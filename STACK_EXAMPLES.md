@@ -115,20 +115,20 @@ package user
 import "errors"
 
 type Profile struct {
-	ID          string
-	DisplayName string
+  ID          string
+  DisplayName string
 }
 
 func ValidateProfile(profile Profile) error {
-	if profile.ID == "" {
-		return errors.New("id is required")
-	}
+  if profile.ID == "" {
+    return errors.New("id is required")
+  }
 
-	if profile.DisplayName == "" {
-		return errors.New("display name is required")
-	}
+  if profile.DisplayName == "" {
+    return errors.New("display name is required")
+  }
 
-	return nil
+  return nil
 }
 ```
 

@@ -4,15 +4,18 @@
 
 ## Overview
 
-### KR
+### KR Overview
+
 `Soku-Convention-Boilerplate`는 어떤 프로젝트에서도 일관된 코드 스타일, 구조, 협업 기준을 유지하기 위한 공통 베이스 템플릿입니다.  
 이 보일러플레이트는 단순한 시작점이 아니라, 읽기 쉬운 코드와 장기적인 유지보수성을 중심에 두는 개발 문화를 반복 가능하게 만드는 것을 목표로 합니다.
 
-### EN
+### EN Overview
+
 `Soku-Convention-Boilerplate` is a reusable base template for maintaining consistent code style, structure, and collaboration standards across any project.  
 It is designed not just as a starter, but as a repeatable foundation for building a development culture centered on readability and long-term maintainability.
 
-### JP
+### JP Overview
+
 Japanese overview content may be added when the project audience or collaborators require it.  
 The default documentation baseline remains Korean and English.
 
@@ -35,19 +38,22 @@ For the canonical operating design, start with [BLUEPRINT.md](./BLUEPRINT.md).
 
 ## Why Google Style Guide
 
-### KR
+### KR Reason
+
 이 프로젝트는 기본 스타일 가이드로 `Google Style Guide`를 채택합니다.  
 첫 번째 이유는, 코드는 작성되는 횟수보다 읽히는 횟수가 훨씬 많다는 철학에 공감하기 때문입니다. 우리는 구현 속도보다, 시간이 지나도 쉽게 이해되고 수정할 수 있는 코드를 더 중요한 가치로 둡니다.
 
 두 번째 이유는 자동화의 용이성입니다. Google 컨벤션은 포맷터, 린터, 정적 분석 도구와 잘 맞물리며, 주관적인 스타일 논쟁을 줄이고 비즈니스 로직과 아키텍처에 더 집중할 수 있는 환경을 만들어 줍니다.
 
-### EN
+### EN Reason
+
 This project adopts the `Google Style Guide` as its baseline convention.  
 The first reason is a strong agreement with the idea that code is read far more often than it is written. We value long-term clarity and maintainability more than short-term implementation speed.
 
 The second reason is automation. Google-style conventions work well with formatters, linters, and static analysis tools, which helps reduce subjective style debates and allows teams to focus more on business logic and architecture.
 
-### JP
+### JP Reason
+
 Japanese explanation can be added for project-specific onboarding when needed.  
 The core operating rules remain standardized in English.
 
@@ -173,11 +179,14 @@ For copyable starter configuration files, see [STACK_CONFIGS.md](./STACK_CONFIGS
 
 ## Summary
 
-### KR
+### KR Summary
+
 이 보일러플레이트는 단순한 프로젝트 시작 템플릿을 넘어, 어떤 프로젝트에서도 흔들리지 않는 개발 기준을 유지하기 위한 재사용 가능한 운영 기반입니다.
 
-### EN
+### EN Summary
+
 This boilerplate is more than a project starter. It is a reusable operational baseline for keeping development standards stable across projects.
 
-### JP
+### JP Summary
+
 Japanese summary sections can be added when the repository needs them, but they are optional rather than mandatory.

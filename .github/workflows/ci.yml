@@ -19,7 +19,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "24"
 
       - name: Verify baseline documents exist
         shell: bash
@@ -75,7 +75,7 @@ jobs:
           done
 
       - name: Check Markdown formatting
-        run: npx --yes markdownlint-cli2@0.22.1 "**/*.md" "#node_modules"
+        run: npx --yes markdownlint-cli2@0.22.1 --config .markdownlint.jsonc "**/*.md" "#node_modules"
 
       - name: Validate workflow YAML
         run: npx --yes yaml-lint@1.7.0 .github/workflows/*.yml
