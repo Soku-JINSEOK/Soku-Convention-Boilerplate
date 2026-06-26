@@ -1,0 +1,58 @@
+# <gitmoji> <type>(<scope>): <short description>
+#
+# [optional body]
+#
+# [optional footer(s)]
+#
+# ─────────────────────────────────────────────────────────────────────────────
+# GITMOJI + CONVENTIONAL COMMITS REFERENCE
+# https://www.conventionalcommits.org/en/v1.0.0/
+# https://gitmoji.dev
+# ─────────────────────────────────────────────────────────────────────────────
+#
+# FORMAT
+#   ✨ feat(scope): add user login
+#   🐛 fix(i18n): correct Japanese placeholder key
+#   📝 docs(readme): update setup instructions
+#
+# TYPE + GITMOJI
+#   ✨  feat      New feature
+#   🐛  fix       Bug fix
+#   📝  docs      Documentation only
+#   💄  style     Formatting, whitespace (no logic change)
+#   ♻️  refactor  Code restructure (no behavior change)
+#   ⚡️  perf      Performance improvement
+#   ✅  test      Add or update tests
+#   🔧  chore     Config, tooling, maintenance
+#   👷  ci        CI/CD pipeline changes
+#   🔒️  security  Security fix or hardening
+#   ⏪️  revert    Revert a previous commit
+#   💥  BREAKING  Breaking change (also add ! after type, e.g. feat!:)
+#   🌐  i18n      Internationalization / translation
+#   🚀  deploy    Deployment / release
+#   🎨  dx        Developer experience improvement
+#
+# SCOPE (optional, project-specific)
+#   backend   Code.gs and server-side logic
+#   frontend  index.html and UI
+#   i18n      i18n.js.html and translation keys
+#   config    appsscript.json, .clasp.json, package.json
+#   docs      Documentation files
+#   gh        GitHub templates and workflows
+#
+# RULES (Conventional Commits)
+#   - Subject line: imperative mood, no period, ≤72 chars
+#   - Body: explain WHY, not WHAT (wrap at 72 chars)
+#   - BREAKING CHANGE: add footer "BREAKING CHANGE: <description>"
+#     or append ! to type: "feat!(scope): ..."
+#   - Multiple footers allowed: "Closes #123", "Refs #456"
+#
+# EXAMPLES
+#   ✨ feat(frontend): add PNG export button
+#   🐛 fix(backend): handle missing Drive folder on first run
+#   🌐 i18n(i18n): add missing exportPng key to all locales
+#   🔒️ security(config): enforce DOMAIN access in appsscript.json
+#   💥 feat!(backend)!: change saveDiagram return shape
+#
+#   BREAKING CHANGE: saveDiagram now returns { id, name } instead of id string
+# ─────────────────────────────────────────────────────────────────────────────

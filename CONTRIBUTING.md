@@ -51,6 +51,56 @@ Contributions should be easy to review. That means:
 
 Comments, pull request descriptions, and documentation should explain intent and tradeoffs, not restate obvious syntax.
 
+## Commit Message Standard
+
+This repository uses **Conventional Commits** combined with **gitmoji**.
+
+Reference: [conventionalcommits.org](https://www.conventionalcommits.org/en/v1.0.0/) · [gitmoji.dev](https://gitmoji.dev)
+
+### Format
+
+```
+<gitmoji> <type>(<scope>): <short description>
+
+[optional body — explain WHY, not WHAT]
+
+[optional footer(s): Closes #123, BREAKING CHANGE: ...]
+```
+
+### Type + Gitmoji Map
+
+| Gitmoji | Type | When to use |
+|---------|------|-------------|
+| ✨ | `feat` | New feature |
+| 🐛 | `fix` | Bug fix |
+| 📝 | `docs` | Documentation only |
+| 💄 | `style` | Formatting, whitespace (no logic change) |
+| ♻️ | `refactor` | Code restructure without behavior change |
+| ⚡️ | `perf` | Performance improvement |
+| ✅ | `test` | Add or update tests |
+| 🔧 | `chore` | Config, tooling, maintenance |
+| 👷 | `ci` | CI/CD pipeline changes |
+| 🔒️ | `security` | Security fix or hardening |
+| ⏪️ | `revert` | Revert a previous commit |
+| 💥 | `feat!` / `fix!` | Breaking change |
+| 🌐 | `i18n` | Internationalization or translation |
+| 🚀 | `deploy` | Deployment or release |
+
+### Rules
+
+- Subject line: imperative mood, no trailing period, ≤ 72 characters
+- Body: explain WHY, not WHAT — wrap at 72 characters
+- Breaking change: append `!` after type (`feat!:`) and add footer `BREAKING CHANGE: <description>`
+
+### Setup
+
+A `.gitmessage` template is provided at the repository root.  
+Activate it with:
+
+```bash
+git config commit.template .gitmessage
+```
+
 ## Pull Request Standards
 
 Every pull request should make it easy for reviewers to answer these questions:
