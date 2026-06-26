@@ -59,7 +59,7 @@ Reference: [conventionalcommits.org](https://www.conventionalcommits.org/en/v1.0
 
 ### Format
 
-```
+```text
 <gitmoji> <type>(<scope>): <short description>
 
 [optional body — explain WHY, not WHAT]
@@ -70,7 +70,7 @@ Reference: [conventionalcommits.org](https://www.conventionalcommits.org/en/v1.0
 ### Type + Gitmoji Map
 
 | Gitmoji | Type | When to use |
-|---------|------|-------------|
+| ------- | ---- | ----------- |
 | ✨ | `feat` | New feature |
 | 🐛 | `fix` | Bug fix |
 | 📝 | `docs` | Documentation only |
