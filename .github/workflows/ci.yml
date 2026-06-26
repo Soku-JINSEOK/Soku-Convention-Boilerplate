@@ -1,0 +1,83 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  repository-hygiene:
+    name: Repository Hygiene
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Verify baseline documents exist
+        shell: bash
+        run: |
+          required_files=(
+            README.md
+            BLUEPRINT.md
+            CONTRIBUTING.md
+            CODE_STYLE.md
+            AGENTS.md
+            PROJECT_STRUCTURE.md
+            GITHUB_STANDARDS.md
+            CICD_STANDARDS.md
+            RELEASE_AND_SYNC.md
+            LICENSE_POLICY.md
+            SECURITY_POLICY.md
+            CLOUD_POLICY.md
+            STACK_EXAMPLES.md
+            STACK_CONFIGS.md
+            README_GUIDE.md
+            LICENSE
+            SECURITY.md
+            .editorconfig
+            .github/PULL_REQUEST_TEMPLATE.md
+            .github/ISSUE_TEMPLATE/bug_report.md
+            .github/ISSUE_TEMPLATE/chore_task.md
+            .github/ISSUE_TEMPLATE/config.yml
+            .github/ISSUE_TEMPLATE/feature_request.md
+            .github/CODEOWNERS
+            .github/workflows/ci.yml
+            templates/javascript-typescript-node/package.json
+            templates/javascript-typescript-node/tsconfig.json
+            templates/javascript-typescript-node/eslint.config.mjs
+            templates/javascript-typescript-node/prettier.config.cjs
+            templates/javascript-typescript-node/vitest.config.ts
+            templates/javascript-typescript-node/src/profile.ts
+            templates/javascript-typescript-node/test/profile.test.ts
+            templates/python/pyproject.toml
+            templates/go/go.mod
+            templates/go/.golangci.yml
+            templates/go/Makefile
+            templates/java-spring/pom.xml
+            templates/java-spring/checkstyle.xml
+            templates/java-spring/src/main/resources/application.yml
+            templates/mysql/schema.sql
+            templates/postgresql/schema.sql
+            templates/gcloud/cloudbuild.yaml
+            templates/aws/buildspec.yml
+            templates/azure/azure-pipelines.yml
+            scripts/sync-boilerplate.ps1
+          )
+
+          for file in "${required_files[@]}"; do
+            test -f "$file"
+          done
+
+      - name: Check Markdown formatting
+        run: npx --yes markdownlint-cli2@0.22.1 --config .markdownlint.jsonc "**/*.md" "#node_modules"
+
+      - name: Validate workflow YAML
+        run: npx --yes yaml-lint@1.7.0 .github/workflows/*.yml

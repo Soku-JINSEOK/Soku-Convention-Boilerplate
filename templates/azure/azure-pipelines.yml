@@ -1,0 +1,12 @@
+trigger:
+  branches:
+    include:
+      - main
+      - master
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+  - script: echo "Replace with build and test steps"
+    displayName: Build placeholder

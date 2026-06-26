@@ -1,0 +1,4 @@
+{
+  // Preserve long-form multilingual documentation without forcing artificial wraps.
+  "MD013": false
+}

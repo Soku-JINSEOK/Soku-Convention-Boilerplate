@@ -1,0 +1,68 @@
+# Operating system files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor state
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Tool caches
+.npm-cache/
+.eslintcache
+.turbo/
+
+# Node.js
+node_modules/
+coverage/
+dist/
+build/
+*.tsbuildinfo
+.next/
+.nuxt/
+.svelte-kit/
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+env/
+pip-wheel-metadata/
+*.egg-info/
+
+# Go
+bin/
+*.test
+coverage.out
+
+# Java
+.gradle/
+target/
+out/
+*.class
+
+# Infrastructure
+.terraform/
+*.tfstate
+*.tfstate.*
+.serverless/
+.aws-sam/
+
