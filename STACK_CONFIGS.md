@@ -26,6 +26,16 @@ Template files:
 - [`templates/javascript-typescript-node/eslint.config.mjs`](./templates/javascript-typescript-node/eslint.config.mjs)
 - [`templates/javascript-typescript-node/prettier.config.cjs`](./templates/javascript-typescript-node/prettier.config.cjs)
 - [`templates/javascript-typescript-node/vitest.config.ts`](./templates/javascript-typescript-node/vitest.config.ts)
+- [`templates/javascript-typescript-node/src/profile.ts`](./templates/javascript-typescript-node/src/profile.ts)
+- [`templates/javascript-typescript-node/test/profile.test.ts`](./templates/javascript-typescript-node/test/profile.test.ts)
+
+The template includes a minimal TypeScript example and a Vitest test so a copied project can be validated immediately after dependency installation:
+
+```bash
+npm ci
+npm run typecheck
+npm test
+```
 
 ## Python
 

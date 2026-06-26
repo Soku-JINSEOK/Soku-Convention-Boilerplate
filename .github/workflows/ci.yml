@@ -55,6 +55,8 @@ jobs:
             templates/javascript-typescript-node/eslint.config.mjs
             templates/javascript-typescript-node/prettier.config.cjs
             templates/javascript-typescript-node/vitest.config.ts
+            templates/javascript-typescript-node/src/profile.ts
+            templates/javascript-typescript-node/test/profile.test.ts
             templates/python/pyproject.toml
             templates/go/go.mod
             templates/go/.golangci.yml
