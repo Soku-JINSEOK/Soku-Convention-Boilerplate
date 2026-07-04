@@ -123,6 +123,8 @@ Issue templates (`.github/ISSUE_TEMPLATE/*.md`) reference the `type:` axis by de
 
 A solo project can usually run with `type:` alone; `priority:`/`status:`/`area:` exist to coordinate work across people and can be added later once multiple contributors are involved (see [`docs/guides/APPLICABILITY.md`](../guides/APPLICABILITY.md)).
 
+**Rule: never create an issue or PR unlabeled.** When opening an issue or PR (via `gh issue create`, `gh pr create`, or the GitHub UI), attach at least a `type:` label in the same action — check `gh label list` (or this catalog) first if unsure what exists, rather than creating it bare and labeling as a follow-up step. An unlabeled issue/PR is harder to triage and defeats the point of having a catalog at all.
+
 ## 📄 Templates
 
 Repositories should provide templates where they reduce ambiguity.

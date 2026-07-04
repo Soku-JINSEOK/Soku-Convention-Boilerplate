@@ -34,7 +34,12 @@ Run these steps regardless of detected stack:
 - [ ] Copy the template directory (or directories) identified in Step 1 into the target repo, preserving their internal path structure (e.g. `templates/python/*` contents go to the target repo root, not into a `templates/` subfolder).
 - [ ] Copy `templates/_shared/ci/downstream-ci.yml` to `.github/workflows/ci.yml` in the target repo, then uncomment only the job(s) matching the detected stack(s) and delete the rest.
 - [ ] Do **not** copy this boilerplate's own `.github/workflows/ci.yml` (`repository-hygiene` job) — that job checks this boilerplate's own files, not the target repo's.
+- [ ] Copy `.github/labels.yml` and `scripts/sync-labels.sh` to the target repo, then run `scripts/sync-labels.sh --repo <owner>/<repo>` against it before creating any issues or PRs there.
 - [ ] Ask the user which collaboration language to use for commit messages, issues, and pull requests in the target repo (Korean-only, English-only, Japanese-only, or an explicit mix) — do not assume this boilerplate's English-language `.gitmessage` examples apply as-is. Record the decision in the target repo's `CONTRIBUTING.md`. See the Collaboration Language section in `docs/standards/GITHUB_STANDARDS.md` for the underlying rule.
+
+## ⚠️ Standing Rule: Never Create Unlabeled Issues/PRs
+
+After setup, whenever you (the agent) create a GitHub issue or PR in this repo or any downstream repo with `gh issue create` / `gh pr create`, always pass `--label` with at least a matching `type:` value in that same command. Check `gh label list` first if unsure what exists. Do not create it unlabeled and fix it as a follow-up — this was a real mistake caught by the user in this boilerplate's own repository.
 
 ## 3️⃣ Replace Placeholders
 
