@@ -37,6 +37,12 @@ Run these steps regardless of detected stack:
 - [ ] Copy `.github/labels.yml` and `scripts/sync-labels.sh` to the target repo, then run `scripts/sync-labels.sh --repo <owner>/<repo>` against it before creating any issues or PRs there.
 - [ ] Ask the user which collaboration language to use for commit messages, issues, and pull requests in the target repo (Korean-only, English-only, Japanese-only, or an explicit mix) — do not assume this boilerplate's English-language `.gitmessage` examples apply as-is. Record the decision in the target repo's `CONTRIBUTING.md`. See the Collaboration Language section in `docs/standards/GITHUB_STANDARDS.md` for the underlying rule.
 
+## 🧵 Domain Layout + Parallel Agent Detection
+
+- [ ] Check whether the target repo already has domain folders at the root (`frontend/`, `backend/`, `app/`, `db/`, `infra/`) or uses the default single-service layout (`src/`). If neither exists yet and the user wants domain folders, apply the [Multi-Domain Layout](../standards/PROJECT_STRUCTURE.md#multi-domain-layout-alternative), respecting the `app/` XOR `frontend/`+`backend/` exclusivity rule.
+- [ ] If the target repo uses (or is adopting) the domain layout, copy only the matching domain charter file(s) from `templates/_shared/agents/` (e.g. `frontend-agent.md` + `backend-agent.md`, or just `app-agent.md`) into the target repo.
+- [ ] Adapt each copied charter to whichever AI coding tool the user actually uses, following `templates/_shared/agents/README.md`'s adapter guide (e.g. `.claude/agents/<name>.md` with frontmatter for Claude Code; a rules file for other tools). Do not assume Claude Code — ask if unclear.
+
 ## ⚠️ Standing Rule: Never Create Unlabeled Issues/PRs
 
 After setup, whenever you (the agent) create a GitHub issue or PR in this repo or any downstream repo with `gh issue create` / `gh pr create`, always pass `--label` with at least a matching `type:` value in that same command. Check `gh label list` first if unsure what exists. Do not create it unlabeled and fix it as a follow-up — this was a real mistake caught by the user in this boilerplate's own repository.

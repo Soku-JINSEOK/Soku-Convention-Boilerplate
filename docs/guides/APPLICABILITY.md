@@ -30,6 +30,7 @@ This maps onto the existing [Maturity Levels in BLUEPRINT.md](../../BLUEPRINT.md
 | `templates/_shared/ci/downstream-ci.yml` | Both | Useful even solo — CI does not require a second contributor to add value. |
 | `scripts/sync-boilerplate.{sh,ps1}`, `scripts/sync-labels.sh` | Team (useful, not required, for Personal) | These exist to keep multiple downstream repositories in sync with this boilerplate. A solo user with one project can just copy files once and skip re-syncing. |
 | `docs/guides/INIT_GUIDE.md` | Both | The stack-detection and bootstrap checklist applies regardless of team size; the collaboration-language step still matters solo (it is still a decision, just one you make alone). |
+| `docs/standards/PROJECT_STRUCTURE.md` — Multi-Domain Layout, `templates/_shared/agents/*` | Team/Scaled | Domain-visible root folders and parallel-agent ownership boundaries solve a coordination problem (multiple contributors or agents working the same repo at once) that a solo project usually does not have. A solo user can still adopt the layout for readability, but the parallel-agent charters mainly pay off once more than one contributor (human or AI) works the repo concurrently; `docs-agent.md` is the exception — useful even solo for keeping `docs/` honest as code changes. |
 
 ## ⏭️ What a Personal Project Can Skip Entirely
 

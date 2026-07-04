@@ -86,6 +86,28 @@ Use `.github/` for automation and collaboration standards such as:
 - CODEOWNERS
 - repository metadata
 
+## 🌐 Multi-Domain Layout (Alternative)
+
+The layout above assumes a single service/package. Some repositories are easier to navigate when domains are visible directly at the root instead of being buried under `src/`:
+
+```text
+/
+|-- frontend/            # Web client (only if frontend/backend are split)
+|-- backend/             # API/server (only if frontend/backend are split)
+|-- app/                 # Single monolithic app (use instead of frontend/+backend/, never alongside)
+|-- db/                  # Schema, migrations, seed data
+|-- infra/               # IaC, deployment, environment definitions
+|-- docs/                # Same docs/ convention as the single-service layout
+|-- .github/
+|-- README.md / CONTRIBUTING.md / AGENTS.md / ...
+```
+
+**Exclusivity rule:** a repository picks either `app/` (single monolithic app) **or** `frontend/` + `backend/` (split deployables) — never both. `db/` is where `templates/mysql` / `templates/postgresql` content lands; `infra/` is where `templates/aws` / `templates/azure` / `templates/gcloud` content lands.
+
+**When to use this instead of the single-service layout:** see [Applicability](../guides/APPLICABILITY.md) — as a rule of thumb, a solo project or a single deployable unit is well served by the default `src/` layout; a project where frontend and backend actually deploy separately, or where multiple contributors (including parallel AI agents, see [AGENTS.md § Parallel Agent Ownership](../../AGENTS.md#parallel-agent-ownership)) need to work on distinct domains at once, benefits from domain folders being visible at the root.
+
+This choice is orthogonal to the `Google Style Guide` baseline in [`CODE_STYLE.md`](./CODE_STYLE.md) — that document governs in-file code style, not directory topology, so either layout can adopt it unchanged.
+
 ## 📍 Documentation Placement
 
 Place documents according to their scope:

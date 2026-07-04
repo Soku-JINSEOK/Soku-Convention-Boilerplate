@@ -88,6 +88,13 @@ jobs:
             templates/aws/buildspec.yml
             templates/azure/azure-pipelines.yml
             templates/_shared/ci/downstream-ci.yml
+            templates/_shared/agents/README.md
+            templates/_shared/agents/frontend-agent.md
+            templates/_shared/agents/backend-agent.md
+            templates/_shared/agents/app-agent.md
+            templates/_shared/agents/db-agent.md
+            templates/_shared/agents/infra-agent.md
+            templates/_shared/agents/docs-agent.md
             scripts/sync-boilerplate.ps1
             scripts/sync-boilerplate.sh
             scripts/sync-labels.sh

@@ -99,6 +99,15 @@ Good agent work in this repository should produce:
 - clear rationale
 - documentation that remains useful to the next contributor
 
+## 🧵 Parallel Agent Ownership
+
+Repositories using the [Multi-Domain Layout](./docs/standards/PROJECT_STRUCTURE.md#multi-domain-layout-alternative) can assign one AI agent per domain folder (`frontend/`, `backend/`, `app/`, `db/`, `infra/`, `docs/`) and run them in parallel. Two rules make this safe:
+
+1. **Directory ownership is the boundary.** An agent only edits files inside its own domain folder. It never reaches into another domain's folder, even to fix something obviously broken there — it reports the issue instead.
+2. **Shared contracts are sequential, not parallel.** Any file more than one domain depends on (API contracts, shared types, DB schemas, infra interfaces) is agreed and written first, before the parallel phase starts. Once parallel work begins, agents treat these files as read-only.
+
+Domain agent charters are tool-agnostic markdown documents in [`templates/_shared/agents/`](./templates/_shared/agents/), not files locked to any one AI tool's format. See that directory's `README.md` for how to adapt a charter into Claude Code, Cursor, Codex, or any other tool's own format.
+
 ## 🎬 Summary
 
 The repository is designed so that both humans and AI agents can work with shared expectations.  
