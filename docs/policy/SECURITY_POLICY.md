@@ -1,12 +1,14 @@
-# Security Policy
+# 🔐 Security Policy
 
-## Purpose
+> **Applies to:** Both (lighter for Personal) — see [`docs/guides/APPLICABILITY.md`](../guides/APPLICABILITY.md). Secret hygiene and dependency review matter solo too; only the "external reporter" framing in `SECURITY.md` assumes other users.
+
+## 🎯 Purpose
 
 This document defines the baseline security posture for repositories based on `Soku-Convention-Boilerplate`.
 
 Security should be treated as an operating concern from the beginning, not as a later compliance add-on.
 
-## Security Principles
+## 📐 Security Principles
 
 Repository security should prioritize:
 
@@ -16,7 +18,7 @@ Repository security should prioritize:
 - traceability
 - fast remediation
 
-## Minimum Expectations
+## ✅ Minimum Expectations
 
 At minimum, repositories should:
 
@@ -26,7 +28,7 @@ At minimum, repositories should:
 - keep dependencies reviewable
 - define a response path for security issues
 
-## Secret Management
+## 🔑 Secret Management
 
 Secrets must not be stored directly in source control.
 
@@ -37,7 +39,7 @@ Use:
 - CI platform secret stores
 - documented local development overrides that are excluded from version control
 
-## Access Control
+## 🚪 Access Control
 
 Access to infrastructure, production systems, and deployment workflows should follow least-privilege principles.
 
@@ -48,7 +50,7 @@ Prefer:
 - short-lived credentials where possible
 - auditable permission changes
 
-## Dependency Hygiene
+## 📦 Dependency Hygiene
 
 Dependencies should be reviewed with security and maintenance in mind.
 
@@ -59,7 +61,7 @@ Projects should aim to:
 - keep transitive risk visible
 - document exceptions when upgrades are delayed
 
-## Logging and Sensitive Data
+## 📋 Logging and Sensitive Data
 
 Logs should be useful for diagnosis without leaking secrets or regulated information.
 
@@ -71,7 +73,7 @@ Avoid logging:
 - private keys
 - personal or regulated data unless explicitly required and protected
 
-## CI/CD Security
+## 🔁 CI/CD Security
 
 Pipelines should:
 
@@ -80,7 +82,7 @@ Pipelines should:
 - separate validation from production deployment where appropriate
 - keep deployment approval paths explicit
 
-## Reporting and Remediation
+## 📣 Reporting and Remediation
 
 Repositories should define how security issues are handled, including:
 
@@ -89,7 +91,7 @@ Repositories should define how security issues are handled, including:
 - how severity is assessed
 - how remediation is tracked
 
-## Summary
+## 🎬 Summary
 
 A strong security policy does not require heavy ceremony.  
 It requires consistent operational discipline, safe defaults, and clear responsibility boundaries.

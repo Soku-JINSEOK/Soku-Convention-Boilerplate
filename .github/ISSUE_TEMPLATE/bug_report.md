@@ -6,28 +6,28 @@ labels: ["type:bug"]
 assignees: []
 ---
 
-## Summary
+## 📝 Summary
 
 <!-- What happened? -->
 
-## Expected Behavior
+## ✅ Expected Behavior
 
 <!-- What should have happened instead? -->
 
-## Actual Behavior
+## ❌ Actual Behavior
 
 <!-- What happened in reality? -->
 
-## Steps to Reproduce
+## 🔁 Steps to Reproduce
 
 1.
 2.
 3.
 
-## Environment
+## 💻 Environment
 
 <!-- Example: local, staging, production / browser / OS / runtime -->
 
-## Notes
+## 🗒️ Notes
 
 <!-- Logs, screenshots, links, or other useful context -->

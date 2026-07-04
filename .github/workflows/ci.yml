@@ -8,8 +8,15 @@ on:
       - master
 
 jobs:
+  # NOTE: This job checks that Soku-Convention-Boilerplate's OWN files exist.
+  # It is specific to this repository's file layout. Downstream repositories
+  # that sync from this boilerplate should either delete this job or replace
+  # `required_files` with their own project's file list — copying it as-is
+  # verifies nothing meaningful in a downstream repo.
+  # For a CI starting point meant to be copied downstream, see
+  # templates/_shared/ci/downstream-ci.yml instead.
   repository-hygiene:
-    name: Repository Hygiene
+    name: Repository Hygiene (boilerplate self-check)
     runs-on: ubuntu-latest
 
     steps:
@@ -28,21 +35,24 @@ jobs:
             README.md
             BLUEPRINT.md
             CONTRIBUTING.md
-            CODE_STYLE.md
             AGENTS.md
-            PROJECT_STRUCTURE.md
-            GITHUB_STANDARDS.md
-            CICD_STANDARDS.md
-            RELEASE_AND_SYNC.md
-            LICENSE_POLICY.md
-            SECURITY_POLICY.md
-            CLOUD_POLICY.md
-            STACK_EXAMPLES.md
-            STACK_CONFIGS.md
-            README_GUIDE.md
+            docs/standards/CODE_STYLE.md
+            docs/standards/PROJECT_STRUCTURE.md
+            docs/standards/GITHUB_STANDARDS.md
+            docs/standards/CICD_STANDARDS.md
+            docs/standards/RELEASE_AND_SYNC.md
+            docs/policy/LICENSE_POLICY.md
+            docs/policy/SECURITY_POLICY.md
+            docs/policy/CLOUD_POLICY.md
+            docs/guides/STACK_EXAMPLES.md
+            docs/guides/STACK_CONFIGS.md
+            docs/guides/README_GUIDE.md
+            docs/guides/INIT_GUIDE.md
+            docs/guides/APPLICABILITY.md
             LICENSE
             SECURITY.md
             .editorconfig
+            .gitmessage
             .github/PULL_REQUEST_TEMPLATE.md
             .github/ISSUE_TEMPLATE/bug_report.md
             .github/ISSUE_TEMPLATE/chore_task.md
@@ -50,6 +60,7 @@ jobs:
             .github/ISSUE_TEMPLATE/feature_request.md
             .github/CODEOWNERS
             .github/workflows/ci.yml
+            .github/labels.yml
             templates/javascript-typescript-node/package.json
             templates/javascript-typescript-node/tsconfig.json
             templates/javascript-typescript-node/eslint.config.mjs
@@ -58,18 +69,35 @@ jobs:
             templates/javascript-typescript-node/src/profile.ts
             templates/javascript-typescript-node/test/profile.test.ts
             templates/python/pyproject.toml
+            templates/python/src/user_profile.py
+            templates/python/tests/test_user_profile.py
             templates/go/go.mod
             templates/go/.golangci.yml
             templates/go/Makefile
+            templates/go/profile.go
+            templates/go/profile_test.go
             templates/java-spring/pom.xml
-            templates/java-spring/checkstyle.xml
             templates/java-spring/src/main/resources/application.yml
+            templates/java-spring/src/main/java/com/example/profile/User.java
+            templates/java-spring/src/main/java/com/example/profile/UserResponse.java
+            templates/java-spring/src/main/java/com/example/profile/ProfileMapper.java
+            templates/java-spring/src/test/java/com/example/profile/ProfileMapperTest.java
             templates/mysql/schema.sql
             templates/postgresql/schema.sql
             templates/gcloud/cloudbuild.yaml
             templates/aws/buildspec.yml
             templates/azure/azure-pipelines.yml
+            templates/_shared/ci/downstream-ci.yml
+            templates/_shared/agents/README.md
+            templates/_shared/agents/frontend-agent.md
+            templates/_shared/agents/backend-agent.md
+            templates/_shared/agents/app-agent.md
+            templates/_shared/agents/db-agent.md
+            templates/_shared/agents/infra-agent.md
+            templates/_shared/agents/docs-agent.md
             scripts/sync-boilerplate.ps1
+            scripts/sync-boilerplate.sh
+            scripts/sync-labels.sh
           )
 
           for file in "${required_files[@]}"; do

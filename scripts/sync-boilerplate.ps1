@@ -21,26 +21,20 @@ if ($null -eq $resolvedTarget) {
     $targetRoot = $resolvedTarget.Path
 }
 
+# Keep this list identical to the $items array in sync-boilerplate.sh.
 $items = @(
     'BLUEPRINT.md'
     'AGENTS.md'
     'CONTRIBUTING.md'
-    'CODE_STYLE.md'
-    'PROJECT_STRUCTURE.md'
-    'GITHUB_STANDARDS.md'
-    'CICD_STANDARDS.md'
-    'LICENSE_POLICY.md'
-    'SECURITY_POLICY.md'
-    'CLOUD_POLICY.md'
-    'STACK_EXAMPLES.md'
-    'STACK_CONFIGS.md'
-    'README_GUIDE.md'
+    'docs'
     'LICENSE'
     'SECURITY.md'
     '.editorconfig'
     '.gitignore'
+    '.gitmessage'
     '.github'
     'templates'
+    'scripts'
 )
 
 if ($IncludeReadme) {

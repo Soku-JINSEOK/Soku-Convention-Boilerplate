@@ -1,12 +1,14 @@
-# Cloud Policy
+# ☁️ Cloud Policy
 
-## Purpose
+> **Applies to:** Team/Scaled — see [`docs/guides/APPLICABILITY.md`](../guides/APPLICABILITY.md). A personal project on a single cloud account only needs the workload-fit reasoning below, not the multi-account governance framing.
+
+## 🎯 Purpose
 
 This document defines how repositories based on `Soku-Convention-Boilerplate` should document and reason about cloud usage.
 
 Cloud selection should be driven by workload fit, organizational capability, compliance needs, and operational maturity rather than branding preference.
 
-## Core Principles
+## 📐 Core Principles
 
 Cloud decisions should be:
 
@@ -16,7 +18,7 @@ Cloud decisions should be:
 - team-capability-aware
 - explicit in tradeoffs
 
-## General Rules
+## 📋 General Rules
 
 When a repository depends on cloud services, document:
 
@@ -26,9 +28,9 @@ When a repository depends on cloud services, document:
 - what environments exist
 - how credentials and permissions are managed
 
-## Provider Selection in Practice
+## 🤔 Provider Selection in Practice
 
-### GCP
+### 🟦 GCP
 
 Teams often choose `GCP` when they want a platform that feels especially strong in:
 
@@ -46,7 +48,7 @@ In practice, `GCP` is frequently selected by teams that:
 
 `GCP` is often attractive when the team values fast setup, tight integration across managed services, and lower operational overhead for modern web backends or analytics platforms.
 
-### AWS
+### 🟧 AWS
 
 Teams often choose `AWS` when they need:
 
@@ -65,7 +67,7 @@ In practice, `AWS` is frequently selected by teams that:
 
 `AWS` is often the practical choice when an organization needs breadth, granular control, and long-term architectural flexibility, even if that comes with more operational complexity.
 
-### Azure
+### 🟦 Azure
 
 Teams often choose `Azure` when they need strong alignment with:
 
@@ -83,7 +85,7 @@ In practice, `Azure` is frequently selected by teams that:
 
 `Azure` is often the most realistic choice when organizational compatibility matters as much as raw technical features.
 
-## Selection Heuristic
+## 🧭 Selection Heuristic
 
 If the team is choosing among major cloud providers, document the decision across these dimensions:
 
@@ -94,7 +96,7 @@ If the team is choosing among major cloud providers, document the decision acros
 5. operational complexity
 6. vendor ecosystem fit
 
-## Repository Expectations
+## 📋 Repository Expectations
 
 If cloud-specific scripts, deployment files, or infrastructure code are committed, the repository should explain:
 
@@ -102,12 +104,12 @@ If cloud-specific scripts, deployment files, or infrastructure code are committe
 - whether they are production-ready or starter examples
 - what assumptions they make about accounts, regions, and permissions
 
-## Multi-Cloud Rule
+## 🔀 Multi-Cloud Rule
 
 Do not adopt multi-cloud by default for image or strategic reasons alone.  
 If multi-cloud is used, the repository should explain the concrete business or resilience reason clearly.
 
-## Summary
+## 🎬 Summary
 
 Good cloud policy turns provider choice into an explicit engineering decision.  
 The right provider is the one that best fits the workload, operating model, and organizational reality of the team.

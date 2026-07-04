@@ -1,7 +1,7 @@
+// Matches gts (Google TypeScript Style) formatting defaults: https://github.com/google/gts
 module.exports = {
-  semi: true,
-  singleQuote: false,
-  trailingComma: "all",
-  printWidth: 100,
-  tabWidth: 2,
+  bracketSpacing: false,
+  singleQuote: true,
+  trailingComma: 'all',
+  arrowParens: 'avoid',
 };

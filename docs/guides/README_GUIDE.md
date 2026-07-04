@@ -1,13 +1,13 @@
-# README Guide
+# 📖 README Guide
 
-## Purpose
+## 🎯 Purpose
 
 This document defines how README files should be managed in repositories based on `Soku-Convention-Boilerplate`.
 
-The README is the front door of the repository.  
+The README is the front door of the repository — the first thing a stranger (or an AI agent) sees before anything else.  
 It should help a contributor understand what the project is, why it exists, how it is used, and where to go next.
 
-## Role of the README
+## 🚪 Role of the README
 
 A good README should answer the first questions a contributor is likely to have:
 
@@ -17,7 +17,7 @@ A good README should answer the first questions a contributor is likely to have:
 - What standards does it follow?
 - Where can I find deeper documentation?
 
-## Tone and Presentation
+## 🎨 Tone and Presentation
 
 README files should feel clear, modern, and intentional.  
 They do not need to be flashy, but they should avoid looking like an unstructured dump of notes.
@@ -30,14 +30,11 @@ Prefer:
 - short tables where they improve scanning
 - example-driven explanation
 
-## Language Policy
+## 🌐 Language Policy
 
-Human-facing overview content should default to Korean and English.  
-Japanese may be added when useful for the project audience, collaborators, or onboarding flow.
+See the [Language Policy in BLUEPRINT.md](../../BLUEPRINT.md#language-policy) for the single canonical rule on document language, including the Multi-Language Block Ordering rule: when a README mixes languages, group each language into one contiguous block (English first, then each additional language in turn) instead of interleaving them section by section. See `README.md` for a reference implementation.
 
-Operational policies, governance, standards, and agent-facing rules should remain in English.
-
-## Recommended README Structure
+## 🗂️ Recommended README Structure
 
 ```text
 1. Project title
@@ -51,7 +48,7 @@ Operational policies, governance, standards, and agent-facing rules should remai
 9. Contribution entry points
 ```
 
-## What to Avoid
+## 🚫 What to Avoid
 
 Avoid README files that are:
 
@@ -60,13 +57,13 @@ Avoid README files that are:
 - full of outdated setup instructions
 - inconsistent with actual repository behavior
 
-## Maintenance Rule
+## 🔁 Maintenance Rule
 
 The README should be updated whenever repository behavior, setup flow, or core positioning changes materially.
 
 If the repository changes but the README stays frozen, onboarding quality degrades quickly.
 
-## Documentation Map
+## 🧭 Documentation Map
 
 The README should act as a hub, not as the only document.  
 It should point clearly to:
@@ -77,7 +74,7 @@ It should point clearly to:
 - architecture or design references
 - agent instructions
 
-## Summary
+## 🎬 Summary
 
 Treat the README as product-quality documentation for the repository itself.  
 A strong README reduces onboarding friction for both humans and AI agents before they ever inspect the code.

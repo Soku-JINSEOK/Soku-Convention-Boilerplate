@@ -1,8 +1,8 @@
-# Stack Examples
+# 💡 Stack Examples
 
 > Practical reference snippets for building new repositories on top of `Soku-Convention-Boilerplate`.
 
-## How to Read This Document
+## 📖 How to Read This Document
 
 These examples are intentionally small.  
 They are not meant to define full production architecture. They are meant to show the expected tone of code:
@@ -12,7 +12,7 @@ They are not meant to define full production architecture. They are meant to sho
 - easy to review
 - easy to extend
 
-## JavaScript
+## 🟨 JavaScript
 
 ### Example: clear service function
 
@@ -35,7 +35,7 @@ function buildPublicProfile(user) {
 }
 ```
 
-## TypeScript
+## 🔷 TypeScript
 
 ### Example: explicit DTO mapping
 
@@ -62,7 +62,7 @@ export function toUserResponse(user: User): UserResponse {
 }
 ```
 
-## Node.js
+## 🟢 Node.js
 
 ### Example: route with narrow responsibility
 
@@ -83,7 +83,7 @@ app.listen(3000, () => {
 });
 ```
 
-## Python
+## 🐍 Python
 
 ### Example: readable domain logic
 
@@ -105,7 +105,7 @@ def calculate_total(order: Order) -> float:
     return order.subtotal + order.shipping_fee
 ```
 
-## Go
+## 🐹 Go
 
 ### Example: small, explicit function
 
@@ -132,7 +132,7 @@ func ValidateProfile(profile Profile) error {
 }
 ```
 
-## Java
+## ☕ Java
 
 ### Example: focused utility method
 
@@ -151,7 +151,7 @@ public final class EmailValidator {
 }
 ```
 
-## Spring
+## 🍃 Spring
 
 ### Example: controller with explicit dependencies
 
@@ -174,7 +174,7 @@ public class UserController {
 }
 ```
 
-## MySQL
+## 🐬 MySQL
 
 ### Example: schema with clear constraints
 
@@ -189,7 +189,7 @@ CREATE TABLE users (
 );
 ```
 
-## PostgreSQL
+## 🐘 PostgreSQL
 
 ### Example: explicit table design
 
@@ -202,7 +202,7 @@ CREATE TABLE users (
 );
 ```
 
-## gcloud
+## ☁️ gcloud
 
 ### Example: readable deployment command
 
@@ -221,7 +221,7 @@ gcloud config list
 gcloud projects list
 ```
 
-## What These Examples Are Optimizing For
+## 🎯 What These Examples Are Optimizing For
 
 These examples are intentionally biased toward:
 
@@ -233,7 +233,7 @@ These examples are intentionally biased toward:
 
 If a shorter or more advanced pattern makes the code harder to understand at first glance, prefer the clearer version.
 
-## Recommended Next Step
+## 👉 Recommended Next Step
 
 As this boilerplate evolves, use [STACK_CONFIGS.md](./STACK_CONFIGS.md) for copyable starter files and keep this document focused on code-shape examples, such as:
 
