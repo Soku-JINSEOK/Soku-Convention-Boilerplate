@@ -10,8 +10,18 @@ requires-python = ">=3.11"
 readme = "README.md"
 dependencies = []
 
+[project.optional-dependencies]
+dev = ["pyink", "ruff", "mypy", "pytest"]
+
+# Formatting is delegated to pyink (Google's Black fork: https://github.com/google/pyink),
+# matching the 80-column line length from the Google Python Style Guide. Ruff is used for
+# linting only — its own formatter is not used, so [tool.ruff.format] is intentionally absent.
+[tool.pyink]
+line-length = 80
+pyink-indentation = 4
+
 [tool.ruff]
-line-length = 88
+line-length = 80
 target-version = "py311"
 src = ["src", "tests"]
 exclude = ["build", "dist", ".venv", "__pycache__"]
@@ -20,10 +30,6 @@ exclude = ["build", "dist", ".venv", "__pycache__"]
 select = ["E", "F", "I", "B", "UP", "SIM", "C4"]
 ignore = ["E501"]
 per-file-ignores = { "__init__.py" = ["F401"] }
-
-[tool.ruff.format]
-quote-style = "double"
-indent-style = "space"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

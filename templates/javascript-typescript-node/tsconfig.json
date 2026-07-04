@@ -11,8 +11,13 @@
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
-    "types": ["node"]
+    "types": ["node"],
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+    "pretty": true
   },
-  "include": ["src", "test", "tests", "scripts"],
+  "include": ["src", "test", "tests", "scripts", "vitest.config.ts"],
   "exclude": ["dist", "coverage", "node_modules"]
 }

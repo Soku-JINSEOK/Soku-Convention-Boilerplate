@@ -1,11 +1,11 @@
-# Contributing
+# 🤝 Contributing
 
-## Overview
+## 👋 Overview
 
 This repository is designed to keep development standards consistent across projects.  
 Contributing is not only about adding code. It is also about preserving readability, predictability, and maintainability for future contributors.
 
-## Core Expectations
+## ✅ Core Expectations
 
 All contributions should align with the following expectations:
 
@@ -15,29 +15,29 @@ All contributions should align with the following expectations:
 - document important decisions clearly
 - rely on automation for formatting and linting whenever possible
 
-## Contribution Workflow
+## 🔄 Contribution Workflow
 
-### 1. Understand the Existing Structure
+### 1️⃣ Understand the Existing Structure
 
 Before making changes, review the current repository structure, naming patterns, and documentation.  
 New code should extend the existing system instead of introducing a parallel style.
 
-### 2. Keep Changes Small and Focused
+### 2️⃣ Keep Changes Small and Focused
 
 A single change should solve a single problem whenever possible.  
 Avoid mixing refactors, feature work, formatting-only changes, and unrelated cleanup in one contribution unless there is a clear operational reason.
 
-### 3. Follow the Style Baseline
+### 3️⃣ Follow the Style Baseline
 
 This repository uses `Google Style Guide` as the default convention baseline.  
 Language-specific tooling may differ by stack, but the principles of readability, consistency, and explicitness should remain the same.
 
-### 4. Let Tooling Enforce Style
+### 4️⃣ Let Tooling Enforce Style
 
 Run the formatter, linter, and test suite relevant to the project before requesting review.  
 If a rule can be enforced automatically, prefer automation over manual policing in review comments.
 
-### 5. Write Reviewable Changes
+### 5️⃣ Write Reviewable Changes
 
 Contributions should be easy to review. That means:
 
@@ -47,17 +47,17 @@ Contributions should be easy to review. That means:
 - meaningful commit boundaries
 - concise documentation when context is not obvious
 
-### 6. Explain Why
+### 6️⃣ Explain Why
 
 Comments, pull request descriptions, and documentation should explain intent and tradeoffs, not restate obvious syntax.
 
-## Commit Message Standard
+## 📝 Commit Message Standard
 
-This repository uses **Conventional Commits** combined with **gitmoji**.
+This repository uses **Conventional Commits** combined with **gitmoji**. This is a structural convention (type, scope, gitmoji), independent of what human language the description text is written in — see the Collaboration Language section in [`docs/standards/GITHUB_STANDARDS.md`](./docs/standards/GITHUB_STANDARDS.md) for that decision.
 
 Reference: [conventionalcommits.org](https://www.conventionalcommits.org/en/v1.0.0/) · [gitmoji.dev](https://gitmoji.dev)
 
-### Format
+### 📐 Format
 
 ```text
 <gitmoji> <type>(<scope>): <short description>
@@ -67,7 +67,7 @@ Reference: [conventionalcommits.org](https://www.conventionalcommits.org/en/v1.0
 [optional footer(s): Closes #123, BREAKING CHANGE: ...]
 ```
 
-### Type + Gitmoji Map
+### 🎨 Type + Gitmoji Map
 
 | Gitmoji | Type | When to use |
 | ------- | ---- | ----------- |
@@ -86,13 +86,13 @@ Reference: [conventionalcommits.org](https://www.conventionalcommits.org/en/v1.0
 | 🌐 | `i18n` | Internationalization or translation |
 | 🚀 | `deploy` | Deployment or release |
 
-### Rules
+### 📋 Rules
 
 - Subject line: imperative mood, no trailing period, ≤ 72 characters
 - Body: explain WHY, not WHAT — wrap at 72 characters
 - Breaking change: append `!` after type (`feat!:`) and add footer `BREAKING CHANGE: <description>`
 
-### Setup
+### 🔧 Setup
 
 A `.gitmessage` template is provided at the repository root.  
 Activate it with:
@@ -101,7 +101,7 @@ Activate it with:
 git config commit.template .gitmessage
 ```
 
-## Pull Request Standards
+## 🔀 Pull Request Standards
 
 Every pull request should make it easy for reviewers to answer these questions:
 
@@ -111,7 +111,7 @@ Every pull request should make it easy for reviewers to answer these questions:
 - How was the change validated?
 - Are there follow-up tasks or known limitations?
 
-## Review Standards
+## 🔍 Review Standards
 
 Code review should prioritize:
 
@@ -123,17 +123,17 @@ Code review should prioritize:
 
 Avoid spending review energy on formatting issues that should be handled by tools.
 
-## Documentation Policy
+## 🌐 Documentation Policy
 
-User-facing or onboarding-oriented content should default to Korean and English.  
-Japanese may be added when needed for collaboration or audience fit.  
-Project rules, governance, conventions, and AI-facing operational guidance should be written in English.
+Document language (multilingual overview content vs. English-only operational content) follows the single canonical rule in the [Language Policy in BLUEPRINT.md](./BLUEPRINT.md#language-policy).
 
-## Decision Rule
+The language used for commit messages, issues, and pull requests is a separate, per-project decision — see the Collaboration Language section in [`docs/standards/GITHUB_STANDARDS.md`](./docs/standards/GITHUB_STANDARDS.md).
+
+## ⚖️ Decision Rule
 
 If a proposed change improves short-term speed but weakens long-term consistency, prefer consistency unless there is a documented reason not to.
 
-## Summary
+## 🎬 Summary
 
 Contributing to this repository means protecting a shared standard.  
 The goal is not just to ship code, but to leave behind a codebase that the next human or AI contributor can understand quickly and extend safely.

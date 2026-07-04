@@ -6,22 +6,22 @@ labels: ["type:feature"]
 assignees: []
 ---
 
-## Summary
+## 📝 Summary
 
 <!-- What do you want to add or improve? -->
 
-## Problem
+## 🚧 Problem
 
 <!-- What limitation or pain point exists today? -->
 
-## Proposed Direction
+## 🧭 Proposed Direction
 
 <!-- Describe the desired direction at a high level -->
 
-## Scope
+## 🔭 Scope
 
 <!-- What should be in scope, and what should not? -->
 
-## Notes
+## 🗒️ Notes
 
 <!-- Dependencies, references, or related issues -->

@@ -52,11 +52,13 @@
         <artifactId>maven-surefire-plugin</artifactId>
       </plugin>
       <plugin>
+        <!-- Uses the official Google Java Style checks bundled with maven-checkstyle-plugin.
+             See https://checkstyle.org/google_style.html and docs/standards/CODE_STYLE.md. -->
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
         <version>3.5.0</version>
         <configuration>
-          <configLocation>checkstyle.xml</configLocation>
+          <configLocation>google_checks.xml</configLocation>
           <consoleOutput>true</consoleOutput>
           <failsOnError>true</failsOnError>
         </configuration>

@@ -1,6 +1,6 @@
-# AGENTS
+# 🤖 AGENTS
 
-## Purpose
+## 🎯 Purpose
 
 This document provides stable operating guidance for AI agents working in repositories based on `Soku-Convention-Boilerplate`.
 
@@ -8,9 +8,9 @@ It should be read after `BLUEPRINT.md`, which defines the repository-level archi
 This file then acts as the AI-facing behavioral contract.  
 If local project instructions exist, agents should follow the more specific rule as long as it does not conflict with higher-priority system constraints.
 
-When editing release behavior, tag policy, or downstream sync logic, read `RELEASE_AND_SYNC.md` before making changes.
+When editing release behavior, tag policy, or downstream sync logic, read [`docs/standards/RELEASE_AND_SYNC.md`](./docs/standards/RELEASE_AND_SYNC.md) before making changes.
 
-## Repository Intent
+## 🧭 Repository Intent
 
 This repository prioritizes:
 
@@ -20,18 +20,16 @@ This repository prioritizes:
 - automation over subjective formatting debate
 - documentation clarity over implicit tribal knowledge
 
-## Default Assumptions
+## 🧩 Default Assumptions
 
 Unless local documentation states otherwise, agents should assume the following:
 
 1. `Google Style Guide` is the baseline convention.
 2. Formatting and linting should be enforced by tools where possible.
-3. Human-facing overview documents default to Korean and English.
-4. Japanese may be added selectively when needed.
-5. Rules, governance, philosophy, and operational guidance should remain in English.
-6. Changes should preserve predictable structure across repositories.
+3. Document language follows the [Language Policy in BLUEPRINT.md](./BLUEPRINT.md#language-policy).
+4. Changes should preserve predictable structure across repositories.
 
-## Agent Behavior Rules
+## 📏 Agent Behavior Rules
 
 Agents working in this repository should:
 
@@ -42,7 +40,7 @@ Agents working in this repository should:
 - update relevant documentation when behavior or structure changes
 - optimize for future readability, not just immediate task completion
 
-## Editing Policy
+## ✏️ Editing Policy
 
 When editing code or documentation:
 
@@ -52,25 +50,15 @@ When editing code or documentation:
 - prefer small diffs with obvious intent
 - do not rewrite established conventions without a documented reason
 
-## Documentation Policy
+## 🌐 Documentation Policy
 
 Agents should treat documentation as part of the codebase, not as optional polish.
 
-Use multilingual content for:
+Which language to write in (multilingual overview content vs. English-only operational content) is defined once in the [Language Policy in BLUEPRINT.md](./BLUEPRINT.md#language-policy) — do not restate or fork that rule in other documents.
 
-- overview sections
-- onboarding summaries
-- high-level repository introductions
+For commit messages, issues, and pull requests specifically (a separate concern from document language), see the Collaboration Language section in [`docs/standards/GITHUB_STANDARDS.md`](./docs/standards/GITHUB_STANDARDS.md).
 
-Use English-only content for:
-
-- operational rules
-- coding standards
-- contribution policy
-- architecture constraints
-- agent instructions
-
-## Review Heuristics
+## 🔍 Review Heuristics
 
 When evaluating or generating changes, agents should prioritize:
 
@@ -82,7 +70,7 @@ When evaluating or generating changes, agents should prioritize:
 
 Style-only commentary should be minimized when tooling can enforce the rule automatically.
 
-## Decision Framework
+## 🧠 Decision Framework
 
 When multiple implementations are possible, agents should prefer the option that:
 
@@ -91,7 +79,7 @@ When multiple implementations are possible, agents should prefer the option that
 3. creates the least policy ambiguity
 4. scales better across multiple repositories
 
-## Anti-Patterns
+## 🚫 Anti-Patterns
 
 Agents should avoid introducing:
 
@@ -101,7 +89,7 @@ Agents should avoid introducing:
 - repository-specific conventions disguised as global standards
 - undocumented deviations from the baseline style
 
-## Expected Outputs
+## 📦 Expected Outputs
 
 Good agent work in this repository should produce:
 
@@ -111,7 +99,7 @@ Good agent work in this repository should produce:
 - clear rationale
 - documentation that remains useful to the next contributor
 
-## Summary
+## 🎬 Summary
 
 The repository is designed so that both humans and AI agents can work with shared expectations.  
 Agents should contribute in ways that make the project easier to understand, easier to review, and easier to extend over time.

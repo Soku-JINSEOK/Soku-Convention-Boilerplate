@@ -1,13 +1,13 @@
-# Project Structure
+# 🏗️ Project Structure
 
-## Purpose
+## 🎯 Purpose
 
 This document defines how repositories based on `Soku-Convention-Boilerplate` should organize directories, files, and ownership boundaries.
 
 The goal is not to force every project into an identical shape.  
 The goal is to make repository structure predictable enough that contributors can move across projects without re-learning the layout every time.
 
-## Structural Principles
+## 📐 Structural Principles
 
 Repository structure should optimize for:
 
@@ -17,7 +17,7 @@ Repository structure should optimize for:
 - low onboarding friction
 - scalability over time
 
-## Default Expectations
+## ✅ Default Expectations
 
 Projects should aim for the following qualities:
 
@@ -27,7 +27,7 @@ Projects should aim for the following qualities:
 4. naming should be explicit and unsurprising
 5. project-specific deviations should be documented
 
-## Suggested Root Layout
+## 🗂️ Suggested Root Layout
 
 ```text
 /
@@ -35,48 +35,48 @@ Projects should aim for the following qualities:
 |-- .editorconfig       # Shared editor formatting baseline
 |-- src/                 # Main application or package source code
 |-- test/ or tests/      # Automated tests
-|-- docs/                # Extended project documentation
+|-- docs/                # Extended project documentation, grouped by category
 |-- scripts/             # Operational and maintenance scripts
 |-- config/              # Shared configuration files when appropriate
 |-- templates/           # Copyable starter configs by stack
 |-- infra/               # Infrastructure or deployment-related assets
 |-- .github/             # GitHub workflows, templates, and repo automation
-|-- templates/           # Copyable starter configs by stack
 |-- README.md            # Public project overview
 |-- CONTRIBUTING.md      # Contribution workflow
-|-- CODE_STYLE.md        # Style baseline and coding rules
 |-- AGENTS.md            # AI agent operating instructions
 ```
 
-## Directory Rules
+This boilerplate applies the `docs/` grouping concretely as `docs/policy/`, `docs/standards/`, and `docs/guides/` — see the [README.md](../../README.md) document index. Keep only true first-entry documents (`README.md`, `CONTRIBUTING.md`, `AGENTS.md`, `LICENSE`, `SECURITY.md`, and a top-level design document such as `BLUEPRINT.md`) at the repository root; move narrower policy, standards, and reference documents into the matching `docs/` subfolder instead of leaving them flat at the root.
 
-### `src/`
+## 📋 Directory Rules
+
+### 💻 `src/`
 
 Use `src/` for primary application logic unless the language ecosystem strongly prefers another conventional layout.
 
-### `tests/` or `test/`
+### 🧪 `tests/` or `test/`
 
 Tests should be separated clearly from runtime code unless the ecosystem convention strongly prefers colocated tests.
 
-### `docs/`
+### 📚 `docs/`
 
 Use `docs/` for deeper documentation that should not overload the root.  
 Examples include architecture notes, ADRs, onboarding guides, runbooks, and integration references.
 
-### `scripts/`
+### ⚙️ `scripts/`
 
 Use `scripts/` for operational helpers that support local development, validation, migration, or deployment.
 
-### `infra/`
+### ☁️ `infra/`
 
 Use `infra/` for deployment, provisioning, environment, or platform-related definitions when those assets are part of the repository.
 
-### `templates/`
+### 🧰 `templates/`
 
 Use `templates/` for copyable starter configuration sets that downstream repositories can lift and adapt.  
 This is the right place for language, framework, database, and cloud bootstrap files that should stay close to the boilerplate.
 
-### `.github/`
+### 🐙 `.github/`
 
 Use `.github/` for automation and collaboration standards such as:
 
@@ -86,7 +86,7 @@ Use `.github/` for automation and collaboration standards such as:
 - CODEOWNERS
 - repository metadata
 
-## Documentation Placement
+## 📍 Documentation Placement
 
 Place documents according to their scope:
 
@@ -96,7 +96,7 @@ Place documents according to their scope:
 
 Do not bury essential governance documents deep inside the tree.
 
-## Naming Rules
+## 🏷️ Naming Rules
 
 Prefer names that are:
 
@@ -106,12 +106,12 @@ Prefer names that are:
 
 Avoid names that require tribal knowledge, such as generic folders with unclear scope.
 
-## Deviation Policy
+## 🔀 Deviation Policy
 
 Not every project needs the exact same structure.  
 If a repository adopts a different layout because of framework conventions or operational constraints, document the reasoning in the relevant onboarding or architecture material.
 
-## Summary
+## 🎬 Summary
 
 Good project structure makes the repository legible before anyone reads the code.  
 A contributor should be able to open the root directory and understand where things belong with minimal guesswork.

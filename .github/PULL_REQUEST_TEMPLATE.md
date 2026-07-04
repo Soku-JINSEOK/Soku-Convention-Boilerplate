@@ -1,26 +1,26 @@
-# Pull Request
+# 🔀 Pull Request
 
-## Summary
+## 📝 Summary
 
 <!-- What changed? Keep this concise and concrete. -->
 
-## Why
+## 🤔 Why
 
 <!-- Why is this change needed? What problem does it solve? -->
 
-## Scope
+## 🔭 Scope
 
 <!-- What is intentionally included and excluded? -->
 
-## Validation
+## 🧪 Validation
 
 <!-- How was this verified? Example: tests, lint, manual checks, screenshots -->
 
-## Risks and Tradeoffs
+## ⚠️ Risks and Tradeoffs
 
 <!-- Any known risks, edge cases, or follow-up work -->
 
-## Checklist
+## ✅ Checklist
 
 - [ ] The change follows the repository conventions
 - [ ] Formatting and linting were considered or run where applicable

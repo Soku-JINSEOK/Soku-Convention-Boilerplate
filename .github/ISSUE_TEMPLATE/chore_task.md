@@ -6,18 +6,18 @@ labels: ["type:chore"]
 assignees: []
 ---
 
-## Summary
+## 📝 Summary
 
 <!-- What needs to be maintained, updated, or cleaned up? -->
 
-## Reason
+## 🤔 Reason
 
 <!-- Why does this need to happen now? -->
 
-## Scope
+## 🔭 Scope
 
 <!-- Define boundaries so the task does not expand unnecessarily -->
 
-## Completion Criteria
+## ✅ Completion Criteria
 
 <!-- What must be true for this task to be considered done? -->
