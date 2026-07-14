@@ -47,8 +47,17 @@ jobs:
           import {execSync} from 'node:child_process';
           import {validateContributionTitle} from './contribution-title.mjs';
 
+          // `base.sha` is the base branch's current tip, not the merge base — resolve the
+          // actual divergence point so commits already on the base branch (e.g. pulled in by
+          // merging it into this branch) aren't re-validated as part of this PR.
+          const mergeBase = execSync(
+            `git merge-base ${process.env.BASE_SHA} ${process.env.HEAD_SHA}`,
+          )
+            .toString()
+            .trim();
+
           const commitTitles = execSync(
-            `git log --no-merges --format=%s ${process.env.BASE_SHA}..${process.env.HEAD_SHA}`,
+            `git log --no-merges --format=%s ${mergeBase}..${process.env.HEAD_SHA}`,
           )
             .toString()
             .trim()
