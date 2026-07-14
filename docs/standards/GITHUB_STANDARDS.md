@@ -136,6 +136,15 @@ Recommended templates:
 - bug report template
 - feature request template
 
+### 📝 Commit Message Linting Template
+
+To enforce the commit message convention (defined in [CONTRIBUTING.md](../../CONTRIBUTING.md#commit-message-standard)) automatically in pull requests or via Git Hooks, a shared configuration template is provided:
+
+- [templates/_shared/commitlint/commitlint.config.mjs](../../templates/_shared/commitlint/commitlint.config.mjs)
+- [templates/_shared/commitlint/contribution-title.mjs](../../templates/_shared/commitlint/contribution-title.mjs)
+
+Downstream projects can copy these files into their repository roots and integrate them with tools like Husky or GitHub Actions to block non-compliant commit messages.
+
 ## 🤖 Automation Expectations
 
 GitHub should be used as an operational surface, not just a code host.  

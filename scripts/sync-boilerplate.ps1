@@ -52,14 +52,21 @@ foreach ($relativePath in $items) {
     $item = Get-Item -LiteralPath $sourcePath
     if ($item.PSIsContainer) {
         $destinationPath = Join-Path $targetRoot $relativePath
+        if (-not $Force -and (Test-Path -LiteralPath $destinationPath)) {
+            throw "Destination already exists (use -Force to overwrite): $destinationPath"
+        }
         if ($PSCmdlet.ShouldProcess($destinationPath, "Copy directory from $sourcePath")) {
-            Copy-Item -LiteralPath $sourcePath -Destination $targetRoot -Recurse -Force:$Force
+            New-Item -ItemType Directory -Path $destinationPath -Force | Out-Null
+            Copy-Item -LiteralPath (Join-Path $sourcePath '*') -Destination $destinationPath -Recurse -Force:$Force
             $copied.Add($relativePath) | Out-Null
         }
         continue
     }
 
     $destinationPath = Join-Path $targetRoot $relativePath
+    if (-not $Force -and (Test-Path -LiteralPath $destinationPath)) {
+        throw "Destination already exists (use -Force to overwrite): $destinationPath"
+    }
     $parentDirectory = Split-Path -Parent $destinationPath
     if ($parentDirectory -and -not (Test-Path -LiteralPath $parentDirectory)) {
         New-Item -ItemType Directory -Path $parentDirectory -Force | Out-Null

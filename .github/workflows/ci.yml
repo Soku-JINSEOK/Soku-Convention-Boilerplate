@@ -88,6 +88,8 @@ jobs:
             templates/aws/buildspec.yml
             templates/azure/azure-pipelines.yml
             templates/_shared/ci/downstream-ci.yml
+            templates/_shared/commitlint/commitlint.config.mjs
+            templates/_shared/commitlint/contribution-title.mjs
             templates/_shared/agents/README.md
             templates/_shared/agents/frontend-agent.md
             templates/_shared/agents/backend-agent.md
