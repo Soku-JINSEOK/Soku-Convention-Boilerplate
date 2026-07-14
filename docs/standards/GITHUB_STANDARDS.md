@@ -100,7 +100,9 @@ See [RELEASE_AND_SYNC.md](./RELEASE_AND_SYNC.md) for the full operating contract
 To guarantee the integrity and authorship of the convention updates, all committers and maintainers should sign their commits and release tags. Signed commits get a **Verified** badge on GitHub.
 
 #### 1. SSH Key Signing (Recommended)
+
 If you already use an SSH key for GitHub, you can use it to sign commits:
+
 ```bash
 # Configure Git to use SSH for signing
 git config --global gpg.format ssh
@@ -112,10 +114,13 @@ git config --global user.signingkey "~/.ssh/id_ed25519.pub"
 git config --global commit.gpgsign true
 git config --global tag.gpgsign true
 ```
+
 Make sure to upload this public key to your GitHub account under **Settings -> SSH and GPG keys -> New SSH Key** and set the **Key type** to **Signing Key**.
 
 #### 2. GPG Key Signing
+
 Alternatively, you can use a GPG key:
+
 ```bash
 # Generate a new GPG key
 gpg --full-generate-key
@@ -128,6 +133,7 @@ git config --global user.signingkey <KEY_ID>
 git config --global commit.gpgsign true
 git config --global tag.gpgsign true
 ```
+
 Export and paste your GPG public key (`gpg --armor --export <KEY_ID>`) into GitHub under **Settings -> SSH and GPG keys -> New GPG Key**.
 
 For interactive configuration assistance, you can run the [scripts/setup-git-signing.sh](../../scripts/setup-git-signing.sh) script.
