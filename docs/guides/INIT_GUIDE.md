@@ -36,6 +36,7 @@ Run these steps regardless of detected stack:
 - [ ] Do **not** copy this boilerplate's own `.github/workflows/ci.yml` (`repository-hygiene` job) — that job checks this boilerplate's own files, not the target repo's.
 - [ ] Copy `.github/labels.yml` and `scripts/sync-labels.sh` to the target repo, then run `scripts/sync-labels.sh --repo <owner>/<repo>` against it before creating any issues or PRs there.
 - [ ] Ask the user which collaboration language to use for commit messages, issues, and pull requests in the target repo (Korean-only, English-only, Japanese-only, or an explicit mix) — do not assume this boilerplate's English-language `.gitmessage` examples apply as-is. Record the decision in the target repo's `CONTRIBUTING.md`. See the Collaboration Language section in `docs/standards/GITHUB_STANDARDS.md` for the underlying rule.
+- [ ] Ask the user whether to adopt the task-report workflow (a written, approved plan before implementation starts — see the Task Reports section in `docs/standards/GITHUB_STANDARDS.md`). If yes, copy `docs/issues/TASK_REPORT_TEMPLATE.md` into the target repo.
 
 ## 🧵 Domain Layout + Parallel Agent Detection
 

@@ -57,6 +57,17 @@ Every PR should answer:
 - What risks or tradeoffs exist?
 - What follow-up work remains?
 
+## 📝 Task Reports
+
+For work that benefits from a documented plan before implementation starts, use [`docs/issues/TASK_REPORT_TEMPLATE.md`](../issues/TASK_REPORT_TEMPLATE.md):
+
+- Copy it to `docs/issues/issue-<n>-task-report.md`, where `<n>` matches the linked issue number.
+- Fill in the goal, proposed approach, planned implementation, and acceptance criteria, then wait for the `Approval` section to record an explicit approval before implementation begins.
+- Keep the `Implementation Status` and `Verification` sections current as the work progresses.
+- Link both the issue and the task report from the pull request — the `PULL_REQUEST_TEMPLATE.md` already has fields for both.
+
+This is not only a team review mechanism. It also works as an implementation gate for AI coding agents: the agent drafts the report, a human (even the sole owner of a solo project) approves it, and only then does implementation start. Skip it for trivial changes where a full plan would be pure overhead.
+
 ## 🔍 Review Standards
 
 > **Applies to:** Team — see [`docs/guides/APPLICABILITY.md`](../guides/APPLICABILITY.md). This section assumes a second person reviewing the PR; a solo project has no reviewer to apply it to.
@@ -178,6 +189,7 @@ Recommended templates:
 - pull request template
 - bug report template
 - feature request template
+- [review and status comment templates](../../.github/COMMENT_TEMPLATES.md)
 
 ### 📝 Commit Message Linting Template
 
@@ -185,8 +197,11 @@ To enforce the commit message convention (defined in [CONTRIBUTING.md](../../CON
 
 - [templates/_shared/commitlint/commitlint.config.mjs](../../templates/_shared/commitlint/commitlint.config.mjs)
 - [templates/_shared/commitlint/contribution-title.mjs](../../templates/_shared/commitlint/contribution-title.mjs)
+- [templates/_shared/commitlint/contribution-title.test.mjs](../../templates/_shared/commitlint/contribution-title.test.mjs) — regression tests for the validation logic itself, run with `node --test templates/_shared/commitlint/*.test.mjs`.
 
-Downstream projects can copy these files into their repository roots and integrate them with tools like Husky or GitHub Actions to block non-compliant commit messages.
+Downstream projects can copy these files into their repository roots and integrate them with tools like Husky to block non-compliant commit messages locally.
+
+For enforcement in CI — which also catches titles edited through the GitHub UI or contributed without local hooks installed — copy [templates/_shared/ci/contribution-title-check.yml](../../templates/_shared/ci/contribution-title-check.yml) into `.github/workflows/`. It runs the same `contribution-title.mjs` logic against the pull request title and every commit in the pull request, so the rule is defined once and enforced consistently whether it runs locally or in CI.
 
 ## 🤖 Automation Expectations
 

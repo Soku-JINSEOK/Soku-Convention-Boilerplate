@@ -1,0 +1,90 @@
+name: Contribution Title Check
+
+# Starter workflow for downstream repositories that adopt this boilerplate's
+# commit message convention (see docs/standards/GITHUB_STANDARDS.md).
+#
+# It validates the pull request title and every commit title included in the
+# pull request against the same `validateContributionTitle` logic used by the
+# local commitlint hook — so titles edited through the GitHub UI, or
+# contributed without local hooks installed, are still caught before merge.
+#
+# Copy this file into `.github/workflows/` alongside `contribution-title.mjs`
+# and `commitlint.config.mjs` at the repository root (see
+# docs/standards/GITHUB_STANDARDS.md's "Commit Message Linting Template"
+# section for how to copy those). If `contribution-title.mjs` lives somewhere
+# else in your repository, adjust the paths below. Also copying
+# `contribution-title.test.mjs` is optional but recommended — the regression
+# test step below only runs when that file is present.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+
+jobs:
+  contribution-title:
+    name: Contribution Title Convention
+    runs-on: ubuntu-latest
+    # `edited` fires for body and base-branch edits too, not just the title. Skip
+    # those runs — an `edited` event with no `changes.title` didn't touch the title.
+    if: github.event.action != 'edited' || github.event.changes.title != null
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      # Optional: only present if contribution-title.test.mjs was also copied.
+      - name: Run contribution-title regression tests
+        if: hashFiles('contribution-title.test.mjs') != ''
+        run: node --test contribution-title.test.mjs
+
+      - name: Validate PR title and commit titles
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          node --input-type=module - <<'NODE'
+          import {execSync} from 'node:child_process';
+          import {validateContributionTitle} from './contribution-title.mjs';
+
+          // `base.sha` is the base branch's current tip, not the merge base — resolve the
+          // actual divergence point so commits already on the base branch (e.g. pulled in by
+          // merging it into this branch) aren't re-validated as part of this PR.
+          const mergeBase = execSync(
+            `git merge-base ${process.env.BASE_SHA} ${process.env.HEAD_SHA}`,
+          )
+            .toString()
+            .trim();
+
+          const commitTitles = execSync(
+            `git log --no-merges --format=%s ${mergeBase}..${process.env.HEAD_SHA}`,
+          )
+            .toString()
+            .trim()
+            .split('\n')
+            .filter(Boolean);
+
+          const titles = [process.env.PR_TITLE, ...commitTitles];
+
+          let failed = false;
+          for (const title of titles) {
+            const result = validateContributionTitle(title);
+            if (!result.valid) {
+              failed = true;
+              console.error(`✗ "${title}"\n  ${result.message}`);
+            } else {
+              console.log(`✓ "${title}"`);
+            }
+          }
+
+          if (failed) {
+            process.exit(1);
+          }
+          NODE

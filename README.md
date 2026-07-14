@@ -25,7 +25,7 @@ For the canonical operating design, start with [BLUEPRINT.md](./BLUEPRINT.md).
 | Main objective | Consistency across projects |
 | Review priority | Logic, clarity, maintainability |
 | Enforcement model | Formatter + linter + documentation |
-| Commit style | Gitmoji + Conventional Commits (CutVi style) |
+| Commit style | Gitmoji + Conventional Commits |
 | Release tagging | Signed tags (`git tag -s`) for Verified status |
 
 ## 🤔 Why Google Style Guide
@@ -143,6 +143,10 @@ This boilerplate is intended to serve as:
 - [README_GUIDE.md](./docs/guides/README_GUIDE.md): how repository README files should be written and maintained
 - [INIT_GUIDE.md](./docs/guides/INIT_GUIDE.md): stack-detection and setup checklist for AI agents bootstrapping a downstream repository
 - [APPLICABILITY.md](./docs/guides/APPLICABILITY.md): which parts of this boilerplate apply to personal projects vs. teams
+
+### 📝 `docs/issues/` — task report artifacts
+
+- [TASK_REPORT_TEMPLATE.md](./docs/issues/TASK_REPORT_TEMPLATE.md): template for a written, approved plan before implementation starts
 
 ## 🧱 Starter Stack Coverage
 

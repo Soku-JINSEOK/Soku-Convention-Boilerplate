@@ -47,7 +47,7 @@ Projects should aim for the following qualities:
 |-- AGENTS.md            # AI agent operating instructions
 ```
 
-This boilerplate applies the `docs/` grouping concretely as `docs/policy/`, `docs/standards/`, and `docs/guides/` — see the [README.md](../../README.md) document index. Keep only true first-entry documents (`README.md`, `CONTRIBUTING.md`, `AGENTS.md`, `LICENSE`, `SECURITY.md`, and a top-level design document such as `BLUEPRINT.md`) at the repository root; move narrower policy, standards, and reference documents into the matching `docs/` subfolder instead of leaving them flat at the root.
+This boilerplate applies the `docs/` grouping concretely as `docs/policy/`, `docs/standards/`, `docs/guides/`, and `docs/issues/` — see the [README.md](../../README.md) document index. Keep only true first-entry documents (`README.md`, `CONTRIBUTING.md`, `AGENTS.md`, `LICENSE`, `SECURITY.md`, and a top-level design document such as `BLUEPRINT.md`) at the repository root; move narrower policy, standards, and reference documents into the matching `docs/` subfolder instead of leaving them flat at the root.
 
 ## 📋 Directory Rules
 
