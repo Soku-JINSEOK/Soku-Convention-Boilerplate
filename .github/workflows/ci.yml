@@ -53,11 +53,13 @@ jobs:
             docs/guides/README_GUIDE.md
             docs/guides/INIT_GUIDE.md
             docs/guides/APPLICABILITY.md
+            docs/issues/TASK_REPORT_TEMPLATE.md
             LICENSE
             SECURITY.md
             .editorconfig
             .gitmessage
             .github/PULL_REQUEST_TEMPLATE.md
+            .github/COMMENT_TEMPLATES.md
             .github/ISSUE_TEMPLATE/bug_report.md
             .github/ISSUE_TEMPLATE/chore_task.md
             .github/ISSUE_TEMPLATE/config.yml
@@ -94,8 +96,10 @@ jobs:
             templates/aws/buildspec.yml
             templates/azure/azure-pipelines.yml
             templates/_shared/ci/downstream-ci.yml
+            templates/_shared/ci/contribution-title-check.yml
             templates/_shared/commitlint/commitlint.config.mjs
             templates/_shared/commitlint/contribution-title.mjs
+            templates/_shared/commitlint/contribution-title.test.mjs
             templates/_shared/agents/README.md
             templates/_shared/agents/frontend-agent.md
             templates/_shared/agents/backend-agent.md
@@ -113,6 +117,9 @@ jobs:
           for file in "${required_files[@]}"; do
             test -f "$file"
           done
+
+      - name: Run contribution-title regression tests
+        run: node --test templates/_shared/commitlint/*.test.mjs
 
       - name: Check Markdown formatting
         run: npx --yes markdownlint-cli2@0.22.1 --config .markdownlint.jsonc "**/*.md" "#node_modules"

@@ -25,7 +25,7 @@
 | コア目標 | 複数プロジェクト間の一貫性の維持 |
 | コードレビューの最優先事項 | 論理、明確さ、保守性 |
 | ルール強制メカニズム | フォーマッター + リンター + ドキュメント自動検証 |
-| コミットスタイル | Gitmoji + Conventional Commits (CutVi スタイル) |
+| コミットスタイル | Gitmoji + Conventional Commits |
 | リリースタグ | Verified ステータスのための署名付きタグ (`git tag -s`) |
 
 ## 🤔 Google Style Guideを採用する理由
@@ -141,6 +141,10 @@
 - [README_GUIDE.md](./docs/guides/README_GUIDE.md): プロジェクトのREADMEを明確に維持するためのガイド
 - [INIT_GUIDE.md](./docs/guides/INIT_GUIDE.md): 下流リポジトリをセットアップする際にAIが参照するチェックリスト
 - [APPLICABILITY.md](./docs/guides/APPLICABILITY.md): 個人開発とチーム開発における適用規約の分類基準
+
+### 📝 `docs/issues/` — タスクレポート成果物
+
+- [TASK_REPORT_TEMPLATE.md](./docs/issues/TASK_REPORT_TEMPLATE.md): 実装着手前に文書化・承認を得るための計画テンプレート
 
 ## 🧱 スタータースタック対応範囲
 
