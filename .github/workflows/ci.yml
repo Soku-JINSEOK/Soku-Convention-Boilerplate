@@ -100,6 +100,8 @@ jobs:
             scripts/sync-boilerplate.ps1
             scripts/sync-boilerplate.sh
             scripts/sync-labels.sh
+            scripts/setup-git-signing.sh
+            scripts/create-release-tag.sh
           )
 
           for file in "${required_files[@]}"; do

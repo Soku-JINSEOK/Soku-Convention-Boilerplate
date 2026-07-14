@@ -27,6 +27,8 @@ For the canonical operating design, start with [BLUEPRINT.md](./BLUEPRINT.md).
 | Main objective | Consistency across projects |
 | Review priority | Logic, clarity, maintainability |
 | Enforcement model | Formatter + linter + documentation |
+| Commit style | Gitmoji + Conventional Commits (CutVi style) |
+| Release tagging | Signed tags (`git tag -s`) for Verified status |
 
 ### 🤔 Why Google Style Guide
 
