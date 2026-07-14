@@ -88,7 +88,10 @@ foreach ($relativePath in $items) {
         throw "Missing source item: $relativePath"
     }
 
-    $item = Get-Item -LiteralPath $sourcePath
+    # -Force is required here: on non-Windows platforms, PowerShell marks dotfiles/dotdirs
+    # (.editorconfig, .github, etc.) as Hidden, and Get-Item excludes Hidden items by default
+    # even though Test-Path above does not.
+    $item = Get-Item -LiteralPath $sourcePath -Force
     if ($item.PSIsContainer) {
         Copy-TrackedDirectory -RelativePath $relativePath
         $copied.Add($relativePath) | Out-Null
