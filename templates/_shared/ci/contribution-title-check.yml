@@ -8,11 +8,13 @@ name: Contribution Title Check
 # local commitlint hook — so titles edited through the GitHub UI, or
 # contributed without local hooks installed, are still caught before merge.
 #
-# Copy this file into `.github/workflows/` alongside `contribution-title.mjs`,
-# `commitlint.config.mjs`, and `contribution-title.test.mjs` at the repository
-# root (see docs/standards/GITHUB_STANDARDS.md's "Commit Message Linting
-# Template" section for how to copy those). If `contribution-title.mjs` lives
-# somewhere else in your repository, adjust the paths below.
+# Copy this file into `.github/workflows/` alongside `contribution-title.mjs`
+# and `commitlint.config.mjs` at the repository root (see
+# docs/standards/GITHUB_STANDARDS.md's "Commit Message Linting Template"
+# section for how to copy those). If `contribution-title.mjs` lives somewhere
+# else in your repository, adjust the paths below. Also copying
+# `contribution-title.test.mjs` is optional but recommended — the regression
+# test step below only runs when that file is present.
 
 on:
   pull_request:
@@ -22,6 +24,9 @@ jobs:
   contribution-title:
     name: Contribution Title Convention
     runs-on: ubuntu-latest
+    # `edited` fires for body and base-branch edits too, not just the title. Skip
+    # those runs — an `edited` event with no `changes.title` didn't touch the title.
+    if: github.event.action != 'edited' || github.event.changes.title != null
 
     steps:
       - name: Checkout repository
@@ -34,7 +39,9 @@ jobs:
         with:
           node-version: "22"
 
+      # Optional: only present if contribution-title.test.mjs was also copied.
       - name: Run contribution-title regression tests
+        if: hashFiles('contribution-title.test.mjs') != ''
         run: node --test contribution-title.test.mjs
 
       - name: Validate PR title and commit titles
