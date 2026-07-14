@@ -1,33 +1,51 @@
 ---
-name: Bug report
-about: Report incorrect behavior, regressions, or production issues
-title: "[Bug] "
-labels: ["type:bug"]
-assignees: []
+name: 🐛 Bug Report
+about: Report a reproducible defect or bug
+title: '🐛 fix(scope): '
+labels: 'type:bug'
+assignees: ''
 ---
 
-## 📝 Summary
+<!-- Replace `scope` in the title with a lowercase kebab-case scope. -->
 
-<!-- What happened? -->
+## Bug Description
 
-## ✅ Expected Behavior
+<!-- Describe the expected and actual behavior in English. -->
 
-<!-- What should have happened instead? -->
+## Steps to Reproduce
 
-## ❌ Actual Behavior
+1. <!-- First step. -->
+2. <!-- Second step. -->
 
-<!-- What happened in reality? -->
+## Environment and Evidence
 
-## 🔁 Steps to Reproduce
+- **OS:**
+- **Runtime/Browser version:**
+- **Logs/screenshots:**
 
-1.
-2.
-3.
+## AI Assistance
 
-## 💻 Environment
+<!-- Replace with the actual tool used (`@codex`, `Antigravity (agy)`, Claude Code) or `None`. -->
 
-<!-- Example: local, staging, production / browser / OS / runtime -->
+- **Planning/analysis/drafting:** `<actual tool or None>`
 
-## 🗒️ Notes
+---
 
-<!-- Logs, screenshots, links, or other useful context -->
+## 버그 설명
+
+<!-- 예상 동작과 실제 동작을 한국어로 작성합니다. -->
+
+## 재현 방법
+
+1. <!-- 첫 번째 단계. -->
+2. <!-- 두 번째 단계. -->
+
+## 환경 및 근거
+
+- **운영체제:**
+- **런타임/브라우저 버전:**
+- **로그/스크린샷:**
+
+## AI 지원
+
+- **계획/분석/초안 작성:** `<실제 사용 도구 또는 None>`
