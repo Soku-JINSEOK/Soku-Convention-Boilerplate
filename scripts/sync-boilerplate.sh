@@ -59,6 +59,7 @@ target_root="$(cd "$target_root" && pwd)"
 # Keep this list identical to the $items array in sync-boilerplate.ps1.
 items=(
   'BLUEPRINT.md'
+  '.markdownlint.jsonc'
   'AGENTS.md'
   'CONTRIBUTING.md'
   'docs'
@@ -73,7 +74,7 @@ items=(
 )
 
 if [[ "$include_readme" -eq 1 ]]; then
-  items=('README.md' "${items[@]}")
+  items=('README.md' 'README.ko.md' 'README.ja.md' "${items[@]}")
 fi
 
 copied=()

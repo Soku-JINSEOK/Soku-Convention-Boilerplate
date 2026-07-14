@@ -95,6 +95,49 @@ Releases should be explicit and repeatable.
 
 See [RELEASE_AND_SYNC.md](./RELEASE_AND_SYNC.md) for the full operating contract.
 
+### 🔏 Signed Commits and Tags (Verified)
+
+To guarantee the integrity and authorship of the convention updates, all committers and maintainers should sign their commits and release tags. Signed commits get a **Verified** badge on GitHub.
+
+#### 1. SSH Key Signing (Recommended)
+
+If you already use an SSH key for GitHub, you can use it to sign commits:
+
+```bash
+# Configure Git to use SSH for signing
+git config --global gpg.format ssh
+
+# Set your SSH public key as the signing key (or path to public key file)
+git config --global user.signingkey "~/.ssh/id_ed25519.pub"
+
+# Enable signing globally
+git config --global commit.gpgsign true
+git config --global tag.gpgsign true
+```
+
+Make sure to upload this public key to your GitHub account under **Settings -> SSH and GPG keys -> New SSH Key** and set the **Key type** to **Signing Key**.
+
+#### 2. GPG Key Signing
+
+Alternatively, you can use a GPG key:
+
+```bash
+# Generate a new GPG key
+gpg --full-generate-key
+
+# List your keys to find the Key ID
+gpg --list-secret-keys --keyid-format=long
+
+# Set the key in Git (replace <KEY_ID> with your key ID)
+git config --global user.signingkey <KEY_ID>
+git config --global commit.gpgsign true
+git config --global tag.gpgsign true
+```
+
+Export and paste your GPG public key (`gpg --armor --export <KEY_ID>`) into GitHub under **Settings -> SSH and GPG keys -> New GPG Key**.
+
+For interactive configuration assistance, you can run the [scripts/setup-git-signing.sh](../../scripts/setup-git-signing.sh) script.
+
 ## 🏷️ Labels and Metadata
 
 GitHub labels should help organize work rather than create clutter.
@@ -135,6 +178,15 @@ Recommended templates:
 - pull request template
 - bug report template
 - feature request template
+
+### 📝 Commit Message Linting Template
+
+To enforce the commit message convention (defined in [CONTRIBUTING.md](../../CONTRIBUTING.md#commit-message-standard)) automatically in pull requests or via Git Hooks, a shared configuration template is provided:
+
+- [templates/_shared/commitlint/commitlint.config.mjs](../../templates/_shared/commitlint/commitlint.config.mjs)
+- [templates/_shared/commitlint/contribution-title.mjs](../../templates/_shared/commitlint/contribution-title.mjs)
+
+Downstream projects can copy these files into their repository roots and integrate them with tools like Husky or GitHub Actions to block non-compliant commit messages.
 
 ## 🤖 Automation Expectations
 

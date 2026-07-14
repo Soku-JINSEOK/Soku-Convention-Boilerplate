@@ -42,6 +42,7 @@ Projects should aim for the following qualities:
 |-- infra/               # Infrastructure or deployment-related assets
 |-- .github/             # GitHub workflows, templates, and repo automation
 |-- README.md            # Public project overview
+|-- BLUEPRINT.md         # Canonical repository design and authority map
 |-- CONTRIBUTING.md      # Contribution workflow
 |-- AGENTS.md            # AI agent operating instructions
 ```

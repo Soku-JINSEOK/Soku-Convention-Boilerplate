@@ -60,7 +60,7 @@ Reference: [conventionalcommits.org](https://www.conventionalcommits.org/en/v1.0
 ### 📐 Format
 
 ```text
-<gitmoji> <type>(<scope>): <short description>
+<gitmoji> <type>(<scope>): <English subject>
 
 [optional body — explain WHY, not WHAT]
 
@@ -73,22 +73,26 @@ Reference: [conventionalcommits.org](https://www.conventionalcommits.org/en/v1.0
 | ------- | ---- | ----------- |
 | ✨ | `feat` | New feature |
 | 🐛 | `fix` | Bug fix |
-| 📝 | `docs` | Documentation only |
-| 💄 | `style` | Formatting, whitespace (no logic change) |
 | ♻️ | `refactor` | Code restructure without behavior change |
-| ⚡️ | `perf` | Performance improvement |
+| 🎨 | `style` | Formatting, whitespace, UI styling (no logic change) |
+| 📚 | `docs` | Documentation only |
 | ✅ | `test` | Add or update tests |
 | 🔧 | `chore` | Config, tooling, maintenance |
+| 🚀 | `perf` | Performance improvement |
+| 📦 | `build` | Build system, compile settings, package managers |
 | 👷 | `ci` | CI/CD pipeline changes |
+| 🔥 | `remove` | Remove files or features |
+| 🚑 | `hotfix` | Critical production bug fix |
+| 🔖 | `release` | Release tagging or version update |
+| 🔄 | `sync` | Sync changes from boilerplate or upstream |
 | 🔒️ | `security` | Security fix or hardening |
 | ⏪️ | `revert` | Revert a previous commit |
 | 💥 | `feat!` / `fix!` | Breaking change |
-| 🌐 | `i18n` | Internationalization or translation |
-| 🚀 | `deploy` | Deployment or release |
 
 ### 📋 Rules
 
-- Subject line: imperative mood, no trailing period, ≤ 72 characters
+- **Scope is required** and must use lowercase kebab-case (e.g., `(sync-script)`, `(ts-template)`).
+- **English subject is required** and must use standard ASCII/English text. Imperative mood, no trailing period, ≤ 72 characters.
 - Body: explain WHY, not WHAT — wrap at 72 characters
 - Breaking change: append `!` after type (`feat!:`) and add footer `BREAKING CHANGE: <description>`
 
@@ -100,6 +104,8 @@ Activate it with:
 ```bash
 git config commit.template .gitmessage
 ```
+
+Additionally, automated commit linting is available as a shared template. You can copy the configuration files from [templates/_shared/commitlint/](file:///home/seok_jinseok/CodeBase/Soku-Convention-Boilerplate/templates/_shared/commitlint/) to your project root to run automatic title checks on Git hooks or CI.
 
 ## 🔀 Pull Request Standards
 

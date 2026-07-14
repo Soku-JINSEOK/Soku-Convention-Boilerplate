@@ -1,58 +1,56 @@
-# <gitmoji> <type>(<scope>): <short description>
+# <gitmoji> <type>(<scope>): <English subject>
 #
 # [optional body]
 #
 # [optional footer(s)]
 #
 # ─────────────────────────────────────────────────────────────────────────────
-# GITMOJI + CONVENTIONAL COMMITS REFERENCE
+# GITMOJI + CONVENTIONAL COMMITS REFERENCE (Soku-Convention style)
 # https://www.conventionalcommits.org/en/v1.0.0/
 # https://gitmoji.dev
 # ─────────────────────────────────────────────────────────────────────────────
 #
 # FORMAT
-#   ✨ feat(scope): add user login
-#   🐛 fix(i18n): correct Japanese placeholder key
-#   📝 docs(readme): update setup instructions
+#   ✨ feat(login): add user login
+#   🐛 fix(i18n): correct japanese placeholder key
+#   📚 docs(readme): update setup instructions
 #
 # TYPE + GITMOJI
 #   ✨  feat      New feature
 #   🐛  fix       Bug fix
-#   📝  docs      Documentation only
-#   💄  style     Formatting, whitespace (no logic change)
 #   ♻️  refactor  Code restructure (no behavior change)
-#   ⚡️  perf      Performance improvement
+#   🎨  style     Formatting, whitespace, UI styling (no logic change)
+#   📚  docs      Documentation only
 #   ✅  test      Add or update tests
 #   🔧  chore     Config, tooling, maintenance
+#   🚀  perf      Performance improvement
+#   📦  build     Build system, compiler settings, packages
 #   👷  ci        CI/CD pipeline changes
+#   🔥  remove    Remove files or features
+#   🚑  hotfix    Critical production bug fix
+#   🔖  release   Release tagging or version update
+#   🔄  sync      Sync changes from boilerplate or upstream
 #   🔒️  security  Security fix or hardening
 #   ⏪️  revert    Revert a previous commit
-#   💥  BREAKING  Breaking change (also add ! after type, e.g. feat!:)
-#   🌐  i18n      Internationalization / translation
-#   🚀  deploy    Deployment / release
-#   🎨  dx        Developer experience improvement
+#   💥  feat! / fix! Breaking change (append ! to type, e.g. feat!:)
 #
-# SCOPE (optional, project-specific)
-#   backend   Code.gs and server-side logic
-#   frontend  index.html and UI
-#   i18n      i18n.js.html and translation keys
-#   config    appsscript.json, .clasp.json, package.json
-#   docs      Documentation files
-#   gh        GitHub templates and workflows
+# SCOPE (Required, must be lowercase kebab-case)
+#   e.g. backend, frontend, auth, sync-script, code-style
 #
 # RULES (Conventional Commits)
-#   - Subject line: imperative mood, no period, ≤72 chars
+#   - Scope: MUST be provided, lowercase kebab-case only.
+#   - Subject line: MUST be written in English. Imperative mood, no period, ≤72 chars.
 #   - Body: explain WHY, not WHAT (wrap at 72 chars)
 #   - BREAKING CHANGE: add footer "BREAKING CHANGE: <description>"
 #     or append ! to type: "feat!(scope): ..."
 #   - Multiple footers allowed: "Closes #123", "Refs #456"
 #
 # EXAMPLES
-#   ✨ feat(frontend): add PNG export button
-#   🐛 fix(backend): handle missing Drive folder on first run
-#   🌐 i18n(i18n): add missing exportPng key to all locales
-#   🔒️ security(config): enforce DOMAIN access in appsscript.json
-#   💥 feat!(backend)!: change saveDiagram return shape
+#   ✨ feat(frontend): add png export button
+#   🐛 fix(backend): handle missing drive folder on first run
+#   🎨 style(button): adjust main primary hover color
+#   🔒️ security(auth): enforce domain access in cookies
+#   💥 feat!(backend): change savediagram return shape
 #
 #   BREAKING CHANGE: saveDiagram now returns { id, name } instead of id string
 # ─────────────────────────────────────────────────────────────────────────────

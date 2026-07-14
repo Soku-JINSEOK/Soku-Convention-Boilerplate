@@ -26,13 +26,22 @@ if ! command -v gh >/dev/null 2>&1; then
   exit 1
 fi
 
-# Parse the constrained labels.yml format (list of {name, color, description})
-# without requiring a YAML library dependency.
-python3 - "$labels_file" <<'PYEOF' | while IFS=$'\t' read -r name color description; do
+# Parse and sync labels using Python to avoid string splitting issues and empty description bugs.
+python3 - "$labels_file" "${repo_arg[@]}" <<'PYEOF'
 import sys
+import subprocess
 
 path = sys.argv[1]
+repo_args = sys.argv[2:]
 name = color = description = None
+
+def sync_label(n, c, d):
+    if not n or not c:
+        return
+    desc = d if d is not None else ""
+    print(f"Syncing label: {n}")
+    cmd = ["gh", "label", "create", n, "--color", c, "--description", desc, "--force"] + repo_args
+    subprocess.run(cmd, check=True)
 
 with open(path, encoding="utf-8") as f:
     for line in f:
@@ -40,8 +49,7 @@ with open(path, encoding="utf-8") as f:
         if not stripped or stripped.startswith("#"):
             continue
         if stripped.startswith("- name:"):
-            if name is not None:
-                print(f"{name}\t{color}\t{description}")
+            sync_label(name, color, description)
             name = stripped.split(":", 1)[1].strip().strip('"')
             color = description = None
         elif stripped.startswith("color:"):
@@ -49,11 +57,7 @@ with open(path, encoding="utf-8") as f:
         elif stripped.startswith("description:"):
             description = stripped.split(":", 1)[1].strip().strip('"')
 
-if name is not None:
-    print(f"{name}\t{color}\t{description}")
+sync_label(name, color, description)
 PYEOF
-  echo "Syncing label: $name"
-  gh label create "$name" --color "$color" --description "$description" --force "${repo_arg[@]}"
-done
 
 echo "Label sync completed."
