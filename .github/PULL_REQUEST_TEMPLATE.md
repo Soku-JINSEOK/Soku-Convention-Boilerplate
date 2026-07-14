@@ -11,16 +11,23 @@
 - **Issue:** Closes #
 - **Task report:** `docs/issues/issue-<n>-task-report.md`
 
-## Type of Change
-
-- [ ] ✨ Feature
-- [ ] 🐛 Fix
-- [ ] ♻️ Refactor
-- [ ] 🎨 Style
-- [ ] 📚 Documentation
-- [ ] ✅ Test
-- [ ] 🔧 Chore
-- [ ] 👷 CI / 📦 Build
+- [ ] ✨ Feature (`feat`)
+- [ ] 🐛 Fix (`fix`)
+- [ ] ♻️ Refactor (`refactor`)
+- [ ] 🎨 Style (`style`)
+- [ ] 📚 Documentation (`docs`)
+- [ ] ✅ Test (`test`)
+- [ ] 🔧 Chore (`chore`)
+- [ ] 👷 CI (`ci`)
+- [ ] 📦 Build (`build`)
+- [ ] 🚀 Performance (`perf`)
+- [ ] 🔥 Remove (`remove`)
+- [ ] 🚑 Hotfix (`hotfix`)
+- [ ] 🔒️ Security (`security`)
+- [ ] ⏪️ Revert (`revert`)
+- [ ] 🔄 Sync (`sync`)
+- [ ] 🔖 Release (`release`)
+- [ ] 💥 Breaking Change (`feat!`, `fix!`, etc.)
 
 ## Verification
 
@@ -49,16 +56,23 @@
 - **이슈:** Closes #
 - **작업 보고서:** `docs/issues/issue-<n>-task-report.md`
 
-## 변경 유형
-
-- [ ] ✨ 기능
-- [ ] 🐛 수정
-- [ ] ♻️ 리팩터링
-- [ ] 🎨 스타일
-- [ ] 📚 문서
-- [ ] ✅ 테스트
-- [ ] 🔧 유지보수
-- [ ] 👷 CI / 📦 빌드
+- [ ] ✨ 기능 (`feat`)
+- [ ] 🐛 수정 (`fix`)
+- [ ] ♻️ 리팩터링 (`refactor`)
+- [ ] 🎨 스타일 (`style`)
+- [ ] 📚 문서 (`docs`)
+- [ ] ✅ 테스트 (`test`)
+- [ ] 🔧 유지보수 (`chore`)
+- [ ] 👷 CI (`ci`)
+- [ ] 📦 빌드 (`build`)
+- [ ] 🚀 성능 개선 (`perf`)
+- [ ] 🔥 제거 (`remove`)
+- [ ] 🚑 긴급 패치 (`hotfix`)
+- [ ] 🔒️ 보안 강화 (`security`)
+- [ ] ⏪️ 되돌리기 (`revert`)
+- [ ] 🔄 동기화 (`sync`)
+- [ ] 🔖 릴리즈 (`release`)
+- [ ] 💥 파괴적 변경 (`feat!`, `fix!`, etc.)
 
 ## 검증
 

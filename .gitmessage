@@ -5,7 +5,7 @@
 # [optional footer(s)]
 #
 # ─────────────────────────────────────────────────────────────────────────────
-# GITMOJI + CONVENTIONAL COMMITS REFERENCE (CutVi style)
+# GITMOJI + CONVENTIONAL COMMITS REFERENCE (Soku-Convention style)
 # https://www.conventionalcommits.org/en/v1.0.0/
 # https://gitmoji.dev
 # ─────────────────────────────────────────────────────────────────────────────
@@ -32,7 +32,7 @@
 #   🔄  sync      Sync changes from boilerplate or upstream
 #   🔒️  security  Security fix or hardening
 #   ⏪️  revert    Revert a previous commit
-#   💥  BREAKING  Breaking change (also add ! after type, e.g. feat!:)
+#   💥  feat! / fix! Breaking change (append ! to type, e.g. feat!:)
 #
 # SCOPE (Required, must be lowercase kebab-case)
 #   e.g. backend, frontend, auth, sync-script, code-style

@@ -24,6 +24,7 @@ if ($null -eq $resolvedTarget) {
 # Keep this list identical to the $items array in sync-boilerplate.sh.
 $items = @(
     'BLUEPRINT.md'
+    '.markdownlint.jsonc'
     'AGENTS.md'
     'CONTRIBUTING.md'
     'docs'

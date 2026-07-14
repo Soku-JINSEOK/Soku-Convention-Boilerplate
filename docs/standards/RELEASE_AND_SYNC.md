@@ -37,7 +37,7 @@ Each release should include a short summary of what downstream repositories need
 
 1. Review the latest boilerplate tag.
 2. Compare the downstream state with that tag.
-3. Apply the import with `scripts/sync-boilerplate.ps1`.
+3. Apply the import with `scripts/sync-boilerplate.sh` (Linux/macOS) or `scripts/sync-boilerplate.ps1` (Windows).
 4. Re-run CI and replace placeholder values where the downstream project requires them.
 5. Commit the sync as a focused change.
 

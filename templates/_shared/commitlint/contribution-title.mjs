@@ -22,21 +22,45 @@ const ENGLISH_SUBJECT_PATTERN = /^[\x20-\x7e]+$/;
 
 export function validateContributionTitle(title) {
   const value = title.trim();
-  const convention = TITLE_CONVENTIONS.find(([emoji, type]) =>
-    value.startsWith(`${emoji} ${type}(`),
-  );
+  let isBreaking = false;
+  let convention = null;
+  let prefixLength = 0;
+
+  // 1. Check for breaking change pattern (starts with 💥 and ends type with !)
+  if (value.startsWith('💥 ')) {
+    const afterEmoji = value.slice('💥 '.length); // Remove '💥 '
+    const matchedType = TITLE_CONVENTIONS.find(([_, type]) =>
+      afterEmoji.startsWith(`${type}!(`),
+    );
+    if (matchedType) {
+      isBreaking = true;
+      const type = matchedType[1];
+      convention = ['💥', type];
+      prefixLength = `💥 ${type}!(`.length;
+    }
+  }
+
+  // 2. If not breaking, check for standard prefix
+  if (!convention) {
+    convention = TITLE_CONVENTIONS.find(([emoji, type]) =>
+      value.startsWith(`${emoji} ${type}(`),
+    );
+    if (convention) {
+      const [emoji, type] = convention;
+      prefixLength = `${emoji} ${type}(`.length;
+    }
+  }
 
   if (!convention) {
     return {
       valid: false,
       message:
         'Title must start with a supported Gitmoji/type pair, such as ' +
-        '`📚 docs(workflow): ...`.',
+        '`📚 docs(workflow): ...`. For breaking changes, use `💥 feat!(scope): ...`.',
     };
   }
 
-  const [emoji, type] = convention;
-  const remainder = value.slice(`${emoji} ${type}(`.length);
+  const remainder = value.slice(prefixLength);
   const separator = remainder.indexOf('): ');
   if (separator < 1) {
     return {
@@ -47,6 +71,7 @@ export function validateContributionTitle(title) {
 
   const scope = remainder.slice(0, separator);
   const subject = remainder.slice(separator + 3);
+
   if (!SCOPE_PATTERN.test(scope)) {
     return {
       valid: false,
@@ -58,6 +83,15 @@ export function validateContributionTitle(title) {
   }
   if (!ENGLISH_SUBJECT_PATTERN.test(subject)) {
     return {valid: false, message: 'Subject must be written in English.'};
+  }
+  if (subject.endsWith('.')) {
+    return {valid: false, message: 'Subject must not end with a period.'};
+  }
+  if (value.length > 72) {
+    return {
+      valid: false,
+      message: `Title exceeds 72 characters (currently ${value.length}).`,
+    };
   }
 
   return {valid: true, message: 'Title follows the repository convention.'};

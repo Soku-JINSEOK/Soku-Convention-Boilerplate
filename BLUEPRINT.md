@@ -269,6 +269,8 @@ Reference examples currently cover:
 - MySQL
 - PostgreSQL
 - gcloud
+- AWS
+- Azure
 
 The blueprint does not prescribe a single application architecture for every stack.  
 Instead, it ensures that whichever stack is adopted stays readable and conventionally organized.

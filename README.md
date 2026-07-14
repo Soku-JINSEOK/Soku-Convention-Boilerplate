@@ -20,7 +20,7 @@ For the canonical operating design, start with [BLUEPRINT.md](./BLUEPRINT.md).
 | Area | Standard |
 | --- | --- |
 | Style baseline | `Google Style Guide` |
-| Human-facing docs | Korean / English by default, Japanese when needed |
+| Human-facing docs | English, Korean, and Japanese |
 | Rule and governance docs | English only |
 | Main objective | Consistency across projects |
 | Review priority | Logic, clarity, maintainability |
@@ -72,7 +72,7 @@ Projects should preserve a stable directory structure, naming strategy, and docu
 
 ### 4. Documentation Rules
 
-Document language follows the [Language Policy in BLUEPRINT.md](./BLUEPRINT.md#language-policy): human-facing overview content defaults to Korean and English, with Japanese added as needed, while agent-facing rules, project philosophy, governance, and operational standards stay English-only. When a document mixes languages, each language's content is grouped into one contiguous block (English block, then the next language's block, and so on) rather than interleaved section by section.
+document language follows the [Language Policy in BLUEPRINT.md](./BLUEPRINT.md#language-policy): human-facing overview content defaults to English, Korean, and Japanese, while agent-facing rules, project philosophy, governance, and operational standards stay English-only. When a document mixes languages, each language's content is grouped into one contiguous block (English block, then the next language's block, and so on) rather than interleaved section by section.
 
 ### 5. Review Discipline
 

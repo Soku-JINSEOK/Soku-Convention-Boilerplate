@@ -59,6 +59,7 @@ target_root="$(cd "$target_root" && pwd)"
 # Keep this list identical to the $items array in sync-boilerplate.ps1.
 items=(
   'BLUEPRINT.md'
+  '.markdownlint.jsonc'
   'AGENTS.md'
   'CONTRIBUTING.md'
   'docs'

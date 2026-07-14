@@ -35,6 +35,8 @@ jobs:
             README.md
             README.ko.md
             README.ja.md
+            .markdownlint.jsonc
+            .gitignore
             BLUEPRINT.md
             CONTRIBUTING.md
             AGENTS.md
@@ -60,6 +62,8 @@ jobs:
             .github/ISSUE_TEMPLATE/chore_task.md
             .github/ISSUE_TEMPLATE/config.yml
             .github/ISSUE_TEMPLATE/feature_request.md
+            .github/ISSUE_TEMPLATE/docs_update.md
+            .github/ISSUE_TEMPLATE/refactor_proposal.md
             .github/CODEOWNERS
             .github/workflows/ci.yml
             .github/labels.yml
