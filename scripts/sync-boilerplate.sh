@@ -73,7 +73,7 @@ items=(
 )
 
 if [[ "$include_readme" -eq 1 ]]; then
-  items=('README.md' "${items[@]}")
+  items=('README.md' 'README.ko.md' 'README.ja.md' "${items[@]}")
 fi
 
 copied=()

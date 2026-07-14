@@ -33,6 +33,8 @@ jobs:
         run: |
           required_files=(
             README.md
+            README.ko.md
+            README.ja.md
             BLUEPRINT.md
             CONTRIBUTING.md
             AGENTS.md

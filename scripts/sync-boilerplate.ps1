@@ -38,7 +38,7 @@ $items = @(
 )
 
 if ($IncludeReadme) {
-    $items = @('README.md') + $items
+    $items = @('README.md', 'README.ko.md', 'README.ja.md') + $items
 }
 
 $copied = New-Object System.Collections.Generic.List[string]

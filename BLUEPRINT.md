@@ -75,17 +75,24 @@ If a document conflicts with this blueprint, the blueprint wins unless a downstr
 
 The repository uses a layered language strategy.
 
-- Human-facing overview content defaults to Korean and English.
-- Japanese may be added when the audience or collaboration context makes it useful.
+- Human-facing overview content defaults to English, Korean, and Japanese.
 - Operational rules, governance, policy, and AI instructions are written in English only.
 
 This keeps the public-facing docs approachable while making the operating rules easy for AI agents and humans to parse consistently.
 
-### 🧱 Multi-Language Block Ordering
+### 🧱 Multi-Language File Splitting (Overview Docs)
 
-When a document contains more than one language, group each language's content into a single contiguous block instead of interleaving languages section by section or paragraph by paragraph. Order the blocks English first, followed by each additional language in the order it was added (for example: English, then Korean, then Japanese). A reader should encounter at most one language switch per additional language in the document, not once per section.
+To support multiple languages without cluttering a single document, public-facing overview documentation is split into separate language files:
 
-`README.md` is the reference implementation of this rule — see its `## English`, `## 한국어`, and `## 日本語` blocks.
+- `README.md` for English (Default)
+- `README.ko.md` for Korean
+- `README.ja.md` for Japanese
+
+A cross-link header must be included at the very top of each file to allow readers to jump to their preferred language (e.g., `[한국어](./README.ko.md) | [日本語](./README.ja.md)`).
+
+### 🧱 Multi-Language Block Ordering (Inside Single Docs)
+
+If a document mixes more than one language inside a single file, group each language's content into a single contiguous block instead of interleaving languages section by section or paragraph by paragraph. Order the blocks English first, followed by each additional language in the order it was added.
 
 ## 🏗️ Repository Shape
 
