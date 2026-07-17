@@ -141,6 +141,7 @@
 - [README_GUIDE.md](./docs/guides/README_GUIDE.md): 프로젝트 README를 읽기 쉽고 명확하게 유지하는 작성법
 - [INIT_GUIDE.md](./docs/guides/INIT_GUIDE.md): 다운스트림 프로젝트를 부트스트랩할 때 에이전트가 참고하는 환경 탐색 체크리스트
 - [APPLICABILITY.md](./docs/guides/APPLICABILITY.md): 개인 프로젝트와 팀 프로젝트에서 각각 적용 가능한 수준 분리 기준
+- [LANGUAGE_SELECTION.md](./docs/guides/LANGUAGE_SELECTION.md): 새 프로젝트나 기능에 사용할 프로그래밍 언어를 선택하는 기준
 
 ### 📝 `docs/issues/` — 작업 보고서 아티팩트
 

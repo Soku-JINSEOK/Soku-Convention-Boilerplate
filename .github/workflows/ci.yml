@@ -53,6 +53,7 @@ jobs:
             docs/guides/README_GUIDE.md
             docs/guides/INIT_GUIDE.md
             docs/guides/APPLICABILITY.md
+            docs/guides/LANGUAGE_SELECTION.md
             docs/issues/TASK_REPORT_TEMPLATE.md
             LICENSE
             SECURITY.md

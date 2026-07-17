@@ -4,7 +4,7 @@
 
 This document maps the copyable starter configuration files that live under `templates/`.
 
-The files in this area are meant to be dropped into downstream repositories and adapted, not treated as the only possible way to configure a stack.
+The files in this area are meant to be dropped into downstream repositories and adapted, not treated as the only possible way to configure a stack. To decide which stack to use in the first place, see [`LANGUAGE_SELECTION.md`](./LANGUAGE_SELECTION.md).
 
 ## 🛠️ How To Use
 

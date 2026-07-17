@@ -143,6 +143,7 @@ This boilerplate is intended to serve as:
 - [README_GUIDE.md](./docs/guides/README_GUIDE.md): how repository README files should be written and maintained
 - [INIT_GUIDE.md](./docs/guides/INIT_GUIDE.md): stack-detection and setup checklist for AI agents bootstrapping a downstream repository
 - [APPLICABILITY.md](./docs/guides/APPLICABILITY.md): which parts of this boilerplate apply to personal projects vs. teams
+- [LANGUAGE_SELECTION.md](./docs/guides/LANGUAGE_SELECTION.md): how to choose a programming language for a new project or feature
 
 ### 📝 `docs/issues/` — task report artifacts
 
