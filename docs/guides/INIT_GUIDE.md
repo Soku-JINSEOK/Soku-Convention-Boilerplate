@@ -23,7 +23,7 @@ match more than one row (for example, a Node.js API with a PostgreSQL schema).
 | `.github/workflows/*` referencing `gcloud`/Cloud Run/Cloud Build | GCP | `templates/gcloud/` |
 | `.github/workflows/*` referencing CodeBuild/CodePipeline, or `buildspec.yml` | AWS | `templates/aws/` |
 | `.github/workflows/*` referencing `azure-pipelines.yml` or Azure DevOps | Azure | `templates/azure/` |
-| No marker files (empty/new repository) | Ask the user which stack(s) to bootstrap, or default to the stack named in the user's request | — |
+| No marker files (empty/new repository) | Ask the user which stack(s) to bootstrap, or default to the stack named in the user's request — see [`LANGUAGE_SELECTION.md`](./LANGUAGE_SELECTION.md) for selection criteria | — |
 
 ## 2️⃣ Common Setup Checklist
 

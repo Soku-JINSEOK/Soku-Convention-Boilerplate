@@ -141,6 +141,7 @@
 - [README_GUIDE.md](./docs/guides/README_GUIDE.md): プロジェクトのREADMEを明確に維持するためのガイド
 - [INIT_GUIDE.md](./docs/guides/INIT_GUIDE.md): 下流リポジトリをセットアップする際にAIが参照するチェックリスト
 - [APPLICABILITY.md](./docs/guides/APPLICABILITY.md): 個人開発とチーム開発における適用規約の分類基準
+- [LANGUAGE_SELECTION.md](./docs/guides/LANGUAGE_SELECTION.md): 新しいプロジェクトや機能に使用するプログラミング言語を選ぶための基準
 
 ### 📝 `docs/issues/` — タスクレポート成果物
 
