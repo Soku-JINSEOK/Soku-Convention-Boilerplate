@@ -59,6 +59,8 @@ Use `-IncludeReadme` only when the downstream repository is being bootstrapped f
 
 Use `--include-readme` only when the downstream repository is being bootstrapped from scratch.
 
+Both scripts only copy git-tracked files from the source checkout (via `git ls-files`), so local build artifacts that happen to sit in the working tree (`node_modules/`, `dist/`, `__pycache__/`, and anything else covered by `.gitignore`) are never included even if present on disk. Both require the source to be a git repository. Preview what would be copied without touching the filesystem with `--dry-run` (bash) or `-WhatIf` (PowerShell's built-in dry-run mechanism). `scripts/verify-sync-parity.sh` runs both scripts against fresh temporary directories and diffs the output — it runs in CI on every change and can be run locally too.
+
 ## 🎬 Summary
 
 The boilerplate stays reusable when releases are explicit and downstream sync is intentional.

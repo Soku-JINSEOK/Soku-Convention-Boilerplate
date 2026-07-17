@@ -9,10 +9,18 @@ param(
     [switch]$IncludeReadme
 )
 
+# Use -WhatIf for a dry run (PowerShell's native ShouldProcess mechanism) —
+# it prints what would be copied without touching the filesystem.
+
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 $sourceRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..')).Path
+
+git -C $sourceRoot rev-parse --is-inside-work-tree *>$null
+if ($LASTEXITCODE -ne 0) {
+    throw "Source root is not a git checkout: $sourceRoot`nThis script only copies git-tracked files, so it requires a git repository as its source."
+}
 
 $resolvedTarget = Resolve-Path -LiteralPath $TargetRoot -ErrorAction SilentlyContinue
 if ($null -eq $resolvedTarget) {
@@ -44,23 +52,49 @@ if ($IncludeReadme) {
 
 $copied = New-Object System.Collections.Generic.List[string]
 
+# Copies only git-tracked files under $RelativePath, so build artifacts and
+# other .gitignore'd content sitting in a local checkout (e.g. node_modules/,
+# dist/, __pycache__/) never leak into the sync target.
+function Copy-TrackedDirectory {
+    param(
+        [string]$RelativePath
+    )
+
+    $destinationPath = Join-Path $targetRoot $RelativePath
+    if (-not $Force -and (Test-Path -LiteralPath $destinationPath)) {
+        throw "Destination already exists (use -Force to overwrite): $destinationPath"
+    }
+
+    $trackedFiles = git -C $sourceRoot ls-files -- $RelativePath
+    foreach ($file in $trackedFiles) {
+        if ([string]::IsNullOrWhiteSpace($file)) {
+            continue
+        }
+        $sourceFile = Join-Path $sourceRoot $file
+        $destinationFile = Join-Path $targetRoot $file
+        if ($PSCmdlet.ShouldProcess($destinationFile, "Copy file from $sourceFile")) {
+            $parentDirectory = Split-Path -Parent $destinationFile
+            if ($parentDirectory -and -not (Test-Path -LiteralPath $parentDirectory)) {
+                New-Item -ItemType Directory -Path $parentDirectory -Force | Out-Null
+            }
+            Copy-Item -LiteralPath $sourceFile -Destination $destinationFile -Force:$Force
+        }
+    }
+}
+
 foreach ($relativePath in $items) {
     $sourcePath = Join-Path $sourceRoot $relativePath
     if (-not (Test-Path -LiteralPath $sourcePath)) {
         throw "Missing source item: $relativePath"
     }
 
-    $item = Get-Item -LiteralPath $sourcePath
+    # -Force is required here: on non-Windows platforms, PowerShell marks dotfiles/dotdirs
+    # (.editorconfig, .github, etc.) as Hidden, and Get-Item excludes Hidden items by default
+    # even though Test-Path above does not.
+    $item = Get-Item -LiteralPath $sourcePath -Force
     if ($item.PSIsContainer) {
-        $destinationPath = Join-Path $targetRoot $relativePath
-        if (-not $Force -and (Test-Path -LiteralPath $destinationPath)) {
-            throw "Destination already exists (use -Force to overwrite): $destinationPath"
-        }
-        if ($PSCmdlet.ShouldProcess($destinationPath, "Copy directory from $sourcePath")) {
-            New-Item -ItemType Directory -Path $destinationPath -Force | Out-Null
-            Copy-Item -LiteralPath (Join-Path $sourcePath '*') -Destination $destinationPath -Recurse -Force:$Force
-            $copied.Add($relativePath) | Out-Null
-        }
+        Copy-TrackedDirectory -RelativePath $relativePath
+        $copied.Add($relativePath) | Out-Null
         continue
     }
 

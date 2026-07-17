@@ -52,6 +52,7 @@ npm test
 Template files:
 
 - [`templates/python/pyproject.toml`](../../templates/python/pyproject.toml)
+- [`templates/python/requirements-lock.txt`](../../templates/python/requirements-lock.txt)
 - [`templates/python/src/user_profile.py`](../../templates/python/src/user_profile.py)
 - [`templates/python/tests/test_user_profile.py`](../../templates/python/tests/test_user_profile.py)
 
@@ -61,11 +62,14 @@ Formatting uses [`pyink`](https://github.com/google/pyink) (Google's Black fork,
 
 ```bash
 python -m venv .venv && source .venv/bin/activate
-pip install -e ".[dev]"
+pip install -r requirements-lock.txt -e ".[dev]"
 pyink --check .
 ruff check .
+mypy .
 pytest
 ```
+
+`requirements-lock.txt` pins the `dev` extra's transitive dependencies for reproducible installs (generated with `pip-compile --extra=dev --output-file=requirements-lock.txt pyproject.toml`, from the [`pip-tools`](https://github.com/jazzband/pip-tools) package). Regenerate it with that same command whenever `pyproject.toml`'s `dev` extra changes.
 
 ## 🐹 Go
 

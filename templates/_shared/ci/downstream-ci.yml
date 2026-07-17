@@ -4,6 +4,8 @@ name: CI
 # Uncomment the job(s) matching your stack and delete the rest.
 # This file does not check for this boilerplate's own files (see .github/workflows/ci.yml
 # in Soku-Convention-Boilerplate for that repository-hygiene check).
+# Each commented job mirrors a job actually run and verified in
+# Soku-Convention-Boilerplate's own .github/workflows/templates-ci.yml.
 
 on:
   pull_request:
@@ -21,8 +23,11 @@ jobs:
   #       with:
   #         node-version: "22"
   #     - run: npm ci
+  #     - run: npm run lint
   #     - run: npm run typecheck
   #     - run: npm test
+  #     - run: npm run build
+  #     - run: npm run format:check
 
   # python:
   #   name: Python
@@ -31,10 +36,11 @@ jobs:
   #     - uses: actions/checkout@v4
   #     - uses: actions/setup-python@v5
   #       with:
-  #         python-version: "3.11"
-  #     - run: pip install -e . pytest ruff mypy
+  #         python-version: "3.12"
+  #     - run: pip install -r requirements-lock.txt -e ".[dev]"
   #     - run: ruff check .
   #     - run: mypy .
+  #     - run: pyink --check .
   #     - run: pytest
 
   # go:
@@ -44,9 +50,15 @@ jobs:
   #     - uses: actions/checkout@v4
   #     - uses: actions/setup-go@v5
   #       with:
-  #         go-version: "1.22"
-  #     - run: go vet ./...
-  #     - run: go test ./...
+  #         go-version: "1.26"
+  #     - run: go install golang.org/x/tools/cmd/goimports@latest
+  #     - uses: golangci/golangci-lint-action@v7
+  #       with:
+  #         version: v2.12.2
+  #     - run: make fmt-check
+  #     - run: make lint
+  #     - run: make test
+  #     - run: make build
 
   # java-spring:
   #   name: Java/Spring

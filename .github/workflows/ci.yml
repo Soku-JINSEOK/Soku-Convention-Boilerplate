@@ -68,6 +68,7 @@ jobs:
             .github/ISSUE_TEMPLATE/refactor_proposal.md
             .github/CODEOWNERS
             .github/workflows/ci.yml
+            .github/workflows/templates-ci.yml
             .github/labels.yml
             templates/javascript-typescript-node/package.json
             templates/javascript-typescript-node/tsconfig.json
@@ -77,6 +78,7 @@ jobs:
             templates/javascript-typescript-node/src/profile.ts
             templates/javascript-typescript-node/test/profile.test.ts
             templates/python/pyproject.toml
+            templates/python/requirements-lock.txt
             templates/python/src/user_profile.py
             templates/python/tests/test_user_profile.py
             templates/go/go.mod
@@ -93,6 +95,7 @@ jobs:
             templates/mysql/schema.sql
             templates/postgresql/schema.sql
             templates/gcloud/cloudbuild.yaml
+            templates/gcloud/Dockerfile
             templates/aws/buildspec.yml
             templates/azure/azure-pipelines.yml
             templates/_shared/ci/downstream-ci.yml
@@ -112,6 +115,7 @@ jobs:
             scripts/sync-labels.sh
             scripts/setup-git-signing.sh
             scripts/create-release-tag.sh
+            scripts/verify-sync-parity.sh
           )
 
           for file in "${required_files[@]}"; do
@@ -126,3 +130,14 @@ jobs:
 
       - name: Validate workflow YAML
         run: npx --yes yaml-lint@1.7.0 .github/workflows/*.yml
+
+  sync-parity:
+    name: Sync Script Parity (sh vs ps1)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Verify sync-boilerplate.sh and sync-boilerplate.ps1 produce identical output
+        run: scripts/verify-sync-parity.sh
