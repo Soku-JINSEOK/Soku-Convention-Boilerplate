@@ -59,6 +59,8 @@ Every PR should answer:
 
 This boilerplate's own issue and pull request templates record English as the normative source and require Korean and Japanese summaries of the same goal, scope, verification, non-destructive boundary, and risk information. The English source also records explicit acceptance criteria. Downstream repositories should adapt those language blocks to the collaboration language selected in their `CONTRIBUTING.md` without weakening the underlying review contract.
 
+The `Governance profile` field identifies a profile only when the repository is mapped in a documented governance registry linked from its operational documentation. Use the exact registered profile name when that mapping exists; otherwise use `None`. During downstream synchronization, do not copy the source repository's profile value unchanged: resolve the downstream repository's own registry mapping or replace the value with `None`.
+
 ## 📝 Task Reports
 
 For work that benefits from a documented plan before implementation starts, use [`docs/issues/TASK_REPORT_TEMPLATE.md`](../issues/TASK_REPORT_TEMPLATE.md):

@@ -6,7 +6,7 @@
 
 - **Issue:** `<Closes #N for final work | Related to #N for partial work>`
 - **Task report:** `docs/issues/issue-<n>-task-report.md`
-- **Governance profile:** `boilerplate`
+- **Governance profile:** `<profile name or None>`
 
 ## 🇬🇧 English — Normative Source
 
@@ -32,7 +32,7 @@
 
 - [ ] `node --test templates/_shared/commitlint/*.test.mjs`
 - [ ] `npx --yes markdownlint-cli2@0.22.1 --config .markdownlint.jsonc "**/*.md" "#node_modules"`
-- [ ] `npx --yes yaml-lint@1.7.0 .github/**/*.yml`
+- [ ] `npx --yes yaml-lint@1.7.0 .github/*.yml .github/**/*.yml`
 - [ ] `scripts/verify-sync-parity.sh`
 - [ ] Relevant stack or template validation:
 - [ ] `git diff --check`

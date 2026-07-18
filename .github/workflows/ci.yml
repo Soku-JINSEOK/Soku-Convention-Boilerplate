@@ -130,7 +130,7 @@ jobs:
         run: npx --yes markdownlint-cli2@0.22.1 --config .markdownlint.jsonc "**/*.md" "#node_modules"
 
       - name: Validate GitHub YAML
-        run: npx --yes yaml-lint@1.7.0 .github/**/*.yml
+        run: npx --yes yaml-lint@1.7.0 .github/*.yml .github/**/*.yml
 
   sync-parity:
     name: Sync Script Parity (sh vs ps1)

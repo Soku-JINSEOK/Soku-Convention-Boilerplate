@@ -35,7 +35,7 @@ Complete. The local templates, CI file list, standards documentation, and Issue 
 
 ## Verification
 
-- `npx --yes yaml-lint@1.7.0 .github/**/*.yml` — passed.
+- `npx --yes yaml-lint@1.7.0 .github/*.yml .github/**/*.yml` — passed.
 - `npx --yes markdownlint-cli2@0.22.1 --config .markdownlint.jsonc "**/*.md" "#node_modules"` — passed, 36 files and 0 errors.
 - `node --test templates/_shared/commitlint/*.test.mjs` — passed, 1 test.
 - Issue and pull request template contract assertions — passed.
