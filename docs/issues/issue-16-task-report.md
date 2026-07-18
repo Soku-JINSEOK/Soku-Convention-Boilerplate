@@ -61,8 +61,8 @@ logic.
 
 Complete. The normative ADR and authority-boundary updates are implemented and
 verified locally. The repository owner subsequently authorized the agent to
-commit, publish, and merge this work as a separate pull request before Issue
-#17 implementation begins.
+commit, publish, and merge this work as a separate pull request before Issue #17
+implementation begins.
 
 ## Verification
 
