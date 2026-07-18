@@ -25,6 +25,14 @@ type ExitError struct {
 	Cause   error
 }
 
+type resultExit struct {
+	Code ExitCode
+}
+
+func (e *resultExit) Error() string {
+	return fmt.Sprintf("command completed with exit code %d", e.Code)
+}
+
 func (e *ExitError) Error() string {
 	if e.Message != "" {
 		return e.Message

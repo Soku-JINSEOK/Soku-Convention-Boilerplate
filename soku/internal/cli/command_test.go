@@ -150,7 +150,6 @@ func TestDefaultLifecycleHandlersAreUnavailable(t *testing.T) {
 		args    []string
 	}{
 		{command: "init", args: []string{"init", "--dry-run"}},
-		{command: "status", args: []string{"status"}},
 		{command: "diff", args: []string{"diff"}},
 		{command: "upgrade", args: []string{"upgrade", "--dry-run"}},
 	} {
@@ -163,6 +162,97 @@ func TestDefaultLifecycleHandlersAreUnavailable(t *testing.T) {
 				t.Fatalf("stdout=%q stderr=%q", result.stdout, result.stderr)
 			}
 		})
+	}
+}
+
+func TestDefaultStatusIsImplemented(t *testing.T) {
+	original, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Chdir(t.TempDir()); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = os.Chdir(original) })
+
+	result := execute([]string{"status", "--json"}, testRuntime{}, defaultHandlers())
+	if result.code != 3 || result.stderr != "" {
+		t.Fatalf("result = %#v", result)
+	}
+	assertSingleJSONEnvelope(t, result.stdout)
+	if !strings.Contains(result.stdout, `"ok":true`) || !strings.Contains(result.stdout, `"state":"uninitialized"`) || strings.Contains(result.stdout, "feature.unavailable") {
+		t.Fatalf("unexpected status envelope: %s", result.stdout)
+	}
+}
+
+func TestDefaultStatusMapsMalformedManifestToValidationFailure(t *testing.T) {
+	original, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+	root := t.TempDir()
+	if err := os.Mkdir(filepath.Join(root, ".soku"), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, ".soku", "manifest.json"), []byte("{"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Chdir(root); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = os.Chdir(original) })
+
+	result := execute([]string{"status", "--json"}, testRuntime{}, defaultHandlers())
+	if result.code != 2 || result.stderr != "" {
+		t.Fatalf("result = %#v", result)
+	}
+	assertSingleJSONEnvelope(t, result.stdout)
+	if !strings.Contains(result.stdout, `"ok":false`) || !strings.Contains(result.stdout, `"code":"manifest.invalid"`) {
+		t.Fatalf("unexpected status envelope: %s", result.stdout)
+	}
+}
+
+func TestDiagnosticResultsUseSuccessfulEnvelopeAndExitCode(t *testing.T) {
+	for _, test := range []struct {
+		name string
+		code ExitCode
+	}{
+		{name: "changes", code: ExitChangesFound},
+		{name: "compatibility", code: ExitCompatibilityFailure},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			handler := ResultHandlerFunc(func(context.Context, Request) (Result, error) {
+				return Result{Human: "diagnostic\n", Data: struct {
+					State string `json:"state"`
+				}{State: test.name}, Code: test.code}, nil
+			})
+			handlers := defaultHandlers()
+			handlers.Status = handler
+			result := execute([]string{"status", "--json"}, testRuntime{}, handlers)
+			if result.code != int(test.code) || result.stderr != "" {
+				t.Fatalf("result = %#v", result)
+			}
+			assertSingleJSONEnvelope(t, result.stdout)
+			if !strings.Contains(result.stdout, `"ok":true`) || !strings.Contains(result.stdout, `"state":"`+test.name+`"`) {
+				t.Fatalf("unexpected envelope: %s", result.stdout)
+			}
+		})
+	}
+}
+
+func TestDiagnosticHumanAndQuietOutput(t *testing.T) {
+	handler := ResultHandlerFunc(func(context.Context, Request) (Result, error) {
+		return Result{Human: "Soku status: drifted\n", Data: struct{}{}, Code: ExitChangesFound}, nil
+	})
+	handlers := defaultHandlers()
+	handlers.Status = handler
+	human := execute([]string{"status"}, testRuntime{}, handlers)
+	if human.code != 3 || human.stdout != "Soku status: drifted\n" || human.stderr != "" {
+		t.Fatalf("human result = %#v", human)
+	}
+	quiet := execute([]string{"status", "--quiet"}, testRuntime{}, handlers)
+	if quiet.code != 3 || quiet.stdout != "" || quiet.stderr != "" {
+		t.Fatalf("quiet result = %#v", quiet)
 	}
 }
 

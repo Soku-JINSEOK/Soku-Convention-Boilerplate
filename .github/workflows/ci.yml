@@ -59,6 +59,7 @@ jobs:
             docs/guides/LANGUAGE_SELECTION.md
             docs/issues/TASK_REPORT_TEMPLATE.md
             docs/issues/issue-17-task-report.md
+            docs/issues/issue-19-task-report.md
             LICENSE
             SECURITY.md
             .editorconfig
@@ -135,10 +136,25 @@ jobs:
             soku/internal/cli/output.go
             soku/internal/cli/runtime.go
             soku/internal/cli/runtime_test.go
+            soku/internal/manifest/manifest.go
+            soku/internal/manifest/manifest_test.go
+            soku/internal/manifest/replace_unix.go
+            soku/internal/manifest/replace_windows.go
+            soku/internal/manifest/store.go
+            soku/internal/manifest/store_test.go
             soku/internal/packagezip/main.go
+            soku/internal/status/status.go
+            soku/internal/status/status_test.go
             soku/install_test.go
+            soku/schema/manifest-v1.schema.json
             soku/scripts/package.sh
             soku/scripts/package_test.sh
+            soku/testdata/manifest-v1/invalid/credential-source.json
+            soku/testdata/manifest-v1/invalid/path-traversal.json
+            soku/testdata/manifest-v1/invalid/project-owned-baseline.json
+            soku/testdata/manifest-v1/invalid/raw-configuration.json
+            soku/testdata/manifest-v1/invalid/token-query.json
+            soku/testdata/manifest-v1/valid/complete.json
           )
 
           for file in "${required_files[@]}"; do
@@ -213,7 +229,7 @@ jobs:
           "$binary" status
           exit_code=$?
           set -e
-          test "$exit_code" -eq 5
+          test "$exit_code" -eq 3
 
   soku-quality:
     name: soku quality and race checks

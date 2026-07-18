@@ -186,9 +186,12 @@ metadata later changes.
 
 ## Portable Manifest Contract
 
-The manifest path is fixed at `.soku/manifest.json`. Issue #19 owns the JSON
-wire representation, field names, and schema publication, but it must preserve
-the following meanings:
+The manifest path is fixed at `.soku/manifest.json`. The published JSON Schema
+Draft 2020-12 wire contract is
+[`soku/schema/manifest-v1.schema.json`](../../soku/schema/manifest-v1.schema.json),
+with representative fixtures under
+[`soku/testdata/manifest-v1/`](../../soku/testdata/manifest-v1/). Manifest v1
+preserves the following meanings:
 
 - manifest schema version
 - `soku` version that completed the last successful apply
@@ -209,8 +212,7 @@ At minimum, integration state must preserve these meanings:
 | `drifted` | Current managed content or provider data differs from the recorded baseline or desired state. |
 | `incompatible` | The CLI, schema, API, source, or request cannot safely participate in mutation. |
 
-Issue #19 may choose the wire encoding, but it must not merge or remove these
-four semantic states.
+Manifest v1 must not merge or remove these four semantic states.
 
 The manifest must never contain:
 
@@ -221,6 +223,44 @@ The manifest must never contain:
 
 Only portable selections, immutable source identity, and canonical hashes are
 stored for sensitive or environment-dependent inputs.
+
+Files use the classes `core-managed`, `provider-managed`, `mergeable`, and
+`project-owned`, and the lifecycle states `current`, `obsolete`, and
+`unmanaged-expected`. Managed files require a `text` or `binary` content mode
+and a baseline SHA-256. Project-owned files prohibit baseline fields. Text
+baselines validate UTF-8 and normalize CRLF and bare CR to LF; they do not
+change whitespace, a BOM, or the final newline. Binary baselines hash bytes
+without normalization.
+
+Manifest serialization sorts stacks, file paths, integration IDs, and managed
+file references. It rejects absolute or traversing paths, backslash bypasses,
+`.git` and `.soku` paths, Windows-incompatible components, case-insensitive
+collisions, ambiguous owners, inconsistent integration references, secrets,
+credential-bearing URLs, raw configuration, and environment-specific paths.
+
+### Status and Recovery
+
+`status` reads the last recorded snapshot and the current filesystem only. It
+does not fetch a source or desired state, and it never creates, removes,
+repairs, or replaces a file. Human output reports a summary and actionable
+details. JSON output uses the existing single envelope and places ordered
+manifest, boilerplate, count, path-sorted file, ID-sorted integration, and
+guidance fields in `data`. A completed drift result (`3`) or compatibility
+result (`5`) uses `ok: true`; validation or internal failure uses `ok: false`.
+
+Writers stage mode-`0600` deterministic JSON in
+`.soku/manifest.json.pending`, synchronize it, atomically replace the manifest
+on the same filesystem, and synchronize the state directory where the platform
+supports it. Windows replacement uses replace-existing and write-through
+semantics. `status` reports a valid pending file as `recovery-required` with
+exit `3` and leaves it untouched.
+
+Explicit recovery applies only these unambiguous rules:
+
+1. If a valid manifest and valid pending file both exist, retain the manifest
+   and discard the pending file.
+2. If only a valid pending file exists, promote it to the manifest.
+3. Preserve malformed or ambiguous state and stop with exit `2`.
 
 ## Ownership and Drift Rules
 

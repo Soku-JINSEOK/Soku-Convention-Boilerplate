@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "soku_version": "v0.2.0",
+  "boilerplate": {
+    "source": "https://github.com/example/boilerplate",
+    "release": "v1.0.0",
+    "resolved_commit": "0123456789abcdef0123456789abcdef01234567"
+  },
+  "selection": {
+    "profile": "team",
+    "stacks": [],
+    "configuration_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "configuration": {
+      "password": "must-not-be-stored"
+    }
+  },
+  "files": [],
+  "integrations": []
+}
