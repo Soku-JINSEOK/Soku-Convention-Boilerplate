@@ -11,6 +11,7 @@ import (
 	"io"
 	"net/url"
 	"path"
+	"regexp"
 	"sort"
 	"strings"
 	"unicode/utf8"
@@ -24,6 +25,8 @@ const (
 	// PendingPath is the repository-relative interrupted-write marker.
 	PendingPath = ".soku/manifest.json.pending"
 )
+
+var integrationIDPattern = regexp.MustCompile(`^[A-Za-z0-9._-]+$`)
 
 // Document is the complete manifest-v1 wire record.
 type Document struct {
@@ -163,7 +166,7 @@ func Validate(document Document) error {
 	integrations := make(map[string]Integration, len(document.Integrations))
 	previousID := ""
 	for _, integration := range document.Integrations {
-		if integration.ID == "" || strings.ContainsAny(integration.ID, "\\/ ") {
+		if !integrationIDPattern.MatchString(integration.ID) {
 			return fmt.Errorf("integration id %q is not portable", integration.ID)
 		}
 		if integration.ID <= previousID {
@@ -322,21 +325,15 @@ func HashContent(content []byte, mode string) (string, error) {
 }
 
 func validatePortableSource(field, value string) error {
-	if value == "" || strings.Contains(value, "\\") {
+	if value == "" || strings.ContainsAny(value, `\@?#`) {
 		return fmt.Errorf("%s is not a portable source", field)
 	}
-	parsed, err := url.Parse(value)
-	if err != nil || !parsed.IsAbs() || parsed.Scheme == "file" || parsed.Host == "" {
-		return fmt.Errorf("%s must be an absolute non-file URL", field)
+	parsed, err := url.ParseRequestURI(value)
+	if err != nil || parsed.Scheme != "https" || parsed.Host == "" {
+		return fmt.Errorf("%s must be an absolute HTTPS URL", field)
 	}
 	if parsed.User != nil {
 		return fmt.Errorf("%s must not contain credentials", field)
-	}
-	for key := range parsed.Query() {
-		lower := strings.ToLower(key)
-		if strings.Contains(lower, "token") || strings.Contains(lower, "password") || strings.Contains(lower, "secret") || strings.Contains(lower, "key") {
-			return fmt.Errorf("%s must not contain credential query fields", field)
-		}
 	}
 	return nil
 }

@@ -152,7 +152,12 @@ func TestValidationRejectsUnsafePortableState(t *testing.T) {
 	}{
 		{name: "credential source", mutate: func(document *Document) { document.Boilerplate.Source = "https://token@example.com/repo" }},
 		{name: "credential query", mutate: func(document *Document) { document.Boilerplate.Source = "https://example.com/repo?token=value" }},
+		{name: "non-https source", mutate: func(document *Document) { document.Boilerplate.Source = "http://example.com/repo" }},
+		{name: "fragment source", mutate: func(document *Document) { document.Boilerplate.Source = "https://example.com/repo#main" }},
 		{name: "absolute source", mutate: func(document *Document) { document.Boilerplate.Source = "file:///tmp/repo" }},
+		{name: "invalid integration id", mutate: func(document *Document) {
+			document.Integrations = []Integration{validIntegration("provider:id", nil)}
+		}},
 		{name: "case collision", mutate: func(document *Document) {
 			document.Files = []File{managedFile("A.txt", "core", "core-managed"), managedFile("a.txt", "core", "core-managed")}
 		}},
