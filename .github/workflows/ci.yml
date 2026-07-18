@@ -134,6 +134,7 @@ jobs:
             soku/internal/cli/metadata_test.go
             soku/internal/cli/output.go
             soku/internal/cli/runtime.go
+            soku/internal/cli/runtime_test.go
             soku/internal/packagezip/main.go
             soku/install_test.go
             soku/scripts/package.sh

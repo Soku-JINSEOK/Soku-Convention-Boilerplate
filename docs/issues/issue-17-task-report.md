@@ -85,6 +85,8 @@ Release is part of this work.
   passed.
 - Native Linux smoke — human help, development version, and JSON parse-error
   stream separation passed.
+- TTY safety regression — a null device and pipe are rejected as terminals;
+  `soku init </dev/null` now stops with validation exit code `2`.
 - `markdownlint-cli2@0.22.1` and `yaml-lint@1.7.0` — passed.
 - Contribution-title regression tests — passed.
 - `bash -n scripts/*.sh soku/scripts/*.sh` and `git diff --check` — passed.
@@ -185,6 +187,8 @@ CLI tag와 GitHub Release는 이 작업 범위에 포함하지 않습니다.
   통과
 - Native Linux smoke — human help, 개발 version, JSON parse error의 stream 분리
   통과
+- TTY safety regression — null device와 pipe를 terminal로 인식하지 않으며
+  `soku init </dev/null`은 validation exit code `2`로 중단
 - `markdownlint-cli2@0.22.1`, `yaml-lint@1.7.0` — 통과
 - contribution-title regression test — 통과
 - `bash -n scripts/*.sh soku/scripts/*.sh`, `git diff --check` — 통과

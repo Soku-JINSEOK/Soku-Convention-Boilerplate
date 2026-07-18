@@ -4,6 +4,8 @@ import (
 	"io"
 	"io/fs"
 	"os"
+
+	"golang.org/x/term"
 )
 
 // Runtime isolates environment observations so command behavior is testable.
@@ -29,6 +31,5 @@ func (r osRuntime) IsTerminal() bool {
 	if r.stdin == nil {
 		return false
 	}
-	info, err := r.stdin.Stat()
-	return err == nil && info.Mode()&os.ModeCharDevice != 0
+	return term.IsTerminal(int(r.stdin.Fd()))
 }
