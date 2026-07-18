@@ -6,6 +6,13 @@
 
 This document defines how `Soku-Convention-Boilerplate` is versioned, released, and synchronized across downstream repositories.
 
+This document governs release tags and the existing manual sync scripts. The
+automated `soku` lifecycle is governed by
+[`SOKU_LIFECYCLE.md`](./SOKU_LIFECYCLE.md), which additionally requires an
+immutable source version, its resolved commit, and explicit compatibility and
+migration checks. The scripts described here remain supported; they do not
+implement or weaken that lifecycle contract.
+
 ## 📍 Source Of Truth
 
 - This repository is the canonical source for the convention baseline.
