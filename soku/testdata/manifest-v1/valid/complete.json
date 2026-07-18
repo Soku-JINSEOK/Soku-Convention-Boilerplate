@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "soku_version": "v0.2.0",
+  "boilerplate": {
+    "source": "https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate",
+    "release": "v1.4.0",
+    "resolved_commit": "0123456789abcdef0123456789abcdef01234567"
+  },
+  "selection": {
+    "profile": "team",
+    "stacks": [
+      "go",
+      "postgresql"
+    ],
+    "configuration_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  "files": [
+    {
+      "path": ".editorconfig",
+      "owner": "core",
+      "class": "core-managed",
+      "content_mode": "text",
+      "baseline_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "lifecycle_state": "current"
+    },
+    {
+      "path": ".github/workflows/provider-ci.yml",
+      "owner": "ci-provider",
+      "class": "provider-managed",
+      "content_mode": "text",
+      "baseline_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "lifecycle_state": "current"
+    },
+    {
+      "path": "assets/logo.png",
+      "owner": "core",
+      "class": "mergeable",
+      "content_mode": "binary",
+      "baseline_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "lifecycle_state": "obsolete"
+    },
+    {
+      "path": "src/main.go",
+      "owner": "project",
+      "class": "project-owned",
+      "lifecycle_state": "unmanaged-expected"
+    }
+  ],
+  "integrations": [
+    {
+      "id": "ci-provider",
+      "source": "https://github.com/example/ci-provider",
+      "ref": "89abcdef0123456789abcdef0123456789abcdef",
+      "provider_api_version": "1",
+      "provider_schema_version": "1",
+      "configuration_hash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "lifecycle_state": "connected",
+      "managed_files": [
+        ".github/workflows/provider-ci.yml"
+      ]
+    }
+  ]
+}

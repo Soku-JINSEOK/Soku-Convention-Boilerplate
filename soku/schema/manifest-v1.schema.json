@@ -1,0 +1,145 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/soku/schema/manifest-v1.schema.json",
+  "title": "Soku portable manifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "soku_version",
+    "boilerplate",
+    "selection",
+    "files",
+    "integrations"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "soku_version": { "type": "string", "minLength": 1 },
+    "boilerplate": { "$ref": "#/$defs/boilerplate" },
+    "selection": { "$ref": "#/$defs/selection" },
+    "files": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/file" }
+    },
+    "integrations": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/integration" }
+    }
+  },
+  "$defs": {
+    "sha1": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "source": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^https://[^@?#]+(?:/[^@?#]*)?$"
+    },
+    "path": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[^/\\\\][^\\\\]*$",
+      "allOf": [
+        { "not": { "pattern": "(^|/)\\.\\.(/|$)" } },
+        { "not": { "pattern": "(^|/)\\.(git|soku)(/|$)" } }
+      ]
+    },
+    "boilerplate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "release", "resolved_commit"],
+      "properties": {
+        "source": { "$ref": "#/$defs/source" },
+        "release": { "type": "string", "minLength": 1 },
+        "resolved_commit": { "$ref": "#/$defs/sha1" }
+      }
+    },
+    "selection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["profile", "stacks", "configuration_hash"],
+      "properties": {
+        "profile": { "type": "string", "minLength": 1 },
+        "stacks": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "configuration_hash": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "file": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "owner", "class", "lifecycle_state"],
+      "properties": {
+        "path": { "$ref": "#/$defs/path" },
+        "owner": { "type": "string", "minLength": 1 },
+        "class": {
+          "enum": ["core-managed", "provider-managed", "mergeable", "project-owned"]
+        },
+        "content_mode": { "enum": ["text", "binary"] },
+        "baseline_sha256": { "$ref": "#/$defs/sha256" },
+        "lifecycle_state": {
+          "enum": ["current", "obsolete", "unmanaged-expected"]
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "class": { "const": "project-owned" } } },
+          "then": {
+            "properties": {
+              "owner": { "const": "project" },
+              "lifecycle_state": { "const": "unmanaged-expected" }
+            },
+            "not": {
+              "anyOf": [
+                { "required": ["content_mode"] },
+                { "required": ["baseline_sha256"] }
+              ]
+            }
+          },
+          "else": {
+            "required": ["content_mode", "baseline_sha256"],
+            "properties": {
+              "lifecycle_state": { "enum": ["current", "obsolete"] }
+            }
+          }
+        }
+      ]
+    },
+    "integration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "source",
+        "ref",
+        "provider_api_version",
+        "provider_schema_version",
+        "configuration_hash",
+        "lifecycle_state",
+        "managed_files"
+      ],
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "pattern": "^[A-Za-z0-9._-]+$" },
+        "source": { "$ref": "#/$defs/source" },
+        "ref": { "$ref": "#/$defs/sha1" },
+        "provider_api_version": { "type": "string", "minLength": 1 },
+        "provider_schema_version": { "type": "string", "minLength": 1 },
+        "configuration_hash": { "$ref": "#/$defs/sha256" },
+        "lifecycle_state": { "enum": ["pending", "connected", "drifted", "incompatible"] },
+        "managed_files": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/path" },
+          "uniqueItems": true
+        }
+      }
+    }
+  }
+}

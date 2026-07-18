@@ -1,10 +1,45 @@
 # `soku` CLI
 
-`soku` is the cross-platform command shell for the lifecycle contract in
+`soku` is the cross-platform command for the lifecycle contract in
 [`SOKU_LIFECYCLE.md`](../docs/standards/SOKU_LIFECYCLE.md). This first release
-provides stable parsing, output, safety validation, and packaging boundaries.
-The lifecycle handlers intentionally report `feature.unavailable` until their
-own roadmap issues implement managed state.
+provides stable parsing, output, safety validation, packaging boundaries, the
+portable manifest-v1 record, and read-only `soku status` diagnostics. `init`,
+`diff`, and `upgrade` intentionally continue to report `feature.unavailable`
+until their roadmap issues implement planning and mutation.
+
+## Manifest and Status
+
+The durable record is `.soku/manifest.json`. Its JSON Schema Draft 2020-12
+contract is [`schema/manifest-v1.schema.json`](./schema/manifest-v1.schema.json),
+with representative [valid](./testdata/manifest-v1/valid/complete.json) and
+[invalid](./testdata/manifest-v1/invalid/) fixtures. The record contains only
+portable selections, immutable source identities, ownership metadata, and
+canonical hashes. Raw configuration, secrets, credential-bearing URLs, and
+machine-specific absolute paths are rejected.
+
+Run `soku status` from the repository root. Human output includes a summary and
+actionable diagnostics; `--quiet` suppresses that normal output, and `--json`
+always emits exactly one ordered `{ok, command, error, data}` envelope. Status
+never fetches, repairs, removes, or changes repository content.
+
+| Exit | `status` meaning |
+| --- | --- |
+| `0` | The validated snapshot and current managed files are clean. |
+| `1` | An unexpected handler or store failure occurred. |
+| `2` | Manifest, path, hash, or readable-state validation failed. |
+| `3` | State is uninitialized, recovery-required, pending, or drifted. |
+| `5` | The manifest or recorded provider state is incompatible. |
+
+Completed diagnostic results with exit `3` or `5` use `ok: true` in JSON.
+Validation and internal failures use `ok: false`.
+
+Manifest writes stage deterministic mode-`0600` JSON at
+`.soku/manifest.json.pending`, synchronize it, and atomically replace the
+durable manifest. If `status` reports `recovery-required`, preserve both files.
+An explicit `Store.Recover` or a future mutation entrypoint may discard a valid
+pending file beside a valid manifest, or promote a valid pending file when the
+manifest is absent. Malformed or ambiguous evidence is preserved and recovery
+stops with exit `2`.
 
 ## Build and Test
 
@@ -17,6 +52,7 @@ go test ./...
 go build -o ./bin/soku .
 ./bin/soku --help
 ./bin/soku --version
+./bin/soku status
 ```
 
 Use a temporary `GOBIN` to test local installation without changing a user-wide

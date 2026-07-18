@@ -73,6 +73,10 @@ func runWith(args []string, stdout, stderr io.Writer, deps dependencies) int {
 	if err == nil {
 		return 0
 	}
+	var completed *resultExit
+	if errors.As(err, &completed) {
+		return int(completed.Code)
+	}
 
 	exitError := normalizeError(err)
 	out.failure(invokedCommand, exitError)
@@ -181,10 +185,17 @@ func newLifecycleCommand(
 				Yes:            yes,
 				Interactive:    interactive,
 			}
-			if err := invokeHandler(command.Context(), handler, request); err != nil {
+			result, err := invokeHandler(command.Context(), handler, request)
+			if err != nil {
 				return err
 			}
-			return out.success(name)
+			if err := out.result(name, result, opts.quiet); err != nil {
+				return err
+			}
+			if result.Code != ExitSuccess {
+				return &resultExit{Code: result.Code}
+			}
+			return nil
 		},
 	}
 	if mutation {
@@ -196,9 +207,10 @@ func newLifecycleCommand(
 	return command
 }
 
-func invokeHandler(ctx context.Context, handler Handler, request Request) (err error) {
+func invokeHandler(ctx context.Context, handler Handler, request Request) (result Result, err error) {
 	defer func() {
 		if recovered := recover(); recovered != nil {
+			result = Result{}
 			err = &ExitError{
 				Code:    ExitInternalError,
 				Key:     "internal.error",
@@ -207,25 +219,31 @@ func invokeHandler(ctx context.Context, handler Handler, request Request) (err e
 		}
 	}()
 	if handler == nil {
-		return &ExitError{
+		return Result{}, &ExitError{
 			Code:    ExitInternalError,
 			Key:     "internal.error",
 			Message: "internal command failure",
 		}
 	}
-	if err := handler.Handle(ctx, request); err != nil {
+	result, err = handler.Handle(ctx, request)
+	if err != nil {
 		var exitError *ExitError
 		if errors.As(err, &exitError) {
-			return err
+			return Result{}, err
 		}
-		return &ExitError{
+		return Result{}, &ExitError{
 			Code:    ExitInternalError,
 			Key:     "internal.error",
 			Message: "internal command failure",
 			Cause:   err,
 		}
 	}
-	return nil
+	if result.Code != ExitSuccess && result.Code != ExitChangesFound && result.Code != ExitCompatibilityFailure {
+		return Result{}, &ExitError{
+			Code: ExitInternalError, Key: "internal.error", Message: "internal command failure",
+		}
+	}
+	return result, nil
 }
 
 func validateConfig(runtime Runtime, path string) error {

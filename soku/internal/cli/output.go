@@ -61,15 +61,20 @@ func (o *output) version(metadata BuildMetadata) error {
 	return err
 }
 
-func (o *output) success(command string) error {
-	if !o.json {
+func (o *output) result(command string, result Result, quiet bool) error {
+	if o.json {
+		data := result.Data
+		if data == nil {
+			data = struct{}{}
+		}
+		return o.writeEnvelope(envelope{OK: true, Command: command, Data: data})
+	}
+	if quiet || result.Human == "" {
 		return nil
 	}
-	return o.writeEnvelope(envelope{
-		OK:      true,
-		Command: command,
-		Data:    struct{}{},
-	})
+	_, err := fmt.Fprint(o.stdout, result.Human)
+	o.wrote = true
+	return err
 }
 
 func (o *output) failure(command string, exitError *ExitError) {
