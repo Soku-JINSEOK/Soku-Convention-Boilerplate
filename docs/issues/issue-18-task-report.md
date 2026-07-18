@@ -212,7 +212,9 @@ downstream release E2E는 후속 Issue 범위로 유지합니다.
 - JS/TS, Python, Go, Java/Spring template lint/typecheck/test/build — 통과
 - catalog Draft 2020-12 schema와 hermetic source/archive/transaction test — 통과
 - 전체 Markdown lint, GitHub/template YAML lint, `git diff --check` — 통과
-- `scripts/verify-sync-parity.sh` — 로컬 `pwsh` 부재로 미실행; Draft PR CI에서 확인 필요
+- `scripts/verify-sync-parity.sh` — 로컬 `pwsh` 부재; Draft PR #29 CI에서 통과
+- Draft PR #29 repository hygiene, Linux/macOS/Windows native, race/lint,
+  five-target package job — 통과 (Release job은 정책에 따라 skip)
 
 ## AI 지원
 
