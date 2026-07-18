@@ -67,8 +67,9 @@ five supported OS/architecture targets and exercise that path in CI.
 
 Complete on `agent/implement-soku-cli`. The approved task report was added
 before implementation files. The repository owner subsequently authorized
-final validation, commit, push, and Draft pull request publication. No CLI tag
-or GitHub Release is part of this work.
+final validation, commit, push, and Draft pull request publication. Draft PR #27
+contains the implementation, and its initial CI run passed. No CLI tag or GitHub
+Release is part of this work.
 
 ## Verification
 
@@ -93,8 +94,11 @@ or GitHub Release is part of this work.
   current and post-commit-simulated tracked trees produced identical bash and
   PowerShell output, no leaked artifacts, and no downstream `soku/` directory.
 - `go test -race ./...` could not run locally because this environment has
-  `CGO_ENABLED=0` and no C compiler. The Draft pull request's Ubuntu CI quality
-  job is the verification boundary for the same command with a C toolchain.
+  `CGO_ENABLED=0` and no C compiler.
+- Draft PR #27 CI — repository hygiene, sync parity, Linux/macOS/Windows native
+  test/vet/build/smoke, Ubuntu race/static analysis, and five-target packaging
+  all passed. The release job was correctly skipped for the non-tag pull
+  request.
 
 ## AI Assistance
 
@@ -165,8 +169,8 @@ package하고 CI에서 전체 경로를 검증합니다.
 
 `agent/implement-soku-cli`에서 완료했습니다. 구현 파일보다 먼저 승인된 task
 report를 추가했습니다. 저장소 소유자가 이후 최종 검증, commit, push, Draft PR
-게시를 승인했습니다. CLI tag와 GitHub Release는 이 작업 범위에 포함하지
-않습니다.
+게시를 승인했습니다. Draft PR #27에 구현을 게시했고 초기 CI가 통과했습니다.
+CLI tag와 GitHub Release는 이 작업 범위에 포함하지 않습니다.
 
 ## 검증
 
@@ -189,8 +193,10 @@ report를 추가했습니다. 저장소 소유자가 이후 최종 검증, commi
   현재 tree와 commit 이후를 모사한 tracked tree에서 bash·PowerShell 결과 일치,
   artifact 누출 없음, downstream `soku/` 없음 확인
 - `go test -race ./...`는 이 환경이 `CGO_ENABLED=0`이고 C compiler가 없어 로컬
-  실행할 수 없었습니다. Draft PR의 Ubuntu CI quality job이 C toolchain으로
-  같은 명령을 검증하는 경계입니다.
+  실행할 수 없었습니다.
+- Draft PR #27 CI — repository hygiene, sync parity, Linux/macOS/Windows native
+  test·vet·build·smoke, Ubuntu race·정적 분석, 5-target packaging 모두 통과.
+  Non-tag PR이므로 release job은 의도대로 skipped
 
 ## AI 지원
 
