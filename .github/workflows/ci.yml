@@ -45,6 +45,7 @@ jobs:
             docs/standards/GITHUB_STANDARDS.md
             docs/standards/CICD_STANDARDS.md
             docs/standards/RELEASE_AND_SYNC.md
+            docs/standards/SOKU_LIFECYCLE.md
             docs/policy/LICENSE_POLICY.md
             docs/policy/SECURITY_POLICY.md
             docs/policy/CLOUD_POLICY.md

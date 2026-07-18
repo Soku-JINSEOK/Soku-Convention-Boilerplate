@@ -128,6 +128,7 @@ This boilerplate is intended to serve as:
 - [PROJECT_STRUCTURE.md](./docs/standards/PROJECT_STRUCTURE.md): repository folder organization and structural rules
 - [GITHUB_STANDARDS.md](./docs/standards/GITHUB_STANDARDS.md): issue, PR, review, and template governance
 - [RELEASE_AND_SYNC.md](./docs/standards/RELEASE_AND_SYNC.md): release tagging and downstream sync model
+- [SOKU_LIFECYCLE.md](./docs/standards/SOKU_LIFECYCLE.md): normative CLI, manifest, ownership, provider, and transactional lifecycle contract for `soku`
 - [CICD_STANDARDS.md](./docs/standards/CICD_STANDARDS.md): continuous integration and delivery expectations
 
 ### 🛡️ `docs/policy/` — declared policy positions

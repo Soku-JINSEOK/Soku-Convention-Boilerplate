@@ -126,6 +126,7 @@
 - [PROJECT_STRUCTURE.md](./docs/standards/PROJECT_STRUCTURE.md): 디렉토리 및 모듈 레이아웃 규칙
 - [GITHUB_STANDARDS.md](./docs/standards/GITHUB_STANDARDS.md): 이슈, PR, 리뷰, 레이블 및 템플릿 운영 기준
 - [RELEASE_AND_SYNC.md](./docs/standards/RELEASE_AND_SYNC.md): 버전 릴리즈 태그 배포 및 다운스트림 동기화 절차
+- [SOKU_LIFECYCLE.md](./docs/standards/SOKU_LIFECYCLE.md): `soku` CLI, 매니페스트, 소유권, 공급자 및 트랜잭션 라이프사이클 규범
 - [CICD_STANDARDS.md](./docs/standards/CICD_STANDARDS.md): 지속적 통합 및 배포(CI/CD) 수용 규칙
 
 ### 🛡️ `docs/policy/` — 영역별 기본 정책 선언서

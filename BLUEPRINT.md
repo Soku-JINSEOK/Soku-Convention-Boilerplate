@@ -43,6 +43,7 @@ These documents define expected behavior:
 - [GITHUB_STANDARDS.md](./docs/standards/GITHUB_STANDARDS.md)
 - [CICD_STANDARDS.md](./docs/standards/CICD_STANDARDS.md)
 - [RELEASE_AND_SYNC.md](./docs/standards/RELEASE_AND_SYNC.md)
+- [SOKU_LIFECYCLE.md](./docs/standards/SOKU_LIFECYCLE.md)
 - [LICENSE_POLICY.md](./docs/policy/LICENSE_POLICY.md)
 - [SECURITY_POLICY.md](./docs/policy/SECURITY_POLICY.md)
 - [CLOUD_POLICY.md](./docs/policy/CLOUD_POLICY.md)
@@ -115,7 +116,7 @@ The boilerplate assumes a structure that is easy to navigate without hidden conv
 
 Deeper reference material lives under `docs/`, grouped by category:
 
-- `docs/standards/`: [CODE_STYLE.md](./docs/standards/CODE_STYLE.md), [PROJECT_STRUCTURE.md](./docs/standards/PROJECT_STRUCTURE.md), [GITHUB_STANDARDS.md](./docs/standards/GITHUB_STANDARDS.md), [CICD_STANDARDS.md](./docs/standards/CICD_STANDARDS.md), [RELEASE_AND_SYNC.md](./docs/standards/RELEASE_AND_SYNC.md)
+- `docs/standards/`: [CODE_STYLE.md](./docs/standards/CODE_STYLE.md), [PROJECT_STRUCTURE.md](./docs/standards/PROJECT_STRUCTURE.md), [GITHUB_STANDARDS.md](./docs/standards/GITHUB_STANDARDS.md), [CICD_STANDARDS.md](./docs/standards/CICD_STANDARDS.md), [RELEASE_AND_SYNC.md](./docs/standards/RELEASE_AND_SYNC.md), [SOKU_LIFECYCLE.md](./docs/standards/SOKU_LIFECYCLE.md)
 - `docs/policy/`: [LICENSE_POLICY.md](./docs/policy/LICENSE_POLICY.md), [SECURITY_POLICY.md](./docs/policy/SECURITY_POLICY.md), [CLOUD_POLICY.md](./docs/policy/CLOUD_POLICY.md)
 - `docs/guides/`: [STACK_EXAMPLES.md](./docs/guides/STACK_EXAMPLES.md), [STACK_CONFIGS.md](./docs/guides/STACK_CONFIGS.md), [README_GUIDE.md](./docs/guides/README_GUIDE.md), [INIT_GUIDE.md](./docs/guides/INIT_GUIDE.md), [APPLICABILITY.md](./docs/guides/APPLICABILITY.md), [LANGUAGE_SELECTION.md](./docs/guides/LANGUAGE_SELECTION.md)
 - `docs/issues/`: [TASK_REPORT_TEMPLATE.md](./docs/issues/TASK_REPORT_TEMPLATE.md), plus one `issue-<n>-task-report.md` per task that adopts the template

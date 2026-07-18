@@ -7,6 +7,12 @@ This document is written for AI coding agents (not humans) that are applying
 detect the target repository's stack and which setup steps to execute, in
 order. Follow it as a procedure, not as background reading.
 
+This is the legacy manual bootstrap workflow. The future `soku init` command
+will replace its copy-oriented steps with the ownership-aware, reviewable plan
+defined by [`SOKU_LIFECYCLE.md`](../standards/SOKU_LIFECYCLE.md). Until that
+command is implemented, this guide remains the operational procedure; it does
+not define the automated lifecycle contract.
+
 ## 1️⃣ Detect the Stack
 
 Inspect the target repository root for these marker files. A repository may
