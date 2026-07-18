@@ -36,6 +36,12 @@ if ! diff -rq "$sh_target" "$ps_target"; then
   exit 1
 fi
 
+echo "Checking that the independently released soku source is excluded..."
+if [[ -e "$sh_target/soku" || -e "$ps_target/soku" ]]; then
+  echo "Unexpected soku/ directory in manual sync output." >&2
+  exit 1
+fi
+
 echo "Checking for leaked build artifacts..."
 leaked=0
 for pattern in node_modules dist __pycache__ .venv coverage .pytest_cache .mypy_cache .ruff_cache; do

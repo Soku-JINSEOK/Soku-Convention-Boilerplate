@@ -6,6 +6,8 @@ on:
     branches:
       - main
       - master
+    tags:
+      - "soku/v*"
 
 jobs:
   # NOTE: This job checks that Soku-Convention-Boilerplate's OWN files exist.
@@ -56,6 +58,7 @@ jobs:
             docs/guides/APPLICABILITY.md
             docs/guides/LANGUAGE_SELECTION.md
             docs/issues/TASK_REPORT_TEMPLATE.md
+            docs/issues/issue-17-task-report.md
             LICENSE
             SECURITY.md
             .editorconfig
@@ -118,6 +121,23 @@ jobs:
             scripts/setup-git-signing.sh
             scripts/create-release-tag.sh
             scripts/verify-sync-parity.sh
+            soku/README.md
+            soku/THIRD_PARTY_NOTICES.md
+            soku/go.mod
+            soku/go.sum
+            soku/main.go
+            soku/internal/cli/command.go
+            soku/internal/cli/command_test.go
+            soku/internal/cli/errors.go
+            soku/internal/cli/handler.go
+            soku/internal/cli/metadata.go
+            soku/internal/cli/metadata_test.go
+            soku/internal/cli/output.go
+            soku/internal/cli/runtime.go
+            soku/internal/packagezip/main.go
+            soku/install_test.go
+            soku/scripts/package.sh
+            soku/scripts/package_test.sh
           )
 
           for file in "${required_files[@]}"; do
@@ -143,3 +163,149 @@ jobs:
 
       - name: Verify sync-boilerplate.sh and sync-boilerplate.ps1 produce identical output
         run: scripts/verify-sync-parity.sh
+
+  soku-cross-platform:
+    name: soku (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+          - windows-latest
+
+    defaults:
+      run:
+        working-directory: soku
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Setup Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: "1.26.x"
+          cache-dependency-path: soku/go.sum
+
+      - name: Verify modules
+        run: go mod verify
+
+      - name: Run tests
+        run: go test ./...
+
+      - name: Run vet
+        run: go vet ./...
+
+      - name: Build and smoke test native binary
+        shell: bash
+        run: |
+          binary="$RUNNER_TEMP/soku"
+          if [[ "${{ runner.os }}" == "Windows" ]]; then
+            binary="$RUNNER_TEMP/soku.exe"
+          fi
+          go build -trimpath -o "$binary" .
+          "$binary" --help
+          "$binary" --version
+          set +e
+          "$binary" status
+          exit_code=$?
+          set -e
+          test "$exit_code" -eq 5
+
+  soku-quality:
+    name: soku quality and race checks
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: soku
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Setup Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: "1.26.x"
+          cache-dependency-path: soku/go.sum
+
+      - name: Run race tests
+        run: go test -race ./...
+
+      - name: Check gofmt
+        shell: bash
+        run: test -z "$(gofmt -l .)"
+
+      - name: Check goimports
+        shell: bash
+        run: |
+          go install golang.org/x/tools/cmd/goimports@v0.48.0
+          test -z "$("$(go env GOPATH)/bin/goimports" -l .)"
+
+      - name: Run golangci-lint
+        shell: bash
+        run: |
+          go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.12.2
+          "$(go env GOPATH)/bin/golangci-lint" run ./...
+
+  soku-package:
+    name: soku five-target package snapshot
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Setup Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: "1.26.x"
+          cache-dependency-path: soku/go.sum
+
+      - name: Verify archives, checksums, and packaged binary
+        run: soku/scripts/package_test.sh
+
+  soku-release:
+    name: Publish soku GitHub Release
+    if: >-
+      startsWith(github.ref, 'refs/tags/soku/v') &&
+      github.repository == 'Soku-JINSEOK/Soku-Convention-Boilerplate'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Setup Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: "1.26.x"
+          cache-dependency-path: soku/go.sum
+
+      - name: Package release assets
+        shell: bash
+        run: |
+          version="${GITHUB_REF_NAME#soku/}"
+          commit="$(git rev-parse "$GITHUB_SHA")"
+          commit_epoch="$(git show -s --format=%ct "$GITHUB_SHA")"
+          built_at="$(date -u -d "@$commit_epoch" +%Y-%m-%dT%H:%M:%SZ)"
+          soku/scripts/package.sh \
+            --version "$version" \
+            --commit "$commit" \
+            --built-at "$built_at" \
+            --output-dir soku/dist
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          gh release create "$GITHUB_REF_NAME" soku/dist/*
+          --verify-tag --notes-from-tag --latest=false

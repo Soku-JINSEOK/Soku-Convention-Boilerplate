@@ -130,6 +130,7 @@ Deeper reference material lives under `docs/`, grouped by category:
 - `config/` for shared configuration
 - `templates/` for copyable starter configuration sets
 - `infra/` for deployment and environment assets
+- `soku/` for the independently versioned convention lifecycle CLI
 - `.github/` for collaboration and automation files
 
 Projects may adjust the exact shape to match their ecosystem, but they should keep the same intent and readability.
@@ -316,12 +317,17 @@ The repository adds ownership, release discipline, stronger security controls, a
 
 ## 🔄 Release And Sync Model
 
-The boilerplate is distributed as a versioned convention package.
+The repository has two independent release axes: the boilerplate convention
+package and the `soku` CLI.
 
 - The source of truth is this repository.
-- Releases use semantic-style tags in the form `vMAJOR.MINOR.PATCH`.
+- Boilerplate releases use semantic-style tags in the form
+  `vMAJOR.MINOR.PATCH`.
+- CLI releases use signed tags in the form `soku/vMAJOR.MINOR.PATCH`; they do
+  not imply a boilerplate release with the same version.
 - Downstream repositories should pin to a release tag before importing updates.
 - Convention-owned files are synchronized with `scripts/sync-boilerplate.sh` (Linux/macOS) or `scripts/sync-boilerplate.ps1` (Windows).
+- The manual sync scripts do not distribute the `soku/` source tree.
 - [`docs/standards/RELEASE_AND_SYNC.md`](./docs/standards/RELEASE_AND_SYNC.md) defines the operational release and sync rules in detail.
 
 ## 🚫 Non-Goals
