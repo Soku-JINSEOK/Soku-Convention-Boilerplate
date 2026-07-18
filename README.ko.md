@@ -119,6 +119,7 @@
 - [AGENTS.md](./AGENTS.md): AI 에이전트 동작 안내서 (영어 전용)
 - [LICENSE](./LICENSE): 보일러플레이트 기본 라이선스 문서 (MIT)
 - [SECURITY.md](./SECURITY.md): 보안 결함 제보 창구
+- [`soku` CLI](./soku/README.md): 빌드, 설치, 검증, 패키징 및 릴리즈 운영 안내
 
 ### 📏 `docs/standards/` — 구조 및 프로세스 규범 지침서
 

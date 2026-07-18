@@ -19,9 +19,22 @@ implement or weaken that lifecycle contract.
 - Downstream repositories should treat convention-owned files as imported policy, not local invention.
 - If a downstream project overrides a rule, the override should be documented in that project.
 
-## 🔢 Versioning
+## 🔢 Independent Release Axes
 
-Releases should use semantic-style tags in the form `vMAJOR.MINOR.PATCH`.
+This repository publishes two independent version lines:
+
+| Artifact | Tag form | Meaning |
+| --- | --- | --- |
+| Boilerplate convention package | `vMAJOR.MINOR.PATCH` | A versioned convention baseline for downstream synchronization and lifecycle source selection. |
+| `soku` CLI | `soku/vMAJOR.MINOR.PATCH` | A signed source tag used to build the cross-platform CLI archives and GitHub Release. |
+
+A tag on one axis never creates, advances, or implies a release on the other
+axis. The versions may differ because CLI compatibility and boilerplate content
+evolve independently. The CLI release procedure is documented in
+[`soku/README.md`](../../soku/README.md).
+
+Boilerplate releases use semantic-style tags in the form
+`vMAJOR.MINOR.PATCH`.
 
 - `PATCH`: documentation clarifications, typo fixes, CI hygiene, and non-behavioral template cleanup.
 - `MINOR`: new non-breaking conventions, new templates, additional docs, or tooling that does not invalidate the existing contract.
@@ -38,6 +51,9 @@ Each release should include a short summary of what downstream repositories need
   - `.github/`
   - `templates/`
   - shared editor and ignore settings
+- Do not copy the repository's `soku/` source directory through the manual sync
+  scripts. Install the CLI from its independently versioned source or release
+  archive instead.
 - Leave application code, product docs, and environment-specific secrets to the downstream repository.
 
 ## 🔁 Sync Workflow

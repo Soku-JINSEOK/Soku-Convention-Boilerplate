@@ -119,6 +119,7 @@
 - [AGENTS.md](./AGENTS.md): AIエージェント動作ガイド（英語専用）
 - [LICENSE](./LICENSE): ボイラープレート基本ライセンスドキュメント（MIT）
 - [SECURITY.md](./SECURITY.md): セキュリティ欠陥の報告窓口
+- [`soku` CLI](./soku/README.md): ビルド、インストール、検証、パッケージ、およびリリース運用
 
 ### 📏 `docs/standards/` — 構造とプロセスの規範ドキュメント
 

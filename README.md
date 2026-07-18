@@ -121,6 +121,7 @@ This boilerplate is intended to serve as:
 - [AGENTS.md](./AGENTS.md): English-only operating guidance for AI agents
 - [LICENSE](./LICENSE): default boilerplate license
 - [SECURITY.md](./SECURITY.md): security reporting entrypoint
+- [`soku` CLI](./soku/README.md): build, install, verification, packaging, and release operation
 
 ### 📏 `docs/standards/` — normative structural and process rules
 
