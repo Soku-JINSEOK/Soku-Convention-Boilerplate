@@ -23,6 +23,7 @@ type ExitError struct {
 	Key     string
 	Message string
 	Cause   error
+	Data    any
 }
 
 type resultExit struct {

@@ -149,7 +149,6 @@ func TestDefaultLifecycleHandlersAreUnavailable(t *testing.T) {
 		command string
 		args    []string
 	}{
-		{command: "init", args: []string{"init", "--dry-run"}},
 		{command: "diff", args: []string{"diff"}},
 		{command: "upgrade", args: []string{"upgrade", "--dry-run"}},
 	} {
@@ -162,6 +161,27 @@ func TestDefaultLifecycleHandlersAreUnavailable(t *testing.T) {
 				t.Fatalf("stdout=%q stderr=%q", result.stdout, result.stderr)
 			}
 		})
+	}
+}
+
+func TestInitPublicOptionsArePassedToHandler(t *testing.T) {
+	var got Request
+	handler := HandlerFunc(func(_ context.Context, request Request) error { got = request; return nil })
+	handlers := defaultHandlers()
+	handlers.Init = handler
+	result := execute([]string{"init", "--dry-run", "--boilerplate-source", "https://github.com/example/boilerplate", "--boilerplate-release", "v1.2.3", "--stack", "go", "--stack", "mysql", "--profile", "standard", "--project-name", "demo", "--module-path", "github.com/example/demo", "--java-group", "com.example", "--service-name", "demo-api", "--verify"}, testRuntime{}, handlers)
+	if result.code != 0 {
+		t.Fatalf("result = %#v", result)
+	}
+	if got.BoilerplateSource != "https://github.com/example/boilerplate" || got.BoilerplateRelease != "v1.2.3" || strings.Join(got.Stacks, ",") != "go,mysql" || !got.Verify || !got.SourceSet || !got.ReleaseSet || !got.StacksSet || !got.VerifySet {
+		t.Fatalf("request = %#v", got)
+	}
+}
+
+func TestJSONMutationRequiresYes(t *testing.T) {
+	result := execute([]string{"init", "--json"}, testRuntime{terminal: true}, successHandlers(HandlerFunc(func(context.Context, Request) error { return nil })))
+	if result.code != 2 || !strings.Contains(result.stdout, "--json mutation requires --yes") {
+		t.Fatalf("result = %#v", result)
 	}
 }
 

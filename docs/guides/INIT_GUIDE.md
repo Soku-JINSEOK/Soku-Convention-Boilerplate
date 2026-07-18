@@ -7,11 +7,35 @@ This document is written for AI coding agents (not humans) that are applying
 detect the target repository's stack and which setup steps to execute, in
 order. Follow it as a procedure, not as background reading.
 
-This is the legacy manual bootstrap workflow. The future `soku init` command
-will replace its copy-oriented steps with the ownership-aware, reviewable plan
-defined by [`SOKU_LIFECYCLE.md`](../standards/SOKU_LIFECYCLE.md). Until that
-command is implemented, this guide remains the operational procedure; it does
-not define the automated lifecycle contract.
+This is the legacy manual bootstrap fallback. The preferred automated path is
+the ownership-aware, reviewable `soku init` workflow defined by
+[`SOKU_LIFECYCLE.md`](../standards/SOKU_LIFECYCLE.md). This guide remains useful
+when preparing a source release or when a downstream repository deliberately
+does not adopt managed lifecycle state; it does not override the automated
+lifecycle contract.
+
+## Preferred Automated Workflow
+
+Use an exact published boilerplate tag and preview the full plan first:
+
+```text
+soku init \
+  --boilerplate-source https://github.com/<owner>/<repo> \
+  --boilerplate-release vMAJOR.MINOR.PATCH \
+  --stack <stack-id> \
+  --dry-run
+```
+
+Repeat `--stack` for a multi-stack repository. If no stack is supplied, the
+command detects every catalog marker match and fails with an explicit
+`--stack` instruction when none match. Apply the already reviewed plan with
+`--yes`; use `--verify` when the complete generated staging tree should pass
+the built-in stack checks before any target write.
+
+First initialization does not adopt an existing selected output, even when its
+bytes happen to match the template. Only `.gitignore` and `.editorconfig` have
+bounded merge strategies. Resolve all other existing-path conflicts explicitly
+before applying or retain the manual workflow without creating a Soku manifest.
 
 ## 1️⃣ Detect the Stack
 

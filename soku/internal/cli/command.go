@@ -43,6 +43,8 @@ type dependencies struct {
 	runtime  Runtime
 	handlers Handlers
 	metadata BuildMetadata
+	stdin    io.Reader
+	stderr   io.Writer
 }
 
 // Run connects the process streams to the injectable command implementation.
@@ -52,6 +54,8 @@ func Run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 		runtime:  osRuntime{stdin: file},
 		handlers: defaultHandlers(),
 		metadata: resolveBuildMetadata(),
+		stdin:    stdin,
+		stderr:   stderr,
 	})
 }
 
@@ -148,6 +152,9 @@ func newLifecycleCommand(
 ) *cobra.Command {
 	var dryRun bool
 	var yes bool
+	var source, release, profile, projectName, modulePath, javaGroup, serviceName string
+	var stacks []string
+	var verify bool
 	var command *cobra.Command
 	command = &cobra.Command{
 		Use:   name,
@@ -174,6 +181,9 @@ func newLifecycleCommand(
 			if mutation && !dryRun && !yes && !interactive {
 				return invocationError("non-interactive mutation requires --dry-run or --yes")
 			}
+			if name == "init" && out.json && !dryRun && !yes {
+				return invocationError("--json mutation requires --yes; use --json --dry-run for a plan")
+			}
 
 			request := Request{
 				Command:        name,
@@ -184,6 +194,23 @@ func newLifecycleCommand(
 				DryRun:         dryRun,
 				Yes:            yes,
 				Interactive:    interactive,
+				Input:          deps.stdin,
+				PromptOutput:   deps.stderr,
+				SokuVersion:    deps.metadata.Version,
+			}
+			if name == "init" {
+				request.BoilerplateSource, request.BoilerplateRelease, request.Stacks, request.Profile = source, release, append([]string(nil), stacks...), profile
+				request.ProjectName, request.ModulePath, request.JavaGroup, request.ServiceName, request.Verify = projectName, modulePath, javaGroup, serviceName, verify
+				flags := command.Flags()
+				request.SourceSet = flags.Changed("boilerplate-source")
+				request.ReleaseSet = flags.Changed("boilerplate-release")
+				request.StacksSet = flags.Changed("stack")
+				request.ProfileSet = flags.Changed("profile")
+				request.ProjectNameSet = flags.Changed("project-name")
+				request.ModulePathSet = flags.Changed("module-path")
+				request.JavaGroupSet = flags.Changed("java-group")
+				request.ServiceNameSet = flags.Changed("service-name")
+				request.VerifySet = flags.Changed("verify")
 			}
 			result, err := invokeHandler(command.Context(), handler, request)
 			if err != nil {
@@ -201,6 +228,18 @@ func newLifecycleCommand(
 	if mutation {
 		command.Flags().BoolVar(&dryRun, "dry-run", false, "produce a complete plan without writing")
 		command.Flags().BoolVar(&yes, "yes", false, "approve an already validated mutation plan")
+	}
+	if name == "init" {
+		flags := command.Flags()
+		flags.StringVar(&source, "boilerplate-source", "", "public GitHub HTTPS boilerplate repository")
+		flags.StringVar(&release, "boilerplate-release", "", "exact boilerplate vMAJOR.MINOR.PATCH release")
+		flags.StringArrayVar(&stacks, "stack", nil, "selected stack (repeatable; replaces detection)")
+		flags.StringVar(&profile, "profile", "", "initialization profile (standard)")
+		flags.StringVar(&projectName, "project-name", "", "project/package name")
+		flags.StringVar(&modulePath, "module-path", "", "Go module path")
+		flags.StringVar(&javaGroup, "java-group", "", "Java group/package prefix")
+		flags.StringVar(&serviceName, "service-name", "", "service name")
+		flags.BoolVar(&verify, "verify", false, "verify the complete staging tree before applying")
 	}
 	command.InitDefaultHelpFlag()
 	command.Flags().Lookup("help").Shorthand = ""
@@ -294,7 +333,7 @@ func hasJSONFlag(args []string) bool {
 }
 
 func commandFromArgs(args []string) string {
-	valueFlags := map[string]bool{"--config": true}
+	valueFlags := map[string]bool{"--config": true, "--boilerplate-source": true, "--boilerplate-release": true, "--stack": true, "--profile": true, "--project-name": true, "--module-path": true, "--java-group": true, "--service-name": true}
 	for index := 0; index < len(args); index++ {
 		arg := args[index]
 		if valueFlags[arg] {
@@ -340,6 +379,18 @@ func helpFor(command *cobra.Command) string {
 		mutationFlags = "      --dry-run            produce a complete plan without writing\n" +
 			"      --yes                approve an already validated mutation plan\n"
 	}
+	initFlags := ""
+	if command.Name() == "init" {
+		initFlags = "      --boilerplate-source string   public GitHub HTTPS boilerplate repository\n" +
+			"      --boilerplate-release string exact boilerplate vMAJOR.MINOR.PATCH release\n" +
+			"      --stack string               selected stack (repeatable; replaces detection)\n" +
+			"      --profile string             initialization profile (standard)\n" +
+			"      --project-name string        project/package name\n" +
+			"      --module-path string         Go module path\n" +
+			"      --java-group string          Java group/package prefix\n" +
+			"      --service-name string        service name\n" +
+			"      --verify                     verify the staging tree before applying\n"
+	}
 	return fmt.Sprintf(`%s.
 
 Usage:
@@ -347,10 +398,10 @@ Usage:
 
 Flags:
       --config string       explicit portable YAML configuration file
-%s      --help                help for %s
+%s%s      --help                help for %s
       --json                emit one machine-readable JSON envelope
       --non-interactive     forbid interactive prompts
       --quiet               suppress non-essential human output
       --version             print version information
-`, lifecycleDescription(command.Name()), command.Name(), mutationFlags, command.Name())
+`, lifecycleDescription(command.Name()), command.Name(), mutationFlags, initFlags, command.Name())
 }

@@ -105,9 +105,12 @@ for target in "${targets[@]}"; do
   else
     archive_name="${archive_base}.tar.gz"
     (
-      cd "$stage_dir"
-      tar --sort=name --mtime='@315532800' --owner=0 --group=0 --numeric-owner \
-        -cf - LICENSE THIRD_PARTY_NOTICES.md "$binary_name" | gzip -n >"$output_dir/$archive_name"
+      cd "$module_dir"
+      go run ./internal/packagezip \
+        --format targz \
+        --source "$stage_dir" \
+        --output "$output_dir/$archive_name" \
+        --binary "$binary_name"
     )
   fi
   archives+=("$archive_name")
@@ -115,5 +118,9 @@ done
 
 (
   cd "$output_dir"
-  printf '%s\n' "${archives[@]}" | LC_ALL=C sort | xargs sha256sum >checksums.txt
+  if command -v sha256sum >/dev/null 2>&1; then
+    printf '%s\n' "${archives[@]}" | LC_ALL=C sort | xargs sha256sum >checksums.txt
+  else
+    printf '%s\n' "${archives[@]}" | LC_ALL=C sort | xargs shasum -a 256 >checksums.txt
+  fi
 )

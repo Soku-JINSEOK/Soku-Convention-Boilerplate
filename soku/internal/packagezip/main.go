@@ -1,8 +1,10 @@
-// Command packagezip creates the deterministic Windows release archive.
+// Command packagezip creates deterministic release archives.
 package main
 
 import (
+	"archive/tar"
 	"archive/zip"
+	"compress/gzip"
 	"flag"
 	"fmt"
 	"io"
@@ -17,6 +19,7 @@ func main() {
 	source := flag.String("source", "", "directory containing release files")
 	output := flag.String("output", "", "output zip archive")
 	binary := flag.String("binary", "", "binary filename")
+	format := flag.String("format", "zip", "archive format: zip or targz")
 	list := flag.String("list", "", "list an existing archive")
 	flag.Parse()
 	if *list != "" {
@@ -30,10 +33,74 @@ func main() {
 		fmt.Fprintln(os.Stderr, "source, output, and binary are required")
 		os.Exit(2)
 	}
-	if err := createArchive(*source, *output, *binary); err != nil {
-		fmt.Fprintf(os.Stderr, "create zip archive: %v\n", err)
+	var err error
+	switch *format {
+	case "zip":
+		err = createArchive(*source, *output, *binary)
+	case "targz":
+		err = createTarGzip(*source, *output, *binary)
+	default:
+		fmt.Fprintln(os.Stderr, "format must be zip or targz")
+		os.Exit(2)
+	}
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "create archive: %v\n", err)
 		os.Exit(1)
 	}
+}
+
+func createTarGzip(source, output, binary string) (returnError error) {
+	archive, err := os.Create(output)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err := archive.Close(); returnError == nil && err != nil {
+			returnError = err
+		}
+	}()
+	compressed := gzip.NewWriter(archive)
+	compressed.ModTime = time.Unix(0, 0).UTC()
+	compressed.OS = 255
+	defer func() {
+		if err := compressed.Close(); returnError == nil && err != nil {
+			returnError = err
+		}
+	}()
+	writer := tar.NewWriter(compressed)
+	defer func() {
+		if err := writer.Close(); returnError == nil && err != nil {
+			returnError = err
+		}
+	}()
+	for _, name := range []string{"LICENSE", "THIRD_PARTY_NOTICES.md", binary} {
+		path := filepath.Join(source, name)
+		info, err := os.Stat(path)
+		if err != nil {
+			return err
+		}
+		mode := int64(0o644)
+		if info.Mode()&0o111 != 0 {
+			mode = 0o755
+		}
+		header := &tar.Header{Name: name, Mode: mode, Size: info.Size(), ModTime: archiveTime, AccessTime: archiveTime, ChangeTime: archiveTime, Uid: 0, Gid: 0, Typeflag: tar.TypeReg}
+		if err := writer.WriteHeader(header); err != nil {
+			return err
+		}
+		file, err := os.Open(path)
+		if err != nil {
+			return err
+		}
+		_, copyErr := io.Copy(writer, file)
+		closeErr := file.Close()
+		if copyErr != nil {
+			return copyErr
+		}
+		if closeErr != nil {
+			return closeErr
+		}
+	}
+	return nil
 }
 
 func listArchive(path string) (returnError error) {

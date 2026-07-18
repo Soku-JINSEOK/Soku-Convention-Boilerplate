@@ -1,11 +1,58 @@
 # `soku` CLI
 
 `soku` is the cross-platform command for the lifecycle contract in
-[`SOKU_LIFECYCLE.md`](../docs/standards/SOKU_LIFECYCLE.md). This first release
-provides stable parsing, output, safety validation, packaging boundaries, the
-portable manifest-v1 record, and read-only `soku status` diagnostics. `init`,
-`diff`, and `upgrade` intentionally continue to report `feature.unavailable`
-until their roadmap issues implement planning and mutation.
+[`SOKU_LIFECYCLE.md`](../docs/standards/SOKU_LIFECYCLE.md). It provides stable
+parsing and output, transactional `init`, the portable manifest-v1 record, and
+read-only `status` diagnostics. `diff` and `upgrade` remain unavailable until
+their roadmap issues implement them.
+
+## Transactional Init
+
+`soku init` accepts only a public GitHub HTTPS source and an exact, non-prerelease
+`vMAJOR.MINOR.PATCH`. It resolves the tag through the GitHub API to a full commit,
+validates the bounded source archive and `catalog/core-v1.json`, renders the
+complete plan, and writes the manifest last. A real non-interactive or JSON
+mutation requires `--yes`; `--json --dry-run` emits one plan envelope and writes
+nothing.
+
+```bash
+soku init \
+  --boilerplate-source https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate \
+  --boilerplate-release v1.0.0 \
+  --stack javascript-typescript-node \
+  --project-name example-service \
+  --dry-run
+```
+
+The supported stack IDs are `javascript-typescript-node`, `python`, `go`,
+`java-spring`, `mysql`, `postgresql`, `gcp`, `aws`, and `azure`. Repeat
+`--stack` to select more than one; an explicit list replaces detection. The only
+v1 profile is `standard`. Go requires `--module-path`, Java requires
+`--java-group`, and Java/GCP service output accepts `--service-name`.
+
+The equivalent strict YAML file is a flat mapping. Unknown fields are rejected:
+
+```yaml
+schema_version: 1
+boilerplate_source: https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate
+boilerplate_release: v1.0.0
+stacks:
+  - go
+  - postgresql
+profile: standard
+project_name: example-service
+module_path: github.com/example/example-service
+java_group: io.example
+service_name: example-service
+verify: false
+```
+
+Only `.gitignore` and `.editorconfig` are mergeable on first initialization.
+Any other existing selected output is treated as project-owned and stops with
+exit `4` before a journal, backup, managed file, or manifest is written. Optional
+`--verify` runs only built-in argv sequences against an isolated staging tree.
+Apply failure with complete rollback exits `7`; incomplete rollback retains the
+mode-restricted journal and exits `8` with recovery data.
 
 ## Manifest and Status
 

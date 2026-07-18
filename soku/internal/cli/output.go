@@ -82,6 +82,7 @@ func (o *output) failure(command string, exitError *ExitError) {
 		return
 	}
 	if o.json {
+		data := exitError.Data
 		_ = o.writeEnvelope(envelope{
 			OK:      false,
 			Command: command,
@@ -89,7 +90,7 @@ func (o *output) failure(command string, exitError *ExitError) {
 				Code:    exitError.Key,
 				Message: exitError.Error(),
 			},
-			Data: nil,
+			Data: data,
 		})
 		return
 	}

@@ -191,19 +191,28 @@ atomic replace합니다. 실패 시 전체 rollback하며 rollback 성공은 exi
 
 ## 승인
 
-- **상태:** `Pending`
-- **승인자:** `None`
+- **상태:** `Approved`
+- **승인자:** `Soku-JINSEOK`
+- **승인 기록:** 2026-07-18 구현 지시에 따라 본 report의 확정된 결정을 승인함
 
 ## 구현 현황
 
-착수하지 않았습니다. 이 report가 구현 gate이며 저장소 소유자가 명시적으로 승인하기
-전에는 `soku init` production code, catalog, fixture, test 구현을 시작하지 않습니다.
+승인된 report를 기준으로 `soku init` production code, core-v1 catalog/schema,
+hermetic integration/security/failure test, 문서와 portable packaging smoke를
+완료했습니다. 실제 boilerplate tag/Release 생성, `diff`, `upgrade`, provider와
+downstream release E2E는 후속 Issue 범위로 유지합니다.
 
 ## 검증
 
-- `npx --yes markdownlint-cli2@0.22.1 --config .markdownlint.jsonc docs/issues/issue-18-task-report.md` — 통과
-- `git diff --check` — 통과
-- 구현 검증은 시작하지 않았습니다.
+- `go mod verify` — 통과
+- `go test ./...`, `go test -race ./...`, `go vet ./...` — 통과
+- `golangci-lint v2.12.2`, `gofmt`, `goimports v0.48.0` — 통과
+- Linux amd64/arm64, macOS amd64/arm64, Windows amd64 cross-build — 통과
+- `soku/scripts/package_test.sh` five-target deterministic package smoke — 통과
+- JS/TS, Python, Go, Java/Spring template lint/typecheck/test/build — 통과
+- catalog Draft 2020-12 schema와 hermetic source/archive/transaction test — 통과
+- 전체 Markdown lint, GitHub/template YAML lint, `git diff --check` — 통과
+- `scripts/verify-sync-parity.sh` — 로컬 `pwsh` 부재로 미실행; Draft PR CI에서 확인 필요
 
 ## AI 지원
 

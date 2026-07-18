@@ -1,0 +1,96 @@
+{
+  "schema_version": 1,
+  "profile": "standard",
+  "files": [
+    {"source": ".editorconfig", "output": ".editorconfig", "owner": "core", "class": "mergeable", "content_mode": "text", "strategy": "editorconfig-merge", "placeholders": []},
+    {"source": ".gitignore", "output": ".gitignore", "owner": "core", "class": "mergeable", "content_mode": "text", "strategy": "gitignore-merge", "placeholders": []},
+    {"source": "templates/_shared/ci/downstream-ci.yml", "output": ".github/workflows/ci.yml", "owner": "core", "class": "core-managed", "content_mode": "text", "strategy": "render", "placeholders": []}
+  ],
+  "stacks": [
+    {
+      "id": "aws",
+      "markers": ["buildspec.yml"],
+      "files": [
+        {"source": "templates/aws/buildspec.yml", "output": "buildspec.yml", "owner": "core", "class": "core-managed", "content_mode": "text", "strategy": "render", "placeholders": []}
+      ]
+    },
+    {
+      "id": "azure",
+      "markers": ["azure-pipelines.yml"],
+      "files": [
+        {"source": "templates/azure/azure-pipelines.yml", "output": "azure-pipelines.yml", "owner": "core", "class": "core-managed", "content_mode": "text", "strategy": "render", "placeholders": []}
+      ]
+    },
+    {
+      "id": "gcp",
+      "markers": ["cloudbuild.yaml"],
+      "files": [
+        {"source": "templates/gcloud/Dockerfile", "output": "Dockerfile", "owner": "core", "class": "core-managed", "content_mode": "text", "strategy": "render", "placeholders": []},
+        {"source": "templates/gcloud/cloudbuild.yaml", "output": "cloudbuild.yaml", "owner": "core", "class": "core-managed", "content_mode": "text", "strategy": "render", "placeholders": ["service_name"]}
+      ]
+    },
+    {
+      "id": "go",
+      "markers": ["go.mod"],
+      "files": [
+        {"source": "templates/go/.golangci.yml", "output": ".golangci.yml", "owner": "core", "class": "core-managed", "content_mode": "text", "strategy": "render", "placeholders": []},
+        {"source": "templates/go/Makefile", "output": "Makefile", "owner": "core", "class": "core-managed", "content_mode": "text", "strategy": "render", "placeholders": []},
+        {"source": "templates/go/go.mod", "output": "go.mod", "owner": "core", "class": "core-managed", "content_mode": "text", "strategy": "render", "placeholders": ["module_path"]},
+        {"source": "templates/go/profile.go", "output": "profile.go", "owner": "core", "class": "core-managed", "content_mode": "text", "strategy": "render", "placeholders": []},
+        {"source": "templates/go/profile_test.go", "output": "profile_test.go", "owner": "core", "class": "core-managed", "content_mode": "text", "strategy": "render", "placeholders": []}
+      ]
+    },
+    {
+      "id": "java-spring",
+      "markers": ["pom.xml"],
+      "files": [
+        {"source": "templates/java-spring/pom.xml", "output": "pom.xml", "owner": "core", "class": "core-managed", "content_mode": "text", "strategy": "render", "placeholders": ["java_group", "service_name"]},
+        {"source": "templates/java-spring/src/main/java/com/example/profile/Application.java", "output": "src/main/java/{{java_group_path}}/profile/Application.java", "owner": "core", "class": "core-managed", "content_mode": "text", "strategy": "render", "placeholders": ["java_group"]},
+        {"source": "templates/java-spring/src/main/java/com/example/profile/ProfileMapper.java", "output": "src/main/java/{{java_group_path}}/profile/ProfileMapper.java", "owner": "core", "class": "core-managed", "content_mode": "text", "strategy": "render", "placeholders": ["java_group"]},
+        {"source": "templates/java-spring/src/main/java/com/example/profile/User.java", "output": "src/main/java/{{java_group_path}}/profile/User.java", "owner": "core", "class": "core-managed", "content_mode": "text", "strategy": "render", "placeholders": ["java_group"]},
+        {"source": "templates/java-spring/src/main/java/com/example/profile/UserResponse.java", "output": "src/main/java/{{java_group_path}}/profile/UserResponse.java", "owner": "core", "class": "core-managed", "content_mode": "text", "strategy": "render", "placeholders": ["java_group"]},
+        {"source": "templates/java-spring/src/main/resources/application.yml", "output": "src/main/resources/application.yml", "owner": "core", "class": "core-managed", "content_mode": "text", "strategy": "render", "placeholders": ["service_name"]},
+        {"source": "templates/java-spring/src/test/java/com/example/profile/ProfileMapperTest.java", "output": "src/test/java/{{java_group_path}}/profile/ProfileMapperTest.java", "owner": "core", "class": "core-managed", "content_mode": "text", "strategy": "render", "placeholders": ["java_group"]}
+      ]
+    },
+    {
+      "id": "javascript-typescript-node",
+      "markers": ["package.json"],
+      "files": [
+        {"source": "templates/javascript-typescript-node/.prettierignore", "output": ".prettierignore", "owner": "core", "class": "core-managed", "content_mode": "text", "strategy": "render", "placeholders": []},
+        {"source": "templates/javascript-typescript-node/eslint.config.mjs", "output": "eslint.config.mjs", "owner": "core", "class": "core-managed", "content_mode": "text", "strategy": "render", "placeholders": []},
+        {"source": "templates/javascript-typescript-node/package-lock.json", "output": "package-lock.json", "owner": "core", "class": "core-managed", "content_mode": "text", "strategy": "render", "placeholders": ["project_name"]},
+        {"source": "templates/javascript-typescript-node/package.json", "output": "package.json", "owner": "core", "class": "core-managed", "content_mode": "text", "strategy": "render", "placeholders": ["project_name"]},
+        {"source": "templates/javascript-typescript-node/prettier.config.cjs", "output": "prettier.config.cjs", "owner": "core", "class": "core-managed", "content_mode": "text", "strategy": "render", "placeholders": []},
+        {"source": "templates/javascript-typescript-node/src/profile.ts", "output": "src/profile.ts", "owner": "core", "class": "core-managed", "content_mode": "text", "strategy": "render", "placeholders": []},
+        {"source": "templates/javascript-typescript-node/test/profile.test.ts", "output": "test/profile.test.ts", "owner": "core", "class": "core-managed", "content_mode": "text", "strategy": "render", "placeholders": []},
+        {"source": "templates/javascript-typescript-node/tsconfig.json", "output": "tsconfig.json", "owner": "core", "class": "core-managed", "content_mode": "text", "strategy": "render", "placeholders": []},
+        {"source": "templates/javascript-typescript-node/vitest.config.ts", "output": "vitest.config.ts", "owner": "core", "class": "core-managed", "content_mode": "text", "strategy": "render", "placeholders": []}
+      ]
+    },
+    {
+      "id": "mysql",
+      "markers": ["db/mysql/schema.sql"],
+      "files": [
+        {"source": "templates/mysql/schema.sql", "output": "db/mysql/schema.sql", "owner": "core", "class": "core-managed", "content_mode": "text", "strategy": "render", "placeholders": []}
+      ]
+    },
+    {
+      "id": "postgresql",
+      "markers": ["db/postgresql/schema.sql"],
+      "files": [
+        {"source": "templates/postgresql/schema.sql", "output": "db/postgresql/schema.sql", "owner": "core", "class": "core-managed", "content_mode": "text", "strategy": "render", "placeholders": []}
+      ]
+    },
+    {
+      "id": "python",
+      "markers": ["pyproject.toml"],
+      "files": [
+        {"source": "templates/python/pyproject.toml", "output": "pyproject.toml", "owner": "core", "class": "core-managed", "content_mode": "text", "strategy": "render", "placeholders": ["project_name"]},
+        {"source": "templates/python/requirements-lock.txt", "output": "requirements-lock.txt", "owner": "core", "class": "core-managed", "content_mode": "text", "strategy": "render", "placeholders": ["project_name"]},
+        {"source": "templates/python/src/user_profile.py", "output": "src/user_profile.py", "owner": "core", "class": "core-managed", "content_mode": "text", "strategy": "render", "placeholders": []},
+        {"source": "templates/python/tests/test_user_profile.py", "output": "tests/test_user_profile.py", "owner": "core", "class": "core-managed", "content_mode": "text", "strategy": "render", "placeholders": []}
+      ]
+    }
+  ]
+}

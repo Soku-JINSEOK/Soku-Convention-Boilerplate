@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/soku/schema/catalog-core-v1.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "profile", "files", "stacks"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "profile": {"const": "standard"},
+    "files": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"$ref": "#/$defs/file"}},
+    "stacks": {
+      "type": "array",
+      "minItems": 9,
+      "maxItems": 9,
+      "items": {"$ref": "#/$defs/stack"}
+    }
+  },
+  "$defs": {
+    "stack": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "markers", "files"],
+      "properties": {
+        "id": {"enum": ["aws", "azure", "gcp", "go", "java-spring", "javascript-typescript-node", "mysql", "postgresql", "python"]},
+        "markers": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+        "files": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/file"}}
+      }
+    },
+    "file": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "output", "owner", "class", "content_mode", "strategy", "placeholders"],
+      "properties": {
+        "source": {"type": "string", "minLength": 1},
+        "output": {"type": "string", "minLength": 1},
+        "owner": {"const": "core"},
+        "class": {"enum": ["core-managed", "mergeable"]},
+        "content_mode": {"enum": ["text", "binary"]},
+        "strategy": {"enum": ["render", "gitignore-merge", "editorconfig-merge"]},
+        "placeholders": {"type": "array", "uniqueItems": true, "items": {"enum": ["project_name", "module_path", "java_group", "service_name"]}}
+      }
+    }
+  }
+}
