@@ -1,15 +1,91 @@
-# 🔀 Pull Request
+# Pull Request
 
-## Description
+## 🔗 Common Metadata
 
-<!-- Summarize the change and rationale in English. -->
+<!-- An issue is required. Use `Closes #N` for final work or `Related to #N` for partial work; `No-Issue` is not allowed. -->
 
-## Related Issue and Task Report
-
-<!-- Required. Use `Closes #n` or `Related to #n`; `No-Issue` is not allowed. -->
-
-- **Issue:** Closes #
+- **Issue:** `<Closes #N for final work | Related to #N for partial work>`
 - **Task report:** `docs/issues/issue-<n>-task-report.md`
+- **Governance profile:** `boilerplate`
+
+## 🇬🇧 English — Normative Source
+
+### 🎯 Goal
+
+<!-- State the outcome and rationale. -->
+
+### 📦 Scope
+
+<!-- List included and excluded changes, constraints, and approval boundaries. -->
+
+### ✅ Acceptance Criteria
+
+<!-- Record observable completion criteria. -->
+
+### 🔒️ Security Boundary
+
+<!-- Confirm downstream customization, user data, secrets, approval boundaries, and delivery state are preserved. -->
+
+### 🧪 Verification
+
+<!-- Select only checks actually run and record their results. -->
+
+- [ ] `node --test templates/_shared/commitlint/*.test.mjs`
+- [ ] `npx --yes markdownlint-cli2@0.22.1 --config .markdownlint.jsonc "**/*.md" "#node_modules"`
+- [ ] `npx --yes yaml-lint@1.7.0 .github/**/*.yml`
+- [ ] `scripts/verify-sync-parity.sh`
+- [ ] Relevant stack or template validation:
+- [ ] `git diff --check`
+
+### ⚠️ Risks and Follow-up
+
+<!-- Record compatibility, migration, cost, delivery, and remaining risks. -->
+
+## 🇰🇷 한국어 요약
+
+### 🎯 목표
+
+<!-- 목표와 기대 결과를 요약합니다. -->
+
+### 📦 핵심 범위
+
+<!-- 포함 범위, 제외 범위, 제약 조건과 승인 경계를 요약합니다. -->
+
+### 🧪 검증
+
+<!-- 실제 실행한 검증과 결과를 요약합니다. -->
+
+### 🔒️ 비파괴 조건
+
+<!-- 다운스트림 수정, 사용자 데이터, 비밀정보, 승인 경계와 delivery 상태를 요약합니다. -->
+
+### ⚠️ 잔여 위험과 후속 작업
+
+<!-- 호환성, migration, 비용, delivery와 잔여 위험을 요약합니다. -->
+
+## 🇯🇵 日本語の要約
+
+### 🎯 目標
+
+<!-- 目標と期待する結果を要約します。 -->
+
+### 📦 主な範囲
+
+<!-- 対象、対象外、制約、承認境界を要約します。 -->
+
+### 🧪 検証
+
+<!-- 実際に実行した検証と結果を要約します。 -->
+
+### 🔒️ 非破壊条件
+
+<!-- ダウンストリームの変更、ユーザーデータ、secret、承認境界、delivery状態を要約します。 -->
+
+### ⚠️ 残存リスクと後続作業
+
+<!-- compatibility、migration、cost、delivery、残存リスクを要約します。 -->
+
+## Gitmoji Checklist
 
 - [ ] ✨ Feature (`feat`)
 - [ ] 🐛 Fix (`fix`)
@@ -28,62 +104,11 @@
 - [ ] 🔄 Sync (`sync`)
 - [ ] 🔖 Release (`release`)
 - [ ] 💥 Breaking Change (`feat!`, `fix!`, etc.)
+- [ ] 🔒️ Security boundary maintained
+- [ ] Delivery enabled
 
-## Verification
-
-<!-- List only checks actually run and their results. -->
-
-- [ ] `npx markdownlint-cli2`
-- [ ] `npx yaml-lint`
-- [ ] `npm run lint` (or relevant project-specific linter)
-- [ ] `npm run test` (or relevant project-specific test runner)
-- [ ] Runtime/manual verification, if applicable:
-
-## AI Assistance
+## 🤖 AI Assistance
 
 <!-- Replace with the actual tool used or `None`; do not leave placeholders. -->
 
 - **Planning/implementation/drafting:** `<actual tool or None>`
-
----
-
-## 개요
-
-<!-- 변경 사항과 이유를 한국어로 요약합니다. -->
-
-## 관련 이슈 및 작업 보고서
-
-- **이슈:** Closes #
-- **작업 보고서:** `docs/issues/issue-<n>-task-report.md`
-
-- [ ] ✨ 기능 (`feat`)
-- [ ] 🐛 수정 (`fix`)
-- [ ] ♻️ 리팩터링 (`refactor`)
-- [ ] 🎨 스타일 (`style`)
-- [ ] 📚 문서 (`docs`)
-- [ ] ✅ 테스트 (`test`)
-- [ ] 🔧 유지보수 (`chore`)
-- [ ] 👷 CI (`ci`)
-- [ ] 📦 빌드 (`build`)
-- [ ] 🚀 성능 개선 (`perf`)
-- [ ] 🔥 제거 (`remove`)
-- [ ] 🚑 긴급 패치 (`hotfix`)
-- [ ] 🔒️ 보안 강화 (`security`)
-- [ ] ⏪️ 되돌리기 (`revert`)
-- [ ] 🔄 동기화 (`sync`)
-- [ ] 🔖 릴리즈 (`release`)
-- [ ] 💥 파괴적 변경 (`feat!`, `fix!`, etc.)
-
-## 검증
-
-<!-- 실제 실행한 검사와 결과만 작성합니다. -->
-
-- [ ] `npx markdownlint-cli2`
-- [ ] `npx yaml-lint`
-- [ ] `npm run lint` (또는 프로젝트별 린터)
-- [ ] `npm run test` (또는 프로젝트별 테스트)
-- [ ] 해당 시 런타임/수동 검증:
-
-## AI 지원
-
-- **계획/구현/초안 작성:** `<실제 사용 도구 또는 None>`

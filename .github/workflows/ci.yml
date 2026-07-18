@@ -61,12 +61,12 @@ jobs:
             .gitmessage
             .github/PULL_REQUEST_TEMPLATE.md
             .github/COMMENT_TEMPLATES.md
-            .github/ISSUE_TEMPLATE/bug_report.md
-            .github/ISSUE_TEMPLATE/chore_task.md
+            .github/ISSUE_TEMPLATE/bug_report.yml
+            .github/ISSUE_TEMPLATE/chore_task.yml
             .github/ISSUE_TEMPLATE/config.yml
-            .github/ISSUE_TEMPLATE/feature_request.md
-            .github/ISSUE_TEMPLATE/docs_update.md
-            .github/ISSUE_TEMPLATE/refactor_proposal.md
+            .github/ISSUE_TEMPLATE/feature_request.yml
+            .github/ISSUE_TEMPLATE/docs_update.yml
+            .github/ISSUE_TEMPLATE/refactor_proposal.yml
             .github/CODEOWNERS
             .github/workflows/ci.yml
             .github/workflows/templates-ci.yml
@@ -129,8 +129,8 @@ jobs:
       - name: Check Markdown formatting
         run: npx --yes markdownlint-cli2@0.22.1 --config .markdownlint.jsonc "**/*.md" "#node_modules"
 
-      - name: Validate workflow YAML
-        run: npx --yes yaml-lint@1.7.0 .github/workflows/*.yml
+      - name: Validate GitHub YAML
+        run: npx --yes yaml-lint@1.7.0 .github/**/*.yml
 
   sync-parity:
     name: Sync Script Parity (sh vs ps1)

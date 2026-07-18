@@ -57,6 +57,8 @@ Every PR should answer:
 - What risks or tradeoffs exist?
 - What follow-up work remains?
 
+This boilerplate's own issue and pull request templates record English as the normative source and require Korean and Japanese summaries of the same goal, scope, verification, non-destructive boundary, and risk information. The English source also records explicit acceptance criteria. Downstream repositories should adapt those language blocks to the collaboration language selected in their `CONTRIBUTING.md` without weakening the underlying review contract.
+
 ## 📝 Task Reports
 
 For work that benefits from a documented plan before implementation starts, use [`docs/issues/TASK_REPORT_TEMPLATE.md`](../issues/TASK_REPORT_TEMPLATE.md):
@@ -173,7 +175,7 @@ scripts/sync-labels.sh --repo <owner>/<repo>
 | `status:` | `triage`, `ready`, `in-progress`, `blocked`, `done` |
 | `area:` | `docs`, `tooling`, `ci`, `templates` (example set — adapt per project) |
 
-Issue templates (`.github/ISSUE_TEMPLATE/*.md`) reference the `type:` axis by default (`type:bug`, `type:feature`, `type:chore`) — run `sync-labels.sh` before those templates are used, or issue creation will silently drop the label.
+Issue forms (`.github/ISSUE_TEMPLATE/*.yml`) apply a `type:` label by default (`type:bug`, `type:feature`, `type:chore`) and use the same normative-source, multilingual-summary, verification, security, risk, and AI-assistance structure as the pull request template. Apply priority and area labels as issue metadata rather than duplicating them in the issue body. Run `sync-labels.sh` before those forms are used, or issue creation will silently drop a default label that does not exist.
 
 A solo project can usually run with `type:` alone; `priority:`/`status:`/`area:` exist to coordinate work across people and can be added later once multiple contributors are involved (see [`docs/guides/APPLICABILITY.md`](../guides/APPLICABILITY.md)).
 
@@ -185,8 +187,8 @@ Repositories should provide templates where they reduce ambiguity.
 
 Recommended templates:
 
-- issue templates
-- pull request template
+- issue forms with normative scope, acceptance, multilingual summaries, verification, security, risk, and AI-assistance fields
+- pull request template with common metadata, normative scope, multilingual summaries, verification, and non-destructive boundary
 - bug report template
 - feature request template
 - [review and status comment templates](../../.github/COMMENT_TEMPLATES.md)
