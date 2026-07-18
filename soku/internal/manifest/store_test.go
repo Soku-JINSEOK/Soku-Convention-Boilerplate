@@ -5,6 +5,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 )
 
@@ -23,7 +24,7 @@ func TestStoreWriteLoadAndMode(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if info.Mode().Perm() != 0o600 {
+	if runtime.GOOS != "windows" && info.Mode().Perm() != 0o600 {
 		t.Fatalf("manifest mode = %o, want 600", info.Mode().Perm())
 	}
 	if _, err := os.Stat(filepath.Join(root, filepath.FromSlash(PendingPath))); !errors.Is(err, os.ErrNotExist) {

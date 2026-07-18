@@ -149,6 +149,9 @@ func TestInspectSymlinkEscapeAndUnreadable(t *testing.T) {
 	if err != nil || result.Report.Files[0].State != "symlink-escape" {
 		t.Fatalf("Inspect() = %#v, %v", result, err)
 	}
+	if runtime.GOOS == "windows" {
+		return
+	}
 
 	unreadableRoot := t.TempDir()
 	writeProjectFile(t, unreadableRoot, "private.txt", []byte("private"), 0o000)
