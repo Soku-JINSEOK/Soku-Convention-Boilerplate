@@ -33,6 +33,7 @@ add_sanitized_root "${HOME:-}" home
 sed_arguments+=("-E" "-e" 's#[A-Za-z]:/[^"[:space:]]+#<path>#g')
 sed_arguments+=("-e" 's#(/[^/"[:space:]]+)+#<path>#g')
 
+# shellcheck disable=SC1003 # `tr` receives an escaped backslash character.
 tr '\\' '/' <"$raw_log" | sed "${sed_arguments[@]}" >"$sanitized_log"
 rm -f "$raw_log"
 
