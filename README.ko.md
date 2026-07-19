@@ -13,6 +13,14 @@
 
 표준화된 설계와 운영 모델에 대해서는 [BLUEPRINT.md](./BLUEPRINT.md) 문서를 참고하십시오.
 
+## 📦 현재 검증된 베이스라인
+
+현재 보일러플레이트 컨벤션 패키지는 `v1.0.0`입니다. 권장 CLI는
+`soku/v0.1.1`이며, 공개 CLI 계약을 유지하면서 GitHub 소스 아카이브 처리를
+수정한 버전으로 `soku/v0.1.0`을 대체합니다. 로컬·hosted·릴리스·거버넌스·
+보안·비용 검증은 [VERIFICATION_GUIDE.md](./VERIFICATION_GUIDE.md)를
+참고하십시오.
+
 ---
 
 ## 📌 한눈에 보기
@@ -120,6 +128,7 @@
 - [LICENSE](./LICENSE): 보일러플레이트 기본 라이선스 문서 (MIT)
 - [SECURITY.md](./SECURITY.md): 보안 결함 제보 창구
 - [`soku` CLI](./soku/README.md): 빌드, 설치, 검증, 패키징 및 릴리즈 운영 안내
+- [VERIFICATION_GUIDE.md](./VERIFICATION_GUIDE.md): 로컬, hosted, 거버넌스, 아티팩트, 보안 및 비용 전체 검증
 
 ### 📏 `docs/standards/` — 구조 및 프로세스 규범 지침서
 

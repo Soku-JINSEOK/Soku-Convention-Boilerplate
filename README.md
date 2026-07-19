@@ -13,6 +13,14 @@ It is designed not just as a starter, but as a repeatable foundation for buildin
 
 For the canonical operating design, start with [BLUEPRINT.md](./BLUEPRINT.md).
 
+## 📦 Current Verified Baseline
+
+The current boilerplate convention package is `v1.0.0`. The recommended CLI is
+`soku/v0.1.1`; it supersedes `soku/v0.1.0` while preserving the public CLI
+contract and correcting GitHub source-archive handling. See
+[VERIFICATION_GUIDE.md](./VERIFICATION_GUIDE.md) for local, hosted, release,
+governance, security, and cost verification.
+
 ---
 
 ## 📌 At a Glance
@@ -122,6 +130,7 @@ This boilerplate is intended to serve as:
 - [LICENSE](./LICENSE): default boilerplate license
 - [SECURITY.md](./SECURITY.md): security reporting entrypoint
 - [`soku` CLI](./soku/README.md): build, install, verification, packaging, and release operation
+- [VERIFICATION_GUIDE.md](./VERIFICATION_GUIDE.md): complete local, hosted, governance, artifact, security, and cost checks
 
 ### 📏 `docs/standards/` — normative structural and process rules
 

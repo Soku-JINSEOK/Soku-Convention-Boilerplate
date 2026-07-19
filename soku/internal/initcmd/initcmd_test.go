@@ -13,6 +13,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -121,6 +122,21 @@ func TestCatalogRenderingUsesExactTokensAndJavaPaths(t *testing.T) {
 	}
 	if strings.Contains(string(paths[".github/workflows/ci.yml"].Content), "# javascript") || !strings.Contains(string(paths[".github/workflows/ci.yml"].Content), "java-spring:") {
 		t.Fatal("CI was not selected deterministically")
+	}
+	workflow := string(paths[".github/workflows/ci.yml"].Content)
+	for _, action := range []string{
+		"actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7",
+		"actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7",
+		"actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6",
+		"actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7",
+		"actions/setup-java@03ad4de0992f5dab5e18fcb136590ce7c4a0ac95 # v5",
+	} {
+		if !strings.Contains(workflow, action) {
+			t.Errorf("generated CI does not pin %s", action)
+		}
+	}
+	if regexp.MustCompile(`uses:\s+[^\s]+@v\d+`).MatchString(workflow) {
+		t.Fatal("generated CI contains a mutable major-version action reference")
 	}
 }
 

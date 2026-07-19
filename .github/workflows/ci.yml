@@ -1,12 +1,10 @@
-name: CI
+name: Repository CI
 
 on:
   workflow_call:
-  pull_request:
-  push:
-    branches:
-      - main
-      - master
+
+permissions:
+  contents: read
 
 jobs:
   # NOTE: This job checks that Soku-Convention-Boilerplate's OWN files exist.
@@ -22,12 +20,17 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
 
       - name: Setup Node.js
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
           node-version: "24"
+
+      - name: Setup Go for workflow validation
+        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
+        with:
+          go-version: "1.26.x"
 
       - name: Verify baseline documents exist
         shell: bash
@@ -37,6 +40,7 @@ jobs:
             README.ko.md
             README.ja.md
             .markdownlint.jsonc
+            .gitleaks.toml
             .gitignore
             BLUEPRINT.md
             CONTRIBUTING.md
@@ -56,6 +60,7 @@ jobs:
             docs/guides/INIT_GUIDE.md
             docs/guides/APPLICABILITY.md
             docs/guides/LANGUAGE_SELECTION.md
+            VERIFICATION_GUIDE.md
             docs/issues/TASK_REPORT_TEMPLATE.md
             docs/releases/v1.0.0.md
             docs/releases/soku-v0.1.0.md
@@ -69,6 +74,7 @@ jobs:
             docs/issues/issue-22-task-report.md
             docs/issues/issue-23-task-report.md
             docs/issues/issue-35-task-report.md
+            docs/issues/issue-39-task-report.md
             LICENSE
             SECURITY.md
             .editorconfig
@@ -85,6 +91,7 @@ jobs:
             .github/workflows/ci.yml
             .github/workflows/release.yml
             .github/workflows/templates-ci.yml
+            .github/workflows/validation.yml
             .github/labels.yml
             templates/javascript-typescript-node/package.json
             templates/javascript-typescript-node/tsconfig.json
@@ -215,13 +222,39 @@ jobs:
       - name: Validate GitHub YAML
         run: npx --yes yaml-lint@1.7.0 .github/*.yml .github/**/*.yml
 
+      - name: Validate GitHub Actions semantics
+        run: >-
+          go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.10
+          .github/workflows/*.yml
+
+      - name: Validate shell scripts
+        shell: bash
+        run: |
+          bash -n scripts/*.sh soku/scripts/*.sh
+          shellcheck scripts/*.sh soku/scripts/*.sh
+
   sync-parity:
     name: Sync Script Parity (sh vs ps1)
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+
+      - name: Parse PowerShell sync script
+        shell: pwsh
+        run: |
+          $tokens = $null
+          $errors = $null
+          [System.Management.Automation.Language.Parser]::ParseFile(
+            "scripts/sync-boilerplate.ps1",
+            [ref]$tokens,
+            [ref]$errors
+          ) > $null
+          if ($errors.Count -gt 0) {
+            $errors | ForEach-Object { Write-Error $_ }
+            exit 1
+          }
 
       - name: Verify sync-boilerplate.sh and sync-boilerplate.ps1 produce identical output
         run: scripts/verify-sync-parity.sh
@@ -243,10 +276,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
 
       - name: Setup Go
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
         with:
           go-version: "1.26.x"
           cache-dependency-path: soku/go.sum
@@ -286,10 +319,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
 
       - name: Setup Go
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
         with:
           go-version: "1.26.x"
           cache-dependency-path: soku/go.sum
@@ -330,10 +363,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
 
       - name: Setup Go
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
         with:
           go-version: "1.26.x"
           cache-dependency-path: soku/go.sum
@@ -344,7 +377,7 @@ jobs:
 
       - name: Retain sanitized failure diagnostics
         if: failure()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: soku-lifecycle-conformance-${{ matrix.os }}
           path: ${{ runner.temp }}/soku-lifecycle-conformance/lifecycle-conformance.log
@@ -357,10 +390,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
 
       - name: Setup Go
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
         with:
           go-version: "1.26.x"
           cache-dependency-path: soku/go.sum

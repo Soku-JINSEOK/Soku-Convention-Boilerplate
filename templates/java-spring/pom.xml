@@ -21,6 +21,7 @@
   <properties>
     <java.version>21</java.version>
     <checkstyle.version>13.8.0</checkstyle.version>
+    <jackson-bom.version>2.21.5</jackson-bom.version>
   </properties>
 
   <dependencies>

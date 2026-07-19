@@ -1,0 +1,7 @@
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Synthetic API key used by archive secret-rejection tests"
+regexTarget = "match"
+regexes = ['''api_key=abcdefghijklmnop123456''']

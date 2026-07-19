@@ -101,7 +101,7 @@ if [[ ! -x "$extract_dir/$host_binary" ]]; then
   echo "Packaged native binary is not executable" >&2
   exit 1
 fi
-version_json="$($extract_dir/$host_binary --json --version)"
+version_json="$("$extract_dir/$host_binary" --json --version)"
 if [[ "$version_json" != *'"version":"v0.1.0-test"'* || "$version_json" != *'"commit":"0123456789abcdef0123456789abcdef01234567"'* ]]; then
   echo "Packaged binary metadata is incorrect: $version_json" >&2
   exit 1
