@@ -60,7 +60,7 @@ Implemented. Catalog-v2 profile composition, legacy fallback, profile
 transitions, public integration inputs, provider API v1 fetching and decoding,
 pending/connected state, global ownership planning, AI-collaboration example,
 schemas, rollback coverage, CI inventory, and user documentation are complete.
-Pull request CI remains the merge gate.
+Pull request #32 passed the complete required CI matrix.
 
 ## Verification
 
@@ -70,6 +70,9 @@ Pull request CI remains the merge gate.
 - Passed: Markdown lint, GitHub YAML lint, title tests, and `git diff --check`.
 - Passed: pending-to-connected, provider rollback, ownership, secret,
   executable, traversal, legacy migration, and profile composition tests.
+- Passed in PR #32: native CLI and lifecycle jobs on Linux, macOS, and Windows,
+  including the provider schema CRLF regression; runtime templates, repository
+  hygiene, sync parity, quality/race, and five-target package snapshot.
 
 ## AI Assistance
 
@@ -124,7 +127,7 @@ executable, traversal, reserved path, secret과 ownership 충돌은 write 전에
 구현을 완료했습니다. catalog-v2 profile 합성, legacy fallback, profile transition,
 integration 공개 입력, provider API v1 fetch/decode, pending/connected, 전역 ownership,
 AI example, schema, rollback 테스트, CI 목록과 문서를 반영했습니다. PR CI를 최종
-merge gate로 유지합니다.
+merge gate로 유지했으며 PR #32의 전체 필수 matrix가 통과했습니다.
 
 ## 검증
 
@@ -134,6 +137,9 @@ merge gate로 유지합니다.
 - 통과: Markdown, GitHub YAML, title test, `git diff --check`
 - 통과: pending 연결, provider rollback, ownership, secret, executable, traversal,
   legacy migration과 profile 합성 테스트
+- PR #32 통과: Linux/macOS/Windows native CLI와 lifecycle, provider schema CRLF
+  회귀, runtime template, repository hygiene, sync parity, quality/race,
+  five-target package snapshot
 
 ## AI 지원
 
