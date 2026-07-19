@@ -133,7 +133,7 @@ func validateProviderBundle(bundle ProviderBundle) error {
 		return fail(5, "provider.incompatible", "provider bundle has invalid immutable or schema metadata")
 	}
 	schema, schemaExists := bundle.Files["configuration.schema.json"]
-	schemaHash := sha256.Sum256(schema)
+	schemaHash := sha256.Sum256([]byte(normalizeText(schema)))
 	if !schemaExists || hex.EncodeToString(schemaHash[:]) != bundle.ConfigurationSchemaHash {
 		return fail(5, "provider.incompatible", "provider configuration schema is missing or does not match its hash")
 	}

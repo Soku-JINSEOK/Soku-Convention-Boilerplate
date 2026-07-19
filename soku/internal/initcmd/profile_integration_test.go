@@ -38,6 +38,13 @@ func TestPublishedProfileAndProviderContracts(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	crlfFiles := map[string][]byte{}
+	for path, content := range files {
+		crlfFiles[path] = bytes.ReplaceAll(content, []byte("\n"), []byte("\r\n"))
+	}
+	if _, err := DecodeProviderBundle(providerData, crlfFiles); err != nil {
+		t.Fatalf("CRLF provider bundle: %v", err)
+	}
 	configurationHash, err := integrationConfigurationHash("../../providers/ai-collaboration/example-config.yml")
 	if err != nil || configurationHash != bundle.ConfigurationHash {
 		t.Fatalf("example configuration hash = %q, %v", configurationHash, err)
