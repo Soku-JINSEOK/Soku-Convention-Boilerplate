@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/soku/schema/provider-v1.schema.json",
+  "title": "soku declarative provider API v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "id",
+    "source",
+    "ref",
+    "provider_api_version",
+    "provider_schema_version",
+    "compatible_soku",
+    "configuration_schema_hash",
+    "configuration_hash",
+    "compatible_profiles",
+    "outputs"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "id": {"type": "string", "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"},
+    "source": {"type": "string", "pattern": "^github:[^/]+/[^/]+/.+$"},
+    "ref": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "provider_api_version": {"const": "1"},
+    "provider_schema_version": {"const": "1"},
+    "compatible_soku": {"type": "string", "pattern": "^>=[0-9]+\\.[0-9]+\\.[0-9]+ <[0-9]+\\.[0-9]+\\.[0-9]+$"},
+    "configuration_schema_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "configuration_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "compatible_profiles": {"type": "array", "items": {"enum": ["bootstrap", "standard", "scaled"]}, "minItems": 1, "uniqueItems": true},
+    "outputs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["template", "path", "content_mode"],
+        "properties": {
+          "template": {"type": "string"},
+          "path": {"type": "string"},
+          "content_mode": {"enum": ["text", "binary"]}
+        }
+      }
+    }
+  }
+}

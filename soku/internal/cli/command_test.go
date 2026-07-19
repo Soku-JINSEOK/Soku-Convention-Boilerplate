@@ -176,11 +176,42 @@ func TestTransitionReleaseOptionIsPassedToHandlers(t *testing.T) {
 				handlers.Upgrade = handler
 			}
 			args := []string{command, "--boilerplate-release", "v2.0.0"}
-			if command == "upgrade" {
+			if command == "init" || command == "upgrade" {
 				args = append(args, "--dry-run")
 			}
 			result := execute(args, testRuntime{}, handlers)
 			if result.code != 0 || got.BoilerplateRelease != "v2.0.0" || !got.ReleaseSet {
+				t.Fatalf("result=%#v request=%#v", result, got)
+			}
+		})
+	}
+}
+
+func TestIntegrationOptionsArePassedToLifecycleHandlers(t *testing.T) {
+	for _, command := range []string{"init", "diff", "upgrade"} {
+		t.Run(command, func(t *testing.T) {
+			var got Request
+			handler := HandlerFunc(func(_ context.Context, request Request) error { got = request; return nil })
+			handlers := defaultHandlers()
+			switch command {
+			case "init":
+				handlers.Init = handler
+			case "diff":
+				handlers.Diff = handler
+			case "upgrade":
+				handlers.Upgrade = handler
+			}
+			args := []string{command, "--integration-source", "github:example/provider/ai-collaboration", "--integration-ref", "abcdef0123456789abcdef0123456789abcdef01", "--integration-config", "provider.yml"}
+			if command == "init" {
+				args = append(args, "--boilerplate-source", "https://github.com/example/boilerplate", "--boilerplate-release", "v1.0.0", "--stack", "go", "--module-path", "github.com/example/project")
+			} else {
+				args = append(args, "--boilerplate-release", "v1.0.0")
+			}
+			if command == "init" || command == "upgrade" {
+				args = append(args, "--dry-run")
+			}
+			result := execute(args, testRuntime{}, handlers)
+			if result.code != 0 || got.IntegrationSource == "" || got.IntegrationRef == "" || got.IntegrationConfig != "provider.yml" {
 				t.Fatalf("result=%#v request=%#v", result, got)
 			}
 		})

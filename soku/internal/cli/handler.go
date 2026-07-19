@@ -30,6 +30,9 @@ type Request struct {
 	ModulePath         string
 	JavaGroup          string
 	ServiceName        string
+	IntegrationSource  string
+	IntegrationRef     string
+	IntegrationConfig  string
 	Verify             bool
 	SourceSet          bool
 	ReleaseSet         bool
@@ -109,7 +112,7 @@ func initHandler() Handler {
 			answer = strings.ToLower(strings.TrimSpace(answer))
 			return answer == "y" || answer == "yes", nil
 		}
-		report, err := initcmd.Run(ctx, initcmd.Options{Root: root, ConfigPath: request.ConfigPath, Explicit: initcmd.Explicit{Source: request.BoilerplateSource, Release: request.BoilerplateRelease, Stacks: request.Stacks, Profile: request.Profile, ProjectName: request.ProjectName, ModulePath: request.ModulePath, JavaGroup: request.JavaGroup, ServiceName: request.ServiceName, Verify: request.Verify, SourceSet: request.SourceSet, ReleaseSet: request.ReleaseSet, StacksSet: request.StacksSet, ProfileSet: request.ProfileSet, ProjectNameSet: request.ProjectNameSet, ModulePathSet: request.ModulePathSet, JavaGroupSet: request.JavaGroupSet, ServiceNameSet: request.ServiceNameSet, VerifySet: request.VerifySet}, DryRun: request.DryRun, Yes: request.Yes, Interactive: request.Interactive, Confirm: confirm, SokuVersion: request.SokuVersion}, nil)
+		report, err := initcmd.Run(ctx, initcmd.Options{Root: root, ConfigPath: request.ConfigPath, Explicit: initcmd.Explicit{Source: request.BoilerplateSource, Release: request.BoilerplateRelease, Stacks: request.Stacks, Profile: request.Profile, ProjectName: request.ProjectName, ModulePath: request.ModulePath, JavaGroup: request.JavaGroup, ServiceName: request.ServiceName, Verify: request.Verify, SourceSet: request.SourceSet, ReleaseSet: request.ReleaseSet, StacksSet: request.StacksSet, ProfileSet: request.ProfileSet, ProjectNameSet: request.ProjectNameSet, ModulePathSet: request.ModulePathSet, JavaGroupSet: request.JavaGroupSet, ServiceNameSet: request.ServiceNameSet, VerifySet: request.VerifySet}, DryRun: request.DryRun, Yes: request.Yes, Interactive: request.Interactive, Confirm: confirm, SokuVersion: request.SokuVersion, IntegrationSource: request.IntegrationSource, IntegrationRef: request.IntegrationRef, IntegrationConfigPath: request.IntegrationConfig, IntegrationFetcher: initcmd.NewSourceClient()}, nil)
 		if err != nil {
 			var failure *initcmd.Failure
 			if errors.As(err, &failure) {
@@ -163,9 +166,11 @@ func transitionHandler(apply bool) Handler {
 			return answer == "y" || answer == "yes", nil
 		}
 		report, err := initcmd.RunTransition(ctx, initcmd.TransitionOptions{
-			Root: root, ConfigPath: request.ConfigPath, TargetRelease: request.BoilerplateRelease, DryRun: request.DryRun,
+			Root: root, ConfigPath: request.ConfigPath, TargetRelease: request.BoilerplateRelease, TargetProfile: request.Profile, DryRun: request.DryRun,
 			Yes: request.Yes, Interactive: request.Interactive, Confirm: confirm,
-			SokuVersion: request.SokuVersion,
+			SokuVersion: request.SokuVersion, IntegrationSource: request.IntegrationSource,
+			IntegrationRef: request.IntegrationRef, IntegrationConfigPath: request.IntegrationConfig,
+			IntegrationFetcher: initcmd.NewSourceClient(),
 		}, nil, apply)
 		if err != nil {
 			var failure *initcmd.Failure

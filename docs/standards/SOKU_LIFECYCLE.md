@@ -391,17 +391,24 @@ A two-stage provider has a request phase and a connected phase:
 This rule prevents a request for one governance or pipeline configuration from
 being silently connected to data produced for another revision.
 
-## Consumer Example and Deferred Wire Format
+## Consumer Example and Provider Wire Format
 
 `ci-cd-control-plane-v1` is a consumer example, not a special core adapter. The
 core contract must not contain repository-name conditions, provider-ID
 branches, built-in control-plane adapters, or central-registry interpretation
 logic.
 
-Issue #22 will define the loader and provider API wire format. That work may
-choose field names and serialization, but it must remain generic,
-exact-SHA-pinned, executable-free, ownership-bounded, and compatible with the
-transaction contract in this document.
+Issue #22 defines provider API v1 as strict JSON metadata with API/schema
+versions, a `compatible_soku` range, a hashed configuration schema, the exact
+configuration hash, sorted compatible profiles, and bounded template/output
+declarations. Unknown fields and undeclared bundle files are invalid. The
+generic loader fetches the declared GitHub bundle at a lowercase full commit;
+it never executes or dynamically loads bundle content.
+
+Catalog v2 is selected by `soku/catalog/index-v2.json` and composes the built-in
+profiles in the fixed order `bootstrap → standard → scaled`. `standard` remains
+the default and compatibility ID. A source without the index is legacy core-v1
+`standard`; no implicit migration selects another profile.
 
 The control-plane follow-up may coordinate only these provider-owned details:
 

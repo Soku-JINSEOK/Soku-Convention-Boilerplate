@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/soku/schema/catalog-index-v2.schema.json",
+  "title": "soku catalog profile index v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "default_profile", "profiles", "layers"],
+  "properties": {
+    "schema_version": {"const": 2},
+    "default_profile": {"const": "standard"},
+    "profiles": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "layers"],
+        "properties": {
+          "id": {"enum": ["bootstrap", "standard", "scaled"]},
+          "layers": {"type": "array", "items": {"enum": ["bootstrap", "standard", "scaled"]}, "uniqueItems": true}
+        }
+      }
+    },
+    "layers": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "shared_outputs", "stack_file_limit", "files"],
+        "properties": {
+          "id": {"enum": ["bootstrap", "standard", "scaled"]},
+          "shared_outputs": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+          "stack_file_limit": {"type": "integer", "minimum": -1},
+          "files": {"type": "array", "items": {"$ref": "#/$defs/file"}}
+        }
+      }
+    }
+  },
+  "$defs": {
+    "file": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "output", "owner", "class", "content_mode", "strategy", "placeholders"],
+      "properties": {
+        "source": {"type": "string"},
+        "output": {"type": "string"},
+        "owner": {"const": "core"},
+        "class": {"const": "core-managed"},
+        "content_mode": {"enum": ["text", "binary"]},
+        "strategy": {"const": "render"},
+        "placeholders": {"type": "array", "items": {"type": "string"}, "uniqueItems": true}
+      }
+    }
+  }
+}

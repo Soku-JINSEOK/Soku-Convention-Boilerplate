@@ -1,7 +1,9 @@
 package initcmd
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io/fs"
@@ -16,28 +18,36 @@ import (
 
 // TransitionOptions contains the complete input for diff and upgrade.
 type TransitionOptions struct {
-	Root          string
-	ConfigPath    string
-	TargetRelease string
-	DryRun        bool
-	Yes           bool
-	Interactive   bool
-	Confirm       func(TransitionReport) (bool, error)
-	SokuVersion   string
-	ApplyHook     ApplyHook
+	Root                  string
+	ConfigPath            string
+	TargetRelease         string
+	TargetProfile         string
+	DryRun                bool
+	Yes                   bool
+	Interactive           bool
+	Confirm               func(TransitionReport) (bool, error)
+	SokuVersion           string
+	ApplyHook             ApplyHook
+	IntegrationSource     string
+	IntegrationRef        string
+	IntegrationConfigPath string
+	IntegrationFetcher    IntegrationFetcher
 }
 
 // TransitionReport is the stable, ordered comparison emitted by diff and upgrade.
 type TransitionReport struct {
-	State          string   `json:"state"`
-	Source         string   `json:"source"`
-	CurrentRelease string   `json:"current_release"`
-	TargetRelease  string   `json:"target_release"`
-	CurrentCommit  string   `json:"current_commit"`
-	TargetCommit   string   `json:"target_commit"`
-	Changes        []Change `json:"changes"`
-	Recovery       Recovery `json:"recovery"`
-	HasChanges     bool     `json:"has_changes"`
+	State          string                 `json:"state"`
+	Source         string                 `json:"source"`
+	CurrentRelease string                 `json:"current_release"`
+	TargetRelease  string                 `json:"target_release"`
+	CurrentCommit  string                 `json:"current_commit"`
+	TargetCommit   string                 `json:"target_commit"`
+	CurrentProfile string                 `json:"current_profile"`
+	TargetProfile  string                 `json:"target_profile"`
+	Changes        []Change               `json:"changes"`
+	Recovery       Recovery               `json:"recovery"`
+	HasChanges     bool                   `json:"has_changes"`
+	Integrations   []manifest.Integration `json:"integrations"`
 }
 
 // RunTransition plans a diff or applies an upgrade using only manifest state and
@@ -66,6 +76,7 @@ func RunTransition(ctx context.Context, options TransitionOptions, fetcher Fetch
 		}
 		return TransitionReport{}, fail(2, "manifest.invalid", "%v", err)
 	}
+	targetProfile := options.TargetProfile
 	if options.ConfigPath != "" {
 		fileConfig, configErr := LoadConfig(options.ConfigPath)
 		if configErr != nil {
@@ -74,8 +85,11 @@ func RunTransition(ctx context.Context, options TransitionOptions, fetcher Fetch
 		if fileConfig.BoilerplateSource != "" && fileConfig.BoilerplateSource != document.Boilerplate.Source {
 			return TransitionReport{}, fail(5, "source.change", "changing boilerplate source during an upgrade is not supported")
 		}
-		if (fileConfig.Profile != "" && fileConfig.Profile != document.Selection.Profile) || (len(fileConfig.Stacks) > 0 && strings.Join(fileConfig.Stacks, "\x00") != strings.Join(document.Selection.Stacks, "\x00")) {
-			return TransitionReport{}, fail(5, "selection.change", "profile and stack changes require a compatible migration")
+		if len(fileConfig.Stacks) > 0 && strings.Join(fileConfig.Stacks, "\x00") != strings.Join(document.Selection.Stacks, "\x00") {
+			return TransitionReport{}, fail(5, "selection.change", "stack changes require a compatible migration")
+		}
+		if targetProfile == "" {
+			targetProfile = fileConfig.Profile
 		}
 	}
 	if compareRelease(options.TargetRelease, document.Boilerplate.Release) < 0 {
@@ -101,24 +115,70 @@ func RunTransition(ctx context.Context, options TransitionOptions, fetcher Fetch
 	if target.Source != document.Boilerplate.Source || target.Release != options.TargetRelease || !lowerCommit(target.ResolvedCommit) {
 		return TransitionReport{}, fail(6, "source.invalid", "source resolver returned an inconsistent immutable target identity")
 	}
-	config, err := configFromManifest(document)
+	baseConfig, err := configFromManifest(document)
 	if err != nil {
 		return TransitionReport{}, err
 	}
-	baseTree, err := renderSnapshot(base, config)
+	targetConfig := baseConfig
+	if targetProfile != "" {
+		if !contains([]string{ProfileBootstrap, ProfileStandard, ProfileScaled}, targetProfile) {
+			return TransitionReport{}, fail(2, "selection.invalid", "profile must be bootstrap, standard, or scaled")
+		}
+		targetConfig.Profile = targetProfile
+	}
+	baseTree, err := renderSnapshot(base, baseConfig)
 	if err != nil {
 		return TransitionReport{}, err
 	}
-	targetTree, err := renderSnapshot(target, config)
+	targetTree, err := renderSnapshot(target, targetConfig)
 	if err != nil {
+		return TransitionReport{}, err
+	}
+	providerBase, err := providerBaselineChanges(options.Root, document)
+	if err != nil {
+		return TransitionReport{}, err
+	}
+	baseTree = append(baseTree, providerBase...)
+	targetTree = append(targetTree, providerBase...)
+	targetIntegrations := append([]manifest.Integration(nil), document.Integrations...)
+	if options.IntegrationSource != "" || options.IntegrationRef != "" || options.IntegrationConfigPath != "" {
+		integration, integrationErr := planIntegration(ctx, options.IntegrationSource, options.IntegrationRef, options.IntegrationConfigPath, targetConfig.Profile, options.IntegrationFetcher)
+		if integrationErr != nil {
+			return TransitionReport{}, integrationErr
+		}
+		filteredTree := targetTree[:0]
+		for _, change := range targetTree {
+			if change.Owner != integration.Integration.ID {
+				filteredTree = append(filteredTree, change)
+			}
+		}
+		targetTree = append(filteredTree, integration.Changes...)
+		replaced := false
+		for position := range targetIntegrations {
+			if targetIntegrations[position].ID == integration.Integration.ID {
+				targetIntegrations[position] = integration.Integration
+				replaced = true
+			}
+		}
+		if !replaced {
+			targetIntegrations = append(targetIntegrations, integration.Integration)
+		}
+		sort.Slice(targetIntegrations, func(i, j int) bool { return targetIntegrations[i].ID < targetIntegrations[j].ID })
+	}
+	if err := validateChangeOwnership(baseTree); err != nil {
+		return TransitionReport{}, err
+	}
+	if err := validateChangeOwnership(targetTree); err != nil {
 		return TransitionReport{}, err
 	}
 	report := TransitionReport{
 		State: "planned", Source: document.Boilerplate.Source,
 		CurrentRelease: document.Boilerplate.Release, TargetRelease: options.TargetRelease,
 		CurrentCommit: document.Boilerplate.ResolvedCommit, TargetCommit: target.ResolvedCommit,
-		Recovery:   Recovery{Instructions: []string{}},
-		HasChanges: document.Boilerplate.Release != options.TargetRelease || document.Boilerplate.ResolvedCommit != target.ResolvedCommit,
+		CurrentProfile: baseConfig.Profile, TargetProfile: targetConfig.Profile,
+		Recovery:     Recovery{Instructions: []string{}},
+		HasChanges:   document.Boilerplate.Release != options.TargetRelease || document.Boilerplate.ResolvedCommit != target.ResolvedCommit || baseConfig.Profile != targetConfig.Profile,
+		Integrations: targetIntegrations,
 	}
 	report.Changes, err = planTransition(options.Root, document, baseTree, targetTree)
 	if err != nil {
@@ -138,6 +198,11 @@ func RunTransition(ctx context.Context, options TransitionOptions, fetcher Fetch
 				return TransitionReport{}, failure
 			}
 		}
+	}
+	previousIntegrations, _ := json.Marshal(document.Integrations)
+	nextIntegrations, _ := json.Marshal(targetIntegrations)
+	if !bytes.Equal(previousIntegrations, nextIntegrations) {
+		report.HasChanges = true
 	}
 	if !apply {
 		if report.HasChanges {
@@ -168,7 +233,7 @@ func RunTransition(ctx context.Context, options TransitionOptions, fetcher Fetch
 			return report, nil
 		}
 	}
-	targetDocument, err := buildTransitionManifest(options.SokuVersion, document, target, config, report.Changes)
+	targetDocument, err := buildTransitionManifestWithIntegrations(options.SokuVersion, document, target, targetConfig, report.Changes, targetIntegrations)
 	if err != nil {
 		return TransitionReport{}, err
 	}
@@ -194,7 +259,7 @@ func renderSnapshot(snapshot SourceSnapshot, config Config) ([]Change, error) {
 	if err != nil {
 		return nil, err
 	}
-	return renderCatalog(snapshot, catalog, config)
+	return renderProfileCatalog(snapshot, catalog, config)
 }
 
 func configFromManifest(document manifest.Document) (Config, error) {
@@ -343,14 +408,18 @@ func planTransition(root string, document manifest.Document, baseTree, targetTre
 	return result, nil
 }
 
-func buildTransitionManifest(version string, previous manifest.Document, snapshot SourceSnapshot, config Config, changes []Change) (manifest.Document, error) {
+func buildTransitionManifestWithIntegrations(version string, previous manifest.Document, snapshot SourceSnapshot, config Config, changes []Change, integrations []manifest.Integration) (manifest.Document, error) {
 	active := make([]Change, 0, len(changes))
 	for _, change := range changes {
 		if change.Action != "removed" {
 			active = append(active, change)
 		}
 	}
-	document, err := buildManifest(version, snapshot, config, previous.Selection.ConfigurationHash, active)
+	configurationHash, err := configHash(config)
+	if err != nil {
+		return manifest.Document{}, err
+	}
+	document, err := buildManifestWithIntegrations(version, snapshot, config, configurationHash, active, integrations)
 	if err != nil {
 		return manifest.Document{}, err
 	}
@@ -436,11 +505,17 @@ func lowerCommit(value string) bool {
 // HumanTransition renders a deterministic human-readable transition report.
 func HumanTransition(command string, report TransitionReport) string {
 	var builder strings.Builder
-	fmt.Fprintf(&builder, "Soku %s: %s\nSource: %s\nRelease: %s -> %s\nCommit: %s -> %s\n", command, report.State, report.Source, report.CurrentRelease, report.TargetRelease, report.CurrentCommit, report.TargetCommit)
+	fmt.Fprintf(&builder, "Soku %s: %s\nSource: %s\nRelease: %s -> %s\nCommit: %s -> %s\nProfile: %s -> %s\n", command, report.State, report.Source, report.CurrentRelease, report.TargetRelease, report.CurrentCommit, report.TargetCommit, report.CurrentProfile, report.TargetProfile)
 	if len(report.Changes) > 0 {
 		builder.WriteString("Changes:\n")
 		for _, change := range report.Changes {
 			fmt.Fprintf(&builder, "  %s %s\n", change.Action, change.Path)
+		}
+	}
+	if len(report.Integrations) > 0 {
+		builder.WriteString("Integrations:\n")
+		for _, integration := range report.Integrations {
+			fmt.Fprintf(&builder, "  %s %s\n", integration.LifecycleState, integration.ID)
 		}
 	}
 	return builder.String()

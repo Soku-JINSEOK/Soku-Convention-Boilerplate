@@ -153,6 +153,7 @@ func newLifecycleCommand(
 	var dryRun bool
 	var yes bool
 	var source, release, profile, projectName, modulePath, javaGroup, serviceName string
+	var integrationSource, integrationRef, integrationConfig string
 	var stacks []string
 	var verify bool
 	var command *cobra.Command
@@ -214,7 +215,14 @@ func newLifecycleCommand(
 				request.VerifySet = flags.Changed("verify")
 			case "diff", "upgrade":
 				request.BoilerplateRelease = release
+				request.Profile = profile
 				request.ReleaseSet = command.Flags().Changed("boilerplate-release")
+				request.ProfileSet = command.Flags().Changed("profile")
+			}
+			if name == "init" || name == "diff" || name == "upgrade" {
+				request.IntegrationSource = integrationSource
+				request.IntegrationRef = integrationRef
+				request.IntegrationConfig = integrationConfig
 			}
 			result, err := invokeHandler(command.Context(), handler, request)
 			if err != nil {
@@ -246,7 +254,15 @@ func newLifecycleCommand(
 		flags.StringVar(&serviceName, "service-name", "", "service name")
 		flags.BoolVar(&verify, "verify", false, "verify the complete staging tree before applying")
 	case "diff", "upgrade":
-		command.Flags().StringVar(&release, "boilerplate-release", "", "exact target boilerplate vMAJOR.MINOR.PATCH release")
+		flags := command.Flags()
+		flags.StringVar(&release, "boilerplate-release", "", "exact target boilerplate vMAJOR.MINOR.PATCH release")
+		flags.StringVar(&profile, "profile", "", "target profile (bootstrap, standard, or scaled)")
+	}
+	if name == "init" || name == "diff" || name == "upgrade" {
+		flags := command.Flags()
+		flags.StringVar(&integrationSource, "integration-source", "", "provider source github:<owner>/<repo>/<bundle-path>")
+		flags.StringVar(&integrationRef, "integration-ref", "", "provider lowercase 40-character commit")
+		flags.StringVar(&integrationConfig, "integration-config", "", "provider configuration YAML path")
 	}
 	command.InitDefaultHelpFlag()
 	command.Flags().Lookup("help").Shorthand = ""
@@ -340,7 +356,7 @@ func hasJSONFlag(args []string) bool {
 }
 
 func commandFromArgs(args []string) string {
-	valueFlags := map[string]bool{"--config": true, "--boilerplate-source": true, "--boilerplate-release": true, "--stack": true, "--profile": true, "--project-name": true, "--module-path": true, "--java-group": true, "--service-name": true}
+	valueFlags := map[string]bool{"--config": true, "--boilerplate-source": true, "--boilerplate-release": true, "--stack": true, "--profile": true, "--project-name": true, "--module-path": true, "--java-group": true, "--service-name": true, "--integration-source": true, "--integration-ref": true, "--integration-config": true}
 	for index := 0; index < len(args); index++ {
 		arg := args[index]
 		if valueFlags[arg] {
@@ -399,7 +415,13 @@ func helpFor(command *cobra.Command) string {
 			"      --verify                     verify the staging tree before applying\n"
 	}
 	if command.Name() == "diff" || command.Name() == "upgrade" {
-		initFlags = "      --boilerplate-release string exact target boilerplate vMAJOR.MINOR.PATCH release\n"
+		initFlags = "      --boilerplate-release string exact target boilerplate vMAJOR.MINOR.PATCH release\n" +
+			"      --profile string             target profile (bootstrap, standard, or scaled)\n"
+	}
+	if command.Name() == "init" || command.Name() == "diff" || command.Name() == "upgrade" {
+		initFlags += "      --integration-source string provider source github:<owner>/<repo>/<bundle-path>\n" +
+			"      --integration-ref string   provider lowercase 40-character commit\n" +
+			"      --integration-config string provider configuration YAML path\n"
 	}
 	return fmt.Sprintf(`%s.
 

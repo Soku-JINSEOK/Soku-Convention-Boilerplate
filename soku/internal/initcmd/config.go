@@ -180,8 +180,8 @@ func ResolveConfig(root string, file Config, cli Explicit, catalog Catalog) (Con
 	if resolved.Profile == "" {
 		resolved.Profile = ProfileStandard
 	}
-	if resolved.Profile != ProfileStandard {
-		return Config{}, fail(2, "selection.invalid", "profile must be standard")
+	if !contains([]string{ProfileBootstrap, ProfileStandard, ProfileScaled}, resolved.Profile) {
+		return Config{}, fail(2, "selection.invalid", "profile must be bootstrap, standard, or scaled")
 	}
 	if resolved.BoilerplateSource == "" || resolved.BoilerplateRelease == "" {
 		return Config{}, fail(2, "selection.invalid", "--boilerplate-source and --boilerplate-release are required")

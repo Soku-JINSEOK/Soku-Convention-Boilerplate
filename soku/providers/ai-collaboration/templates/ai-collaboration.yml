@@ -1,0 +1,10 @@
+schema_version: 1
+mode: advisory
+guidance:
+  require_human_review: true
+  preserve_project_ownership: true
+  allow_automated_delivery: false
+languages:
+  - en
+  - ko
+  - ja

@@ -56,11 +56,20 @@ changes share the existing outer transaction.
 
 ## Implementation Status
 
-In progress. The approved design is the implementation boundary for Issue #22.
+Implemented. Catalog-v2 profile composition, legacy fallback, profile
+transitions, public integration inputs, provider API v1 fetching and decoding,
+pending/connected state, global ownership planning, AI-collaboration example,
+schemas, rollback coverage, CI inventory, and user documentation are complete.
+Pull request CI remains the merge gate.
 
 ## Verification
 
-- Not started.
+- Passed: `go test ./...` and `go test -race ./...` from `soku/`.
+- Passed: `go vet ./...`, gofmt, goimports v0.48.0, and golangci-lint v2.12.2.
+- Passed: profile/provider contract and published JSON Schema validation.
+- Passed: Markdown lint, GitHub YAML lint, title tests, and `git diff --check`.
+- Passed: pending-to-connected, provider rollback, ownership, secret,
+  executable, traversal, legacy migration, and profile composition tests.
 
 ## AI Assistance
 
@@ -112,11 +121,19 @@ executable, traversal, reserved path, secret과 ownership 충돌은 write 전에
 
 ## 구현 현황
 
-진행 중입니다. 승인된 설계를 Issue #22 구현 경계로 사용합니다.
+구현을 완료했습니다. catalog-v2 profile 합성, legacy fallback, profile transition,
+integration 공개 입력, provider API v1 fetch/decode, pending/connected, 전역 ownership,
+AI example, schema, rollback 테스트, CI 목록과 문서를 반영했습니다. PR CI를 최종
+merge gate로 유지합니다.
 
 ## 검증
 
-- 시작 전
+- 통과: `go test ./...`, `go test -race ./...`, `go vet ./...`
+- 통과: gofmt, goimports v0.48.0, golangci-lint v2.12.2
+- 통과: profile/provider contract와 published JSON Schema 검증
+- 통과: Markdown, GitHub YAML, title test, `git diff --check`
+- 통과: pending 연결, provider rollback, ownership, secret, executable, traversal,
+  legacy migration과 profile 합성 테스트
 
 ## AI 지원
 
