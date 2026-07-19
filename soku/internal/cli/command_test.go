@@ -144,7 +144,7 @@ func TestPublicCommandSurface(t *testing.T) {
 	}
 }
 
-func TestDefaultLifecycleHandlersAreUnavailable(t *testing.T) {
+func TestDefaultTransitionHandlersRequireExplicitRelease(t *testing.T) {
 	for _, test := range []struct {
 		command string
 		args    []string
@@ -154,11 +154,34 @@ func TestDefaultLifecycleHandlersAreUnavailable(t *testing.T) {
 	} {
 		t.Run(test.command, func(t *testing.T) {
 			result := execute(test.args, testRuntime{}, defaultHandlers())
-			if result.code != 5 {
-				t.Fatalf("exit code = %d, want 5; stderr=%q", result.code, result.stderr)
+			if result.code != 2 {
+				t.Fatalf("exit code = %d, want 2; stderr=%q", result.code, result.stderr)
 			}
-			if !strings.Contains(result.stderr, "not available") || result.stdout != "" {
+			if !strings.Contains(result.stderr, "--boilerplate-release") || result.stdout != "" {
 				t.Fatalf("stdout=%q stderr=%q", result.stdout, result.stderr)
+			}
+		})
+	}
+}
+
+func TestTransitionReleaseOptionIsPassedToHandlers(t *testing.T) {
+	for _, command := range []string{"diff", "upgrade"} {
+		t.Run(command, func(t *testing.T) {
+			var got Request
+			handler := HandlerFunc(func(_ context.Context, request Request) error { got = request; return nil })
+			handlers := defaultHandlers()
+			if command == "diff" {
+				handlers.Diff = handler
+			} else {
+				handlers.Upgrade = handler
+			}
+			args := []string{command, "--boilerplate-release", "v2.0.0"}
+			if command == "upgrade" {
+				args = append(args, "--dry-run")
+			}
+			result := execute(args, testRuntime{}, handlers)
+			if result.code != 0 || got.BoilerplateRelease != "v2.0.0" || !got.ReleaseSet {
+				t.Fatalf("result=%#v request=%#v", result, got)
 			}
 		})
 	}

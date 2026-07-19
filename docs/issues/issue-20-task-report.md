@@ -64,11 +64,25 @@ cancellation, and conflicts are zero-write. Successful rollback remains exit
 
 ## Implementation Status
 
-In progress. The approved design is the implementation boundary for Issue #20.
+Implemented. The public commands, immutable compatibility checks, ordered
+three-way planner, structural shared-file merges, deletion-aware transaction,
+prior-manifest rollback, synthetic sequential-release coverage, CI inventory,
+and user documentation are complete. Pull request CI remains the final merge
+gate.
 
 ## Verification
 
-- Not started.
+- Passed: `go mod verify` from `soku/`.
+- Passed: `go test ./...` from `soku/`.
+- Passed: `go test -race ./...` from `soku/`.
+- Passed: `go vet ./...` from `soku/`.
+- Passed: gofmt, goimports v0.48.0, and golangci-lint v2.12.2.
+- Passed: `node --test templates/_shared/commitlint/*.test.mjs` (10 tests).
+- Passed: Markdown lint and GitHub YAML lint.
+- Passed: `soku/scripts/package_test.sh` (five reproducible target archives).
+- Passed: `git diff --check`.
+- Not run locally: `scripts/verify-sync-parity.sh` requires PowerShell 7; the
+  unchanged scripts remain covered by the pull request's Linux CI job.
 
 ## AI Assistance
 
@@ -122,11 +136,19 @@ core-managed drift와 ownership 충돌은 write 전에 중단하고, 두 공유 
 
 ## 구현 현황
 
-진행 중입니다. 승인된 설계를 Issue #20 구현 경계로 사용합니다.
+구현을 완료했습니다. 공개 명령, immutable 호환성 검사, 경로순 3-way planner,
+공유 파일 구조 merge, 삭제 transaction, 이전 manifest rollback, synthetic 연속
+release 테스트, CI 파일 목록과 사용자 문서를 반영했습니다. PR CI를 최종 merge
+gate로 유지합니다.
 
 ## 검증
 
-- 시작 전
+- 통과: `soku/`에서 `go mod verify`, `go test ./...`, `go test -race ./...`,
+  `go vet ./...`
+- 통과: gofmt, goimports v0.48.0, golangci-lint v2.12.2
+- 통과: contribution-title 10개 테스트, Markdown lint, GitHub YAML lint
+- 통과: five-target package snapshot과 `git diff --check`
+- 로컬 미실행: PowerShell 7이 없어 sync parity는 PR의 Linux CI에서 최종 확인
 
 ## AI 지원
 

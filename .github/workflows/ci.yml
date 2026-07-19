@@ -146,6 +146,9 @@ jobs:
             soku/internal/initcmd/plan.go
             soku/internal/initcmd/source.go
             soku/internal/initcmd/transaction.go
+            soku/internal/initcmd/upgrade.go
+            soku/internal/initcmd/upgrade_merge.go
+            soku/internal/initcmd/upgrade_test.go
             soku/internal/initcmd/verify.go
             soku/internal/manifest/manifest.go
             soku/internal/manifest/manifest_test.go
