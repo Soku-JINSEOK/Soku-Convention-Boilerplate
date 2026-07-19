@@ -52,12 +52,18 @@ and home paths removed.
 
 ## Implementation Status
 
-In progress. This report covers only the first `Related to #21` core gate. The
-provider conformance phase remains a separate final PR after Issue #22.
+Implemented for the first `Related to #21` core-gate boundary. The hermetic
+fixtures, OS filesystem-risk matrix, sanitized artifact runner, event coverage,
+template runtime triggers, release dependency, and user documentation are
+complete. Provider conformance remains a separate final PR after Issue #22.
 
 ## Verification
 
-- Not started.
+- Passed: `soku/scripts/run_lifecycle_gate.sh` with synthetic releases.
+- Passed: `go test ./...` and `go test -race ./...` from `soku/`.
+- Passed: `go vet ./...`, gofmt, goimports v0.48.0, and golangci-lint v2.12.2.
+- Passed: repository Markdown lint, GitHub YAML lint, and `git diff --check`.
+- Pending: pull request Linux/macOS/Windows lifecycle and runtime-template jobs.
 
 ## AI Assistance
 
@@ -106,12 +112,18 @@ lint, typecheck, test, build를 담당합니다.
 
 ## 구현 현황
 
-진행 중입니다. 이 보고서의 첫 PR은 `Related to #21` core gate만 다루며,
-provider conformance는 Issue #22 이후 별도 최종 PR로 유지합니다.
+첫 `Related to #21` core-gate 경계의 구현을 완료했습니다. hermetic fixture, OS
+filesystem-risk matrix, sanitized artifact runner, event 범위, template runtime
+trigger, release 의존성과 사용자 문서를 반영했습니다. provider conformance는
+Issue #22 이후 별도 최종 PR로 유지합니다.
 
 ## 검증
 
-- 시작 전
+- 통과: synthetic release를 사용한 `soku/scripts/run_lifecycle_gate.sh`
+- 통과: `go test ./...`, `go test -race ./...`, `go vet ./...`
+- 통과: gofmt, goimports v0.48.0, golangci-lint v2.12.2
+- 통과: Markdown, GitHub YAML, `git diff --check`
+- 대기: PR의 Linux/macOS/Windows lifecycle 및 runtime-template job
 
 ## AI 지원
 
