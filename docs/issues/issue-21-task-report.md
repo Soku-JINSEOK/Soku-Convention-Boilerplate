@@ -72,6 +72,9 @@ three operating systems and remains the CLI release dependency.
 - Passed in PR #31: core lifecycle and native CLI jobs on Linux, macOS, and
   Windows; JS/TS, Python, Go, Java, MySQL, PostgreSQL, gcloud, AWS/Azure;
   repository hygiene, sync parity, quality/race, and package snapshot.
+- Passed in PR #33: lifecycle provider conformance and native CLI on Linux,
+  macOS, and Windows; all runtime templates, sync parity, quality/race,
+  repository hygiene, and the five-target package snapshot.
 
 ## AI Assistance
 
@@ -138,6 +141,9 @@ hermetic package가 세 OS에서 실행되며 CLI release 의존성을 유지합
   ownership, compatibility matrix
 - PR #31 통과: Linux/macOS/Windows core lifecycle와 native CLI, JS/TS, Python,
   Go, Java, MySQL, PostgreSQL, gcloud, AWS/Azure, 기존 전체 필수 CI
+- PR #33 통과: Linux/macOS/Windows lifecycle provider conformance와 native CLI,
+  전체 runtime template, sync parity, quality/race, repository hygiene,
+  five-target package snapshot
 
 ## AI 지원
 
