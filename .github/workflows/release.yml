@@ -1,0 +1,175 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      boilerplate-tag:
+        description: Boilerplate tag to validate without publishing
+        required: true
+        default: v1.0.0
+      cli-tag:
+        description: CLI tag to validate without publishing
+        required: true
+        default: soku/v0.1.0
+  push:
+    tags:
+      - "v*"
+      - "soku/v*"
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    name: Full repository gates
+    uses: ./.github/workflows/ci.yml
+
+  templates:
+    name: Full runtime template gates
+    uses: ./.github/workflows/templates-ci.yml
+
+  release-metadata:
+    name: Verify release identity and signed records
+    runs-on: ubuntu-latest
+    outputs:
+      is-cli: ${{ steps.metadata.outputs.is-cli }}
+      notes-file: ${{ steps.metadata.outputs.notes-file }}
+      tag: ${{ steps.metadata.outputs.tag }}
+    steps:
+      - name: Checkout repository and tags
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Validate manual preflight records
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          BOILERPLATE_TAG: ${{ inputs.boilerplate-tag }}
+          CLI_TAG: ${{ inputs.cli-tag }}
+        shell: bash
+        run: |
+          boilerplate_notes="docs/releases/${BOILERPLATE_TAG//\//-}.md"
+          cli_notes="docs/releases/${CLI_TAG//\//-}.md"
+          scripts/verify-release-tag.sh \
+            --tag "$BOILERPLATE_TAG" \
+            --notes-file "$boilerplate_notes" \
+            --check-notes-only
+          scripts/verify-release-tag.sh \
+            --tag "$CLI_TAG" \
+            --notes-file "$cli_notes" \
+            --check-notes-only
+
+      - name: Resolve tag release record
+        if: github.event_name == 'push'
+        id: metadata
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        shell: bash
+        run: |
+          notes_file="docs/releases/${RELEASE_TAG//\//-}.md"
+          test -f "$notes_file"
+          is_cli=false
+          if [[ "$RELEASE_TAG" == soku/* ]]; then
+            is_cli=true
+          fi
+          echo "tag=$RELEASE_TAG" >>"$GITHUB_OUTPUT"
+          echo "notes-file=$notes_file" >>"$GITHUB_OUTPUT"
+          echo "is-cli=$is_cli" >>"$GITHUB_OUTPUT"
+
+      - name: Verify paired signed annotated tags
+        if: github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.metadata.outputs.tag }}
+          RELEASE_NOTES: ${{ steps.metadata.outputs.notes-file }}
+        shell: bash
+        run: |
+          curl --fail --silent --show-error --location \
+            https://github.com/Soku-JINSEOK.gpg | gpg --batch --import
+
+          companion_tag="$(sed -n 's/^Companion tag: //p' "$RELEASE_NOTES")"
+          test -n "$companion_tag"
+          companion_notes="docs/releases/${companion_tag//\//-}.md"
+          test -f "$companion_notes"
+
+          git fetch --force origin \
+            "refs/tags/$RELEASE_TAG:refs/tags/$RELEASE_TAG" \
+            "refs/tags/$companion_tag:refs/tags/$companion_tag"
+          scripts/verify-release-tag.sh \
+            --tag "$RELEASE_TAG" \
+            --notes-file "$RELEASE_NOTES"
+          scripts/verify-release-tag.sh \
+            --tag "$companion_tag" \
+            --notes-file "$companion_notes"
+
+          release_commit="$(git rev-list -n 1 "$RELEASE_TAG")"
+          companion_commit="$(git rev-list -n 1 "$companion_tag")"
+          test "$release_commit" = "$companion_commit"
+          test "$release_commit" = "$GITHUB_SHA"
+
+          for tag in "$RELEASE_TAG" "$companion_tag"; do
+            tag_object="$(git rev-parse "refs/tags/$tag")"
+            verified="$(gh api \
+              "repos/$GITHUB_REPOSITORY/git/tags/$tag_object" \
+              --jq '.verification.verified')"
+            test "$verified" = true
+          done
+
+  deliver:
+    name: Publish GitHub Release
+    needs:
+      - ci
+      - templates
+      - release-metadata
+    if: >-
+      github.event_name == 'push' &&
+      github.repository == 'Soku-JINSEOK/Soku-Convention-Boilerplate'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout verified source
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Setup Go for CLI packaging
+        if: needs.release-metadata.outputs.is-cli == 'true'
+        uses: actions/setup-go@v6
+        with:
+          go-version: "1.26.x"
+          cache-dependency-path: soku/go.sum
+
+      - name: Build five CLI archives and checksums
+        if: needs.release-metadata.outputs.is-cli == 'true'
+        env:
+          RELEASE_TAG: ${{ needs.release-metadata.outputs.tag }}
+        shell: bash
+        run: |
+          version="${RELEASE_TAG#soku/}"
+          commit="$(git rev-parse "$GITHUB_SHA")"
+          commit_epoch="$(git show -s --format=%ct "$GITHUB_SHA")"
+          built_at="$(date -u -d "@$commit_epoch" +%Y-%m-%dT%H:%M:%SZ)"
+          soku/scripts/package.sh \
+            --version "$version" \
+            --commit "$commit" \
+            --built-at "$built_at" \
+            --output-dir soku/dist
+
+      - name: Publish CLI release and assets
+        if: needs.release-metadata.outputs.is-cli == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ needs.release-metadata.outputs.tag }}
+        run: >-
+          gh release create "$RELEASE_TAG" soku/dist/*
+          --verify-tag --notes-from-tag --latest=false
+
+      - name: Publish boilerplate release
+        if: needs.release-metadata.outputs.is-cli != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ needs.release-metadata.outputs.tag }}
+        run: >-
+          gh release create "$RELEASE_TAG"
+          --verify-tag --notes-from-tag --latest=false
