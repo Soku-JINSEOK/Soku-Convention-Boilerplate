@@ -63,7 +63,9 @@ complete. Provider conformance remains a separate final PR after Issue #22.
 - Passed: `go test ./...` and `go test -race ./...` from `soku/`.
 - Passed: `go vet ./...`, gofmt, goimports v0.48.0, and golangci-lint v2.12.2.
 - Passed: repository Markdown lint, GitHub YAML lint, and `git diff --check`.
-- Pending: pull request Linux/macOS/Windows lifecycle and runtime-template jobs.
+- Passed in PR #31: core lifecycle and native CLI jobs on Linux, macOS, and
+  Windows; JS/TS, Python, Go, Java, MySQL, PostgreSQL, gcloud, AWS/Azure;
+  repository hygiene, sync parity, quality/race, and package snapshot.
 
 ## AI Assistance
 
@@ -123,7 +125,8 @@ Issue #22 이후 별도 최종 PR로 유지합니다.
 - 통과: `go test ./...`, `go test -race ./...`, `go vet ./...`
 - 통과: gofmt, goimports v0.48.0, golangci-lint v2.12.2
 - 통과: Markdown, GitHub YAML, `git diff --check`
-- 대기: PR의 Linux/macOS/Windows lifecycle 및 runtime-template job
+- PR #31 통과: Linux/macOS/Windows core lifecycle와 native CLI, JS/TS, Python,
+  Go, Java, MySQL, PostgreSQL, gcloud, AWS/Azure, 기존 전체 필수 CI
 
 ## AI 지원
 
