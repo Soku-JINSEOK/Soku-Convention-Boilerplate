@@ -67,8 +67,8 @@ cancellation, and conflicts are zero-write. Successful rollback remains exit
 Implemented. The public commands, immutable compatibility checks, ordered
 three-way planner, structural shared-file merges, deletion-aware transaction,
 prior-manifest rollback, synthetic sequential-release coverage, CI inventory,
-and user documentation are complete. Pull request CI remains the final merge
-gate.
+and user documentation are complete. Pull request #30 passed every required CI
+job on Linux, macOS, and Windows.
 
 ## Verification
 
@@ -81,8 +81,8 @@ gate.
 - Passed: Markdown lint and GitHub YAML lint.
 - Passed: `soku/scripts/package_test.sh` (five reproducible target archives).
 - Passed: `git diff --check`.
-- Not run locally: `scripts/verify-sync-parity.sh` requires PowerShell 7; the
-  unchanged scripts remain covered by the pull request's Linux CI job.
+- Passed in PR #30 CI: repository hygiene, sync parity, Linux/macOS/Windows
+  native checks, quality/race checks, and the five-target package snapshot.
 
 ## AI Assistance
 
@@ -138,8 +138,8 @@ core-managed drift와 ownership 충돌은 write 전에 중단하고, 두 공유 
 
 구현을 완료했습니다. 공개 명령, immutable 호환성 검사, 경로순 3-way planner,
 공유 파일 구조 merge, 삭제 transaction, 이전 manifest rollback, synthetic 연속
-release 테스트, CI 파일 목록과 사용자 문서를 반영했습니다. PR CI를 최종 merge
-gate로 유지합니다.
+release 테스트, CI 파일 목록과 사용자 문서를 반영했습니다. PR #30의 Linux,
+macOS, Windows 필수 CI를 모두 통과했습니다.
 
 ## 검증
 
@@ -148,7 +148,8 @@ gate로 유지합니다.
 - 통과: gofmt, goimports v0.48.0, golangci-lint v2.12.2
 - 통과: contribution-title 10개 테스트, Markdown lint, GitHub YAML lint
 - 통과: five-target package snapshot과 `git diff --check`
-- 로컬 미실행: PowerShell 7이 없어 sync parity는 PR의 Linux CI에서 최종 확인
+- PR #30 CI 통과: repository hygiene, sync parity, Linux/macOS/Windows native,
+  quality/race와 five-target package snapshot
 
 ## AI 지원
 
