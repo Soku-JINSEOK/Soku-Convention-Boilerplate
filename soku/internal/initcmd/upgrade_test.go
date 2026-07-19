@@ -95,6 +95,25 @@ func TestTransitionForwardMergeDeletionDryRunApplyAndNoOp(t *testing.T) {
 	assertAction(t, noOp.Changes, updated.Output, "unchanged")
 }
 
+func TestTransitionSameReleaseIsImmediateNoOp(t *testing.T) {
+	snapshot := repositorySnapshot(t)
+	root := initializeRelease(t, snapshot)
+	report, err := RunTransition(
+		context.Background(),
+		TransitionOptions{Root: root, TargetRelease: snapshot.Release, Yes: true},
+		releaseFetcher{snapshot.Release: snapshot},
+		true,
+	)
+	if err != nil || report.State != "no-op" || report.HasChanges {
+		t.Fatalf("report=%#v err=%v", report, err)
+	}
+	for _, change := range report.Changes {
+		if change.Action != "unchanged" {
+			t.Fatalf("change=%#v", change)
+		}
+	}
+}
+
 func TestTransitionAddsNewlyDeclaredOutput(t *testing.T) {
 	target := repositorySnapshot(t)
 	target.Release = "v1.1.0"

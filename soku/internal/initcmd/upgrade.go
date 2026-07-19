@@ -361,6 +361,13 @@ func planTransition(root string, document manifest.Document, baseTree, targetTre
 			result = append(result, change)
 			continue
 		}
+		// An unchanged source baseline with an untouched working file is already
+		// converged. Avoid reformatting mergeable files during a same-release run.
+		if old.BaselineSHA256 == next.BaselineSHA256 && currentHash == file.BaselineSHA256 {
+			next.Action = "unchanged"
+			result = append(result, next)
+			continue
+		}
 		if file.Class != "mergeable" {
 			if currentHash == next.BaselineSHA256 {
 				next.Action = "unchanged"

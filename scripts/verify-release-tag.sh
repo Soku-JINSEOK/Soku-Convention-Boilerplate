@@ -52,7 +52,7 @@ if [[ "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
   capture_line "Provider compatibility: "
   capture_line "Companion tag: "
   companion_tag="$(sed -n 's/^Companion tag: //p' "$notes_file")"
-  if [[ ! "$companion_tag" =~ ^soku/v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+  if [[ "$companion_tag" != "none" && ! "$companion_tag" =~ ^soku/v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
     echo "Error: boilerplate companion must be a soku/vMAJOR.MINOR.PATCH tag." >&2
     exit 1
   fi
@@ -68,7 +68,7 @@ elif [[ "$tag" =~ ^soku/v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
   capture_line "Lifecycle conformance evidence: "
   capture_line "Companion tag: "
   companion_tag="$(sed -n 's/^Companion tag: //p' "$notes_file")"
-  if [[ ! "$companion_tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+  if [[ "$companion_tag" != "none" && ! "$companion_tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
     echo "Error: soku companion must be a vMAJOR.MINOR.PATCH tag." >&2
     exit 1
   fi

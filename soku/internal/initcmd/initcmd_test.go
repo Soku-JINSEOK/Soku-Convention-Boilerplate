@@ -288,6 +288,26 @@ func TestArchiveSecurityValidation(t *testing.T) {
 	}
 }
 
+func TestArchiveAcceptsPAXGlobalHeader(t *testing.T) {
+	archive := makeArchive(t, []tarItem{
+		{kind: tar.TypeXGlobalHeader, pax: map[string]string{"comment": "github"}},
+		{name: "root/soku/catalog/core-v1.json", body: "{}"},
+	})
+	if _, err := extractArchive(archive); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestArchiveAllowsManifestSecretFixtures(t *testing.T) {
+	archive := makeArchive(t, []tarItem{
+		{name: "root/soku/testdata/manifest-v1/invalid/raw-configuration.json", body: `{"password":"must-not-be-stored"}`},
+		{name: "root/soku/catalog/core-v1.json", body: "{}"},
+	})
+	if _, err := extractArchive(archive); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestSourceAndPathValidation(t *testing.T) {
 	for _, value := range []string{"http://github.com/o/r", "https://user@github.com/o/r", "https://gitlab.com/o/r", "https://github.com/o/r?token=x", "https://github.com/o/r#x"} {
 		if _, _, err := parseGitHubSource(value); failureCode(err) != 2 {
@@ -348,6 +368,7 @@ func TestVerifyUsesOnlyBuiltInArgv(t *testing.T) {
 type tarItem struct {
 	name, body, link string
 	kind             byte
+	pax              map[string]string
 }
 
 type roundTripFunc func(*http.Request) (*http.Response, error)
@@ -367,6 +388,9 @@ func makeArchive(t *testing.T, items []tarItem) []byte {
 			kind = tar.TypeReg
 		}
 		header := &tar.Header{Name: item.name, Typeflag: kind, Mode: 0o644, Size: int64(len(item.body)), Linkname: item.link}
+		if kind == tar.TypeXGlobalHeader {
+			header = &tar.Header{Typeflag: kind, PAXRecords: item.pax}
+		}
 		if kind == tar.TypeSymlink {
 			header.Size = 0
 		}
