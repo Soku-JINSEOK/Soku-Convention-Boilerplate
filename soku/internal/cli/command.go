@@ -181,7 +181,7 @@ func newLifecycleCommand(
 			if mutation && !dryRun && !yes && !interactive {
 				return invocationError("non-interactive mutation requires --dry-run or --yes")
 			}
-			if name == "init" && out.json && !dryRun && !yes {
+			if mutation && out.json && !dryRun && !yes {
 				return invocationError("--json mutation requires --yes; use --json --dry-run for a plan")
 			}
 
@@ -198,7 +198,8 @@ func newLifecycleCommand(
 				PromptOutput:   deps.stderr,
 				SokuVersion:    deps.metadata.Version,
 			}
-			if name == "init" {
+			switch name {
+			case "init":
 				request.BoilerplateSource, request.BoilerplateRelease, request.Stacks, request.Profile = source, release, append([]string(nil), stacks...), profile
 				request.ProjectName, request.ModulePath, request.JavaGroup, request.ServiceName, request.Verify = projectName, modulePath, javaGroup, serviceName, verify
 				flags := command.Flags()
@@ -211,6 +212,9 @@ func newLifecycleCommand(
 				request.JavaGroupSet = flags.Changed("java-group")
 				request.ServiceNameSet = flags.Changed("service-name")
 				request.VerifySet = flags.Changed("verify")
+			case "diff", "upgrade":
+				request.BoilerplateRelease = release
+				request.ReleaseSet = command.Flags().Changed("boilerplate-release")
 			}
 			result, err := invokeHandler(command.Context(), handler, request)
 			if err != nil {
@@ -229,7 +233,8 @@ func newLifecycleCommand(
 		command.Flags().BoolVar(&dryRun, "dry-run", false, "produce a complete plan without writing")
 		command.Flags().BoolVar(&yes, "yes", false, "approve an already validated mutation plan")
 	}
-	if name == "init" {
+	switch name {
+	case "init":
 		flags := command.Flags()
 		flags.StringVar(&source, "boilerplate-source", "", "public GitHub HTTPS boilerplate repository")
 		flags.StringVar(&release, "boilerplate-release", "", "exact boilerplate vMAJOR.MINOR.PATCH release")
@@ -240,6 +245,8 @@ func newLifecycleCommand(
 		flags.StringVar(&javaGroup, "java-group", "", "Java group/package prefix")
 		flags.StringVar(&serviceName, "service-name", "", "service name")
 		flags.BoolVar(&verify, "verify", false, "verify the complete staging tree before applying")
+	case "diff", "upgrade":
+		command.Flags().StringVar(&release, "boilerplate-release", "", "exact target boilerplate vMAJOR.MINOR.PATCH release")
 	}
 	command.InitDefaultHelpFlag()
 	command.Flags().Lookup("help").Shorthand = ""
@@ -390,6 +397,9 @@ func helpFor(command *cobra.Command) string {
 			"      --java-group string          Java group/package prefix\n" +
 			"      --service-name string        service name\n" +
 			"      --verify                     verify the staging tree before applying\n"
+	}
+	if command.Name() == "diff" || command.Name() == "upgrade" {
+		initFlags = "      --boilerplate-release string exact target boilerplate vMAJOR.MINOR.PATCH release\n"
 	}
 	return fmt.Sprintf(`%s.
 

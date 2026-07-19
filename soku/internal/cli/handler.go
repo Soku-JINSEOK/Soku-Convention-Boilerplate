@@ -83,8 +83,8 @@ func defaultHandlers() Handlers {
 	return Handlers{
 		Init:    initHandler(),
 		Status:  statusHandler(),
-		Diff:    unavailableHandler("diff"),
-		Upgrade: unavailableHandler("upgrade"),
+		Diff:    transitionHandler(false),
+		Upgrade: transitionHandler(true),
 	}
 }
 
@@ -141,8 +141,43 @@ func statusHandler() Handler {
 	})
 }
 
-func unavailableHandler(command string) Handler {
-	return HandlerFunc(func(context.Context, Request) error {
-		return unavailableError(command)
+func transitionHandler(apply bool) Handler {
+	return ResultHandlerFunc(func(ctx context.Context, request Request) (Result, error) {
+		root, err := os.Getwd()
+		if err != nil {
+			return Result{}, err
+		}
+		confirm := func(report initcmd.TransitionReport) (bool, error) {
+			if request.PromptOutput == nil || request.Input == nil {
+				return false, fmt.Errorf("interactive streams are unavailable")
+			}
+			if _, err := fmt.Fprint(request.PromptOutput, initcmd.HumanTransition("upgrade", report)+"Apply this plan? [y/N] "); err != nil {
+				return false, err
+			}
+			var answer string
+			_, err := fmt.Fscanln(request.Input, &answer)
+			if err != nil && err != io.EOF {
+				return false, err
+			}
+			answer = strings.ToLower(strings.TrimSpace(answer))
+			return answer == "y" || answer == "yes", nil
+		}
+		report, err := initcmd.RunTransition(ctx, initcmd.TransitionOptions{
+			Root: root, ConfigPath: request.ConfigPath, TargetRelease: request.BoilerplateRelease, DryRun: request.DryRun,
+			Yes: request.Yes, Interactive: request.Interactive, Confirm: confirm,
+			SokuVersion: request.SokuVersion,
+		}, nil, apply)
+		if err != nil {
+			var failure *initcmd.Failure
+			if errors.As(err, &failure) {
+				return Result{}, &ExitError{Code: ExitCode(failure.Code), Key: failure.Key, Message: failure.Message, Cause: failure, Data: failure.Data}
+			}
+			return Result{}, err
+		}
+		code := ExitSuccess
+		if !apply && report.HasChanges {
+			code = ExitChangesFound
+		}
+		return Result{Human: initcmd.HumanTransition(request.Command, report), Data: report, Code: code}, nil
 	})
 }

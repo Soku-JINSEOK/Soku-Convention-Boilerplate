@@ -3,8 +3,8 @@
 `soku` is the cross-platform command for the lifecycle contract in
 [`SOKU_LIFECYCLE.md`](../docs/standards/SOKU_LIFECYCLE.md). It provides stable
 parsing and output, transactional `init`, the portable manifest-v1 record, and
-read-only `status` diagnostics. `diff` and `upgrade` remain unavailable until
-their roadmap issues implement them.
+read-only `status` diagnostics, immutable release comparison, and transactional
+core upgrades.
 
 ## Transactional Init
 
@@ -53,6 +53,32 @@ exit `4` before a journal, backup, managed file, or manifest is written. Optiona
 `--verify` runs only built-in argv sequences against an isolated staging tree.
 Apply failure with complete rollback exits `7`; incomplete rollback retains the
 mode-restricted journal and exits `8` with recovery data.
+
+## Diff and Upgrade
+
+Run release transitions from an initialized project with the manifest's
+recorded source. A transition cannot select a different source, track a branch,
+or downgrade:
+
+```bash
+soku diff --boilerplate-release v1.1.0
+soku upgrade --boilerplate-release v1.1.0 --dry-run
+soku upgrade --boilerplate-release v1.1.0 --yes
+```
+
+Both the recorded release and target tag must resolve to their immutable
+40-character commits. `diff` writes nothing and exits `3` when either managed
+content or the release identity would change; it exits `0` for an exact no-op.
+An upgrade dry-run performs the same complete read-side validation but always
+exits `0` after producing a valid plan.
+
+Plans list paths in order as `added`, `updated`, `removed`, `merged`,
+`unchanged`, `locally-modified`, or `conflict`. Core-managed drift and
+project-owned collisions stop with exit `4`. `.gitignore` is merged as a line
+set and `.editorconfig` by section and key so independent local entries survive
+a compatible forward transition. Creates, replacements, merges, removals, and
+the prior manifest share one backup journal; the target manifest is replaced
+last. A clean upgrade to the already recorded release is a no-op.
 
 ## Manifest and Status
 

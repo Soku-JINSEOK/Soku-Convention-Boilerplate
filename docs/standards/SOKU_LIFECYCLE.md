@@ -82,6 +82,12 @@ transaction with the manifest replaced last.
 Issue #17 may add subcommand-specific flags, but it must implement these names
 and responsibilities without weakening their safety boundaries.
 
+The core release-transition implementation delivered for Issue #20 accepts
+`--boilerplate-release` on `diff` and `upgrade`, obtains the source only from the
+durable manifest, and supports the manifest-v1 `standard` profile. Profile and
+integration transitions remain within Issue #22's separately approved wire
+format and compatibility boundary.
+
 ### Common Options
 
 All commands use the following common option names where applicable:

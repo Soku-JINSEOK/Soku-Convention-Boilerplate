@@ -16,9 +16,10 @@ import (
 )
 
 type transactionRecord struct {
-	ID    string            `json:"id"`
-	State string            `json:"state"`
-	Paths []transactionPath `json:"paths"`
+	ID              string            `json:"id"`
+	State           string            `json:"state"`
+	ManifestExisted bool              `json:"manifest_existed"`
+	Paths           []transactionPath `json:"paths"`
 }
 type transactionPath struct {
 	Path    string `json:"path"`
@@ -38,6 +39,21 @@ func applyTransaction(root string, changes []Change, document manifest.Document,
 		return id, fail(7, "apply.rolled_back", "create transaction: %v", err)
 	}
 	record := transactionRecord{ID: id, State: "prepared"}
+	manifestPath := filepath.Join(root, filepath.FromSlash(manifest.ManifestPath))
+	if data, readErr := os.ReadFile(manifestPath); readErr == nil {
+		backup := filepath.Join(backupRoot, filepath.FromSlash(manifest.ManifestPath))
+		if err := os.MkdirAll(filepath.Dir(backup), 0o700); err != nil {
+			_ = os.RemoveAll(directory)
+			return id, fail(7, "apply.rolled_back", "backup previous manifest: %v", err)
+		}
+		if err := os.WriteFile(backup, data, 0o600); err != nil {
+			_ = os.RemoveAll(directory)
+			return id, fail(7, "apply.rolled_back", "backup previous manifest: %v", err)
+		}
+		record.ManifestExisted = true
+	} else if !errors.Is(readErr, fs.ErrNotExist) {
+		return rollbackResult(root, directory, record, readErr, hook)
+	}
 	active := make([]Change, 0, len(changes))
 	for _, change := range changes {
 		if change.Action != "unchanged" {
@@ -78,6 +94,13 @@ func applyTransaction(root string, changes []Change, document manifest.Document,
 			}
 		}
 		target := filepath.Join(root, filepath.FromSlash(change.Path))
+		if change.Action == "removed" || change.Action == "remove" {
+			if err := os.Remove(target); err != nil && !errors.Is(err, fs.ErrNotExist) {
+				return rollbackResult(root, directory, record, err, hook)
+			}
+			removeEmptyParents(filepath.Dir(target), root)
+			continue
+		}
 		if err := os.MkdirAll(filepath.Dir(target), 0o755); err != nil {
 			return rollbackResult(root, directory, record, err, hook)
 		}
@@ -143,7 +166,21 @@ func rollbackResult(root, directory string, record transactionRecord, applyErr e
 		}
 	}
 	_ = os.Remove(filepath.Join(root, filepath.FromSlash(manifest.PendingPath)))
-	_ = os.Remove(filepath.Join(root, filepath.FromSlash(manifest.ManifestPath)))
+	manifestPath := filepath.Join(root, filepath.FromSlash(manifest.ManifestPath))
+	if record.ManifestExisted {
+		data, err := os.ReadFile(filepath.Join(directory, "backup", filepath.FromSlash(manifest.ManifestPath)))
+		if err != nil {
+			return id, fail(8, "rollback.failed", "apply failed and previous manifest cannot be read; preserve .soku/transactions/%s", id)
+		}
+		if err := os.MkdirAll(filepath.Dir(manifestPath), 0o700); err != nil {
+			return id, fail(8, "rollback.failed", "apply failed and previous manifest directory cannot be restored; preserve .soku/transactions/%s", id)
+		}
+		if err := os.WriteFile(manifestPath, data, 0o600); err != nil {
+			return id, fail(8, "rollback.failed", "apply failed and previous manifest cannot be restored; preserve .soku/transactions/%s", id)
+		}
+	} else {
+		_ = os.Remove(manifestPath)
+	}
 	if err := os.RemoveAll(directory); err != nil {
 		return id, fail(8, "rollback.failed", "apply failed and rollback cleanup failed; preserve .soku/transactions/%s", id)
 	}

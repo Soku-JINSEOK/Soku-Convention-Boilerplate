@@ -72,8 +72,8 @@ func validateDeclarations(scope string, files []CatalogFile, seenOutputs map[str
 	for _, output := range catalogOutputs[scope] {
 		allowed[output] = true
 	}
-	if len(files) != len(allowed) {
-		return fail(5, "catalog.incompatible", "%s must declare the fixed standard output set", scope)
+	if (scope == "shared" && len(files) != len(allowed)) || len(files) > len(allowed) {
+		return fail(5, "catalog.incompatible", "%s declarations exceed the bounded standard output set", scope)
 	}
 	for _, file := range files {
 		if file.Owner != "core" || (file.Class != "core-managed" && file.Class != "mergeable") || (file.ContentMode != "text" && file.ContentMode != "binary") || !contains([]string{"render", "gitignore-merge", "editorconfig-merge"}, file.Strategy) {
