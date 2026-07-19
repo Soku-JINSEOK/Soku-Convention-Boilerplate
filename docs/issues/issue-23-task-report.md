@@ -44,13 +44,21 @@ Do not create a tag, GitHub Release, or downstream mutation.
 
 ## Implementation Status
 
-Approved for implementation. Actual audit and verification results will be
-recorded before the roadmap PR is marked ready.
+Implemented. Release notes now require explicit compatibility and migration
+records for both independent version axes, and repository hygiene retains every
+roadmap task report. Issues #16–#22 are closed with `status:done`, no
+implementation PR is open, and the complete Issue/PR metadata audit found no
+missing assignee or `type:*` label.
 
 ## Verification
 
-- Pending: release compatibility documentation and repository checks.
-- Pending: final GitHub child-state, open-PR, and metadata audit.
+- Passed: Markdown lint, GitHub YAML lint, contribution-title tests, and
+  `git diff --check`.
+- Passed: approved task report audit for Issues #16–#23.
+- Passed: Issues #16–#22 closed with `status:done`; no open implementation PR.
+- Passed: all Issues and PRs have an assignee and at least one `type:*` label.
+- Passed in PRs #30–#33: lifecycle/runtime, three-OS conformance, sync parity,
+  quality/race, repository hygiene, and five-target package snapshot.
 
 ## AI Assistance
 
@@ -98,13 +106,19 @@ compatibility와 migration 기록을 정의하고, 모든 하위 Issue·PR·CI·
 
 ## 구현 현황
 
-구현 승인 상태입니다. roadmap PR을 ready로 전환하기 전에 실제 감사와 검증 결과를
-기록합니다.
+구현을 완료했습니다. 두 독립 version 축의 release note에 compatibility/migration
+기록을 요구하고 모든 roadmap task report를 repository hygiene에 포함했습니다.
+Issues #16–#22는 `status:done`으로 닫혔고 열린 구현 PR이 없으며 전체 Issue/PR 감사에서
+assignee 또는 `type:*` label 누락이 없었습니다.
 
 ## 검증
 
-- 대기: release compatibility 문서와 repository 검사
-- 대기: 하위 Issue, 열린 PR, metadata 최종 감사
+- 통과: Markdown, GitHub YAML, contribution-title, `git diff --check`
+- 통과: #16–#23 승인 task report 감사
+- 통과: #16–#22 `status:done` 종료와 열린 구현 PR 부재
+- 통과: 모든 Issue/PR의 assignee와 최소 하나의 `type:*` label
+- PR #30–#33 통과: lifecycle/runtime, 세 OS conformance, sync parity,
+  quality/race, repository hygiene, five-target package snapshot
 
 ## AI 지원
 

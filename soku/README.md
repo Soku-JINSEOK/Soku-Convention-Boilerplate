@@ -245,12 +245,15 @@ The CLI and boilerplate use independent tags. Boilerplate policy releases use
 `v*`; CLI releases use signed, annotated `soku/v*` tags. Before creating a CLI
 tag:
 
-1. Verify the version and supported Go toolchain.
-2. Run the complete repository and package verification suite.
-3. Create and verify a signed tag, for example
+1. Prepare the CLI compatibility and migration record required by
+   [`RELEASE_AND_SYNC.md`](../docs/standards/RELEASE_AND_SYNC.md), including
+   manifest, catalog, provider API, profile, and recovery boundaries.
+2. Verify the version and supported Go toolchain.
+3. Run the complete repository and package verification suite.
+4. Create and verify a signed tag, for example
    `git tag -s soku/v0.1.0 -m "soku v0.1.0"` and
    `git tag -v soku/v0.1.0`.
-4. Push the tag only after review. The guarded release job packages the tag's
+5. Push the tag only after review. The guarded release job packages the tag's
    exact commit and creates the GitHub Release from the same script used in CI.
 
 This workflow is designed for a public repository using standard GitHub-hosted
