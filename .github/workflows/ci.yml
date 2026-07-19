@@ -124,6 +124,7 @@ jobs:
             scripts/verify-sync-parity.sh
             soku/README.md
             soku/THIRD_PARTY_NOTICES.md
+            soku/catalog/core-v1.json
             soku/go.mod
             soku/go.sum
             soku/main.go
@@ -136,6 +137,16 @@ jobs:
             soku/internal/cli/output.go
             soku/internal/cli/runtime.go
             soku/internal/cli/runtime_test.go
+            soku/internal/initcmd/catalog.go
+            soku/internal/initcmd/config.go
+            soku/internal/initcmd/engine.go
+            soku/internal/initcmd/initcmd_test.go
+            soku/internal/initcmd/merge.go
+            soku/internal/initcmd/model.go
+            soku/internal/initcmd/plan.go
+            soku/internal/initcmd/source.go
+            soku/internal/initcmd/transaction.go
+            soku/internal/initcmd/verify.go
             soku/internal/manifest/manifest.go
             soku/internal/manifest/manifest_test.go
             soku/internal/manifest/replace_unix.go
@@ -147,6 +158,7 @@ jobs:
             soku/internal/status/status_test.go
             soku/install_test.go
             soku/schema/manifest-v1.schema.json
+            soku/schema/catalog-core-v1.schema.json
             soku/scripts/package.sh
             soku/scripts/package_test.sh
             soku/testdata/manifest-v1/invalid/credential-source.json

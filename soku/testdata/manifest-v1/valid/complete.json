@@ -12,7 +12,8 @@
       "go",
       "postgresql"
     ],
-    "configuration_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    "module_path": "github.com/example/project",
+    "configuration_hash": "2f5a3d95e02474fb266185f2d0720d709da5be41cafc453ba2c1d3e419e2ca79"
   },
   "files": [
     {

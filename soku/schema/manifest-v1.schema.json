@@ -70,6 +70,10 @@
           "items": { "type": "string", "minLength": 1 },
           "uniqueItems": true
         },
+        "project_name": { "type": "string", "minLength": 1 },
+        "module_path": { "type": "string", "minLength": 1 },
+        "java_group": { "type": "string", "minLength": 1 },
+        "service_name": { "type": "string", "minLength": 1 },
         "configuration_hash": { "$ref": "#/$defs/sha256" }
       }
     },
