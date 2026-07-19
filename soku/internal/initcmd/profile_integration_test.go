@@ -40,7 +40,8 @@ func TestPublishedProfileAndProviderContracts(t *testing.T) {
 	}
 	crlfFiles := map[string][]byte{}
 	for path, content := range files {
-		crlfFiles[path] = bytes.ReplaceAll(content, []byte("\n"), []byte("\r\n"))
+		canonical := []byte(normalizeText(content))
+		crlfFiles[path] = bytes.ReplaceAll(canonical, []byte("\n"), []byte("\r\n"))
 	}
 	if _, err := DecodeProviderBundle(providerData, crlfFiles); err != nil {
 		t.Fatalf("CRLF provider bundle: %v", err)
