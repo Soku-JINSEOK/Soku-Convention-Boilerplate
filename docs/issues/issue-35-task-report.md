@@ -11,9 +11,10 @@ test infrastructure. This report tracks
 
 Reuse the full repository and runtime-template CI workflows from one integrated
 Release workflow. Keep manual dispatch validation-only. On tag events, require
-paired signed annotated tags, GitHub-verified signatures, complete compatibility
-records, and an identical source commit before delivery. Build CLI assets only
-for the CLI release and perform all post-publication smoke tests in temporary
+signed annotated tags, GitHub-verified signatures, and complete compatibility
+records. Paired releases must resolve to an identical source commit; a
+single-axis patch explicitly records no companion. Build CLI assets only for
+the CLI release and perform all post-publication smoke tests in temporary
 directories.
 
 ## Planned Implementation
@@ -54,11 +55,11 @@ directories.
 
 ## Implementation Status
 
-Remediation in progress. The preparation PR, hosted preflight, atomic tag push,
-and both initial GitHub Releases completed. Post-release smoke testing found
-that `soku/v0.1.0` rejects GitHub's PAX global archive header as a second root.
-The public tags remain immutable; the CLI-only fix is being issued as
-`soku/v0.1.1` against the existing boilerplate `v1.0.0`.
+Complete. The preparation and remediation PRs, hosted preflights, initial atomic
+tag push, and all three GitHub Releases completed. Post-release smoke testing
+found that `soku/v0.1.0` rejected GitHub's PAX global archive header as a second
+root. The public tags remained immutable, and the corrected CLI was published
+as `soku/v0.1.1` against the existing boilerplate `v1.0.0`.
 
 ## Verification
 
@@ -75,11 +76,46 @@ The public tags remain immutable; the CLI-only fix is being issued as
 - Sync parity — deferred to hosted CI because PowerShell 7 is not installed in
   the local environment.
 - MySQL, PostgreSQL, gcloud, and AWS/Azure configuration checks — deferred to
-  hosted Templates CI because they depend on CI services or Docker.
+  hosted Templates CI because they depend on CI services or Docker; passed.
 - Hosted Actions, release asset, installation, and downstream lifecycle evidence
-  — initial Actions, assets, checksums, archive execution, and `go install`
-  passed; public-source lifecycle failed on the PAX global header and is pending
-  the CLI patch release.
+  — passed for the corrected CLI patch.
+
+## Release Evidence
+
+- Preparation: [PR #36](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/pull/36),
+  initial [preflight](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/actions/runs/29691038900),
+  and initial tag workflows for
+  [`v1.0.0`](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/actions/runs/29691730897)
+  and
+  [`soku/v0.1.0`](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/actions/runs/29691730744).
+- Remediation: [PR #37](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/pull/37),
+  post-merge [CI](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/actions/runs/29692998393),
+  [Templates CI](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/actions/runs/29692998389),
+  validation-only [preflight](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/actions/runs/29693067312),
+  and gated
+  [`soku/v0.1.1` delivery](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/actions/runs/29693174230).
+- Releases:
+  [`v1.0.0`](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/releases/tag/v1.0.0),
+  [`soku/v0.1.0`](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/releases/tag/soku/v0.1.0),
+  and corrected
+  [`soku/v0.1.1`](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/releases/tag/soku/v0.1.1).
+- GitHub reports valid signatures for all three annotated tags. The initial pair
+  resolves to `c13a5e7614f242b6e1a1ccbe12072394479a112b`; the CLI patch resolves to
+  `5b5949107a9e051570e964745fdccadedbe69fab`.
+- The `soku/v0.1.1` Release has exactly five archives plus `checksums.txt`.
+  SHA-256 values are `b9f367737de42ab9fdad597c686fcceb97bf52a21efc6725b87ac45a8e97915a`
+  (darwin amd64), `aeb70f52a0885cd31c5a6ca85fdedf4f3a9c8f64117803e5de47d588f47e1a5a`
+  (darwin arm64), `7acd35053bbfbfbca9d21708aeeb8c863a1666a2b1f6b6688de521b5795656cd`
+  (linux amd64), `1d45181461b27f4a2443eb8133ee4e3ba8e69ab73a50ade6863987b34ea4f9ac`
+  (linux arm64), and `9f09e656f5515cec2f501a7d75008136a092ef7585c181ae54abc2797f989a4e`
+  (Windows amd64).
+- A downloaded darwin arm64 archive reported version `v0.1.1`, commit
+  `5b5949107a9e051570e964745fdccadedbe69fab`, and hosted build timestamp
+  `2026-07-19T15:30:57Z`. `go install` resolved module `v0.1.1` through the Go
+  proxy; source installations intentionally report unknown linker metadata.
+- In a fresh temporary directory, the released binary initialized boilerplate
+  `v1.0.0` at `c13a5e7614f242b6e1a1ccbe12072394479a112b`, reported eight clean managed
+  files, and returned no-op results for both `diff` and same-version `upgrade`.
 
 ## AI Assistance
 
