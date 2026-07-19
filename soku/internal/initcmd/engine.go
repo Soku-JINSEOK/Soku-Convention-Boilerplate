@@ -86,8 +86,20 @@ func Run(ctx context.Context, options Options, fetcher Fetcher) (Report, error) 
 		}
 		return Report{}, fail(4, "manifest.conflict", "existing manifest is invalid or incompatible: %v", loadErr)
 	}
-	changes, err := renderCatalog(snapshot, catalog, config)
+	changes, err := renderProfileCatalog(snapshot, catalog, config)
 	if err != nil {
+		return Report{}, err
+	}
+	integrations := []manifest.Integration{}
+	if options.IntegrationSource != "" || options.IntegrationRef != "" || options.IntegrationConfigPath != "" {
+		integration, integrationErr := planIntegration(ctx, options.IntegrationSource, options.IntegrationRef, options.IntegrationConfigPath, config.Profile, options.IntegrationFetcher)
+		if integrationErr != nil {
+			return Report{}, integrationErr
+		}
+		changes = append(changes, integration.Changes...)
+		integrations = append(integrations, integration.Integration)
+	}
+	if err := validateChangeOwnership(changes); err != nil {
 		return Report{}, err
 	}
 	changes, err = preflight(options.Root, changes)
@@ -95,6 +107,7 @@ func Run(ctx context.Context, options Options, fetcher Fetcher) (Report, error) 
 		return Report{}, err
 	}
 	report.Changes = changes
+	report.Integrations = integrations
 	if config.Verify {
 		report.Verification, err = verifyPlan(ctx, options.Root, changes, config.Stacks, nil)
 		if err != nil {
@@ -118,7 +131,7 @@ func Run(ctx context.Context, options Options, fetcher Fetcher) (Report, error) 
 			return report, nil
 		}
 	}
-	document, err := buildManifest(options.SokuVersion, snapshot, config, configurationHash, changes)
+	document, err := buildManifestWithIntegrations(options.SokuVersion, snapshot, config, configurationHash, changes, integrations)
 	if err != nil {
 		return Report{}, err
 	}
@@ -162,6 +175,10 @@ func checkRerun(root string, document manifest.Document, snapshot SourceSnapshot
 }
 
 func buildManifest(version string, snapshot SourceSnapshot, config Config, configurationHash string, changes []Change) (manifest.Document, error) {
+	return buildManifestWithIntegrations(version, snapshot, config, configurationHash, changes, nil)
+}
+
+func buildManifestWithIntegrations(version string, snapshot SourceSnapshot, config Config, configurationHash string, changes []Change, integrations []manifest.Integration) (manifest.Document, error) {
 	if strings.TrimSpace(version) == "" {
 		version = "dev"
 	}
@@ -172,7 +189,11 @@ func buildManifest(version string, snapshot SourceSnapshot, config Config, confi
 	sort.Slice(files, func(i, j int) bool { return files[i].Path < files[j].Path })
 	selection := selectionFromConfig(config)
 	selection.ConfigurationHash = configurationHash
-	document := manifest.Document{SchemaVersion: manifest.SchemaVersion, SokuVersion: version, Boilerplate: manifest.Boilerplate{Source: snapshot.Source, Release: snapshot.Release, ResolvedCommit: snapshot.ResolvedCommit}, Selection: selection, Files: files, Integrations: []manifest.Integration{}}
+	if integrations == nil {
+		integrations = []manifest.Integration{}
+	}
+	sort.Slice(integrations, func(i, j int) bool { return integrations[i].ID < integrations[j].ID })
+	document := manifest.Document{SchemaVersion: manifest.SchemaVersion, SokuVersion: version, Boilerplate: manifest.Boilerplate{Source: snapshot.Source, Release: snapshot.Release, ResolvedCommit: snapshot.ResolvedCommit}, Selection: selection, Files: files, Integrations: integrations}
 	if err := manifest.Validate(document); err != nil {
 		return manifest.Document{}, fail(2, "manifest.invalid", "construct manifest: %v", err)
 	}

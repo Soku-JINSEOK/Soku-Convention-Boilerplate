@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["review_mode", "languages"],
+  "properties": {
+    "review_mode": {"enum": ["advisory", "required"]},
+    "languages": {
+      "type": "array",
+      "items": {"enum": ["en", "ko", "ja"]},
+      "minItems": 1,
+      "uniqueItems": true
+    }
+  }
+}

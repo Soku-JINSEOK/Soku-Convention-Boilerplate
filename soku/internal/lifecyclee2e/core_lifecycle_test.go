@@ -223,6 +223,9 @@ func repositorySnapshot(t *testing.T, release, commit string) initcmd.SourceSnap
 		t.Fatal(err)
 	}
 	files := map[string][]byte{initcmd.CatalogPath: catalogData}
+	files[initcmd.ProfileIndexPath] = readAbsolute(t, filepath.Join(root, filepath.FromSlash(initcmd.ProfileIndexPath)))
+	files["AGENTS.md"] = readAbsolute(t, filepath.Join(root, "AGENTS.md"))
+	files[".github/CODEOWNERS"] = readAbsolute(t, filepath.Join(root, ".github", "CODEOWNERS"))
 	for _, declaration := range catalog.Files {
 		files[declaration.Source] = readAbsolute(t, filepath.Join(root, filepath.FromSlash(declaration.Source)))
 	}

@@ -8,11 +8,16 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+
+	"github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/soku/internal/manifest"
 )
 
 const (
-	CatalogPath     = "soku/catalog/core-v1.json"
-	ProfileStandard = "standard"
+	CatalogPath      = "soku/catalog/core-v1.json"
+	ProfileIndexPath = "soku/catalog/index-v2.json"
+	ProfileBootstrap = "bootstrap"
+	ProfileStandard  = "standard"
+	ProfileScaled    = "scaled"
 )
 
 var StackIDs = []string{"aws", "azure", "gcp", "go", "java-spring", "javascript-typescript-node", "mysql", "postgresql", "python"}
@@ -75,6 +80,25 @@ type CatalogFile struct {
 	Placeholders []string `json:"placeholders"`
 }
 
+type ProfileIndex struct {
+	SchemaVersion  int            `json:"schema_version"`
+	DefaultProfile string         `json:"default_profile"`
+	Profiles       []Profile      `json:"profiles"`
+	Layers         []ProfileLayer `json:"layers"`
+}
+
+type Profile struct {
+	ID     string   `json:"id"`
+	Layers []string `json:"layers"`
+}
+
+type ProfileLayer struct {
+	ID             string        `json:"id"`
+	SharedOutputs  []string      `json:"shared_outputs"`
+	StackFileLimit int           `json:"stack_file_limit"`
+	Files          []CatalogFile `json:"files"`
+}
+
 type SourceSnapshot struct {
 	Source         string            `json:"source"`
 	Release        string            `json:"release"`
@@ -105,28 +129,33 @@ type Recovery struct {
 }
 
 type Report struct {
-	State             string         `json:"state"`
-	Source            string         `json:"source"`
-	Release           string         `json:"release"`
-	ResolvedCommit    string         `json:"resolved_commit"`
-	Profile           string         `json:"profile"`
-	Stacks            []string       `json:"stacks"`
-	SelectionHash     string         `json:"selection_hash"`
-	ConfigurationHash string         `json:"configuration_hash"`
-	Changes           []Change       `json:"changes"`
-	Verification      []Verification `json:"verification"`
-	Recovery          Recovery       `json:"recovery"`
+	State             string                 `json:"state"`
+	Source            string                 `json:"source"`
+	Release           string                 `json:"release"`
+	ResolvedCommit    string                 `json:"resolved_commit"`
+	Profile           string                 `json:"profile"`
+	Stacks            []string               `json:"stacks"`
+	SelectionHash     string                 `json:"selection_hash"`
+	ConfigurationHash string                 `json:"configuration_hash"`
+	Changes           []Change               `json:"changes"`
+	Verification      []Verification         `json:"verification"`
+	Recovery          Recovery               `json:"recovery"`
+	Integrations      []manifest.Integration `json:"integrations"`
 }
 
 type Options struct {
-	Root        string
-	ConfigPath  string
-	Explicit    Explicit
-	DryRun      bool
-	Yes         bool
-	Interactive bool
-	Confirm     func(Report) (bool, error)
-	SokuVersion string
+	Root                  string
+	ConfigPath            string
+	Explicit              Explicit
+	DryRun                bool
+	Yes                   bool
+	Interactive           bool
+	Confirm               func(Report) (bool, error)
+	SokuVersion           string
+	IntegrationSource     string
+	IntegrationRef        string
+	IntegrationConfigPath string
+	IntegrationFetcher    IntegrationFetcher
 }
 
 func canonicalHash(value any) (string, error) {

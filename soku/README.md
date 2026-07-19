@@ -26,9 +26,49 @@ soku init \
 
 The supported stack IDs are `javascript-typescript-node`, `python`, `go`,
 `java-spring`, `mysql`, `postgresql`, `gcp`, `aws`, and `azure`. Repeat
-`--stack` to select more than one; an explicit list replaces detection. The only
-v1 profile is `standard`. Go requires `--module-path`, Java requires
+`--stack` to select more than one; an explicit list replaces detection. Go requires `--module-path`, Java requires
 `--java-group`, and Java/GCP service output accepts `--service-name`.
+
+## Profiles
+
+Catalog v2 composes three built-in profiles in one fixed order:
+
+| Profile | Composition | Typical use |
+| --- | --- | --- |
+| `bootstrap` | `bootstrap` | Personal-minimal projects and early experiments. |
+| `standard` | `bootstrap → standard` | Team-standard projects; this is the default and legacy-compatible ID. |
+| `scaled` | `bootstrap → standard → scaled` | Scaled collaboration with core agent and ownership policy files. |
+
+CLI flags override explicit YAML, and explicit YAML overrides manifest state.
+An immutable source without `soku/catalog/index-v2.json` is interpreted as
+legacy core-v1 and supports only `standard`. Profile changes are reviewable with
+`diff --profile <id>` and apply through the same outer transaction with
+`upgrade --profile <id>`; both commands still require an exact release.
+
+AI collaboration is not a fourth profile. The declarative example under
+`providers/ai-collaboration/` can combine with all three profiles.
+
+## Bounded Integrations
+
+Initialization, diff, and upgrade accept the generic provider inputs:
+
+```bash
+--integration-source github:<owner>/<repo>/<bundle-path>
+--integration-ref <lowercase-40-character-commit>
+--integration-config <yaml-path>
+```
+
+Provider API v1 permits only versioned metadata, a hashed configuration schema,
+sorted compatible profiles, declared templates, and bounded text or binary
+outputs. Unknown fields, scripts, hooks, executable or dynamic-library paths,
+undeclared bundle files, traversal, reserved state, secrets, and ownership
+collisions fail before writes. Raw configuration is never stored.
+
+If the exact source, ref, and configuration hash has no matching bundle, `soku`
+creates only `.github/soku/integrations/<id>.json` and records `pending`. An
+exact compatible bundle adds only its declared outputs and records `connected`.
+Pending-to-connected and profile/provider changes use the same manifest-last
+transaction and rollback boundary as core upgrades.
 
 The equivalent strict YAML file is a flat mapping. Unknown fields are rejected:
 

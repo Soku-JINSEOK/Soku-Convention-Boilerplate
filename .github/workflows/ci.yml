@@ -126,6 +126,7 @@ jobs:
             soku/README.md
             soku/THIRD_PARTY_NOTICES.md
             soku/catalog/core-v1.json
+            soku/catalog/index-v2.json
             soku/go.mod
             soku/go.sum
             soku/main.go
@@ -141,10 +142,13 @@ jobs:
             soku/internal/initcmd/catalog.go
             soku/internal/initcmd/config.go
             soku/internal/initcmd/engine.go
+            soku/internal/initcmd/integration.go
             soku/internal/initcmd/initcmd_test.go
             soku/internal/initcmd/merge.go
             soku/internal/initcmd/model.go
             soku/internal/initcmd/plan.go
+            soku/internal/initcmd/profile.go
+            soku/internal/initcmd/profile_integration_test.go
             soku/internal/initcmd/source.go
             soku/internal/initcmd/transaction.go
             soku/internal/initcmd/upgrade.go
@@ -164,6 +168,12 @@ jobs:
             soku/install_test.go
             soku/schema/manifest-v1.schema.json
             soku/schema/catalog-core-v1.schema.json
+            soku/schema/catalog-index-v2.schema.json
+            soku/schema/provider-v1.schema.json
+            soku/providers/ai-collaboration/configuration.schema.json
+            soku/providers/ai-collaboration/example-config.yml
+            soku/providers/ai-collaboration/provider-v1.json
+            soku/providers/ai-collaboration/templates/ai-collaboration.yml
             soku/scripts/package.sh
             soku/scripts/package_test.sh
             soku/scripts/run_lifecycle_gate.sh

@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "id": "ai-collaboration",
+  "source": "github:Soku-JINSEOK/Soku-Convention-Boilerplate/soku/providers/ai-collaboration",
+  "ref": "0123456789abcdef0123456789abcdef01234567",
+  "provider_api_version": "1",
+  "provider_schema_version": "1",
+  "compatible_soku": ">=0.1.0 <2.0.0",
+  "configuration_schema_hash": "9f2ebc3316e744d9c773fc24c4ca30f1eeb414b52405b0ac766f6651f3d18724",
+  "configuration_hash": "e361adf49b33bd73a6991c496454270fbaa505a004b107e392a28b3dd6e83c63",
+  "compatible_profiles": ["bootstrap", "scaled", "standard"],
+  "outputs": [
+    {
+      "template": "templates/ai-collaboration.yml",
+      "path": ".github/ai-collaboration.yml",
+      "content_mode": "text"
+    }
+  ]
+}

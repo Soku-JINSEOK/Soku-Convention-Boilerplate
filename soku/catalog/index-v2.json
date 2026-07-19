@@ -1,0 +1,48 @@
+{
+  "schema_version": 2,
+  "default_profile": "standard",
+  "profiles": [
+    {"id": "bootstrap", "layers": ["bootstrap"]},
+    {"id": "standard", "layers": ["bootstrap", "standard"]},
+    {"id": "scaled", "layers": ["bootstrap", "standard", "scaled"]}
+  ],
+  "layers": [
+    {
+      "id": "bootstrap",
+      "shared_outputs": [".editorconfig", ".gitignore"],
+      "stack_file_limit": 1,
+      "files": []
+    },
+    {
+      "id": "standard",
+      "shared_outputs": [".github/workflows/ci.yml"],
+      "stack_file_limit": -1,
+      "files": []
+    },
+    {
+      "id": "scaled",
+      "shared_outputs": [],
+      "stack_file_limit": -1,
+      "files": [
+        {
+          "source": "AGENTS.md",
+          "output": "AGENTS.md",
+          "owner": "core",
+          "class": "core-managed",
+          "content_mode": "text",
+          "strategy": "render",
+          "placeholders": []
+        },
+        {
+          "source": ".github/CODEOWNERS",
+          "output": ".github/CODEOWNERS",
+          "owner": "core",
+          "class": "core-managed",
+          "content_mode": "text",
+          "strategy": "render",
+          "placeholders": []
+        }
+      ]
+    }
+  ]
+}
