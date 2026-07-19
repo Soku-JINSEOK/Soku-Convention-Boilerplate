@@ -138,6 +138,25 @@ GOBIN="$temporary_gobin" go install .
 "$temporary_gobin/soku" --version
 ```
 
+## Core Lifecycle Release Gate
+
+The hermetic package under `internal/lifecyclee2e` injects synthetic immutable
+source releases and verifies empty, existing, single-stack, and multi-stack
+repositories through initialization, status, local customization, diff,
+upgrade, rollback, rerun, and final clean status. It performs no real tag or
+network operation.
+
+CI runs this package on Linux, macOS, and Windows for pull requests, `main`,
+boilerplate `v*` tags, and CLI `soku/v*` tags. The CLI publishing job requires
+the complete matrix. Platform-aware cases cover canonical line endings,
+case-insensitive collisions, symlink boundaries where available, atomic
+manifest replacement, and deletion rollback. A failure retains a path-sanitized
+log for three days; successful runs retain no lifecycle artifact.
+
+Linux template jobs remain the runtime gate for generated JavaScript/TypeScript,
+Python, Go, and Java projects and run whenever template or `soku` rendering code
+changes. Provider conformance joins this gate in the second phase of Issue #21.
+
 For a published immutable release, Go understands the repository's submodule
 tag and installs it by module version:
 

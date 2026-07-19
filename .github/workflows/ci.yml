@@ -7,6 +7,7 @@ on:
       - main
       - master
     tags:
+      - "v*"
       - "soku/v*"
 
 jobs:
@@ -150,6 +151,7 @@ jobs:
             soku/internal/initcmd/upgrade_merge.go
             soku/internal/initcmd/upgrade_test.go
             soku/internal/initcmd/verify.go
+            soku/internal/lifecyclee2e/core_lifecycle_test.go
             soku/internal/manifest/manifest.go
             soku/internal/manifest/manifest_test.go
             soku/internal/manifest/replace_unix.go
@@ -164,6 +166,7 @@ jobs:
             soku/schema/catalog-core-v1.schema.json
             soku/scripts/package.sh
             soku/scripts/package_test.sh
+            soku/scripts/run_lifecycle_gate.sh
             soku/testdata/manifest-v1/invalid/credential-source.json
             soku/testdata/manifest-v1/invalid/path-traversal.json
             soku/testdata/manifest-v1/invalid/project-owned-baseline.json
@@ -283,6 +286,44 @@ jobs:
           go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.12.2
           "$(go env GOPATH)/bin/golangci-lint" run ./...
 
+  soku-core-lifecycle:
+    name: soku core lifecycle (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+          - windows-latest
+
+    defaults:
+      run:
+        working-directory: soku
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Setup Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: "1.26.x"
+          cache-dependency-path: soku/go.sum
+
+      - name: Run hermetic core lifecycle gate
+        shell: bash
+        run: scripts/run_lifecycle_gate.sh "$RUNNER_TEMP/soku-core-lifecycle"
+
+      - name: Retain sanitized failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v6
+        with:
+          name: soku-core-lifecycle-${{ matrix.os }}
+          path: ${{ runner.temp }}/soku-core-lifecycle/core-lifecycle.log
+          if-no-files-found: error
+          retention-days: 3
+
   soku-package:
     name: soku five-target package snapshot
     if: github.event_name == 'pull_request'
@@ -303,6 +344,8 @@ jobs:
 
   soku-release:
     name: Publish soku GitHub Release
+    needs:
+      - soku-core-lifecycle
     if: >-
       startsWith(github.ref, 'refs/tags/soku/v') &&
       github.repository == 'Soku-JINSEOK/Soku-Convention-Boilerplate'
