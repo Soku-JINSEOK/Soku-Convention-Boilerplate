@@ -68,9 +68,11 @@ jobs:
           if [[ "$RELEASE_TAG" == soku/* ]]; then
             is_cli=true
           fi
-          echo "tag=$RELEASE_TAG" >>"$GITHUB_OUTPUT"
-          echo "notes-file=$notes_file" >>"$GITHUB_OUTPUT"
-          echo "is-cli=$is_cli" >>"$GITHUB_OUTPUT"
+          {
+            echo "tag=$RELEASE_TAG"
+            echo "notes-file=$notes_file"
+            echo "is-cli=$is_cli"
+          } >>"$GITHUB_OUTPUT"
 
       - name: Verify paired signed annotated tags
         if: github.event_name == 'push'
