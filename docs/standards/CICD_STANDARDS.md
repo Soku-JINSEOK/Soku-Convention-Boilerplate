@@ -61,6 +61,20 @@ Pipelines should be:
 
 Avoid building opaque pipelines that only one person can maintain.
 
+For this boilerplate, one top-level Validation workflow must run on every pull
+request and every push to `main`. It calls the complete repository and
+runtime-template workflows, enforces the pull-request title and every in-scope
+commit title, and aggregates their results into one stable `Validation Gate`.
+Required branch protection targets that aggregate gate. Component workflows are
+reusable implementation details and must not also trigger independently, which
+would duplicate execution.
+
+Cancel older in-progress validation for the same ref. Keep default workflow
+permissions at `contents: read`; only the release delivery job may request
+`contents: write`, after the shared validation and signed release-record checks
+succeed. Pin every external action to a verified full commit SHA and retain a
+nearby version comment so maintainers can audit upgrades.
+
 ## 🌍 Environment Strategy
 
 Projects should define environment expectations clearly, such as:
@@ -86,6 +100,11 @@ A failing step should make it clear:
 - why it likely failed
 - what area is affected
 
+The aggregate gate must fail when any required component fails, is cancelled,
+or does not run unexpectedly. A deliberate skip may be accepted only when the
+event makes the check inapplicable, such as contribution-title validation on a
+direct post-merge `main` push or a release preflight.
+
 ## ✅ Minimum Recommended CI Stages
 
 1. checkout
@@ -110,6 +129,14 @@ If a repository uses CI/CD, its README or `docs/` folder should explain:
 - what must pass before merge
 - how deployments are triggered
 - who owns deployment decisions
+
+Document the local equivalents, hosted-only checks, audit evidence, and failure
+handling in [VERIFICATION_GUIDE.md](../../VERIFICATION_GUIDE.md). For public
+repositories, standard hosted runners are free, but larger runners remain
+billable. Audit artifacts, caches, Packages, Git LFS, Codespaces, Marketplace
+apps, and external services independently of runner minutes; do not treat a
+successful or free compute run as proof that storage or account-wide cost is
+zero.
 
 ## 🎬 Summary
 

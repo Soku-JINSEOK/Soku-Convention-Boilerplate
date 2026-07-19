@@ -13,6 +13,14 @@
 
 標準的な設計および運用モデルについては、[BLUEPRINT.md](./BLUEPRINT.md) を参照してください。
 
+## 📦 現在検証済みのベースライン
+
+現在のボイラープレート規約パッケージは `v1.0.0` です。推奨 CLI は
+`soku/v0.1.1` であり、公開 CLI contract を維持しながら GitHub source
+archive 処理を修正した version として `soku/v0.1.0` を置き換えます。
+ローカル、hosted、release、governance、security、cost の検証については
+[VERIFICATION_GUIDE.md](./VERIFICATION_GUIDE.md) を参照してください。
+
 ---
 
 ## 📌 一目で見る
@@ -120,6 +128,7 @@
 - [LICENSE](./LICENSE): ボイラープレート基本ライセンスドキュメント（MIT）
 - [SECURITY.md](./SECURITY.md): セキュリティ欠陥の報告窓口
 - [`soku` CLI](./soku/README.md): ビルド、インストール、検証、パッケージ、およびリリース運用
+- [VERIFICATION_GUIDE.md](./VERIFICATION_GUIDE.md): ローカル、hosted、governance、artifact、security、cost の完全な検証
 
 ### 📏 `docs/standards/` — 構造とプロセスの規範ドキュメント
 

@@ -12,6 +12,9 @@
     "typescript": "6.0.3",
     "vitest": "4.1.10"
   },
+  "overrides": {
+    "tmp": "0.2.7"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json --noEmit false --outDir dist",
     "format": "prettier --write .",

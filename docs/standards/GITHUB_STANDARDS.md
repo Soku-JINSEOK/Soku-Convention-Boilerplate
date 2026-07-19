@@ -61,6 +61,18 @@ This boilerplate's own issue and pull request templates record English as the no
 
 The `Governance profile` field identifies a profile only when the repository is mapped in a documented governance registry linked from its operational documentation. Use the exact registered profile name when that mapping exists; otherwise use `None`. During downstream synchronization, do not copy the source repository's profile value unchanged: resolve the downstream repository's own registry mapping or replace the value with `None`.
 
+Every change to `main` must be made through a pull request and pass the required
+validation. This includes changes made by the repository owner. A personal
+repository may use zero required approvals when no independent reviewer exists,
+but the pull request, required checks, and recorded decision history remain
+mandatory.
+
+Merged pull requests and completed issues must use labels and states that agree
+with completion. At minimum, retain the applicable `type:` label and replace an
+active status such as `status:in-progress` with `status:done`. Closed work that
+was not completed must use an accurate close reason and must not claim done
+status.
+
 ## 📝 Task Reports
 
 For work that benefits from a documented plan before implementation starts, use [`docs/issues/TASK_REPORT_TEMPLATE.md`](../issues/TASK_REPORT_TEMPLATE.md):
@@ -216,6 +228,37 @@ That means repository automation should support:
 - consistent review flow
 - visibility into project health
 - structured collaboration
+
+For repositories using the complete governance profile, protect the default
+branch with the platform-supported equivalent of these rules:
+
+- require a pull request and the repository's aggregate validation gate;
+- require signed commits and resolved conversations;
+- block branch deletion and force-push;
+- preserve the documented merge strategy; and
+- grant no routine bypass actor.
+
+External actions must be pinned to verified full commit SHAs with a nearby
+version comment. Workflow permissions are read-only by default; a delivery job
+may receive the narrow write permission it needs after validation succeeds.
+
+## 💳 Hosted Resource and Cost Audit
+
+Repository governance includes periodic inspection of repository visibility,
+runner labels, Actions artifacts and caches, Release assets, Packages, Git LFS,
+Codespaces, Marketplace apps, and external services. Reconcile these repository
+signals with the authenticated account billing view and report:
+
+1. repository-attributable metered cost;
+2. pre-existing personal or organization account usage and subscriptions; and
+3. future quota or retention risk.
+
+Standard GitHub-hosted runners are free for public repositories, while larger
+runners are billed even for public repositories. Release assets have separate
+limits from Actions artifacts and caches. Never infer `$0` from public
+visibility alone, and never change budgets, payment methods, or subscriptions as
+part of a read-only audit. Follow [VERIFICATION_GUIDE.md](../../VERIFICATION_GUIDE.md)
+for the current evidence checklist and official billing references.
 
 ## 🎬 Summary
 

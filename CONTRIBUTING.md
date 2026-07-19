@@ -105,7 +105,7 @@ Activate it with:
 git config commit.template .gitmessage
 ```
 
-Additionally, automated commit linting is available as a shared template. You can copy the configuration files from [templates/_shared/commitlint/](file:///home/seok_jinseok/CodeBase/Soku-Convention-Boilerplate/templates/_shared/commitlint/) to your project root to run automatic title checks on Git hooks or CI.
+Additionally, automated commit linting is available as a shared template. You can copy the configuration files from [`templates/_shared/commitlint/`](./templates/_shared/commitlint/) to your project root to run automatic title checks on Git hooks or CI.
 
 ## 🔀 Pull Request Standards
 

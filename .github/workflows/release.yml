@@ -20,13 +20,9 @@ permissions:
   contents: read
 
 jobs:
-  ci:
-    name: Full repository gates
-    uses: ./.github/workflows/ci.yml
-
-  templates:
-    name: Full runtime template gates
-    uses: ./.github/workflows/templates-ci.yml
+  validation:
+    name: Full validation gate
+    uses: ./.github/workflows/validation.yml
 
   release-metadata:
     name: Verify release identity and signed records
@@ -37,7 +33,7 @@ jobs:
       tag: ${{ steps.metadata.outputs.tag }}
     steps:
       - name: Checkout repository and tags
-        uses: actions/checkout@v7
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
         with:
           fetch-depth: 0
 
@@ -123,8 +119,7 @@ jobs:
   deliver:
     name: Publish GitHub Release
     needs:
-      - ci
-      - templates
+      - validation
       - release-metadata
     if: >-
       github.event_name == 'push' &&
@@ -134,13 +129,13 @@ jobs:
       contents: write
     steps:
       - name: Checkout verified source
-        uses: actions/checkout@v7
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
         with:
           fetch-depth: 0
 
       - name: Setup Go for CLI packaging
         if: needs.release-metadata.outputs.is-cli == 'true'
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
         with:
           go-version: "1.26.x"
           cache-dependency-path: soku/go.sum
