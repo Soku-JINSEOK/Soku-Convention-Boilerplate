@@ -186,9 +186,10 @@ repositories through initialization, status, local customization, diff,
 upgrade, rollback, rerun, and final clean status. It performs no real tag or
 network operation.
 
-CI runs this package on Linux, macOS, and Windows for pull requests, `main`,
-boilerplate `v*` tags, and CLI `soku/v*` tags. The CLI publishing job requires
-the complete matrix. Platform-aware cases cover canonical line endings,
+CI runs this package on Linux, macOS, and Windows for pull requests and `main`.
+The integrated Release workflow reuses the complete CI matrix for boilerplate
+`v*` and CLI `soku/v*` tags before either GitHub Release can be published.
+Platform-aware cases cover canonical line endings,
 case-insensitive collisions, symlink boundaries where available, atomic
 manifest replacement, and deletion rollback. A failure retains a path-sanitized
 log for three days; successful runs retain no lifecycle artifact.
@@ -241,20 +242,29 @@ filename order.
 
 ## Release Procedure
 
-The CLI and boilerplate use independent tags. Boilerplate policy releases use
-`v*`; CLI releases use signed, annotated `soku/v*` tags. Before creating a CLI
-tag:
+The CLI and boilerplate use independent signed, annotated tags. Boilerplate
+policy releases use `v*`; CLI releases use `soku/v*`. A manual Release workflow
+dispatch is a validation-only preflight and never creates a tag or GitHub
+Release. Before creating release tags:
 
 1. Prepare the CLI compatibility and migration record required by
    [`RELEASE_AND_SYNC.md`](../docs/standards/RELEASE_AND_SYNC.md), including
    manifest, catalog, provider API, profile, and recovery boundaries.
 2. Verify the version and supported Go toolchain.
 3. Run the complete repository and package verification suite.
-4. Create and verify a signed tag, for example
-   `git tag -s soku/v0.1.0 -m "soku v0.1.0"` and
-   `git tag -v soku/v0.1.0`.
-5. Push the tag only after review. The guarded release job packages the tag's
-   exact commit and creates the GitHub Release from the same script used in CI.
+4. Run `scripts/create-release-tag.sh --tag <tag> --notes-file <path>` for each
+   release axis. The helper verifies clean, up-to-date `main`, creates the local
+   signed annotated tag, verifies it, and never pushes it.
+5. Verify companion tags resolve to the same reviewed commit, then publish them
+   together with `git push --atomic origin <boilerplate-tag> <cli-tag>`.
+6. The guarded Release workflow reuses full repository and runtime-template CI,
+   verifies both Git and GitHub signature status, and creates one GitHub Release
+   for each tag. Only the CLI release receives the five archives and checksum
+   file, built from the exact tagged commit.
+
+Published tags are immutable. If a gate fails after publication, do not move,
+delete, or reuse a public tag; fix the defect and issue the affected axis's next
+patch version.
 
 This workflow is designed for a public repository using standard GitHub-hosted
 runners and GitHub Release assets. It does not require larger runners, a paid

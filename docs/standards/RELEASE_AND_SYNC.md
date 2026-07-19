@@ -69,6 +69,20 @@ conformance, runtime template, quality/race, sync parity, or package snapshot
 gate fails. These records document releases when they are intentionally made;
 they do not authorize one release axis to create or advance the other.
 
+The integrated Release workflow is the only automation that publishes GitHub
+Releases. It reuses the full repository and runtime-template workflows for tag
+events. Manual dispatch is a preflight: it validates both release records and
+runs every gate, but its delivery job is structurally disabled. Tag delivery
+requires a signed annotated tag, GitHub-verified signature, a matching source
+commit in the annotation, and any declared companion tag to resolve to the same
+commit. CLI releases alone receive the five platform archives and
+`checksums.txt`; neither release axis is marked latest automatically.
+
+Release tag helpers create and verify local tags but never push. When two axes
+are intentionally released from one reviewed commit, publish them with one
+atomic push. A public tag is immutable: never move, delete, or reuse it after a
+failure. Correct the defect and publish the affected axis's next patch version.
+
 ## 📥 Downstream Sync Rules
 
 - Pin downstream projects to a specific boilerplate tag.

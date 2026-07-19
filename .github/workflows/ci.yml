@@ -1,14 +1,12 @@
 name: CI
 
 on:
+  workflow_call:
   pull_request:
   push:
     branches:
       - main
       - master
-    tags:
-      - "v*"
-      - "soku/v*"
 
 jobs:
   # NOTE: This job checks that Soku-Convention-Boilerplate's OWN files exist.
@@ -59,6 +57,8 @@ jobs:
             docs/guides/APPLICABILITY.md
             docs/guides/LANGUAGE_SELECTION.md
             docs/issues/TASK_REPORT_TEMPLATE.md
+            docs/releases/v1.0.0.md
+            docs/releases/soku-v0.1.0.md
             docs/issues/issue-16-task-report.md
             docs/issues/issue-17-task-report.md
             docs/issues/issue-18-task-report.md
@@ -67,6 +67,7 @@ jobs:
             docs/issues/issue-21-task-report.md
             docs/issues/issue-22-task-report.md
             docs/issues/issue-23-task-report.md
+            docs/issues/issue-35-task-report.md
             LICENSE
             SECURITY.md
             .editorconfig
@@ -81,6 +82,7 @@ jobs:
             .github/ISSUE_TEMPLATE/refactor_proposal.yml
             .github/CODEOWNERS
             .github/workflows/ci.yml
+            .github/workflows/release.yml
             .github/workflows/templates-ci.yml
             .github/labels.yml
             templates/javascript-typescript-node/package.json
@@ -128,6 +130,8 @@ jobs:
             scripts/sync-labels.sh
             scripts/setup-git-signing.sh
             scripts/create-release-tag.sh
+            scripts/verify-release-tag.sh
+            scripts/verify-release-tag_test.sh
             scripts/verify-sync-parity.sh
             soku/README.md
             soku/THIRD_PARTY_NOTICES.md
@@ -199,8 +203,13 @@ jobs:
       - name: Run contribution-title regression tests
         run: node --test templates/_shared/commitlint/*.test.mjs
 
+      - name: Run release tag gate regression tests
+        run: scripts/verify-release-tag_test.sh
+
       - name: Check Markdown formatting
-        run: npx --yes markdownlint-cli2@0.22.1 --config .markdownlint.jsonc "**/*.md" "#node_modules"
+        run: >-
+          npx --yes markdownlint-cli2@0.22.1 --config .markdownlint.jsonc
+          "**/*.md" "#**/node_modules/**"
 
       - name: Validate GitHub YAML
         run: npx --yes yaml-lint@1.7.0 .github/*.yml .github/**/*.yml
@@ -343,7 +352,6 @@ jobs:
 
   soku-package:
     name: soku five-target package snapshot
-    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
 
     steps:
@@ -358,46 +366,3 @@ jobs:
 
       - name: Verify archives, checksums, and packaged binary
         run: soku/scripts/package_test.sh
-
-  soku-release:
-    name: Publish soku GitHub Release
-    needs:
-      - soku-core-lifecycle
-    if: >-
-      startsWith(github.ref, 'refs/tags/soku/v') &&
-      github.repository == 'Soku-JINSEOK/Soku-Convention-Boilerplate'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-
-      - name: Setup Go
-        uses: actions/setup-go@v6
-        with:
-          go-version: "1.26.x"
-          cache-dependency-path: soku/go.sum
-
-      - name: Package release assets
-        shell: bash
-        run: |
-          version="${GITHUB_REF_NAME#soku/}"
-          commit="$(git rev-parse "$GITHUB_SHA")"
-          commit_epoch="$(git show -s --format=%ct "$GITHUB_SHA")"
-          built_at="$(date -u -d "@$commit_epoch" +%Y-%m-%dT%H:%M:%SZ)"
-          soku/scripts/package.sh \
-            --version "$version" \
-            --commit "$commit" \
-            --built-at "$built_at" \
-            --output-dir soku/dist
-
-      - name: Create GitHub Release
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: >-
-          gh release create "$GITHUB_REF_NAME" soku/dist/*
-          --verify-tag --notes-from-tag --latest=false

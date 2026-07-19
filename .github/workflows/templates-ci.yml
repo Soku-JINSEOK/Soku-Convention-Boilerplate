@@ -7,12 +7,10 @@ name: Templates CI
 # downstream project copying a template has a working baseline.
 
 on:
+  workflow_call:
   push:
     branches:
       - main
-    tags:
-      - "v*"
-      - "soku/v*"
     paths:
       - "templates/**"
       - "soku/**"
