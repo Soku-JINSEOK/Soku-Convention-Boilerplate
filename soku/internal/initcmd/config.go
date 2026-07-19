@@ -9,6 +9,8 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/soku/internal/manifest"
 )
 
 var (
@@ -302,14 +304,31 @@ func ensureNoState(root string) error {
 	return nil
 }
 func configHash(config Config) (string, error) {
-	return canonicalHash(struct {
-		Profile     string   `json:"profile"`
-		Stacks      []string `json:"stacks"`
-		ProjectName string   `json:"project_name,omitempty"`
-		ModulePath  string   `json:"module_path,omitempty"`
-		JavaGroup   string   `json:"java_group,omitempty"`
-		ServiceName string   `json:"service_name,omitempty"`
-	}{config.Profile, config.Stacks, used(config, "project_name", config.ProjectName), used(config, "module_path", config.ModulePath), used(config, "java_group", config.JavaGroup), used(config, "service_name", config.ServiceName)})
+	selection := selectionFromConfig(config)
+	return manifest.HashSelection(selection)
+}
+
+func selectionFromConfig(config Config) manifest.Selection {
+	return manifest.Selection{
+		Profile:     config.Profile,
+		Stacks:      append([]string(nil), config.Stacks...),
+		ProjectName: used(config, "project_name", config.ProjectName),
+		ModulePath:  used(config, "module_path", config.ModulePath),
+		JavaGroup:   used(config, "java_group", config.JavaGroup),
+		ServiceName: used(config, "service_name", config.ServiceName),
+	}
+}
+
+func configFromSelection(selection manifest.Selection) Config {
+	return Config{
+		SchemaVersion: 1,
+		Profile:       selection.Profile,
+		Stacks:        append([]string(nil), selection.Stacks...),
+		ProjectName:   selection.ProjectName,
+		ModulePath:    selection.ModulePath,
+		JavaGroup:     selection.JavaGroup,
+		ServiceName:   selection.ServiceName,
+	}
 }
 func used(c Config, key, value string) string {
 	for _, id := range c.Stacks {

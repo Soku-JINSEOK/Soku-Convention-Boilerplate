@@ -32,8 +32,11 @@ Selection follows `CLI > explicit YAML config > detection > defaults`. Repeated
 `--stack` flags replace detection completely. The v1 stack IDs are
 `javascript-typescript-node`, `python`, `go`, `java-spring`, `mysql`,
 `postgresql`, `gcp`, `aws`, and `azure`; the only profile is `standard`.
-Configuration is validated and canonicalized before hashing, but raw config and
-credentials are never stored in the manifest.
+Configuration is validated and canonicalized before hashing. The manifest
+stores only portable rendering values actually used by the selected stacks
+(`project_name`, `module_path`, `java_group`, and `service_name`) so the desired
+tree can be reproduced from the pinned source snapshot. Raw config,
+verification options, credentials, and machine-local paths are never stored.
 
 Rendering is deterministic and complete before mutation. Existing paths remain
 project-owned by default. Only `.gitignore` and `.editorconfig` may use declared
@@ -94,7 +97,7 @@ journal, or manifest.
 | Criterion | Observable evidence |
 | --- | --- |
 | Immutable, reproducible input | Init requires an HTTPS source plus `vMAJOR.MINOR.PATCH`, resolves and records a full commit, rejects floating or changed input, and uses hermetic fixtures before the #21 release gate. |
-| Stable selection and configuration | Explicit stacks fully replace detection; config precedence is deterministic; only the nine stack IDs and `standard` profile are accepted; placeholder requirements are stack-specific; only the canonical config hash is persisted. |
+| Stable selection and configuration | Explicit stacks fully replace detection; config precedence is deterministic; only the nine stack IDs and `standard` profile are accepted; placeholder requirements are stack-specific; only used portable rendering values and their reproducible canonical hash are persisted. |
 | Truthful plan before writes | Fetch, compatibility, schema, path, placeholder, ownership, rendering, merge, conflict, and optional verification checks finish before confirmation or any target/journal/backup/manifest write. |
 | Non-destructive existing-repository behavior | Existing files are project-owned by default; only `.gitignore` and `.editorconfig` are deterministically mergeable; every other collision stops with exit `4` and zero writes. |
 | Transactional apply and rollback | A confirmed apply journals and backs up bounded targets, writes the manifest last, returns `7` after successful rollback, and returns `8` with recovery evidence only when rollback itself fails. |
@@ -105,20 +108,37 @@ journal, or manifest.
 
 ## Approval
 
-- **Status:** `Pending`
-- **Approved by:** `None`
+- **Status:** `Approved`
+- **Approved by:** `Soku-JINSEOK`
+- **Approval record:** The repository owner's 2026-07-18 implementation
+  instruction approved the decisions fixed in this report.
 
 ## Implementation Status
 
-Not started. This report is the implementation gate. No `soku init` production
-code, catalog, fixture, or test implementation will begin until the repository
-owner explicitly approves this report.
+Complete. The approved report was implemented as `soku init` production code,
+the core-v1 catalog and schema, portable manifest rendering inputs, hermetic
+integration/security/failure tests, lifecycle documentation, and portable
+packaging smoke coverage. Real boilerplate tags/Releases, `diff`, `upgrade`,
+providers, and downstream release E2E remain in the follow-up issues.
 
 ## Verification
 
-- `npx --yes markdownlint-cli2@0.22.1 --config .markdownlint.jsonc docs/issues/issue-18-task-report.md` — passed.
-- `git diff --check` — passed.
-- Implementation checks have not started.
+- `go mod verify` — passed.
+- `go test ./...`, `go test -race ./...`, `go vet ./...` — passed.
+- `golangci-lint` v2.12.2, `gofmt`, and `goimports` v0.48.0 — passed.
+- Linux amd64/arm64, macOS amd64/arm64, and Windows amd64 cross-build — passed.
+- `soku/scripts/package_test.sh` deterministic five-target package smoke — passed.
+- JS/TS, Python, Go, and Java/Spring template lint/typecheck/test/build — passed.
+- Core catalog and manifest Draft 2020-12 schema fixtures plus hermetic
+  source/archive/transaction tests — passed.
+- Manifest and pinned source snapshot desired-tree reproduction regression —
+  passed.
+- Full Markdown lint, GitHub/template YAML lint, and `git diff --check` —
+  passed.
+- `scripts/verify-sync-parity.sh` — local `pwsh` unavailable; Draft PR #29 CI
+  passed.
+- Draft PR #29 repository hygiene, Linux/macOS/Windows native, race/lint, and
+  five-target package jobs — passed; the Release job was skipped by policy.
 
 ## AI Assistance
 
@@ -164,7 +184,8 @@ atomic replace합니다. 실패 시 전체 rollback하며 rollback 성공은 exi
 ## 계획된 구현
 
 - `soku init`에 source/release, stack/profile, placeholder, verify option과 portable
-  YAML config를 추가하고 canonical configuration hash만 저장합니다.
+  YAML config를 추가하고 선택 stack이 사용한 portable rendering 값과 재현 가능한
+  canonical configuration hash만 저장합니다.
 - Immutable source 해석·제한된 fetch, core catalog schema, fixed stack detection,
   deterministic renderer와 stack별 CI 생성을 구현합니다.
 - `.gitignore`·`.editorconfig` 전용 merge와 모든 path·ownership·secret·compatibility
@@ -180,7 +201,7 @@ atomic replace합니다. 실패 시 전체 rollback하며 rollback 성공은 exi
 | 기준 | 관찰 가능한 근거 |
 | --- | --- |
 | Immutable input | HTTPS source와 semver release를 필수로 받아 full commit을 기록하고 floating input을 거부하며 #21 전에는 hermetic fixture만 사용 |
-| 결정적 선택 | 명시 stack이 detection을 완전히 대체하고 고정 ID 9개와 `standard`만 허용하며 raw config 대신 canonical hash만 저장 |
+| 결정적 선택 | 명시 stack이 detection을 완전히 대체하고 고정 ID 9개와 `standard`만 허용하며 raw config 대신 사용한 portable rendering 값과 재현 가능한 canonical hash만 저장 |
 | Zero-write preflight | Fetch부터 compatibility, path, placeholder, ownership, render, merge, conflict, 선택 검증까지 write 전에 완료 |
 | 기존 저장소 보존 | 기본 project-owned, 두 공유 파일만 deterministic merge, 나머지 충돌은 exit `4`와 zero-write |
 | Transaction/rollback | Manifest-last commit, 전체 rollback, rollback 성공 exit `7`, rollback 실패만 exit `8`과 recovery evidence |

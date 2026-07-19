@@ -170,7 +170,9 @@ func buildManifest(version string, snapshot SourceSnapshot, config Config, confi
 		files = append(files, manifest.File{Path: change.Path, Owner: change.Owner, Class: change.Class, ContentMode: change.ContentMode, BaselineSHA256: change.BaselineSHA256, LifecycleState: "current"})
 	}
 	sort.Slice(files, func(i, j int) bool { return files[i].Path < files[j].Path })
-	document := manifest.Document{SchemaVersion: manifest.SchemaVersion, SokuVersion: version, Boilerplate: manifest.Boilerplate{Source: snapshot.Source, Release: snapshot.Release, ResolvedCommit: snapshot.ResolvedCommit}, Selection: manifest.Selection{Profile: config.Profile, Stacks: append([]string(nil), config.Stacks...), ConfigurationHash: configurationHash}, Files: files, Integrations: []manifest.Integration{}}
+	selection := selectionFromConfig(config)
+	selection.ConfigurationHash = configurationHash
+	document := manifest.Document{SchemaVersion: manifest.SchemaVersion, SokuVersion: version, Boilerplate: manifest.Boilerplate{Source: snapshot.Source, Release: snapshot.Release, ResolvedCommit: snapshot.ResolvedCommit}, Selection: selection, Files: files, Integrations: []manifest.Integration{}}
 	if err := manifest.Validate(document); err != nil {
 		return manifest.Document{}, fail(2, "manifest.invalid", "construct manifest: %v", err)
 	}

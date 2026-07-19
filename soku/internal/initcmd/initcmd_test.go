@@ -124,6 +124,31 @@ func TestCatalogRenderingUsesExactTokensAndJavaPaths(t *testing.T) {
 	}
 }
 
+func TestManifestSelectionAndPinnedSnapshotReproduceDesiredTree(t *testing.T) {
+	snapshot := repositorySnapshot(t)
+	catalog := mustCatalog(t)
+	config := Config{SchemaVersion: 1, Profile: "standard", Stacks: []string{"gcp", "go", "java-spring", "javascript-typescript-node", "python"}, ProjectName: "demo-project", ModulePath: "github.com/example/demo", JavaGroup: "io.example.demo", ServiceName: "demo-api"}
+	desired, err := renderCatalog(snapshot, catalog, config)
+	if err != nil {
+		t.Fatal(err)
+	}
+	hash, err := configHash(config)
+	if err != nil {
+		t.Fatal(err)
+	}
+	document, err := buildManifest("test", snapshot, config, hash, desired)
+	if err != nil {
+		t.Fatal(err)
+	}
+	reproduced, err := renderCatalog(snapshot, catalog, configFromSelection(document.Selection))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(desired, reproduced) {
+		t.Fatal("manifest selection and pinned source did not reproduce the desired tree")
+	}
+}
+
 func TestMergePreservesExistingValuesAndOrder(t *testing.T) {
 	editor := []byte("root = true\n\n[*]\nindent_size = 8\n")
 	desired := []byte("root = true\n\n[*]\ncharset = utf-8\nindent_size = 2\n\n[*.go]\nindent_style = tab\n")
@@ -170,8 +195,16 @@ func TestRunDryRunApplyRerunAndConflict(t *testing.T) {
 	if report.State != "applied" {
 		t.Fatalf("state=%s", report.State)
 	}
-	if _, err := os.Stat(filepath.Join(root, ".soku", "manifest.json")); err != nil {
+	document, err := manifest.NewStore(root).Load()
+	if err != nil {
 		t.Fatal(err)
+	}
+	if document.Selection.ProjectName != "demo" || document.Selection.ModulePath != "" || document.Selection.JavaGroup != "" || document.Selection.ServiceName != "" {
+		t.Fatalf("stored selection=%#v", document.Selection)
+	}
+	recomputed, _ := manifest.HashSelection(document.Selection)
+	if recomputed != document.Selection.ConfigurationHash {
+		t.Fatalf("configuration hash=%s want %s", document.Selection.ConfigurationHash, recomputed)
 	}
 	report, err = Run(context.Background(), Options{Root: root, Explicit: explicit, Yes: true, SokuVersion: "v1.0.0"}, fetcher)
 	if err != nil || report.State != "no-op" {
@@ -422,8 +455,9 @@ func readTree(t *testing.T, root string) map[string]string {
 }
 func testManifest(t *testing.T, change Change) manifest.Document {
 	t.Helper()
-	hash, _ := canonicalHash(struct{}{})
-	document := manifest.Document{SchemaVersion: 1, SokuVersion: "test", Boilerplate: manifest.Boilerplate{Source: testSource, Release: "v1.0.0", ResolvedCommit: testCommit}, Selection: manifest.Selection{Profile: "standard", Stacks: []string{"go"}, ConfigurationHash: hash}, Files: []manifest.File{{Path: change.Path, Owner: "core", Class: "core-managed", ContentMode: "text", BaselineSHA256: change.BaselineSHA256, LifecycleState: "current"}}, Integrations: []manifest.Integration{}}
+	selection := manifest.Selection{Profile: "standard", Stacks: []string{"go"}, ModulePath: "github.com/example/project"}
+	selection.ConfigurationHash, _ = manifest.HashSelection(selection)
+	document := manifest.Document{SchemaVersion: 1, SokuVersion: "test", Boilerplate: manifest.Boilerplate{Source: testSource, Release: "v1.0.0", ResolvedCommit: testCommit}, Selection: selection, Files: []manifest.File{{Path: change.Path, Owner: "core", Class: "core-managed", ContentMode: "text", BaselineSHA256: change.BaselineSHA256, LifecycleState: "current"}}, Integrations: []manifest.Integration{}}
 	if err := manifest.Validate(document); err != nil {
 		t.Fatal(err)
 	}

@@ -26,7 +26,10 @@ const (
 	PendingPath = ".soku/manifest.json.pending"
 )
 
-var integrationIDPattern = regexp.MustCompile(`^[A-Za-z0-9._-]+$`)
+var (
+	integrationIDPattern = regexp.MustCompile(`^[A-Za-z0-9._-]+$`)
+	portableDrivePattern = regexp.MustCompile(`^[A-Za-z]:`)
+)
 
 // Document is the complete manifest-v1 wire record.
 type Document struct {
@@ -49,6 +52,10 @@ type Boilerplate struct {
 type Selection struct {
 	Profile           string   `json:"profile"`
 	Stacks            []string `json:"stacks"`
+	ProjectName       string   `json:"project_name,omitempty"`
+	ModulePath        string   `json:"module_path,omitempty"`
+	JavaGroup         string   `json:"java_group,omitempty"`
+	ServiceName       string   `json:"service_name,omitempty"`
 	ConfigurationHash string   `json:"configuration_hash"`
 }
 
@@ -116,7 +123,7 @@ func Decode(data []byte) (Document, error) {
 
 // MarshalCanonical validates and serializes a deterministically ordered record.
 func MarshalCanonical(document Document) ([]byte, error) {
-	document.Selection.Stacks = append([]string(nil), document.Selection.Stacks...)
+	document.Selection.Stacks = append([]string{}, document.Selection.Stacks...)
 	document.Files = append([]File(nil), document.Files...)
 	document.Integrations = append([]Integration(nil), document.Integrations...)
 	sort.Strings(document.Selection.Stacks)
@@ -161,6 +168,33 @@ func Validate(document Document) error {
 	}
 	if !isSHA256(document.Selection.ConfigurationHash) {
 		return errors.New("selection.configuration_hash must be a lowercase SHA-256")
+	}
+	for _, input := range []struct {
+		name     string
+		value    string
+		required bool
+	}{
+		{"project_name", document.Selection.ProjectName, selectionUses(document.Selection.Stacks, "javascript-typescript-node", "python")},
+		{"module_path", document.Selection.ModulePath, selectionUses(document.Selection.Stacks, "go")},
+		{"java_group", document.Selection.JavaGroup, selectionUses(document.Selection.Stacks, "java-spring")},
+		{"service_name", document.Selection.ServiceName, selectionUses(document.Selection.Stacks, "java-spring", "gcp")},
+	} {
+		if input.required && input.value == "" {
+			return fmt.Errorf("selection.%s is required by the selected stacks", input.name)
+		}
+		if !input.required && input.value != "" {
+			return fmt.Errorf("selection.%s is not used by the selected stacks", input.name)
+		}
+		if strings.ContainsAny(input.value, "\r\n\x00") || strings.HasPrefix(input.value, "/") || portableDrivePattern.MatchString(input.value) {
+			return fmt.Errorf("selection.%s is not portable", input.name)
+		}
+	}
+	configurationHash, err := HashSelection(document.Selection)
+	if err != nil {
+		return err
+	}
+	if configurationHash != document.Selection.ConfigurationHash {
+		return errors.New("selection.configuration_hash does not match the canonical stored selection")
 	}
 
 	integrations := make(map[string]Integration, len(document.Integrations))
@@ -276,6 +310,36 @@ func Validate(document Document) error {
 		}
 	}
 	return nil
+}
+
+func selectionUses(stacks []string, candidates ...string) bool {
+	for _, stack := range stacks {
+		for _, candidate := range candidates {
+			if stack == candidate {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// HashSelection returns the canonical hash of the portable rendering inputs.
+// The stored hash deliberately excludes itself so it can be reproduced from a
+// manifest without retaining raw configuration or machine-local values.
+func HashSelection(selection Selection) (string, error) {
+	data, err := json.Marshal(struct {
+		Profile     string   `json:"profile"`
+		Stacks      []string `json:"stacks"`
+		ProjectName string   `json:"project_name,omitempty"`
+		ModulePath  string   `json:"module_path,omitempty"`
+		JavaGroup   string   `json:"java_group,omitempty"`
+		ServiceName string   `json:"service_name,omitempty"`
+	}{selection.Profile, selection.Stacks, selection.ProjectName, selection.ModulePath, selection.JavaGroup, selection.ServiceName})
+	if err != nil {
+		return "", fmt.Errorf("encode canonical selection: %w", err)
+	}
+	sum := sha256.Sum256(data)
+	return hex.EncodeToString(sum[:]), nil
 }
 
 // ValidatePath accepts only canonical repository-relative POSIX paths.

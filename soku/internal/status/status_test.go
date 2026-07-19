@@ -173,12 +173,14 @@ func TestInspectSymlinkEscapeAndUnreadable(t *testing.T) {
 }
 
 func statusDocument() manifest.Document {
-	return manifest.Document{
+	document := manifest.Document{
 		SchemaVersion: 1, SokuVersion: "v0.2.0",
 		Boilerplate: manifest.Boilerplate{Source: "https://github.com/example/boilerplate", Release: "v1.0.0", ResolvedCommit: statusCommit},
-		Selection:   manifest.Selection{Profile: "team", Stacks: []string{}, ConfigurationHash: statusHash},
+		Selection:   manifest.Selection{Profile: "team", Stacks: []string{}},
 		Files:       []manifest.File{}, Integrations: []manifest.Integration{},
 	}
+	document.Selection.ConfigurationHash, _ = manifest.HashSelection(document.Selection)
+	return document
 }
 
 func statusFile(path, hash, state string) manifest.File {

@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"sort"
 	"strings"
 	"testing"
 
@@ -79,9 +80,25 @@ func TestPublishedFixturesMatchManifestContract(t *testing.T) {
 	}
 }
 
+func TestSelectionHashIsReproducibleAndDetectsTampering(t *testing.T) {
+	selection := Selection{Profile: "standard", Stacks: []string{"go"}, ModulePath: "github.com/example/project"}
+	selection.ConfigurationHash, _ = HashSelection(selection)
+	document := validDocument()
+	document.Selection = selection
+	if err := Validate(document); err != nil {
+		t.Fatal(err)
+	}
+	document.Selection.ModulePath = "github.com/example/other"
+	if err := Validate(document); err == nil {
+		t.Fatal("selection changed without updating configuration_hash")
+	}
+}
+
 func TestMarshalCanonicalSortsAndIsDeterministic(t *testing.T) {
 	document := validDocument()
 	document.Selection.Stacks = []string{"z", "a"}
+	sort.Strings(document.Selection.Stacks)
+	document.Selection.ConfigurationHash, _ = HashSelection(document.Selection)
 	document.Files = []File{
 		managedFile("z.txt", "core", "core-managed"),
 		managedFile("a.txt", "core", "core-managed"),
@@ -221,15 +238,17 @@ func TestDecodeDistinguishesMalformedAndUnsupportedSchema(t *testing.T) {
 }
 
 func validDocument() Document {
-	return Document{
+	document := Document{
 		SchemaVersion: SchemaVersion,
 		SokuVersion:   "v0.2.0",
 		Boilerplate: Boilerplate{
 			Source: "https://github.com/example/boilerplate", Release: "v1.0.0", ResolvedCommit: testCommit,
 		},
-		Selection: Selection{Profile: "team", Stacks: []string{}, ConfigurationHash: testHash},
+		Selection: Selection{Profile: "team", Stacks: []string{}},
 		Files:     []File{}, Integrations: []Integration{},
 	}
+	document.Selection.ConfigurationHash, _ = HashSelection(document.Selection)
+	return document
 }
 
 func managedFile(name, owner, class string) File {
