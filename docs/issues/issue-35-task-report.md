@@ -54,9 +54,11 @@ directories.
 
 ## Implementation Status
 
-In progress. Local release orchestration, release records, tag tooling, and tag
-regression coverage are implemented. Preparation PR, hosted preflight, tag
-publication, Releases, and post-release smoke evidence remain pending.
+Remediation in progress. The preparation PR, hosted preflight, atomic tag push,
+and both initial GitHub Releases completed. Post-release smoke testing found
+that `soku/v0.1.0` rejects GitHub's PAX global archive header as a second root.
+The public tags remain immutable; the CLI-only fix is being issued as
+`soku/v0.1.1` against the existing boilerplate `v1.0.0`.
 
 ## Verification
 
@@ -75,7 +77,9 @@ publication, Releases, and post-release smoke evidence remain pending.
 - MySQL, PostgreSQL, gcloud, and AWS/Azure configuration checks — deferred to
   hosted Templates CI because they depend on CI services or Docker.
 - Hosted Actions, release asset, installation, and downstream lifecycle evidence
-  — pending publication.
+  — initial Actions, assets, checksums, archive execution, and `go install`
+  passed; public-source lifecycle failed on the PAX global header and is pending
+  the CLI patch release.
 
 ## AI Assistance
 

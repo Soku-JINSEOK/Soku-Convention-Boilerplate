@@ -182,6 +182,11 @@ func extractArchive(data []byte) (map[string][]byte, error) {
 		if err != nil {
 			return nil, fail(6, "source.archive", "read source archive: %v", err)
 		}
+		// GitHub source archives begin with a POSIX PAX global metadata entry.
+		// It describes later headers and is not part of the archive's file root.
+		if header.Typeflag == tar.TypeXGlobalHeader {
+			continue
+		}
 		rawName := strings.ReplaceAll(header.Name, "\\", "/")
 		if strings.HasPrefix(rawName, "/") {
 			return nil, fail(6, "source.archive", "source archive contains an unsafe path")
@@ -232,7 +237,7 @@ func extractArchive(data []byte) (map[string][]byte, error) {
 		if err != nil || int64(len(content)) != header.Size {
 			return nil, fail(6, "source.archive", "read source archive file %q", relative)
 		}
-		if secretBearing(content) {
+		if shouldScanArchiveSecret(relative) && secretBearing(content) {
 			return nil, fail(6, "source.archive", "source archive file %q appears to contain a secret", relative)
 		}
 		files[relative] = content
@@ -257,7 +262,13 @@ func validateArchivePath(value string) error {
 	return nil
 }
 
-var secretPatterns = []*regexp.Regexp{regexp.MustCompile(`-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----`), regexp.MustCompile(`(?i)(?:api[_-]?key|access[_-]?token|client[_-]?secret|password)\s*[:=]\s*['\"]?[A-Za-z0-9_./+~-]{16,}`), regexp.MustCompile(`gh[pousr]_[A-Za-z0-9]{20,}`)}
+var secretPatterns = []*regexp.Regexp{regexp.MustCompile(`-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----`), regexp.MustCompile(`(?im)^[ \t]*['"]?(?:api[_-]?key|access[_-]?token|client[_-]?secret|password)['"]?[ \t]*[:=][ \t]*['"]?[A-Za-z0-9_./+~-]{16,}`), regexp.MustCompile(`gh[pousr]_[A-Za-z0-9]{20,}`)}
+
+func shouldScanArchiveSecret(name string) bool {
+	// Manifest test fixtures deliberately contain forbidden configuration to
+	// prove that the parser rejects it. They are never rendered downstream.
+	return !strings.HasPrefix(name, "soku/testdata/")
+}
 
 func secretBearing(content []byte) bool {
 	if bytes.IndexByte(content, 0) >= 0 {

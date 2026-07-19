@@ -75,7 +75,9 @@ events. Manual dispatch is a preflight: it validates both release records and
 runs every gate, but its delivery job is structurally disabled. Tag delivery
 requires a signed annotated tag, GitHub-verified signature, a matching source
 commit in the annotation, and any declared companion tag to resolve to the same
-commit. CLI releases alone receive the five platform archives and
+commit. A single-axis patch records `Companion tag: none` and relies on its
+explicit compatibility fields instead. CLI releases alone receive the five
+platform archives and
 `checksums.txt`; neither release axis is marked latest automatically.
 
 Release tag helpers create and verify local tags but never push. When two axes

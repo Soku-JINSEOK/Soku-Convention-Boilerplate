@@ -59,6 +59,7 @@ jobs:
             docs/issues/TASK_REPORT_TEMPLATE.md
             docs/releases/v1.0.0.md
             docs/releases/soku-v0.1.0.md
+            docs/releases/soku-v0.1.1.md
             docs/issues/issue-16-task-report.md
             docs/issues/issue-17-task-report.md
             docs/issues/issue-18-task-report.md

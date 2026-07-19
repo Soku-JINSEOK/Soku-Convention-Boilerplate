@@ -10,7 +10,7 @@ on:
       cli-tag:
         description: CLI tag to validate without publishing
         required: true
-        default: soku/v0.1.0
+        default: soku/v0.1.1
   push:
     tags:
       - "v*"
@@ -89,25 +89,30 @@ jobs:
 
           companion_tag="$(sed -n 's/^Companion tag: //p' "$RELEASE_NOTES")"
           test -n "$companion_tag"
-          companion_notes="docs/releases/${companion_tag//\//-}.md"
-          test -f "$companion_notes"
-
           git fetch --force origin \
-            "refs/tags/$RELEASE_TAG:refs/tags/$RELEASE_TAG" \
-            "refs/tags/$companion_tag:refs/tags/$companion_tag"
+            "refs/tags/$RELEASE_TAG:refs/tags/$RELEASE_TAG"
           scripts/verify-release-tag.sh \
             --tag "$RELEASE_TAG" \
             --notes-file "$RELEASE_NOTES"
-          scripts/verify-release-tag.sh \
-            --tag "$companion_tag" \
-            --notes-file "$companion_notes"
 
           release_commit="$(git rev-list -n 1 "$RELEASE_TAG")"
-          companion_commit="$(git rev-list -n 1 "$companion_tag")"
-          test "$release_commit" = "$companion_commit"
           test "$release_commit" = "$GITHUB_SHA"
 
-          for tag in "$RELEASE_TAG" "$companion_tag"; do
+          verified_tags=("$RELEASE_TAG")
+          if [[ "$companion_tag" != none ]]; then
+            companion_notes="docs/releases/${companion_tag//\//-}.md"
+            test -f "$companion_notes"
+            git fetch --force origin \
+              "refs/tags/$companion_tag:refs/tags/$companion_tag"
+            scripts/verify-release-tag.sh \
+              --tag "$companion_tag" \
+              --notes-file "$companion_notes"
+            companion_commit="$(git rev-list -n 1 "$companion_tag")"
+            test "$release_commit" = "$companion_commit"
+            verified_tags+=("$companion_tag")
+          fi
+
+          for tag in "${verified_tags[@]}"; do
             tag_object="$(git rev-parse "refs/tags/$tag")"
             verified="$(gh api \
               "repos/$GITHUB_REPOSITORY/git/tags/$tag_object" \
