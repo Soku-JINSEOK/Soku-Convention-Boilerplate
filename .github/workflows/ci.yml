@@ -59,8 +59,14 @@ jobs:
             docs/guides/APPLICABILITY.md
             docs/guides/LANGUAGE_SELECTION.md
             docs/issues/TASK_REPORT_TEMPLATE.md
+            docs/issues/issue-16-task-report.md
             docs/issues/issue-17-task-report.md
+            docs/issues/issue-18-task-report.md
             docs/issues/issue-19-task-report.md
+            docs/issues/issue-20-task-report.md
+            docs/issues/issue-21-task-report.md
+            docs/issues/issue-22-task-report.md
+            docs/issues/issue-23-task-report.md
             LICENSE
             SECURITY.md
             .editorconfig

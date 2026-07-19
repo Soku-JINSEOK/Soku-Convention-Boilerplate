@@ -40,7 +40,34 @@ Boilerplate releases use semantic-style tags in the form
 - `MINOR`: new non-breaking conventions, new templates, additional docs, or tooling that does not invalidate the existing contract.
 - `MAJOR`: breaking file layout changes, renamed required files, incompatible policy changes, or changes that invalidate older downstream assumptions.
 
-Each release should include a short summary of what downstream repositories need to review after upgrading.
+Each release must include a compatibility and migration record in its release
+notes. A boilerplate `v*` release records:
+
+- the immutable tag and resolved source commit
+- the catalog contract versions it publishes, including the default and legacy
+  profile interpretation
+- the tested `soku` CLI compatibility range, or an explicit statement that no
+  automated lifecycle migration is supported
+- the supported forward migration from the previous release, including file
+  ownership, removals, mergeable paths, and any manual action
+- profile and provider compatibility changes
+
+A CLI `soku/v*` release records:
+
+- the immutable signed tag and source commit used for all archives
+- the manifest schema versions it can inspect and mutate
+- the boilerplate catalog and forward-migration ranges it supports
+- the provider API/schema versions and profile rules it supports
+- the operating-system package matrix, checksum artifact, and lifecycle
+  conformance evidence
+- any breaking behavior, read-only compatibility state, or manual recovery
+  requirement
+
+Unknown compatibility is unsupported; release notes must not infer support from
+matching version numbers. A release is blocked if its required lifecycle
+conformance, runtime template, quality/race, sync parity, or package snapshot
+gate fails. These records document releases when they are intentionally made;
+they do not authorize one release axis to create or advance the other.
 
 ## 📥 Downstream Sync Rules
 
