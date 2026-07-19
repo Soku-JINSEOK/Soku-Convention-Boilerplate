@@ -7,7 +7,7 @@ script_directory="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$script_directory/.."
 mkdir -p "$artifact_directory"
 raw_log="$artifact_directory/raw.json"
-sanitized_log="$artifact_directory/core-lifecycle.log"
+sanitized_log="$artifact_directory/lifecycle-conformance.log"
 
 set +e
 go test -json ./internal/lifecyclee2e >"$raw_log" 2>&1
@@ -41,4 +41,4 @@ if [[ "$test_exit" -ne 0 ]]; then
   exit "$test_exit"
 fi
 
-echo "Core lifecycle gate passed."
+echo "Lifecycle conformance gate passed."

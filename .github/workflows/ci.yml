@@ -156,6 +156,7 @@ jobs:
             soku/internal/initcmd/upgrade_test.go
             soku/internal/initcmd/verify.go
             soku/internal/lifecyclee2e/core_lifecycle_test.go
+            soku/internal/lifecyclee2e/provider_conformance_test.go
             soku/internal/manifest/manifest.go
             soku/internal/manifest/manifest_test.go
             soku/internal/manifest/replace_unix.go
@@ -297,7 +298,7 @@ jobs:
           "$(go env GOPATH)/bin/golangci-lint" run ./...
 
   soku-core-lifecycle:
-    name: soku core lifecycle (${{ matrix.os }})
+    name: soku lifecycle conformance (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -321,16 +322,16 @@ jobs:
           go-version: "1.26.x"
           cache-dependency-path: soku/go.sum
 
-      - name: Run hermetic core lifecycle gate
+      - name: Run hermetic lifecycle conformance gate
         shell: bash
-        run: scripts/run_lifecycle_gate.sh "$RUNNER_TEMP/soku-core-lifecycle"
+        run: scripts/run_lifecycle_gate.sh "$RUNNER_TEMP/soku-lifecycle-conformance"
 
       - name: Retain sanitized failure diagnostics
         if: failure()
         uses: actions/upload-artifact@v6
         with:
-          name: soku-core-lifecycle-${{ matrix.os }}
-          path: ${{ runner.temp }}/soku-core-lifecycle/core-lifecycle.log
+          name: soku-lifecycle-conformance-${{ matrix.os }}
+          path: ${{ runner.temp }}/soku-lifecycle-conformance/lifecycle-conformance.log
           if-no-files-found: error
           retention-days: 3
 

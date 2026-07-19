@@ -178,7 +178,7 @@ GOBIN="$temporary_gobin" go install .
 "$temporary_gobin/soku" --version
 ```
 
-## Core Lifecycle Release Gate
+## Lifecycle Conformance Release Gate
 
 The hermetic package under `internal/lifecyclee2e` injects synthetic immutable
 source releases and verifies empty, existing, single-stack, and multi-stack
@@ -195,7 +195,9 @@ log for three days; successful runs retain no lifecycle artifact.
 
 Linux template jobs remain the runtime gate for generated JavaScript/TypeScript,
 Python, Go, and Java projects and run whenever template or `soku` rendering code
-changes. Provider conformance joins this gate in the second phase of Issue #21.
+changes. The same three-OS package covers all profile/provider combinations,
+pending-to-connected state, combined release/profile/provider upgrades,
+ownership conflicts, and unsupported provider or manifest compatibility.
 
 For a published immutable release, Go understands the repository's submodule
 tag and installs it by module version:
