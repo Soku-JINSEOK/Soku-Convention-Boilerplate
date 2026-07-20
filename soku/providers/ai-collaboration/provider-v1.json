@@ -2,7 +2,6 @@
   "schema_version": 1,
   "id": "ai-collaboration",
   "source": "github:Soku-JINSEOK/Soku-Convention-Boilerplate/soku/providers/ai-collaboration",
-  "ref": "0123456789abcdef0123456789abcdef01234567",
   "provider_api_version": "1",
   "provider_schema_version": "1",
   "compatible_soku": ">=0.1.0 <2.0.0",

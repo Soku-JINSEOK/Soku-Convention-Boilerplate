@@ -69,6 +69,61 @@ func TestPublishedProfileAndProviderContracts(t *testing.T) {
 	}
 }
 
+func TestProviderBundleLegacyRefCompatibility(t *testing.T) {
+	configurationHash := strings.Repeat("a", 64)
+	files := validProviderBundle(configurationHash).Files
+	compiler := jsonschema.NewCompiler()
+	schema, err := compiler.Compile("../../schema/provider-v1.schema.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	tests := []struct {
+		name    string
+		mutate  func(map[string]any)
+		wantErr bool
+	}{
+		{name: "omitted", mutate: func(object map[string]any) { delete(object, "ref") }},
+		{name: "well-formed", mutate: func(object map[string]any) { object["ref"] = providerRef }},
+		{name: "malformed", mutate: func(object map[string]any) { object["ref"] = "" }, wantErr: true},
+		{name: "unknown-field", mutate: func(object map[string]any) { object["unknown"] = true }, wantErr: true},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			data, err := json.Marshal(validProviderBundle(configurationHash))
+			if err != nil {
+				t.Fatal(err)
+			}
+			var object map[string]any
+			if err := json.Unmarshal(data, &object); err != nil {
+				t.Fatal(err)
+			}
+			test.mutate(object)
+			data, err = json.Marshal(object)
+			if err != nil {
+				t.Fatal(err)
+			}
+			instance, err := jsonschema.UnmarshalJSON(bytes.NewReader(data))
+			if err != nil {
+				t.Fatal(err)
+			}
+			schemaErr := schema.Validate(instance)
+			if test.wantErr && schemaErr == nil {
+				t.Fatal("provider schema accepted an invalid legacy shape")
+			}
+			if !test.wantErr && schemaErr != nil {
+				t.Fatal(schemaErr)
+			}
+			_, err = DecodeProviderBundle(data, files)
+			if test.wantErr && failureCode(err) != 5 {
+				t.Fatalf("error = %v, want compatibility failure", err)
+			}
+			if !test.wantErr && err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
+}
+
 func (fetcher staticIntegrationFetcher) FetchIntegration(context.Context, string, string) (ProviderBundle, bool, error) {
 	return fetcher.bundle, fetcher.available, fetcher.err
 }
@@ -141,23 +196,58 @@ func TestIntegrationPendingConnectedAndRollback(t *testing.T) {
 			t.Fatalf("pending manifest = %#v, %v", document.Integrations, err)
 		}
 		request := readProjectPath(t, root, document.Integrations[0].ManagedFiles[0])
-		if strings.Contains(string(request), "review_mode") {
-			t.Fatal("raw provider configuration was persisted")
-		}
+		assertProviderRequest(t, request, configurationHash)
 	})
 
-	t.Run("connected", func(t *testing.T) {
-		root := t.TempDir()
-		options := integrationInitOptions(root, configPath)
-		options.IntegrationFetcher = staticIntegrationFetcher{bundle: bundle, available: true}
-		report, err := Run(context.Background(), options, staticFetcher{snapshot: snapshot})
-		if err != nil || report.Integrations[0].LifecycleState != "connected" {
-			t.Fatalf("connected init = %#v, %v", report, err)
-		}
-		if !strings.Contains(string(readProjectPath(t, root, ".github/ai-collaboration.yml")), "advisory") {
-			t.Fatal("connected provider output is missing")
-		}
-	})
+	for _, test := range []struct {
+		name      string
+		legacyRef *string
+	}{
+		{name: "connected-without-legacy-ref"},
+		{name: "connected-with-matching-legacy-ref", legacyRef: pointerTo(providerRef)},
+		{name: "connected-with-mismatching-legacy-ref", legacyRef: pointerTo(strings.Repeat("1", 40))},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			root := t.TempDir()
+			bundle := bundle
+			bundle.Ref = test.legacyRef
+			options := integrationInitOptions(root, configPath)
+			options.IntegrationFetcher = staticIntegrationFetcher{bundle: bundle, available: true}
+			report, err := Run(context.Background(), options, staticFetcher{snapshot: snapshot})
+			if err != nil || report.Integrations[0].LifecycleState != "connected" {
+				t.Fatalf("connected init = %#v, %v", report, err)
+			}
+			document, err := manifest.NewStore(root).Load()
+			if err != nil || document.Integrations[0].Ref != providerRef {
+				t.Fatalf("authoritative manifest ref = %q, %v", document.Integrations[0].Ref, err)
+			}
+			request := readProjectPath(t, root, ".github/soku/integrations/ai-collaboration.json")
+			assertProviderRequest(t, request, configurationHash)
+			if !strings.Contains(string(readProjectPath(t, root, ".github/ai-collaboration.yml")), "advisory") {
+				t.Fatal("connected provider output is missing")
+			}
+		})
+	}
+
+	for _, test := range []struct {
+		name   string
+		mutate func(*ProviderBundle)
+	}{
+		{name: "configuration-hash-mismatch", mutate: func(bundle *ProviderBundle) { bundle.ConfigurationHash = strings.Repeat("b", 64) }},
+		{name: "source-mismatch", mutate: func(bundle *ProviderBundle) { bundle.Source = "github:other/provider/ai-collaboration" }},
+	} {
+		t.Run(test.name+"-remains-pending", func(t *testing.T) {
+			root := t.TempDir()
+			bundle := bundle
+			test.mutate(&bundle)
+			options := integrationInitOptions(root, configPath)
+			options.IntegrationFetcher = staticIntegrationFetcher{bundle: bundle, available: true}
+			report, err := Run(context.Background(), options, staticFetcher{snapshot: snapshot})
+			if err != nil || report.Integrations[0].LifecycleState != "pending" {
+				t.Fatalf("pending mismatch = %#v, %v", report, err)
+			}
+		})
+	}
 
 	t.Run("pending-to-connected-and-rollback", func(t *testing.T) {
 		root := t.TempDir()
@@ -252,8 +342,39 @@ func integrationInitOptions(root, configPath string) Options {
 }
 
 func validProviderBundle(configurationHash string) ProviderBundle {
-	return ProviderBundle{SchemaVersion: 1, ID: "ai-collaboration", Source: providerSource, Ref: providerRef, ProviderAPIVersion: "1", ProviderSchemaVersion: "1", CompatibleSoku: ">=0.1.0 <2.0.0", ConfigurationSchemaHash: "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356", ConfigurationHash: configurationHash, CompatibleProfiles: []string{ProfileBootstrap, ProfileScaled, ProfileStandard}, Outputs: []ProviderOutput{{Template: "templates/ai.yml", Path: ".github/ai-collaboration.yml", ContentMode: "text"}}, Files: map[string][]byte{"configuration.schema.json": []byte("{}\n"), "templates/ai.yml": []byte("mode: advisory\n")}}
+	return ProviderBundle{SchemaVersion: 1, ID: "ai-collaboration", Source: providerSource, ProviderAPIVersion: "1", ProviderSchemaVersion: "1", CompatibleSoku: ">=0.1.0 <2.0.0", ConfigurationSchemaHash: "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356", ConfigurationHash: configurationHash, CompatibleProfiles: []string{ProfileBootstrap, ProfileScaled, ProfileStandard}, Outputs: []ProviderOutput{{Template: "templates/ai.yml", Path: ".github/ai-collaboration.yml", ContentMode: "text"}}, Files: map[string][]byte{"configuration.schema.json": []byte("{}\n"), "templates/ai.yml": []byte("mode: advisory\n")}}
 }
+
+func assertProviderRequest(t *testing.T, request []byte, configurationHash string) {
+	t.Helper()
+	var artifact map[string]any
+	if err := json.Unmarshal(request, &artifact); err != nil {
+		t.Fatal(err)
+	}
+	expected := map[string]any{
+		"schema_version":     float64(1),
+		"id":                 "ai-collaboration",
+		"source":             "https://github.com/example/provider/ai-collaboration",
+		"ref":                providerRef,
+		"configuration_hash": configurationHash,
+	}
+	if len(artifact) != len(expected) {
+		t.Fatalf("pending artifact keys = %v", artifact)
+	}
+	for key, value := range expected {
+		if artifact[key] != value {
+			t.Fatalf("pending artifact %s = %#v, want %#v", key, artifact[key], value)
+		}
+	}
+	serialized := strings.ToLower(string(request))
+	for _, forbidden := range []string{"review_mode", "languages", "advisory", "secret", "token", "password"} {
+		if strings.Contains(serialized, forbidden) {
+			t.Fatalf("pending artifact persisted forbidden payload %q", forbidden)
+		}
+	}
+}
+
+func pointerTo(value string) *string { return &value }
 
 func assertChangePath(t *testing.T, changes []Change, path string) {
 	t.Helper()

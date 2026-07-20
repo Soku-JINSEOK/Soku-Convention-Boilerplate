@@ -116,6 +116,9 @@ func TestProviderConformanceRejectsIncompatibleState(t *testing.T) {
 		if _, err := os.Stat(filepath.Join(root, ".soku")); !os.IsNotExist(err) {
 			t.Fatal("unsupported provider wrote lifecycle state")
 		}
+		if len(projectTree(t, root)) != 0 {
+			t.Fatal("unsupported provider wrote project output")
+		}
 	})
 
 	t.Run("ownership-conflict", func(t *testing.T) {
@@ -125,6 +128,9 @@ func TestProviderConformanceRejectsIncompatibleState(t *testing.T) {
 		options := integrationOptions(root, configPath, providerFetcher{bundle: bundle, available: true})
 		if _, err := initcmd.Run(context.Background(), options, releaseFetcher{"v1.0.0": snapshot}); failureCode(err) != 4 {
 			t.Fatalf("ownership error = %v", err)
+		}
+		if len(projectTree(t, root)) != 0 {
+			t.Fatal("ownership conflict wrote lifecycle state or project output")
 		}
 	})
 
@@ -174,7 +180,7 @@ func providerConfiguration(t *testing.T) (string, string) {
 func conformanceProvider(configurationHash string) initcmd.ProviderBundle {
 	return initcmd.ProviderBundle{
 		SchemaVersion: 1, ID: "ai-collaboration", Source: providerRequestSource,
-		Ref: providerCommit, ProviderAPIVersion: "1", ProviderSchemaVersion: "1",
+		ProviderAPIVersion: "1", ProviderSchemaVersion: "1",
 		CompatibleSoku:          ">=0.1.0 <2.0.0",
 		ConfigurationSchemaHash: "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356",
 		ConfigurationHash:       configurationHash,

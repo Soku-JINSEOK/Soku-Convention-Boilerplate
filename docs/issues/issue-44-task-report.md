@@ -85,13 +85,26 @@ preflight record. Existing tags and Releases remain immutable.
 
 ## Implementation Status
 
-Task report approved. Implementation is starting on Draft PR #50.
+Provider schema, decoder, revision planning, examples, hermetic and pinned HTTPS
+conformance, lifecycle documentation, CI, and the proposed `soku/v0.1.2` record
+are implemented on Draft PR #50. Hosted validation, Ready transition, merge,
+post-merge validation, and release preflight remain pending.
 
 ## Verification
 
 - Passed: Markdown lint for this task report.
 - Passed: YAML lint for the required-file registration.
 - Passed: `git diff --check` for the initial report-only change.
+- Passed: all Go unit tests, race tests, vet, gofmt, goimports, and
+  golangci-lint.
+- Passed: hermetic lifecycle conformance and the opt-in HTTPS provider test at
+  commit `a81f7c91b0c9c8faa5ba2988fde29e9d17972a83`.
+- Passed: Markdown, YAML, actionlint, contribution-title, release-note contract,
+  release-tag regression, Bash syntax, and final whitespace checks.
+- Local environment limit: PowerShell and ShellCheck are unavailable; the
+  Homebrew Go 1.26.5 installation lacks cross-compile standard-library packages
+  required by the five-target package snapshot. Hosted validation covers all
+  three checks.
 
 ## AI Assistance
 
@@ -182,13 +195,24 @@ test를 추가합니다.
 
 ## 구현 현황
 
-Task report가 승인됐습니다. Draft PR #50에서 구현을 시작합니다.
+Provider schema, decoder, revision planning, 예제, hermetic/pinned HTTPS
+conformance, lifecycle 문서, CI, `soku/v0.1.2` 제안 기록을 Draft PR #50에
+구현했습니다. Hosted validation, Ready 전환, 병합, post-merge validation,
+release preflight는 대기 중입니다.
 
 ## 검증
 
 - 통과: task report Markdown lint.
 - 통과: required-file 등록 YAML lint.
 - 통과: 초기 report-only 변경의 `git diff --check`.
+- 통과: 전체 Go unit/race/vet/gofmt/goimports/golangci-lint.
+- 통과: hermetic lifecycle conformance 및 commit
+  `a81f7c91b0c9c8faa5ba2988fde29e9d17972a83`의 opt-in HTTPS provider test.
+- 통과: Markdown, YAML, actionlint, contribution-title, release-note
+  contract, release-tag regression, Bash syntax, whitespace 검사.
+- 로컬 환경 제한: PowerShell과 ShellCheck가 없고 Homebrew Go 1.26.5에
+  5-target package snapshot용 cross-compile standard-library package가 없습니다.
+  Hosted validation에서 세 검사를 모두 수행합니다.
 
 ## AI 지원
 

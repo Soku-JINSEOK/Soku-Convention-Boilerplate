@@ -60,15 +60,30 @@ Initialization, diff, and upgrade accept the generic provider inputs:
 
 Provider API v1 permits only versioned metadata, a hashed configuration schema,
 sorted compatible profiles, declared templates, and bounded text or binary
-outputs. Unknown fields, scripts, hooks, executable or dynamic-library paths,
-undeclared bundle files, traversal, reserved state, secrets, and ownership
-collisions fail before writes. Raw configuration is never stored.
+outputs. The exact lowercase full commit passed with `--integration-ref` and
+used for fetch is the only authoritative revision in the request artifact,
+manifest, and connection decision. A bundle may omit its deprecated legacy
+`ref`; if present, that value must be well-formed but matching or mismatching it
+has no effect on the fetched revision. Unknown fields, malformed legacy refs,
+scripts, hooks, executable or dynamic-library paths, undeclared bundle files,
+traversal, reserved state, secrets, and ownership collisions fail before
+writes. Raw configuration is never stored.
 
 If the exact source, ref, and configuration hash has no matching bundle, `soku`
 creates only `.github/soku/integrations/<id>.json` and records `pending`. An
 exact compatible bundle adds only its declared outputs and records `connected`.
 Pending-to-connected and profile/provider changes use the same manifest-last
 transaction and rollback boundary as core upgrades.
+
+The pending artifact contains exactly `schema_version`, `id`, portable
+`source`, authoritative `ref`, and `configuration_hash`. A sanitized
+configuration can be submitted only through a provider-owned channel outside
+the lifecycle: remove secrets and validate the schema locally, compare its
+canonical hash with the pending artifact, submit it with the portable source,
+exact requested commit, and hash, then wait for the provider to publish a new
+immutable commit. The user must explicitly select that commit. Neither the
+pending artifact nor `.soku/manifest.json` stores sanitized/raw configuration
+or secrets.
 
 The equivalent strict YAML file is a flat mapping. Unknown fields are rejected:
 
