@@ -62,13 +62,22 @@ Provider API v1 permits only versioned metadata, a hashed configuration schema,
 sorted compatible profiles, declared templates, and bounded text or binary
 outputs. Unknown fields, scripts, hooks, executable or dynamic-library paths,
 undeclared bundle files, traversal, reserved state, secrets, and ownership
-collisions fail before writes. Raw configuration is never stored.
+collisions fail before writes. The fetched `--integration-ref` is the revision
+authority. A bundle may omit its deprecated legacy `ref`; when present, the
+field must still be a lowercase full commit but does not decide connection
+state. Raw configuration is never stored.
 
 If the exact source, ref, and configuration hash has no matching bundle, `soku`
 creates only `.github/soku/integrations/<id>.json` and records `pending`. An
 exact compatible bundle adds only its declared outputs and records `connected`.
 Pending-to-connected and profile/provider changes use the same manifest-last
 transaction and rollback boundary as core upgrades.
+
+The pending artifact contains the provider identity, requested commit, and
+configuration hash, never raw configuration. Any human-readable onboarding
+submission is a separate provider-controlled, reviewed, sanitized document;
+follow the redaction, access, and retention contract in
+[`SOKU_LIFECYCLE.md`](../docs/standards/SOKU_LIFECYCLE.md#pending-artifact-and-sanitized-configuration).
 
 The equivalent strict YAML file is a flat mapping. Unknown fields are rejected:
 
@@ -204,7 +213,7 @@ For a published immutable release, Go understands the repository's submodule
 tag and installs it by module version:
 
 ```bash
-go install github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/soku@v0.1.1
+go install github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/soku@v0.1.2
 ```
 
 ## Verify a Release Download
@@ -214,7 +223,7 @@ then verify it before extraction. For example:
 
 ```bash
 sha256sum --check --ignore-missing checksums.txt
-tar -xzf soku_v0.1.1_linux_amd64.tar.gz
+tar -xzf soku_v0.1.2_linux_amd64.tar.gz
 ./soku --version
 ```
 
@@ -230,7 +239,7 @@ Linux arm64, macOS amd64, macOS arm64, and Windows amd64 archives:
 ```bash
 cd soku
 ./scripts/package.sh \
-  --version v0.1.1 \
+  --version v0.1.2 \
   --commit 0123456789abcdef0123456789abcdef01234567 \
   --built-at 2026-07-18T00:00:00Z \
   --output-dir ./dist

@@ -8,7 +8,6 @@
     "schema_version",
     "id",
     "source",
-    "ref",
     "provider_api_version",
     "provider_schema_version",
     "compatible_soku",
@@ -21,7 +20,12 @@
     "schema_version": {"const": 1},
     "id": {"type": "string", "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"},
     "source": {"type": "string", "pattern": "^github:[^/]+/[^/]+/.+$"},
-    "ref": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "ref": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$",
+      "deprecated": true,
+      "description": "Legacy informational field. The fetched --integration-ref is authoritative."
+    },
     "provider_api_version": {"const": "1"},
     "provider_schema_version": {"const": "1"},
     "compatible_soku": {"type": "string", "pattern": "^>=[0-9]+\\.[0-9]+\\.[0-9]+ <[0-9]+\\.[0-9]+\\.[0-9]+$"},

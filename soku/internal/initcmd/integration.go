@@ -85,7 +85,7 @@ type ProviderBundle struct {
 	SchemaVersion           int               `json:"schema_version"`
 	ID                      string            `json:"id"`
 	Source                  string            `json:"source"`
-	Ref                     string            `json:"ref"`
+	Ref                     string            `json:"ref,omitempty"`
 	ProviderAPIVersion      string            `json:"provider_api_version"`
 	ProviderSchemaVersion   string            `json:"provider_schema_version"`
 	CompatibleSoku          string            `json:"compatible_soku"`
@@ -129,7 +129,7 @@ func validateProviderBundle(bundle ProviderBundle) error {
 	if sourceErr != nil || sourceID != bundle.ID {
 		return fail(5, "provider.incompatible", "provider source and id are inconsistent")
 	}
-	if !lowerCommit(bundle.Ref) || !isSHA256(bundle.ConfigurationSchemaHash) || !isSHA256(bundle.ConfigurationHash) || len(bundle.Outputs) == 0 {
+	if (bundle.Ref != "" && !lowerCommit(bundle.Ref)) || !isSHA256(bundle.ConfigurationSchemaHash) || !isSHA256(bundle.ConfigurationHash) || len(bundle.Outputs) == 0 {
 		return fail(5, "provider.incompatible", "provider bundle has invalid immutable or schema metadata")
 	}
 	schema, schemaExists := bundle.Files["configuration.schema.json"]
@@ -211,7 +211,7 @@ func planIntegration(ctx context.Context, source, ref, configPath, profile strin
 	if err := validateProviderBundle(bundle); err != nil {
 		return integrationPlan{}, err
 	}
-	if bundle.ID != id || bundle.Source != source || bundle.Ref != ref || bundle.ConfigurationHash != configurationHash {
+	if bundle.ID != id || bundle.Source != source || bundle.ConfigurationHash != configurationHash {
 		return plan, nil
 	}
 	if !contains(bundle.CompatibleProfiles, profile) {

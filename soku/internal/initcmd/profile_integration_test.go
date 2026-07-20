@@ -67,6 +67,23 @@ func TestPublishedProfileAndProviderContracts(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
+
+	providerSchema, err := compiler.Compile("../../schema/provider-v1.schema.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var providerObject map[string]any
+	if err := json.Unmarshal(providerData, &providerObject); err != nil {
+		t.Fatal(err)
+	}
+	delete(providerObject, "ref")
+	if err := providerSchema.Validate(providerObject); err != nil {
+		t.Fatalf("provider without legacy ref: %v", err)
+	}
+	providerObject["ref"] = "main"
+	if err := providerSchema.Validate(providerObject); err == nil {
+		t.Fatal("provider schema accepted a malformed legacy ref")
+	}
 }
 
 func (fetcher staticIntegrationFetcher) FetchIntegration(context.Context, string, string) (ProviderBundle, bool, error) {
@@ -144,6 +161,18 @@ func TestIntegrationPendingConnectedAndRollback(t *testing.T) {
 		if strings.Contains(string(request), "review_mode") {
 			t.Fatal("raw provider configuration was persisted")
 		}
+		var artifact map[string]any
+		if err := json.Unmarshal(request, &artifact); err != nil {
+			t.Fatal(err)
+		}
+		for _, field := range []string{"schema_version", "id", "source", "ref", "configuration_hash"} {
+			if _, ok := artifact[field]; !ok {
+				t.Fatalf("pending artifact is missing %q", field)
+			}
+		}
+		if len(artifact) != 5 {
+			t.Fatalf("pending artifact contains unexpected fields: %v", artifact)
+		}
 	})
 
 	t.Run("connected", func(t *testing.T) {
@@ -187,6 +216,55 @@ func TestIntegrationPendingConnectedAndRollback(t *testing.T) {
 			t.Fatalf("connected manifest = %#v, %v", document.Integrations, err)
 		}
 	})
+}
+
+func TestProviderLegacyRefDoesNotSelectConnectionState(t *testing.T) {
+	configPath := filepath.Join(t.TempDir(), "ai.yml")
+	writeTestFile(t, configPath, "review_mode: advisory\n")
+	configurationHash, err := integrationConfigurationHash(configPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for _, test := range []struct {
+		name string
+		ref  string
+	}{
+		{name: "omitted"},
+		{name: "matching", ref: providerRef},
+		{name: "mismatching", ref: strings.Repeat("b", 40)},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			bundle := validProviderBundle(configurationHash)
+			bundle.Ref = test.ref
+			plan, err := planIntegration(context.Background(), providerSource, providerRef, configPath, ProfileStandard, staticIntegrationFetcher{bundle: bundle, available: true})
+			if err != nil || plan.Integration.LifecycleState != "connected" {
+				t.Fatalf("legacy ref %q plan = %#v, %v", test.ref, plan, err)
+			}
+			if plan.Integration.Ref != providerRef {
+				t.Fatalf("authoritative ref = %q", plan.Integration.Ref)
+			}
+		})
+	}
+
+	bundle := validProviderBundle(configurationHash)
+	bundle.Ref = "main"
+	data, err := json.Marshal(bundle)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := DecodeProviderBundle(data, bundle.Files); failureCode(err) != 5 {
+		t.Fatalf("malformed legacy ref error = %v", err)
+	}
+	root := t.TempDir()
+	options := integrationInitOptions(root, configPath)
+	options.IntegrationFetcher = staticIntegrationFetcher{bundle: bundle, available: true}
+	if _, err := Run(context.Background(), options, staticFetcher{snapshot: indexedSnapshot(t)}); failureCode(err) != 5 {
+		t.Fatalf("malformed legacy ref lifecycle error = %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(root, ".soku")); !errors.Is(err, os.ErrNotExist) {
+		t.Fatal("malformed legacy ref wrote lifecycle state")
+	}
 }
 
 func TestProviderRejectsExecutableEscapeSecretAndOwnershipConflict(t *testing.T) {

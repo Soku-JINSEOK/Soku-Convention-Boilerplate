@@ -129,6 +129,12 @@ An integration ref must match `^[0-9a-f]{40}$`. A branch, tag, uppercase SHA,
 abbreviated SHA, or overlong SHA is invalid. The source and ref are persisted;
 raw integration configuration is not.
 
+The validated `--integration-ref` used to fetch the provider archive is the
+only revision authority. Provider API v1 retains an optional, deprecated
+bundle `ref` for backward compatibility. When present it must use the same
+lowercase full-commit syntax, but its value is informational and is not
+compared with the fetched revision or used to decide lifecycle state.
+
 ### Configuration Precedence
 
 Lifecycle values are resolved in this order, from highest to lowest priority:
@@ -383,13 +389,33 @@ A two-stage provider has a request phase and a connected phase:
 1. The request phase may create only its declared request artifact and records
    the integration as `pending`.
 2. The connected phase may create only declared connected outputs after
-   provider data matches the request, schema/configuration hash, and exact full
-   integration SHA.
-3. If new provider data does not match the exact request or ref, the integration
-   remains `pending`; `soku` must not render CI or delivery output.
+   provider data fetched from the requested full integration SHA matches the
+   provider ID, source, schema/configuration hash, and compatibility contract.
+3. If fetched provider data does not match the exact request, the integration
+   remains `pending`; `soku` must not render CI or delivery output. A valid
+   legacy bundle `ref` does not participate in this decision.
 
 This rule prevents a request for one governance or pipeline configuration from
 being silently connected to data produced for another revision.
+
+### Pending Artifact and Sanitized Configuration
+
+The pending request artifact contains only its schema version, provider ID,
+portable provider source, requested commit, and canonical configuration hash.
+It must not contain raw configuration, secret values, credentials, environment
+variables, or machine-specific paths.
+
+When a provider needs human-readable configuration for onboarding, the
+downstream owner submits a separate deliberately sanitized document through a
+provider-controlled review path. Before submission, the owner must remove
+secrets, credentials, personal data, internal endpoints, and unnecessary
+environment details; compare the sanitized document with the local source; and
+record that it is not the lifecycle artifact. A provider reviewer must verify
+redaction before copying approved non-secret fields into provider-owned state.
+The provider must define access and retention for the submission, delete it
+when the review or documented retention period ends, and never treat it as a
+substitute for the hash-bound lifecycle request. If safe sanitization cannot be
+demonstrated, the integration remains `pending`.
 
 ## Consumer Example and Provider Wire Format
 
