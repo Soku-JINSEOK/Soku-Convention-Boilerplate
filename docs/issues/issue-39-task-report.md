@@ -58,9 +58,10 @@ place, while incompatible or release-requiring defects become follow-up issues.
 
 ## Implementation Status
 
-Implementation changes are prepared on the audit branch. The protected hosted
-gate, repository settings, authenticated billing evidence, and final evidence
-pull request remain pending.
+The implementation pull request is merged and the protected hosted gate and
+repository ruleset are active. Authenticated API evidence is recorded below on
+the clean `agent/repository-audit-evidence` worktree. The owner confirmed the
+Billing-page-only evidence, and the final evidence pull request remains pending.
 
 ## Verification
 
@@ -81,9 +82,52 @@ Preliminary local verification completed on 2026-07-20 (JST):
 - Public `soku/v0.1.1` assets, checksums, metadata, native execution, and isolated
   `go install` passed. Published tags and releases were not changed.
 
-Final command versions, hosted results, historical exceptions, repository
-settings, resource usage, and billing evidence will be recorded after the
-implementation pull request merges.
+The post-merge repository, resource, and authenticated usage evidence is
+recorded below, including the owner's Billing-page-only confirmation.
+
+## Final Evidence
+
+Evidence collected on 2026-07-20 (JST) from a separate clean worktree based on
+`main` commit `fa04d49`:
+
+- The `main governance` ruleset is active for `refs/heads/main`, requires pull
+  requests, signed commits, resolved conversations, and the strict
+  `Validation Gate`, blocks deletion and non-fast-forward updates, permits only
+  merge commits, and has no bypass actor. The approval count is zero because
+  this is a personal repository.
+- The protected `main` run
+  [29696203099](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/actions/runs/29696203099)
+  completed with a successful aggregate `Validation Gate`: its nineteen
+  applicable repository/runtime checks succeeded, while the PR-only title job
+  was expectedly skipped on the `main` push.
+- Workflows use only standard `ubuntu-latest`, `macos-latest`, and
+  `windows-latest` runners. Every external Action reference is pinned to a full
+  commit SHA; reusable workflows are repository-local.
+- Repository Actions artifacts are `0` files / `0` bytes. Actions caches are
+  `18` entries / `658,571,560` bytes.
+- Three immutable Releases exist. `v1.0.0` has no uploaded asset;
+  `soku/v0.1.0` and `soku/v0.1.1` each have six assets totaling `15,466,359`
+  and `15,467,777` bytes respectively (`30,934,136` bytes combined).
+- User package inventories for Container, npm, Maven, RubyGems, and NuGet are
+  empty. The account has zero Codespaces and zero Marketplace purchases.
+- The repository has no webhook or deployment. No Git LFS configuration or
+  tracked LFS pointer is present, and the authenticated monthly usage report
+  contains no Packages, Git LFS, or Codespaces usage item.
+- The personal account reports the `free` plan. For July 2026, authenticated
+  usage contains only Actions: account gross `$16.973`, discount `$16.973`, and
+  net `$0`. This repository accounts for gross `$9.39` and net `$0` across
+  Linux, macOS, and Windows Actions usage. This is metered activity fully
+  discounted by the plan, not a paid charge.
+- No account, budget, subscription, payment, or repository setting was changed
+  during evidence collection. No payment identifier was read or recorded.
+- The owner confirmed in the authenticated Billing & Licensing UI that there is
+  no next payment due, no payment method, and no non-metered paid subscription.
+  A personal budget/alert is configured. Only these sanitized facts are
+  recorded; no amount, recipient, payment, address, or billing identifier is
+  retained.
+
+The GitHub REST API does not expose those four Billing & Licensing facts, so
+their source is the account owner's read-only authenticated UI confirmation.
 
 ## AI Assistance
 
@@ -143,8 +187,10 @@ Release를 발행하지 않고 검증 체계와 발견된 결함을 개선해야
 
 ## 구현 현황
 
-감사 브랜치의 구현 변경은 준비되었습니다. 보호된 hosted gate, 저장소 설정,
-인증된 비용 증거, 최종 증거 PR은 아직 남아 있습니다.
+구현 PR은 병합됐고 보호된 hosted gate와 repository ruleset이 활성 상태입니다.
+별도의 clean `agent/repository-audit-evidence` worktree에서 인증된 API 증거를 아래에
+기록했습니다. 소유자가 Billing 화면 전용 증거를 확인했으며 최종 evidence PR만
+남아 있습니다.
 
 ## 검증
 
@@ -165,8 +211,46 @@ Release를 발행하지 않고 검증 체계와 발견된 결함을 개선해야
 - 공개 `soku/v0.1.1` asset, checksum, metadata, native 실행, 격리된
   `go install` 검증은 통과했고 공개 tag·Release는 변경하지 않았습니다.
 
-최종 명령 버전, hosted 결과, 과거 예외, 저장소 설정, resource 사용량, 비용
-증거는 구현 PR 병합 후 기록합니다.
+병합 후 repository, resource, 인증된 사용량 증거는 아래에 기록했습니다.
+Billing 화면에서만 확인 가능한 사실은 소유자의 읽기 전용 확인을 기록했습니다.
+
+## 최종 증거
+
+2026-07-20(JST), `main` commit `fa04d49`에서 만든 별도 clean worktree에서 증거를
+수집했습니다.
+
+- `main governance` ruleset은 PR, signed commit, conversation resolution,
+  strict `Validation Gate`를 요구하고 deletion과 non-fast-forward를 차단합니다.
+  merge commit만 허용하며 bypass actor는 없습니다. 개인 저장소이므로 필수 승인은
+  0명입니다.
+- 보호된 `main` run
+  [29696203099](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/actions/runs/29696203099)의
+  aggregate `Validation Gate`가 성공했습니다. 적용 가능한 repository/runtime 검사
+  19개가 성공했고 PR 전용 title job은 `main` push에서 정상적으로 skip됐습니다.
+- workflow는 표준 `ubuntu-latest`, `macos-latest`, `windows-latest` runner만
+  사용합니다. 외부 Action은 모두 전체 commit SHA로 고정됐고 reusable workflow는
+  저장소 내부 파일만 사용합니다.
+- Actions artifact는 0개/0 bytes, cache는 18개/658,571,560 bytes입니다.
+- 불변 Release는 3개입니다. `v1.0.0`의 업로드 asset은 없고,
+  `soku/v0.1.0`과 `soku/v0.1.1`은 각각 6개 asset, 15,466,359 bytes와
+  15,467,777 bytes로 합계 30,934,136 bytes입니다.
+- Container, npm, Maven, RubyGems, NuGet package는 모두 0개입니다. Codespaces와
+  Marketplace 구매도 각각 0개입니다.
+- repository webhook과 deployment는 없습니다. Git LFS 설정이나 추적 pointer가
+  없고 인증된 월별 사용량에도 Packages, Git LFS, Codespaces 항목이 없습니다.
+- 개인 계정 plan은 `free`입니다. 2026년 7월 사용량은 Actions만 존재하며 계정
+  gross `$16.973`, discount `$16.973`, net `$0`입니다. 이 저장소 귀속 사용량은
+  Linux/macOS/Windows Actions 합계 gross `$9.39`, net `$0`입니다. 이는 plan으로
+  전액 할인된 metered activity이며 실제 유료 청구가 아닙니다.
+- 증거 수집 중 계정, budget, subscription, payment, repository 설정을 변경하지
+  않았고 payment identifier를 읽거나 기록하지 않았습니다.
+- 소유자가 인증된 Billing & Licensing UI에서 다음 결제 예정 없음, payment method
+  없음, 별도 non-metered 유료 구독 없음, 개인 budget/alert 설정 있음을 확인했습니다.
+  이 비민감 사실만 기록하며 금액, 수신자, 결제·주소·billing 식별자는 보존하지
+  않습니다.
+
+GitHub REST API는 이 네 가지 Billing & Licensing 사실을 제공하지 않으므로,
+해당 증거의 출처는 계정 소유자의 인증된 UI 읽기 전용 확인입니다.
 
 ## AI 지원
 
