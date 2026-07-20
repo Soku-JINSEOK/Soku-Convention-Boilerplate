@@ -76,19 +76,22 @@ preflight record. Existing tags and Releases remain immutable.
 
 ## Approval
 
-- **Status:** `Pending approval`
-- **Approved by:** `None`
+- **Status:** `Approved`
+- **Approved by:** `Soku-JINSEOK` (explicit implementation instruction recorded
+  on Draft PR #50 on 2026-07-21)
 - **Approval boundary:** Implementation must not begin until explicit approval
   of this report is recorded on Issue #44 or its Draft PR. Publishing a tag or
   Release and closing Issue #44 require separate later approval.
 
 ## Implementation Status
 
-Task report drafted. Implementation has not started.
+Task report approved. Implementation is starting on Draft PR #50.
 
 ## Verification
 
-- Not run: implementation and validation are gated on task report approval.
+- Passed: Markdown lint for this task report.
+- Passed: YAML lint for the required-file registration.
+- Passed: `git diff --check` for the initial report-only change.
 
 ## AI Assistance
 
@@ -170,20 +173,22 @@ test를 추가합니다.
 
 ## 승인
 
-- **상태:** `Pending approval`
-- **승인자:** `None`
+- **상태:** `Approved`
+- **승인자:** `Soku-JINSEOK` (2026-07-21 Draft PR #50에 명시적 구현 지시
+  기록)
 - **승인 경계:** Issue #44 또는 Draft PR에 본 보고서의 명시적 승인이
   기록되기 전에는 구현을 시작하지 않습니다. Tag/Release 발행과 Issue #44
   종료는 후속 별도 승인이 필요합니다.
 
 ## 구현 현황
 
-Task report 초안을 작성했습니다. 구현은 시작하지 않았습니다.
+Task report가 승인됐습니다. Draft PR #50에서 구현을 시작합니다.
 
 ## 검증
 
-- 미실행: task report 승인 전이므로 구현 및 validation을 실행하지
-  않았습니다.
+- 통과: task report Markdown lint.
+- 통과: required-file 등록 YAML lint.
+- 통과: 초기 report-only 변경의 `git diff --check`.
 
 ## AI 지원
 
