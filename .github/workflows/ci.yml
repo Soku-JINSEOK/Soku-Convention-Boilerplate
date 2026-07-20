@@ -76,6 +76,7 @@ jobs:
             docs/issues/issue-35-task-report.md
             docs/issues/issue-39-task-report.md
             docs/issues/issue-40-task-report.md
+            docs/issues/issue-44-task-report.md
             LICENSE
             SECURITY.md
             .editorconfig
