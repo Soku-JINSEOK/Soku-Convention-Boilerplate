@@ -65,6 +65,7 @@ jobs:
             docs/releases/v1.0.0.md
             docs/releases/soku-v0.1.0.md
             docs/releases/soku-v0.1.1.md
+            docs/releases/soku-v0.1.2.md
             docs/issues/issue-16-task-report.md
             docs/issues/issue-17-task-report.md
             docs/issues/issue-18-task-report.md
@@ -76,6 +77,7 @@ jobs:
             docs/issues/issue-35-task-report.md
             docs/issues/issue-39-task-report.md
             docs/issues/issue-40-task-report.md
+            docs/issues/issue-44-task-report.md
             LICENSE
             SECURITY.md
             .editorconfig
@@ -176,6 +178,7 @@ jobs:
             soku/internal/initcmd/verify.go
             soku/internal/lifecyclee2e/core_lifecycle_test.go
             soku/internal/lifecyclee2e/provider_conformance_test.go
+            soku/internal/lifecyclee2e/provider_network_conformance_test.go
             soku/internal/manifest/manifest.go
             soku/internal/manifest/manifest_test.go
             soku/internal/manifest/replace_unix.go
@@ -375,6 +378,15 @@ jobs:
       - name: Run hermetic lifecycle conformance gate
         shell: bash
         run: scripts/run_lifecycle_gate.sh "$RUNNER_TEMP/soku-lifecycle-conformance"
+
+      - name: Fetch pinned external provider conformance fixture
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          SOKU_PROVIDER_NETWORK_CONFORMANCE: "1"
+        run: >-
+          go test -count=1 -timeout=2m
+          -run '^TestProviderNetworkConformance$'
+          ./internal/lifecyclee2e
 
       - name: Retain sanitized failure diagnostics
         if: failure()

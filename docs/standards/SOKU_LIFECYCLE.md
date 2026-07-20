@@ -127,7 +127,12 @@ The generic integration selection interface is reserved as follows:
 
 An integration ref must match `^[0-9a-f]{40}$`. A branch, tag, uppercase SHA,
 abbreviated SHA, or overlong SHA is invalid. The source and ref are persisted;
-raw integration configuration is not.
+raw integration configuration is not. The exact `--integration-ref` passed to
+the fetcher is the only authoritative provider revision used by request
+artifacts, manifests, and connection decisions. Provider API v1 bundles may
+omit `ref`; a present bundle `ref` is deprecated legacy metadata that must be
+well-formed but is never compared with, substituted for, or allowed to redirect
+the fetched ref.
 
 ### Configuration Precedence
 
@@ -381,15 +386,41 @@ downstream lifecycle command.
 A two-stage provider has a request phase and a connected phase:
 
 1. The request phase may create only its declared request artifact and records
-   the integration as `pending`.
+   the integration as `pending`. The artifact has exactly five fields: schema
+   version, provider ID, portable source, authoritative fetched ref, and the
+   canonical configuration hash.
 2. The connected phase may create only declared connected outputs after
-   provider data matches the request, schema/configuration hash, and exact full
-   integration SHA.
-3. If new provider data does not match the exact request or ref, the integration
-   remains `pending`; `soku` must not render CI or delivery output.
+   provider data fetched at that authoritative ref matches the provider ID,
+   source, schema, configuration hash, and compatibility requirements.
+3. A provider-supplied legacy `ref`, whether matching or mismatching, has no
+   effect on this decision. If provider data does not match the exact request,
+   the integration remains `pending`; `soku` must not render CI or delivery
+   output.
 
 This rule prevents a request for one governance or pipeline configuration from
 being silently connected to data produced for another revision.
+
+### Sanitized Configuration Submission
+
+Sanitized configuration may leave the downstream repository only through an
+explicit provider-owned submission channel outside the `soku` lifecycle:
+
+1. Remove secrets locally and validate the sanitized document against the
+   provider's configuration schema.
+2. Canonicalize it with the same text rules and confirm its SHA-256 matches the
+   `configuration_hash` in the pending request artifact.
+3. Submit it through the provider's declared channel together with the portable
+   source, exact requested commit, and matching hash.
+4. The provider reviews the submission and publishes any matching declarative
+   data in a new immutable commit.
+5. The user explicitly selects that new full commit with
+   `--integration-ref`; no lifecycle command follows or adopts it implicitly.
+
+Neither the five-field pending artifact nor `.soku/manifest.json` stores the
+sanitized document, raw configuration, credentials, or secrets. The manifest
+continues to store its existing provider API, schema, lifecycle, ownership, and
+hash metadata; manifest-v1 is not expanded with a configuration payload or
+provider submission channel.
 
 ## Consumer Example and Provider Wire Format
 
@@ -401,9 +432,12 @@ logic.
 Issue #22 defines provider API v1 as strict JSON metadata with API/schema
 versions, a `compatible_soku` range, a hashed configuration schema, the exact
 configuration hash, sorted compatible profiles, and bounded template/output
-declarations. Unknown fields and undeclared bundle files are invalid. The
-generic loader fetches the declared GitHub bundle at a lowercase full commit;
-it never executes or dynamically loads bundle content.
+declarations. Its `ref` field is optional, deprecated legacy metadata. Unknown
+fields, malformed present legacy refs, and undeclared bundle files are invalid.
+The generic loader fetches the declared GitHub bundle at the lowercase full
+commit selected by the CLI; bundle metadata cannot change that revision or the
+connection decision. The loader never executes or dynamically loads bundle
+content.
 
 Catalog v2 is selected by `soku/catalog/index-v2.json` and composes the built-in
 profiles in the fixed order `bootstrap → standard → scaled`. `standard` remains
@@ -439,6 +473,9 @@ Implementations must cover at least these scenarios:
 | --- | --- |
 | Integration ref is a lowercase 40-character SHA | Accepted if source and compatibility validation also pass. |
 | Integration ref is a branch, tag, uppercase SHA, or the wrong length | Rejected before mutation with exit code `2`. |
+| Provider bundle omits its deprecated legacy `ref` | Accepted when all authoritative fetched-ref, schema, request, and compatibility checks pass. |
+| Provider bundle supplies a well-formed matching or mismatching legacy `ref` | Accepted without changing the fetched revision or connection decision. |
+| Provider bundle supplies a malformed legacy `ref` or an unknown field | Rejected before mutation with exit code `5`. |
 | Provider output uses traversal, reserved state, or an owned path | Rejected before mutation with exit code `2` or `4`, according to whether the failure is path validity or ownership conflict. |
 | Configuration or manifest would persist a secret | Rejected before mutation with exit code `2`. |
 | Exact provider data is not available for a valid request | State remains `pending`; connected CI or delivery output is absent. |
