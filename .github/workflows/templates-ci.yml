@@ -45,7 +45,7 @@ jobs:
       - run: pip install -r requirements-lock.txt -e ".[dev]"
       - run: ruff check .
       - run: mypy .
-      - run: pyink --check .
+      - run: black --check .
       - run: pytest
 
   go:

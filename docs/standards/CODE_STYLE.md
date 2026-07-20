@@ -23,14 +23,16 @@ The starter templates under `templates/` adopt Google's own official tooling and
 | Language | Google guide | Formatter | Linter | Indent | Line length |
 | --- | --- | --- | --- | --- | --- |
 | TypeScript / JavaScript | [Google TypeScript Style Guide](https://google.github.io/styleguide/tsguide.html) | [`gts`](https://github.com/google/gts) (wraps Prettier) | `gts` (wraps ESLint) | 2 spaces | 80 |
-| Python | [Google Python Style Guide](https://google.github.io/styleguide/pyguide.html) | [`pyink`](https://github.com/google/pyink) | `ruff` (lint only) | 4 spaces | 80 |
+| Python | [Google Python Style Guide](https://google.github.io/styleguide/pyguide.html) | [`Black`](https://black.readthedocs.io/) | `ruff` (lint only) | 4 spaces | 80 |
 | Java / Spring | [Google Java Style Guide](https://google.github.io/styleguide/javaguide.html) | [`google-java-format`](https://github.com/google/google-java-format) | Checkstyle `google_checks.xml` | 2 spaces (+4 continuation) | 100 |
 | Go | [Effective Go](https://go.dev/doc/effective_go) | `gofmt` / `goimports` | `golangci-lint` | tabs | (`gofmt`-determined) |
 
 Notes:
 
 - TS/JS: `gts` sets Prettier to `singleQuote: true`, `bracketSpacing: false`, `arrowParens: "avoid"`, `trailingComma: "all"` — see `templates/javascript-typescript-node/prettier.config.cjs` and `eslint.config.mjs`.
-- Python: `ruff` handles linting only; formatting is delegated to `pyink` so the two tools do not fight over line length or quote style — see `templates/python/pyproject.toml`.
+- Python: `ruff` handles linting only; formatting is delegated to Black with an
+  explicit 80-column limit and Python 3.11 target — see
+  `templates/python/pyproject.toml`.
 - Java: Checkstyle's `configLocation` points at the `google_checks.xml` ruleset bundled with `maven-checkstyle-plugin`, not a hand-written ruleset — see `templates/java-spring/pom.xml`.
 - Go's defaults already match Google's Go conventions; only `.editorconfig`'s `[*.go]` tab rule was needed to avoid conflicting with `gofmt`.
 

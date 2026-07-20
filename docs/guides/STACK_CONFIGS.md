@@ -58,12 +58,15 @@ Template files:
 
 The example module is named `user_profile.py`, not `profile.py` — `profile` is a Python standard library module name, and shadowing it breaks `import profile` once the project is installed (`pip install -e .` puts `src/` on `sys.path` directly per the src-layout convention, so top-level module names must not collide with the standard library).
 
-Formatting uses [`pyink`](https://github.com/google/pyink) (Google's Black fork, 80-column) rather than `ruff format` — see the comment in `pyproject.toml`. The template includes a minimal example and a pytest test so a copied project can be validated immediately:
+Formatting uses [`Black`](https://black.readthedocs.io/) with an explicit
+80-column limit rather than `ruff format`. Ruff remains lint-only so the tools
+do not compete over formatting. The template includes a minimal example and a
+pytest test so a copied project can be validated immediately:
 
 ```bash
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements-lock.txt -e ".[dev]"
-pyink --check .
+black --check .
 ruff check .
 mypy .
 pytest

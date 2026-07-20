@@ -40,7 +40,7 @@ func verifyPlan(ctx context.Context, root string, changes []Change, stacks []str
 			return command.Run()
 		}
 	}
-	commands := map[string][][]string{"javascript-typescript-node": {{"npm", "ci"}, {"npm", "run", "lint"}, {"npm", "run", "typecheck"}, {"npm", "test"}, {"npm", "run", "build"}, {"npm", "run", "format:check"}}, "python": {{"python", "-m", "pip", "install", "-r", "requirements-lock.txt", "-e", ".[dev]"}, {"ruff", "check", "."}, {"mypy", "."}, {"pyink", "--check", "."}, {"pytest"}}, "go": {{"go", "test", "./..."}}, "java-spring": {{"mvn", "-B", "verify"}}}
+	commands := map[string][][]string{"javascript-typescript-node": {{"npm", "ci"}, {"npm", "run", "lint"}, {"npm", "run", "typecheck"}, {"npm", "test"}, {"npm", "run", "build"}, {"npm", "run", "format:check"}}, "python": {{"python", "-m", "pip", "install", "-r", "requirements-lock.txt", "-e", ".[dev]"}, {"ruff", "check", "."}, {"mypy", "."}, {"black", "--check", "."}, {"pytest"}}, "go": {{"go", "test", "./..."}}, "java-spring": {{"mvn", "-B", "verify"}}}
 	var report []Verification
 	for _, stack := range stacks {
 		if internalStack(stack) {
