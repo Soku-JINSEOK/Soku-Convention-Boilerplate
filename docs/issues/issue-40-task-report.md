@@ -34,8 +34,10 @@ Keep Ruff lint-only and limit formatting changes to the Python template.
 
 ## Implementation Status
 
-Implementation is complete on a dedicated worktree and branch. Publication,
-hosted Validation, merge, and issue closure are pending their approval boundary.
+Implementation is complete on a dedicated worktree and published draft PR
+[#45](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/pull/45).
+Hosted Validation passed. Merge and issue closure remain pending their approval
+boundary.
 
 ## Verification
 
@@ -48,8 +50,14 @@ hosted Validation, merge, and issue closure are pending their approval boundary.
 - Passed: all `soku` Go tests with `GOFLAGS=-buildvcs=false`; this flag only
   works around unavailable VCS stamping in the isolated worktree sandbox.
 - Passed: gofmt, Markdown, YAML, actionlint, Bash syntax, and `git diff --check`.
-- Not run locally: shellcheck is unavailable; hosted aggregate Validation is
-  pending a published branch/PR.
+- Passed: hosted Validation run
+  [29717172603](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/actions/runs/29717172603)
+  on signed commit `0cc7265`, including shellcheck, sync parity, all runtime
+  templates, three-OS lifecycle and CLI checks, package snapshots, and the
+  aggregate `Validation Gate`.
+- A prior identical-tree run exposed a pre-existing MySQL service-readiness
+  race; the isolated job retry and the signed-commit run both passed without a
+  code change.
 
 ## AI Assistance
 
@@ -90,8 +98,10 @@ Ruff는 lint 전용으로 둡니다.
 
 ## 구현 현황
 
-전용 worktree와 branch에서 구현을 완료했습니다. 게시, hosted Validation, 병합 및
-Issue 종료는 각각의 승인 경계를 기다립니다.
+전용 worktree와 draft PR
+[#45](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/pull/45)에서
+구현을 완료했고 hosted Validation도 통과했습니다. 병합과 Issue 종료는 승인 경계를
+기다립니다.
 
 ## 검증
 
@@ -104,8 +114,12 @@ Issue 종료는 각각의 승인 경계를 기다립니다.
 - 통과: `GOFLAGS=-buildvcs=false`를 사용한 전체 `soku` Go test. 이 flag는 격리된
   worktree sandbox에서 사용할 수 없는 VCS stamping만 우회합니다.
 - 통과: gofmt, Markdown, YAML, actionlint, Bash syntax 및 `git diff --check`.
-- 로컬 미실행: shellcheck를 사용할 수 없습니다. Hosted aggregate Validation은
-  branch/PR 게시 후 실행할 수 있습니다.
+- 통과: signed commit `0cc7265`의 hosted Validation run
+  [29717172603](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/actions/runs/29717172603).
+  shellcheck, sync parity, 모든 runtime template, 3개 OS lifecycle/CLI, package
+  snapshot 및 aggregate `Validation Gate`를 포함합니다.
+- 동일 tree의 이전 run에서 기존 MySQL service readiness race가 한 번 나타났지만,
+  해당 job 재실행과 signed commit run은 코드 변경 없이 모두 통과했습니다.
 
 ## AI 지원
 
