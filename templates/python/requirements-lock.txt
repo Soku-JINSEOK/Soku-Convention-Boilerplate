@@ -6,12 +6,10 @@
 #
 ast-serialize==0.6.0
     # via mypy
-black==25.12.0
-    # via pyink
+black==26.5.1
+    # via your-project-name (pyproject.toml)
 click==8.4.2
-    # via
-    #   black
-    #   pyink
+    # via black
 iniconfig==2.3.0
     # via pytest
 librt==0.13.0
@@ -22,33 +20,24 @@ mypy-extensions==1.1.0
     # via
     #   black
     #   mypy
-    #   pyink
 packaging==26.2
     # via
     #   black
-    #   pyink
     #   pytest
 pathspec==1.1.1
     # via
     #   black
     #   mypy
-    #   pyink
 platformdirs==4.10.0
-    # via
-    #   black
-    #   pyink
+    # via black
 pluggy==1.6.0
     # via pytest
 pygments==2.20.0
     # via pytest
-pyink==25.12.0
-    # via your-project-name (pyproject.toml)
 pytest==9.1.1
     # via your-project-name (pyproject.toml)
 pytokens==0.4.1
-    # via
-    #   black
-    #   pyink
+    # via black
 ruff==0.15.21
     # via your-project-name (pyproject.toml)
 typing-extensions==4.16.0

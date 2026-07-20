@@ -92,7 +92,7 @@ python -m venv .venv
 .venv/bin/pip install -r requirements-lock.txt -e '.[dev]'
 .venv/bin/ruff check .
 .venv/bin/mypy .
-.venv/bin/pyink --check .
+.venv/bin/black --check .
 .venv/bin/pytest
 
 cd ../go

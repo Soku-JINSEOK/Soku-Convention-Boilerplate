@@ -11,14 +11,13 @@ readme = "README.md"
 dependencies = []
 
 [project.optional-dependencies]
-dev = ["pyink", "ruff", "mypy", "pytest"]
+dev = ["black>=26.5.1,<27", "ruff", "mypy", "pytest"]
 
-# Formatting is delegated to pyink (Google's Black fork: https://github.com/google/pyink),
-# matching the 80-column line length from the Google Python Style Guide. Ruff is used for
-# linting only — its own formatter is not used, so [tool.ruff.format] is intentionally absent.
-[tool.pyink]
+# Black enforces the 80-column Python template format. Ruff is used for linting
+# only, so [tool.ruff.format] is intentionally absent.
+[tool.black]
 line-length = 80
-pyink-indentation = 4
+target-version = ["py311"]
 
 [tool.ruff]
 line-length = 80
