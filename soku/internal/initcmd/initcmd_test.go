@@ -124,6 +124,12 @@ func TestCatalogRenderingUsesExactTokensAndJavaPaths(t *testing.T) {
 		t.Fatal("CI was not selected deterministically")
 	}
 	workflow := string(paths[".github/workflows/ci.yml"].Content)
+	if !strings.Contains(workflow, "      - run: black --check .\n") {
+		t.Fatal("generated Python CI does not run black --check .")
+	}
+	if strings.Contains(workflow, "pyink") {
+		t.Fatal("generated Python CI contains pyink")
+	}
 	for _, action := range []string{
 		"actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7",
 		"actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7",
@@ -369,14 +375,22 @@ func TestVerifyUsesOnlyBuiltInArgv(t *testing.T) {
 	change := Change{Path: "go.mod", Content: []byte("module example.com/test\n\ngo 1.26\n")}
 	var commands [][]string
 	mysql := Change{Path: "db/mysql/schema.sql", Content: []byte("CREATE TABLE users (id BIGINT);\n")}
-	results, err := verifyPlan(context.Background(), root, []Change{change, mysql}, []string{"go", "mysql"}, func(_ context.Context, _ string, argv []string) error {
+	results, err := verifyPlan(context.Background(), root, []Change{change, mysql}, []string{"go", "mysql", "python"}, func(_ context.Context, _ string, argv []string) error {
 		commands = append(commands, append([]string(nil), argv...))
 		return nil
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !reflect.DeepEqual(commands, [][]string{{"go", "test", "./..."}}) || len(results) != 2 {
+	expected := [][]string{
+		{"go", "test", "./..."},
+		{"python", "-m", "pip", "install", "-r", "requirements-lock.txt", "-e", ".[dev]"},
+		{"ruff", "check", "."},
+		{"mypy", "."},
+		{"black", "--check", "."},
+		{"pytest"},
+	}
+	if !reflect.DeepEqual(commands, expected) || len(results) != 7 {
 		t.Fatalf("commands=%v results=%v", commands, results)
 	}
 }
