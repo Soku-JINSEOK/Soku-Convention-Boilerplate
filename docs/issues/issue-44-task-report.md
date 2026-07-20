@@ -87,8 +87,9 @@ preflight record. Existing tags and Releases remain immutable.
 
 Provider schema, decoder, revision planning, examples, hermetic and pinned HTTPS
 conformance, lifecycle documentation, CI, and the proposed `soku/v0.1.2` record
-are implemented on Draft PR #50. Hosted validation, Ready transition, merge,
-post-merge validation, and release preflight remain pending.
+are implemented on Draft PR #50. Hosted Validation run `29755390115` passed.
+Ready transition, merge, post-merge validation, and release preflight remain
+pending.
 
 ## Verification
 
@@ -105,6 +106,13 @@ post-merge validation, and release preflight remain pending.
   Homebrew Go 1.26.5 installation lacks cross-compile standard-library packages
   required by the five-target package snapshot. Hosted validation covers all
   three checks.
+- Passed: PR run `29755390115`, including PowerShell/shell parity, ShellCheck,
+  the five-target package snapshot, three-OS native Go and hermetic/network
+  lifecycle gates, runtime templates, contribution titles, and the aggregate
+  `Validation Gate`.
+- Passed: the three preceding implementation-branch commits are GitHub-verified
+  signed commits after the title-only rewrite required by the contribution
+  gate.
 
 ## AI Assistance
 
@@ -197,8 +205,8 @@ test를 추가합니다.
 
 Provider schema, decoder, revision planning, 예제, hermetic/pinned HTTPS
 conformance, lifecycle 문서, CI, `soku/v0.1.2` 제안 기록을 Draft PR #50에
-구현했습니다. Hosted validation, Ready 전환, 병합, post-merge validation,
-release preflight는 대기 중입니다.
+구현했습니다. Hosted Validation run `29755390115`이 통과했습니다.
+Ready 전환, 병합, post-merge validation, release preflight는 대기 중입니다.
 
 ## 검증
 
@@ -213,6 +221,11 @@ release preflight는 대기 중입니다.
 - 로컬 환경 제한: PowerShell과 ShellCheck가 없고 Homebrew Go 1.26.5에
   5-target package snapshot용 cross-compile standard-library package가 없습니다.
   Hosted validation에서 세 검사를 모두 수행합니다.
+- 통과: PR run `29755390115`의 PowerShell/shell parity, ShellCheck,
+  5-target package snapshot, 3-OS native Go 및 hermetic/network lifecycle,
+  runtime template, contribution title, aggregate `Validation Gate`.
+- 통과: contribution gate가 요구한 title-only rewrite 후 앞선 구현 브랜치
+  commit 3개 모두 GitHub-verified signed 상태.
 
 ## AI 지원
 
