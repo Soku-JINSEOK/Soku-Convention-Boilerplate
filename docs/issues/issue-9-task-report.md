@@ -42,6 +42,7 @@ request publication and hosted validation remain.
 - `npx --yes markdownlint-cli2@0.22.1 --config .markdownlint.jsonc "**/*.md" "#**/node_modules/**"`: passed, 62 files and 0 errors.
 - `npx --yes yaml-lint@1.7.0 .github/*.yml .github/**/*.yml templates/**/*.yml templates/**/*.yaml`: passed.
 - `node --check scripts/contribution-title.mjs && node --check scripts/pull-request-policy.mjs`: passed.
+- `node --test scripts/contribution-title.test.mjs scripts/pull-request-policy.test.mjs`: passed, 24 tests.
 - Python `yaml.safe_load` over `.github/**/*.yml`: passed.
 - `git diff --check`: passed before this report update; rerun before commit.
 - `scripts/verify-sync-parity.sh`: unavailable because `pwsh` is not installed;
