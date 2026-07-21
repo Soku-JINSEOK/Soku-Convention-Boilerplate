@@ -3,6 +3,7 @@ package initcmd
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"regexp"
 	"sort"
@@ -185,7 +186,11 @@ func renderShared(snapshot SourceSnapshot, catalog Catalog, config Config, value
 			return nil, fail(5, "catalog.incompatible", "source release is missing %s", item.Source)
 		}
 		if item.Output == ".github/workflows/ci.yml" {
-			content = generateCI(config.Stacks)
+			var err error
+			content, err = renderDownstreamCI(content, config.Stacks)
+			if err != nil {
+				return nil, err
+			}
 		}
 		hash, err := manifest.HashContent(content, item.ContentMode)
 		if err != nil {
@@ -212,27 +217,210 @@ func replaceTemplateContent(content []byte, values map[string]string) []byte {
 	return []byte(strings.ReplaceAll(strings.ReplaceAll(text, "\r\n", "\n"), "\r", "\n"))
 }
 
-func generateCI(stacks []string) []byte {
-	var b strings.Builder
-	b.WriteString("name: CI\n\non:\n  pull_request:\n  push:\n    branches:\n      - main\n\njobs:\n")
-	jobs := map[string]string{
-		"javascript-typescript-node": "  javascript-typescript-node:\n    name: JS/TS/Node\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7\n      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7\n        with:\n          node-version: \"22\"\n      - run: npm ci\n      - run: npm run lint\n      - run: npm run typecheck\n      - run: npm test\n      - run: npm run build\n      - run: npm run format:check\n",
-		"python":                     "  python:\n    name: Python\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7\n      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6\n        with:\n          python-version: \"3.12\"\n      - run: pip install -r requirements-lock.txt -e \".[dev]\"\n      - run: ruff check .\n      - run: mypy .\n      - run: black --check .\n      - run: pytest\n",
-		"go":                         "  go:\n    name: Go\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7\n      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7\n        with:\n          go-version: \"1.26\"\n      - run: go test ./...\n",
-		"java-spring":                "  java-spring:\n    name: Java/Spring\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7\n      - uses: actions/setup-java@03ad4de0992f5dab5e18fcb136590ce7c4a0ac95 # v5\n        with:\n          distribution: temurin\n          java-version: \"21\"\n      - run: mvn -B verify\n",
+var ciJobMarkerPattern = regexp.MustCompile(`^# soku:job-(begin|end) ([a-z0-9-]+)$`)
+var legacyCIJobPattern = regexp.MustCompile(`^  # ([a-z0-9-]+):$`)
+
+var ciJobIDs = map[string]bool{
+	"configuration":              true,
+	"go":                         true,
+	"java-spring":                true,
+	"javascript-typescript-node": true,
+	"python":                     true,
+}
+
+type ciJobBlock struct {
+	start int
+	end   int
+}
+
+func renderDownstreamCI(source []byte, stacks []string) ([]byte, error) {
+	text := strings.ReplaceAll(strings.ReplaceAll(string(source), "\r\n", "\n"), "\r", "\n")
+	lines := strings.Split(text, "\n")
+	blocks, marked, err := parseMarkedCIJobBlocks(lines)
+	if err != nil {
+		return nil, fail(5, "catalog.incompatible", "parse downstream CI source: %v", err)
 	}
-	count := 0
+	legacySource := false
+	if !marked {
+		blocks, marked = parseLegacyCIJobBlocks(lines)
+		legacySource = marked
+	}
+	if !marked {
+		return nil, fail(5, "catalog.incompatible", "downstream CI source has no complete job blocks")
+	}
+
+	selected := map[string]bool{}
 	for _, stack := range stacks {
-		if job := jobs[stack]; job != "" {
-			if count > 0 {
-				b.WriteByte('\n')
-			}
-			b.WriteString(job)
-			count++
+		if ciJobIDs[stack] && stack != "configuration" {
+			selected[stack] = true
 		}
 	}
-	if count == 0 {
-		b.WriteString("  configuration:\n    name: Configuration validation\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7\n      - run: echo \"Configuration files are validated by soku init\"\n")
+	if len(selected) == 0 {
+		selected["configuration"] = true
 	}
-	return []byte(b.String())
+	legacyConfiguration := legacySource && selected["configuration"]
+
+	var rendered []string
+	active := ""
+	for _, line := range lines {
+		if match := ciJobMarkerPattern.FindStringSubmatch(line); match != nil {
+			if match[1] == "begin" {
+				active = match[2]
+			} else {
+				active = ""
+			}
+			continue
+		}
+		if legacySource {
+			legacy := legacyCIJobPattern.FindStringSubmatch(line)
+			if legacy == nil {
+				goto renderLine
+			}
+			active = legacy[1]
+			continue
+		}
+	renderLine:
+		if active != "" {
+			if !selected[active] {
+				continue
+			}
+			uncommented, err := uncommentCIJobLine(line)
+			if err != nil {
+				return nil, fail(5, "catalog.incompatible", "CI job %s contains an un-commented line: %v", active, err)
+			}
+			rendered = append(rendered, uncommented)
+			continue
+		}
+		rendered = append(rendered, line)
+	}
+	if legacyConfiguration {
+		rendered = append(rendered,
+			"  configuration:",
+			"    name: Configuration validation",
+			"    runs-on: ubuntu-latest",
+			"    steps:",
+			"      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7",
+			"      - run: echo 'Configuration files are validated by soku init'",
+			"")
+	}
+	_ = blocks
+	return []byte(strings.Join(rendered, "\n")), nil
+}
+
+func parseMarkedCIJobBlocks(lines []string) (map[string]ciJobBlock, bool, error) {
+	blocks := map[string]ciJobBlock{}
+	open := map[string]int{}
+	marked := false
+	for index, line := range lines {
+		if !strings.HasPrefix(line, "# soku:job-") {
+			if len(open) != 0 && strings.TrimSpace(line) != "" && !strings.HasPrefix(line, "  #") {
+				return nil, true, fmt.Errorf("job block contains un-commented line %q", line)
+			}
+			continue
+		}
+		marked = true
+		match := ciJobMarkerPattern.FindStringSubmatch(line)
+		if match == nil {
+			return nil, true, fmt.Errorf("invalid marker %q", line)
+		}
+		kind, id := match[1], match[2]
+		if !ciJobIDs[id] {
+			return nil, true, fmt.Errorf("unknown job %q", id)
+		}
+		if kind == "begin" {
+			if len(open) != 0 {
+				return nil, true, fmt.Errorf("nested job block at line %d", index+1)
+			}
+			if _, exists := open[id]; exists {
+				return nil, true, fmt.Errorf("duplicate begin marker for %q", id)
+			}
+			if _, exists := blocks[id]; exists {
+				return nil, true, fmt.Errorf("duplicate block for %q", id)
+			}
+			open[id] = index
+			continue
+		}
+		start, exists := open[id]
+		if !exists || index <= start {
+			return nil, true, fmt.Errorf("end marker without begin for %q", id)
+		}
+		blocks[id] = ciJobBlock{start: start, end: index}
+		delete(open, id)
+	}
+	if !marked {
+		return nil, false, nil
+	}
+	if len(open) != 0 {
+		return nil, true, fmt.Errorf("unclosed job marker")
+	}
+	if len(blocks) != len(ciJobIDs) {
+		return nil, true, fmt.Errorf("expected %d job blocks, found %d", len(ciJobIDs), len(blocks))
+	}
+	return blocks, true, nil
+}
+
+func parseLegacyCIJobBlocks(lines []string) (map[string]ciJobBlock, bool) {
+	starts := map[string]int{}
+	for index, line := range lines {
+		match := legacyCIJobPattern.FindStringSubmatch(line)
+		if match == nil || !ciJobIDs[match[1]] {
+			continue
+		}
+		if _, exists := starts[match[1]]; exists {
+			return nil, false
+		}
+		starts[match[1]] = index
+	}
+	if len(starts) != len(ciJobIDs)-1 {
+		return nil, false
+	}
+	if _, exists := starts["configuration"]; exists {
+		return nil, false
+	}
+	ids := make([]string, 0, len(starts))
+	for id := range starts {
+		ids = append(ids, id)
+	}
+	sort.Slice(ids, func(i, j int) bool { return starts[ids[i]] < starts[ids[j]] })
+	blocks := make(map[string]ciJobBlock, len(ids))
+	for index, id := range ids {
+		end := len(lines)
+		if index+1 < len(ids) {
+			end = starts[ids[index+1]]
+		}
+		blocks[id] = ciJobBlock{start: starts[id], end: end}
+		if err := validateCIJobLines(lines, starts[id]+1, end); err != nil {
+			return nil, false
+		}
+	}
+	return blocks, true
+}
+
+func validateCIJobLines(lines []string, start, end int) error {
+	for _, line := range lines[start:end] {
+		if strings.TrimSpace(line) == "" || strings.HasPrefix(line, "  #") {
+			continue
+		}
+		return fmt.Errorf("job block contains un-commented line %q", line)
+	}
+	return nil
+}
+
+func uncommentCIJobLine(line string) (string, error) {
+	if line == "" {
+		return line, nil
+	}
+	if strings.HasPrefix(line, "  # ") {
+		return line[:2] + line[4:], nil
+	}
+	if line == "  #" {
+		return "  ", nil
+	}
+	if strings.HasPrefix(line, "# ") {
+		return line[2:], nil
+	}
+	if line == "#" {
+		return "", nil
+	}
+	return "", fmt.Errorf("line %q is not commented", line)
 }

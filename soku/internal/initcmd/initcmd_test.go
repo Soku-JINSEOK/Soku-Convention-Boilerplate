@@ -146,6 +146,54 @@ func TestCatalogRenderingUsesExactTokensAndJavaPaths(t *testing.T) {
 	}
 }
 
+func TestDownstreamCIRenderingRejectsMalformedMarkersAndUsesFallback(t *testing.T) {
+	source := mustRead(t, "../../../templates/_shared/ci/downstream-ci.yml")
+	source = []byte(strings.ReplaceAll(strings.ReplaceAll(string(source), "\r\n", "\n"), "\r", "\n"))
+	configuration, err := renderDownstreamCI(source, []string{"mysql"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(configuration), "configuration:") || strings.Contains(string(configuration), "javascript-typescript-node:") {
+		t.Fatalf("configuration fallback was not selected:\n%s", configuration)
+	}
+	legacy := string(source)
+	legacyStart := strings.Index(legacy, "# soku:job-begin configuration")
+	if legacyStart < 0 {
+		t.Fatal("configuration marker missing from canonical source")
+	}
+	legacy = legacy[:legacyStart]
+	legacyLines := strings.Split(legacy, "\n")
+	filtered := legacyLines[:0]
+	for _, line := range legacyLines {
+		if strings.HasPrefix(line, "# soku:job-") {
+			continue
+		}
+		filtered = append(filtered, line)
+	}
+	legacyRendered, err := renderDownstreamCI([]byte(strings.Join(filtered, "\n")), []string{"mysql"})
+	if err != nil {
+		t.Fatalf("legacy fallback: %v", err)
+	}
+	if !strings.Contains(string(legacyRendered), "configuration:") {
+		t.Fatalf("legacy configuration fallback missing:\n%s", legacyRendered)
+	}
+
+	cases := map[string]string{
+		"missing block":     strings.Replace(string(source), "# soku:job-end python\n", "", 1),
+		"duplicate begin":   strings.Replace(string(source), "# soku:job-begin python\n", "# soku:job-begin python\n# soku:job-begin python\n", 1),
+		"nested block":      strings.Replace(string(source), "# soku:job-begin python\n", "# soku:job-begin python\n# soku:job-begin go\n", 1),
+		"un-commented line": strings.Replace(string(source), "  #   name: Python\n", "    name: Python\n", 1),
+		"unknown job":       string(source) + "\n# soku:job-begin ruby\n",
+	}
+	for name, malformed := range cases {
+		t.Run(name, func(t *testing.T) {
+			if _, err := renderDownstreamCI([]byte(malformed), []string{"python"}); failureCode(err) != 5 {
+				t.Fatalf("error=%v", err)
+			}
+		})
+	}
+}
+
 func TestManifestSelectionAndPinnedSnapshotReproduceDesiredTree(t *testing.T) {
 	snapshot := repositorySnapshot(t)
 	catalog := mustCatalog(t)

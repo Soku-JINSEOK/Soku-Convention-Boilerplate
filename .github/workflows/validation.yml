@@ -24,6 +24,10 @@ jobs:
     name: Full runtime-template validation
     uses: ./.github/workflows/templates-ci.yml
 
+  security:
+    name: Security validation
+    uses: ./.github/workflows/security.yml
+
   contribution-titles:
     name: Contribution Title Convention
     if: github.event_name == 'pull_request'
@@ -78,6 +82,7 @@ jobs:
     needs:
       - repository
       - templates
+      - security
       - contribution-titles
     runs-on: ubuntu-latest
     steps:
@@ -85,11 +90,13 @@ jobs:
         env:
           REPOSITORY_RESULT: ${{ needs.repository.result }}
           TEMPLATES_RESULT: ${{ needs.templates.result }}
+          SECURITY_RESULT: ${{ needs.security.result }}
           TITLES_RESULT: ${{ needs.contribution-titles.result }}
         shell: bash
         run: |
           test "$REPOSITORY_RESULT" = success
           test "$TEMPLATES_RESULT" = success
+          test "$SECURITY_RESULT" = success
           case "$TITLES_RESULT" in
             success|skipped) ;;
             *) exit 1 ;;

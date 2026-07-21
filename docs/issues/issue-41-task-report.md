@@ -9,9 +9,27 @@ dependency override, the Jackson BOM update, the verification guidance, and the
 aggregate Validation Gate, but downstream projects cannot consume those fixes
 through an immutable boilerplate release yet.
 
-The published `soku/v0.1.2` CLI is the recommended lifecycle client. This task
-prepares, validates, publishes, and publicly exercises boilerplate `v1.0.1`
-without moving or reusing `v1.0.0` or any existing CLI tag.
+### Corrective status update (2026-07-21)
+
+Boilerplate `v1.0.1` and CLI `soku/v0.1.2` are now published, but public smoke
+identified a remaining defect: the immutable CLI embeds a second CI renderer and
+produces a JavaScript workflow whose quoted `node-version` fails the generated
+project's Prettier check. This report therefore remains open and the completion
+target is the companion corrective pair `v1.0.2` + `soku/v0.1.3`. Existing
+`v1.0.0`, `v1.0.1`, and `soku` tags remain immutable.
+
+The source-authoritative renderer, security Validation Gate, Dependabot/tag
+protections, and the two-repository security work are tracked before public
+publication. New security issues are Boilerplate #56 and Control Plane #27;
+Boilerplate #54 remains blocked on Control Plane #19's public contract.
+
+The published `soku/v0.1.2` CLI remains the current historical client. This task
+prepares, validates, publishes, and publicly exercises the corrective
+`v1.0.2`/`soku/v0.1.3` pair without moving or reusing any existing tag.
+
+The original `v1.0.1` preparation and evidence sections below are retained as
+the historical release record. Where they name `v1.0.1` as the completion
+target, the corrective status update above supersedes that target.
 
 ## Proposed Approach
 
@@ -108,7 +126,41 @@ The unrelated commits on `agent/preserve-current-work` were not merged; only
 the Issue #41 limitation-warning intent from `1436435` was reapplied against
 current `main` and `soku/v0.1.2`.
 
+## Corrective implementation status
+
+- The canonical downstream CI source now uses explicit job markers and
+  formatter-compatible scalars; the CLI reads that source instead of embedding
+  a second job definition. Legacy marker-free releases remain readable through
+  a bounded compatibility parser.
+- Boilerplate security automation is connected to the required Validation Gate,
+  with scheduled scans, Dependabot configuration, CodeQL default setup, and an
+  active immutable release-tag ruleset (`19336418`).
+- Control Plane security hardening is prepared in the temporary audit checkout
+  for Issue #27: Python installs use a hash-locked requirements file, dashboard
+  audit covers development dependencies, and security workflow checks are
+  added. Its changes still require a separate PR because the local `.git`
+  metadata is read-only in this environment.
+- The next implementation PR must use `Related to #41`; only the final PR after
+  public lifecycle evidence may use a closing keyword.
+
 ## Verification
+
+### Corrective verification update (2026-07-21)
+
+- Passed: `soku` and `templates/go` unit tests, vet, format/import checks,
+  lifecycle conformance, five-target package reproducibility, release-tag
+  regression, Markdown/YAML lint, actionlint, and `git diff --check`.
+- Passed: Boilerplate Gitleaks full-history scan (78 commits), OSV Scanner
+  v2.4.0 source scan, JavaScript `npm audit`, and the renderer regression suite.
+  The repository allowlist covers only the historical synthetic secret fixture
+  used by archive-rejection tests.
+- Passed: Control Plane actionlint, YAML lint, Python bytecode compilation,
+  Gitleaks, and whitespace checks. Hosted CI remains required for its locked
+  Python registry tests and dashboard audit; local execution intentionally did
+  not export private dependency metadata or install missing validator packages.
+- Not run locally: `shellcheck`, race/golangci-lint, hosted cloud/database
+  gates, and the public `v1.0.2`/`soku/v0.1.3` lifecycle smoke. These remain
+  release-gate requirements after a reviewable commit is available.
 
 - Passed: targeted Markdown lint and `git diff --check` for the report-only
   Draft PR.

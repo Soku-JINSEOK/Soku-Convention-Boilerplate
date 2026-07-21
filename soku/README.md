@@ -6,6 +6,11 @@ parsing and output, transactional `init`, the portable manifest-v1 record, and
 read-only `status` diagnostics, immutable release comparison, and transactional
 core upgrades.
 
+The recommended full-verification baseline is the companion pair
+`v1.0.2` + `soku/v0.1.3` after their signed public Releases exist. Existing
+`v1.0.0`, `v1.0.1`, `soku/v0.1.1`, and `soku/v0.1.2` objects remain immutable
+historical compatibility baselines.
+
 ## Transactional Init
 
 `soku init` accepts only a public GitHub HTTPS source and an exact, non-prerelease
@@ -18,7 +23,7 @@ nothing.
 ```bash
 soku init \
   --boilerplate-source https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate \
-  --boilerplate-release v1.0.0 \
+  --boilerplate-release v1.0.2 \
   --stack javascript-typescript-node \
   --project-name example-service \
   --dry-run
@@ -90,7 +95,7 @@ The equivalent strict YAML file is a flat mapping. Unknown fields are rejected:
 ```yaml
 schema_version: 1
 boilerplate_source: https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate
-boilerplate_release: v1.0.0
+boilerplate_release: v1.0.2
 stacks:
   - go
   - postgresql

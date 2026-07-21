@@ -70,6 +70,21 @@ When evaluating or generating changes, agents should prioritize:
 
 Style-only commentary should be minimized when tooling can enforce the rule automatically.
 
+## 🧰 Tool Invocation and Batched Verification
+
+When tool calls are independent, prefer running them in parallel. Explore
+multiple files with one parallel batch of `rg`, `rg --files`, or equivalent
+read-only commands whenever sequencing is not required.
+
+Group related edits and behavior checks into one verification pass. Small
+helpers do not each require an isolated test when a feature- or file-level test
+covers the behavior more clearly.
+
+Do not inspect `git diff` after every small edit. Usually inspect the complete
+file-level change once the related edits are finished. For difficult or highly
+coupled changes spanning multiple functions or files, run an earlier targeted
+check when it materially improves confidence.
+
 ## 🧠 Decision Framework
 
 When multiple implementations are possible, agents should prefer the option that:
