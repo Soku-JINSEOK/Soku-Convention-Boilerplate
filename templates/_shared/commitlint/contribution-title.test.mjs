@@ -1,7 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import {validateContributionTitle} from './contribution-title.mjs';
+import {
+  contributionTitleOptionsForAuthor,
+  validateContributionTitle,
+} from './contribution-title.mjs';
 
 test('accepts a standard feat title', () => {
   const result = validateContributionTitle('✨ feat(auth): add login flow');
@@ -53,4 +56,52 @@ test('rejects a title longer than 72 characters', () => {
   const result = validateContributionTitle(`✨ feat(auth): ${longSubject}`);
   assert.equal(result.valid, false);
   assert.match(result.message, /72 characters/);
+});
+
+test('defaults to 72 when maxLength is omitted', () => {
+  const longTitle = '✨ feat(auth): a very long subject that keeps going past the character budget';
+  const result = validateContributionTitle(longTitle, {});
+  assert.equal(result.valid, false);
+});
+
+test('supports numeric maxLength override', () => {
+  const longTitle = '✨ feat(auth): this subject is just long enough for the new budget';
+  const long = validateContributionTitle(longTitle, {maxLength: 100});
+  assert.equal(long.valid, true);
+
+  const short = validateContributionTitle(longTitle, {maxLength: 20});
+  assert.equal(short.valid, false);
+});
+
+test('applies maxLength null only for dependabot[bot]', () => {
+  const longSubject =
+    'a very long subject that keeps going past the character budget even with extra detail and more than 72 characters';
+
+  const bot = validateContributionTitle(`✨ feat(auth): ${longSubject}`,
+    contributionTitleOptionsForAuthor('dependabot[bot]'),
+  );
+  assert.equal(bot.valid, true);
+
+  const user = validateContributionTitle(`✨ feat(auth): ${longSubject}`,
+    contributionTitleOptionsForAuthor('dependabot'),
+  );
+  assert.equal(user.valid, false);
+
+  const unknown = validateContributionTitle(`✨ feat(auth): ${longSubject}`,
+    contributionTitleOptionsForAuthor('human'),
+  );
+  assert.equal(unknown.valid, false);
+
+  const bypass = contributionTitleOptionsForAuthor('dependabot[bot]');
+  assert.equal(bypass.maxLength, null);
+  assert.equal(contributionTitleOptionsForAuthor('dependabot').maxLength, undefined);
+});
+
+test('skips length validation when maxLength is null', () => {
+  const longSubject =
+    'a very long subject that keeps going past the character budget even with extra detail and more than 72 characters';
+  const result = validateContributionTitle(`✨ feat(auth): ${longSubject}`, {
+    maxLength: null,
+  });
+  assert.equal(result.valid, true);
 });

@@ -156,6 +156,47 @@ func TestDownstreamCIRenderingRejectsMalformedMarkersAndUsesFallback(t *testing.
 	if !strings.Contains(string(configuration), "configuration:") || strings.Contains(string(configuration), "javascript-typescript-node:") {
 		t.Fatalf("configuration fallback was not selected:\n%s", configuration)
 	}
+	goConfiguration, err := renderDownstreamCI(source, []string{"go"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	goWorkflow := string(goConfiguration)
+	if !strings.Contains(goWorkflow, "go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.12.2") {
+		t.Fatal("rendered Go CI does not pin golangci-lint binary version")
+	}
+	if !strings.Contains(goWorkflow, "$(go env GOPATH)/bin/golangci-lint run ./...") {
+		t.Fatal("rendered Go CI does not execute installed golangci-lint binary")
+	}
+	if strings.Contains(goWorkflow, "golangci/golangci-lint-action") {
+		t.Fatal("rendered Go CI still uses golangci-lint GitHub Action")
+	}
+
+	templatesCI, err := os.ReadFile("../../../.github/workflows/templates-ci.yml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(templatesCI), "go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.12.2") {
+		t.Fatal("templates-ci workflow does not pin golangci-lint binary")
+	}
+	if !strings.Contains(string(templatesCI), "$(go env GOPATH)/bin/golangci-lint run ./...") {
+		t.Fatal("templates-ci workflow does not execute installed golangci-lint binary")
+	}
+	if strings.Contains(string(templatesCI), "golangci/golangci-lint-action") {
+		t.Fatal("templates-ci workflow still uses golangci-lint GitHub Action")
+	}
+	if !strings.Contains(string(templatesCI), "  mysql:\n") {
+		t.Fatal("templates-ci workflow is missing MySQL check job")
+	}
+	if !strings.Contains(string(templatesCI), "  postgresql:\n") {
+		t.Fatal("templates-ci workflow is missing PostgreSQL check job")
+	}
+	if !strings.Contains(string(templatesCI), "  gcloud:\n") {
+		t.Fatal("templates-ci workflow is missing gcloud check job")
+	}
+	if !strings.Contains(string(templatesCI), "  aws-azure-config:\n") {
+		t.Fatal("templates-ci workflow is missing AWS/Azure configuration check job")
+	}
+
 	legacy := string(source)
 	legacyStart := strings.Index(legacy, "# soku:job-begin configuration")
 	if legacyStart < 0 {
