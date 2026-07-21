@@ -18,7 +18,7 @@ Lifecycle conformance evidence: hermetic and pinned HTTPS provider gates require
 
 Companion tag: none
 
-This proposed patch release makes the exact lowercase full commit supplied by
+This patch release makes the exact lowercase full commit supplied by
 the CLI through `--integration-ref` and used for fetch the only authoritative
 provider revision. Request artifacts and manifest-v1 integrations persist that
 exact commit. Provider-supplied `ref` is optional and deprecated: bundles may
@@ -46,9 +46,8 @@ matrix, quality/race/vet/format/import/lint checks, five-target package snapshot
 runtime templates, repository hygiene, sync parity, and the aggregate
 `Validation Gate`.
 
-Before any publication, manually dispatch the Release workflow with
-`boilerplate-tag` set to `v1.0.0` and `cli-tag` set explicitly to
-`soku/v0.1.2`. Manual dispatch is validation-only and cannot create a tag or
-GitHub Release. Publication still requires separate approval and a signed
-annotated `soku/v0.1.2` tag on the reviewed `main` commit. Until that happens,
-`soku/v0.1.1` remains the current public stable CLI release.
+Release validation uses `boilerplate-tag` set to `v1.0.0` and `cli-tag` set to
+`soku/v0.1.2`. The manual dispatch is validation-only; delivery is triggered by
+the separately approved, signed annotated `soku/v0.1.2` tag on the reviewed
+`main` commit. `soku/v0.1.2` supersedes `soku/v0.1.1` as the current stable CLI
+release without changing the public manifest-v1 or Provider API v1 contracts.
