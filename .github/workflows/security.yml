@@ -1,0 +1,111 @@
+name: Security
+
+on:
+  workflow_call:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 3 * * 1'
+
+permissions:
+  contents: read
+
+jobs:
+  secrets:
+    name: Secret scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository history
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+        with:
+          fetch-depth: 0
+
+      - name: Setup Go
+        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
+        with:
+          go-version: '1.26.x'
+
+      - name: Run Gitleaks
+        run: >-
+          go run github.com/zricethezav/gitleaks/v8@v8.24.2 detect
+          --source . --redact --no-banner
+
+  dependencies:
+    name: Dependency and license audits
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: '24'
+
+      - name: Audit JavaScript template dependencies
+        working-directory: templates/javascript-typescript-node
+        run: npm audit --audit-level=low
+
+      - name: Setup Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.12'
+
+      - name: Install pinned Python auditor
+        run: python -m pip install --disable-pip-version-check pip-audit==2.10.0
+
+      - name: Audit Python template lock
+        working-directory: templates/python
+        run: pip-audit --strict -r requirements-lock.txt
+
+      - name: Setup Go
+        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
+        with:
+          go-version: '1.26.x'
+          cache-dependency-path: soku/go.sum
+
+      - name: Audit declared licenses and notices
+        shell: bash
+        run: |
+          test -s LICENSE
+          test -s soku/THIRD_PARTY_NOTICES.md
+          rg -n 'MIT|Apache|BSD|third[- ]party' soku/THIRD_PARTY_NOTICES.md
+
+  go-vulnerabilities:
+    name: Go vulnerability checks
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        module:
+          - soku
+          - templates/go
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+
+      - name: Setup Go
+        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
+        with:
+          go-version: '1.26.x'
+          cache-dependency-path: soku/go.sum
+
+      - name: Run govulncheck
+        working-directory: ${{ matrix.module }}
+        run: go run golang.org/x/vuln/cmd/govulncheck@v1.6.0 ./...
+
+  osv:
+    name: OSV dependency scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+
+      - name: Setup Go
+        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
+        with:
+          go-version: '1.26.x'
+
+      - name: Run OSV scanner
+        run: >-
+          go run github.com/google/osv-scanner/v2/cmd/osv-scanner@v2.4.0
+          scan source -r . --experimental-exclude .git --no-resolve
