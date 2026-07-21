@@ -3,7 +3,7 @@ name: Validation
 on:
   workflow_call:
   pull_request:
-    types: [opened, synchronize, reopened, edited]
+    types: [opened, synchronize, reopened, edited, labeled, unlabeled]
   push:
     branches:
       - main
@@ -46,9 +46,9 @@ jobs:
       - name: Validate pull request and commit titles
         env:
           PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
         run: |
           node --input-type=module - <<'NODE'
           import {execSync} from 'node:child_process';
@@ -57,27 +57,65 @@ jobs:
             validateContributionTitle,
           } from './templates/_shared/commitlint/contribution-title.mjs';
 
+          const prTitle = process.env.PR_TITLE || '';
+          const prAuthor = process.env.PR_AUTHOR || '';
+
           const mergeBase = execSync(
             `git merge-base ${process.env.BASE_SHA} ${process.env.HEAD_SHA}`,
           ).toString().trim();
-          const commitTitles = execSync(
-            `git log --no-merges --format=%s ${mergeBase}..${process.env.HEAD_SHA}`,
-          ).toString().trim().split('\n').filter(Boolean);
-          const titles = [process.env.PR_TITLE, ...commitTitles];
-          const options = contributionTitleOptionsForAuthor(process.env.PR_AUTHOR ?? '');
+          const commitLog = execSync(
+            `git log --no-merges --format=%H%x00%s%x00%aN%x00%aE ${mergeBase}..${process.env.HEAD_SHA}`,
+          ).toString().trim();
+
+          const commits = commitLog
+            .split('\n')
+            .filter(Boolean)
+            .map((line) => {
+              const [sha, title, authorName, authorEmail] = line.split('\x00');
+              return {sha, title, authorName, authorEmail};
+            });
+
+          const checks = [
+            {
+              source: 'PR title',
+              value: prTitle,
+              options: contributionTitleOptionsForAuthor(prAuthor),
+            },
+            ...commits.map((commit) => ({
+              source: `commit ${commit.sha}`,
+              value: commit.title,
+              options: contributionTitleOptionsForAuthor(commit.authorName),
+            })),
+          ];
 
           let failed = false;
-          for (const title of titles) {
-            const result = validateContributionTitle(title, options);
+          for (const item of checks) {
+            const result = validateContributionTitle(item.value, item.options);
             if (!result.valid) {
               failed = true;
-              console.error(`✗ "${title}"\n  ${result.message}`);
+              console.error(`✗ [${item.source}] "${item.value}"\n  ${result.message}`);
             } else {
-              console.log(`✓ "${title}"`);
+              console.log(`✓ [${item.source}] "${item.value}"`);
             }
           }
+
           if (failed) process.exit(1);
           NODE
+
+  governance-policy:
+    name: PR Governance Policy
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+        with:
+          fetch-depth: 0
+
+      - name: Validate pull request metadata, template order, and audit fields
+        env:
+          GITHUB_EVENT_PATH: ${{ github.event_path }}
+        run: node .github/validate-pr-governance.mjs
 
   validation-gate:
     name: Validation Gate
@@ -87,6 +125,7 @@ jobs:
       - templates
       - security
       - contribution-titles
+      - governance-policy
     runs-on: ubuntu-latest
     steps:
       - name: Require every validation group
@@ -95,12 +134,17 @@ jobs:
           TEMPLATES_RESULT: ${{ needs.templates.result }}
           SECURITY_RESULT: ${{ needs.security.result }}
           TITLES_RESULT: ${{ needs.contribution-titles.result }}
+          POLICY_RESULT: ${{ needs.governance-policy.result }}
         shell: bash
         run: |
           test "$REPOSITORY_RESULT" = success
           test "$TEMPLATES_RESULT" = success
           test "$SECURITY_RESULT" = success
           case "$TITLES_RESULT" in
+            success|skipped) ;;
+            *) exit 1 ;;
+          esac
+          case "$POLICY_RESULT" in
             success|skipped) ;;
             *) exit 1 ;;
           esac

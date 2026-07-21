@@ -103,3 +103,52 @@ body:
         - **Planning:** <actual tool or None>
     validations:
       required: true
+  - type: textarea
+    id: use_cases
+    attributes:
+      label: 🧭 Use Cases
+      description: Describe users, operational scenarios, and acceptance by context.
+      value: |
+        ### Primary use case
+
+        <!-- Who needs this and what outcome they expect. -->
+
+        ### Secondary use cases
+
+        <!-- Add additional user stories where behavior differs. -->
+    validations:
+      required: true
+  - type: textarea
+    id: readers_and_language
+    attributes:
+      label: 🌐 Target Readers and Language Policy
+      description: Preserve scope in both English normative and Korean/Japanese summaries.
+      value: |
+        ### Target readers
+
+        <!-- Maintainers, operators, contributors, downstream users. -->
+
+        ### Language policy impact
+
+        <!-- Whether the result changes documentation language expectations or migration notes. -->
+    validations:
+      required: true
+  - type: textarea
+    id: rollout_scope
+    attributes:
+      label: 🛰️ Operational Boundary
+      description: Define rollout boundaries, dependencies, and stop conditions.
+      value: |
+        ### in-scope operations
+
+        <!-- Include repository paths, stacks, and environments. -->
+
+        ### out-of-scope operations
+
+        <!-- What must remain untouched during implementation. -->
+
+        ### Completion boundary
+
+        <!-- Define non-negotiable completion constraints. -->
+    validations:
+      required: true

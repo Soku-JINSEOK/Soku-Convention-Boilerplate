@@ -103,3 +103,52 @@ body:
         - **Planning:** <actual tool or None>
     validations:
       required: true
+  - type: textarea
+    id: readers
+    attributes:
+      label: 👥 Target Readers
+      description: Define who consumes this documentation and any review obligations.
+      value: |
+        ### Primary readers
+
+        <!-- Maintainers, contributors, users, support teams. -->
+
+        ### Secondary readers
+
+        <!-- Other teams or downstream consumers. -->
+    validations:
+      required: true
+  - type: textarea
+    id: language_policy
+    attributes:
+      label: 🈶 Language Policy
+      description: Record intended language parity and scope limitations.
+      value: |
+        ### English source contract
+
+        <!-- Which sections are normative and why. -->
+
+        ### Korean and Japanese parity
+
+        <!-- What must remain equivalent across summaries. -->
+    validations:
+      required: true
+  - type: textarea
+    id: docs_scope
+    attributes:
+      label: 📚 Documentation Operational Scope
+      description: Keep changes bounded and compatibility-safe.
+      value: |
+        ### In scope
+
+        <!-- Pages, versions, and references that must change. -->
+
+        ### Out of scope
+
+        <!-- Content and links that must remain unchanged. -->
+
+        ### Validation boundary
+
+        <!-- Define what proof confirms this update is complete. -->
+    validations:
+      required: true

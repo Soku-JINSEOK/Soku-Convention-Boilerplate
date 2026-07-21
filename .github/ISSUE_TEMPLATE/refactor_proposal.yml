@@ -103,3 +103,48 @@ body:
         - **Planning:** <actual tool or None>
     validations:
       required: true
+  - type: textarea
+    id: behavior_preservation
+    attributes:
+      label: 🧭 Behavior Preservation Evidence
+      description: Explain how behavior stays unchanged and how it is validated.
+      value: |
+        ### Unchanged behaviors
+
+        <!-- List externally visible contracts and migration-safe guarantees. -->
+
+        ### Validation probes
+
+        <!-- Commands, checks, or fixtures proving invariance. -->
+    validations:
+      required: true
+  - type: textarea
+    id: refactor_scope
+    attributes:
+      label: 🧱 Refactor Scope and Safety
+      description: Set hard boundaries and unacceptable structural changes.
+      value: |
+        ### In-scope refactor
+
+        <!-- Files and responsibilities to rewrite. -->
+
+        ### Out-of-scope
+
+        <!-- Features, API, and behavior not touched. -->
+    validations:
+      required: true
+  - type: textarea
+    id: readers_and_language
+    attributes:
+      label: 👥 Audience and Language Consideration
+      description: Define impacted stakeholders and multilingual documentation touch points.
+      value: |
+        ### Direct stakeholders
+
+        <!-- Reviewers, operators, and consumers. -->
+
+        ### Language impact
+
+        <!-- Summaries and downstream docs must remain aligned. -->
+    validations:
+      required: true
