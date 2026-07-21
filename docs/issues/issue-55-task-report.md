@@ -48,6 +48,34 @@ native auto-add target is changed separately, with explicit approval, to
 Fresh reads verified that `#51`, `#58`, `#59`, `#62`-`#65`, and `#68` remain
 closed. Existing labels were preserved; only the manifest additions were made.
 
+### Completion-audit metadata normalization
+
+A fresh completion audit found eight historical pull requests that still had a
+canonical `type:*` label but no canonical `area:*` label. The following exact
+label-only manifest was recorded before the supplemental batch. The selected
+areas match each pull request's linked Issue labels and changed-file scope.
+
+| PR | Preserved state | Exact label additions | Post-mutation body SHA-256 |
+| --- | --- | --- | --- |
+| #7 | closed-merged | `area:templates` | `3dc06b07583135b034061047426d01394cf4943f311da05273a2b01a0f7ba6b7` |
+| #26 | closed-merged | `area:docs`, `area:tooling` | `dada719087742fc2b9fe9f42e4fd28504a002f7b4190d8a63a835dd73297ce79` |
+| #29 | closed-merged | `area:docs`, `area:tooling`, `area:ci`, `area:templates` | `709af30765914d00f81aa22a4c1f9167e8518a2d3f8891f1b04e7400d9b74a7b` |
+| #30 | closed-merged | `area:docs`, `area:tooling`, `area:templates` | `3c298237bd4485f1a43ef8cc39f6dfd4ebe05d2cf0f577498ce41e437a8c1f3c` |
+| #31 | closed-merged | `area:tooling`, `area:ci`, `area:templates` | `a2f6ec4238072312ed5622dfec25676f78fb31e4c6bac823f2a8ef350a514da2` |
+| #32 | closed-merged | `area:docs`, `area:tooling`, `area:templates` | `d88b1398f9c9038555ec20b40a9c2a25bdd94e6ad25a7d073ff79c206610be8d` |
+| #33 | closed-merged | `area:docs`, `area:tooling`, `area:ci`, `area:templates` | `504d8bd863e324483e996eb2db747fc4b09d7c4bdc837ef4c8709c958f2646aa` |
+| #50 | closed-merged | `area:docs`, `area:tooling`, `area:ci` | `b121629fd163eeeca14757d0617c91389405e58389c830cc2c392918a109dfc7` |
+
+The batch used only `gh pr edit --add-label`; it supplied no body, title, state,
+merge, or review arguments. Post-mutation reads verified that all eight pull
+requests remain closed and merged, retain `assignee=Soku-JINSEOK`, and have the
+listed canonical labels. The body hashes above use the exact output of
+`gh api repos/Soku-JINSEOK/Soku-Convention-Boilerplate/pulls/<n> --jq .body`
+including the output newline.
+
+The implementation pull request `#70` was also assigned to `Soku-JINSEOK`
+without changing its body, labels, state, or Project membership.
+
 ### Issue / PR changes applied
 
 | Target | Before | After | Note |
@@ -69,6 +97,8 @@ closed. Existing labels were preserved; only the manifest additions were made.
 | PR #65 | dependency title | `📦 build(templates): ...` | title normalized to governance format |
 | PR #57, #58, #59, #62, #63, #64, #65, #52, #53 | missing/legacy `type:*` in some cases | `type:bug` or `type:chore` added as applicable | required canonical `type:` labels now present |
 | PR #52, #53, #57, #58, #59, #62, #63, #64, #65 | unassigned / mixed | `Soku-JINSEOK` assigned | assignee normalization applied |
+| PR #7, #26, #29-#33, #50 | canonical `type:*` but no canonical `area:*` label | exact `area:*` additions in the completion-audit manifest | bodies, titles, and closed-merged states preserved |
+| PR #70 | unassigned implementation pull request | `Soku-JINSEOK` assigned | body, labels, open state, and Project exclusion preserved |
 | Issues #16–#24, #40, #44 | Open/closed project rows present before | removed from Project #2 | closed-only cleanup completed |
 | PR #60, #61, #66 | PR-only changelog body | wrapped under full issue template; original release/changelog/commit evidence retained | Added `## 🔗 Common Metadata`, `English/KO/JP` sections, checklist, and AI section |
 | Issues #41, #54, #55 | status labels mixed; project metadata inconsistent | Project fields now canonicalized | canonicalized through single source fields only |
@@ -80,6 +110,8 @@ closed. Existing labels were preserved; only the manifest additions were made.
 ### Open item membership check (post-run)
 
 Open issues in repo: `#41`, `#54`, `#55`, `#69` — all are in Project #2. Closed issues are not in Project #2.
+
+Issue #69 was updated to explicitly separate open (#60, #61, #66) and closed-unmerged (#58, #59, #62–#65, #68) PRs, and to record the corresponding hash ledger.
 
 ### Project #2 canonical fields for active Boilerplate issues
 
@@ -93,7 +125,7 @@ Open issues in repo: `#41`, `#54`, `#55`, `#69` — all are in Project #2. Close
 - `#41`: `02c450f236f8d37debc5417d2469bb2d07a30e40d10aa45d718b50720cf550de`
 - `#54`: `37f4fc2957ebf95095e19d6196c52466380c8196604e479ab09c177f30e9f5d5`
 - `#55`: `d40327e4b1cfb912b810e794e0da75f632acd4344fc2c2db839305ce7caec3bd`
-- `#69`: `f1da285e008dd6d07e864a356a08900c80f2d844d0822c71bf1fb9e3acdadbde`
+- `#69`: `bbba3774046753fed4a87b8d1609d550e8e32ae787df105eb80c780368075e37`
 - `#60`: `9ff78f702df69828278412e8c9fbc5206d41ad166406d58794c5019c8a479afa`
 - `#61`: `9dfcbd67b7c154e373cccdf52e8fb45f239883ef76213ed3688615e59afaf49a`
 - `#66`: `4665fd39aff6989c3e1c387b9238d0e01caf5a8b0be2ed60867a04ba166470d2`
