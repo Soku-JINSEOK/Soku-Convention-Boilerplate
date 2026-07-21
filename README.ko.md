@@ -13,13 +13,16 @@
 
 표준화된 설계와 운영 모델에 대해서는 [BLUEPRINT.md](./BLUEPRINT.md) 문서를 참고하십시오.
 
-## 📦 현재 검증된 베이스라인
+## 📦 현재 공개 베이스라인
 
-현재 보일러플레이트 컨벤션 패키지는 `v1.0.0`입니다. 권장 CLI는
-`soku/v0.1.2`이며, manifest-v1과 Provider API v1을 유지하면서 실제 fetch한
-provider revision을 authoritative하게 사용하도록 `soku/v0.1.1`을 대체합니다.
-로컬·hosted·릴리스·거버넌스·보안·비용 검증은
-[VERIFICATION_GUIDE.md](./VERIFICATION_GUIDE.md)를 참고하십시오.
+현재 공개 보일러플레이트 컨벤션 패키지는 `v1.0.0`이고, 권장 공개 CLI는
+`soku/v0.1.2`입니다. 불변인 보일러플레이트 `v1.0.0`에는 알려진 개발 템플릿
+제한이 있습니다. 생성된 JavaScript 결과가 `init --verify`를 통과하지 못하고,
+의존성 스냅샷은 현재의 `tmp` 및 Jackson 수정 전 상태입니다. Issue #41은
+`v1.0.1`을 검토된 후속 버전으로 준비합니다. Signed tag가 발행되기 전에는
+`v1.0.0`을 완전히 검증된 권장 버전으로 간주하거나 `v1.0.1`을 사용하지
+마십시오. 전체 검사는 [VERIFICATION_GUIDE.md](./VERIFICATION_GUIDE.md)를
+참고하십시오.
 
 ---
 

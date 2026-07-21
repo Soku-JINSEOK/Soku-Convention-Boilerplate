@@ -63,6 +63,7 @@ jobs:
             VERIFICATION_GUIDE.md
             docs/issues/TASK_REPORT_TEMPLATE.md
             docs/releases/v1.0.0.md
+            docs/releases/v1.0.1.md
             docs/releases/soku-v0.1.0.md
             docs/releases/soku-v0.1.1.md
             docs/releases/soku-v0.1.2.md
@@ -77,6 +78,7 @@ jobs:
             docs/issues/issue-35-task-report.md
             docs/issues/issue-39-task-report.md
             docs/issues/issue-40-task-report.md
+            docs/issues/issue-41-task-report.md
             docs/issues/issue-44-task-report.md
             LICENSE
             SECURITY.md

@@ -14,11 +14,15 @@ specific limitation and the follow-up needed to close it.
 
 ## Supported Release Baseline
 
-- Current boilerplate convention package: `v1.0.0`
+- Current published boilerplate convention package: `v1.0.0`
+- Release candidate: `v1.0.1`; consume it only after its separately approved
+  signed tag and GitHub Release exist.
 - Recommended CLI: `soku/v0.1.2`
 - Superseded CLIs: `soku/v0.1.0` and `soku/v0.1.1`; use `soku/v0.1.2`, which
   preserves manifest-v1 and Provider API v1 while making the fetched provider
   revision authoritative and fully supporting optional legacy provider `ref`.
+- Immutable `v1.0.0` limitations: generated JavaScript fails `init --verify`,
+  and its dependency snapshots predate the current `tmp` and Jackson fixes.
 
 Published tags and releases are immutable. Verification must never move,
 delete, or reuse them, and must not publish a new release as a side effect.
