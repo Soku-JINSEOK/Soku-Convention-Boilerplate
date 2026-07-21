@@ -3,7 +3,7 @@ name: Validation
 on:
   workflow_call:
   pull_request:
-    types: [opened, synchronize, reopened, edited]
+    types: [opened, synchronize, reopened, edited, labeled, unlabeled]
   push:
     branches:
       - main
