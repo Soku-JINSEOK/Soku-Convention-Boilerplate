@@ -48,10 +48,12 @@ jobs:
           PR_TITLE: ${{ github.event.pull_request.title }}
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
         run: |
           node --input-type=module - <<'NODE'
           import {execSync} from 'node:child_process';
           import {
+            contributionTitleOptionsForAuthor,
             validateContributionTitle,
           } from './templates/_shared/commitlint/contribution-title.mjs';
 
@@ -62,10 +64,11 @@ jobs:
             `git log --no-merges --format=%s ${mergeBase}..${process.env.HEAD_SHA}`,
           ).toString().trim().split('\n').filter(Boolean);
           const titles = [process.env.PR_TITLE, ...commitTitles];
+          const options = contributionTitleOptionsForAuthor(process.env.PR_AUTHOR ?? '');
 
           let failed = false;
           for (const title of titles) {
-            const result = validateContributionTitle(title);
+            const result = validateContributionTitle(title, options);
             if (!result.valid) {
               failed = true;
               console.error(`✗ "${title}"\n  ${result.message}`);
