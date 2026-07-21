@@ -4,15 +4,111 @@ updates:
     directory: /
     schedule:
       interval: monthly
+    open-pull-requests-limit: 1
+    groups:
+      minor-and-patch:
+        update-types:
+          - minor
+          - patch
+        patterns:
+          - "*"
+      security-updates:
+        applies-to: security-updates
+        patterns:
+          - "*"
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - major
+    assignees:
+      - Soku-JINSEOK
+    labels:
+      - "type:chore"
+      - "area:tooling"
+    commit-message:
+      prefix: "📦 build"
+      include: "scope"
   - package-ecosystem: gomod
     directory: /soku
     schedule:
       interval: monthly
+    open-pull-requests-limit: 1
+    groups:
+      minor-and-patch:
+        update-types:
+          - minor
+          - patch
+        patterns:
+          - "*"
+      security-updates:
+        applies-to: security-updates
+        patterns:
+          - "*"
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - major
+    assignees:
+      - Soku-JINSEOK
+    labels:
+      - "type:chore"
+      - "area:tooling"
+    commit-message:
+      prefix: "📦 build"
+      include: "scope"
   - package-ecosystem: npm
     directory: /templates/javascript-typescript-node
     schedule:
       interval: monthly
+    open-pull-requests-limit: 1
+    groups:
+      minor-and-patch:
+        update-types:
+          - minor
+          - patch
+        patterns:
+          - "*"
+      security-updates:
+        applies-to: security-updates
+        patterns:
+          - "*"
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - major
+    assignees:
+      - Soku-JINSEOK
+    labels:
+      - "type:chore"
+      - "area:tooling"
+    commit-message:
+      prefix: "📦 build"
+      include: "scope"
   - package-ecosystem: pip
     directory: /templates/python
     schedule:
       interval: monthly
+    open-pull-requests-limit: 1
+    groups:
+      minor-and-patch:
+        update-types:
+          - minor
+          - patch
+        patterns:
+          - "*"
+      security-updates:
+        applies-to: security-updates
+        patterns:
+          - "*"
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - major
+    assignees:
+      - Soku-JINSEOK
+    labels:
+      - "type:chore"
+      - "area:tooling"
+    commit-message:
+      prefix: "📦 build"
+      include: "scope"
