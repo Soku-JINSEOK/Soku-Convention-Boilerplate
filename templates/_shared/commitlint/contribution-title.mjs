@@ -19,8 +19,19 @@ export const TITLE_CONVENTIONS = Object.freeze([
 
 const SCOPE_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const ENGLISH_SUBJECT_PATTERN = /^[\x20-\x7e]+$/;
+const DEFAULT_MAX_TITLE_LENGTH = 72;
+const DEPENDABOT_BOT_LOGIN = 'dependabot[bot]';
 
-export function validateContributionTitle(title) {
+export function contributionTitleOptionsForAuthor(author) {
+  if (author === DEPENDABOT_BOT_LOGIN) {
+    return {maxLength: null};
+  }
+  return {};
+}
+
+export function validateContributionTitle(title, options = {}) {
+  const {maxLength = DEFAULT_MAX_TITLE_LENGTH} = options || {};
+
   const value = title.trim();
   let isBreaking = false;
   let convention = null;
@@ -87,10 +98,10 @@ export function validateContributionTitle(title) {
   if (subject.endsWith('.')) {
     return {valid: false, message: 'Subject must not end with a period.'};
   }
-  if (value.length > 72) {
+  if (maxLength !== null && value.length > maxLength) {
     return {
       valid: false,
-      message: `Title exceeds 72 characters (currently ${value.length}).`,
+      message: `Title exceeds ${maxLength} characters (currently ${value.length}).`,
     };
   }
 

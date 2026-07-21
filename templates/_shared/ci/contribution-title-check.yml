@@ -49,10 +49,14 @@ jobs:
           PR_TITLE: ${{ github.event.pull_request.title }}
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
         run: |
           node --input-type=module - <<'NODE'
           import {execSync} from 'node:child_process';
-          import {validateContributionTitle} from './contribution-title.mjs';
+          import {
+            contributionTitleOptionsForAuthor,
+            validateContributionTitle,
+          } from './contribution-title.mjs';
 
           // `base.sha` is the base branch's current tip, not the merge base — resolve the
           // actual divergence point so commits already on the base branch (e.g. pulled in by
@@ -72,10 +76,11 @@ jobs:
             .filter(Boolean);
 
           const titles = [process.env.PR_TITLE, ...commitTitles];
+          const options = contributionTitleOptionsForAuthor(process.env.PR_AUTHOR ?? '');
 
           let failed = false;
           for (const title of titles) {
-            const result = validateContributionTitle(title);
+            const result = validateContributionTitle(title, options);
             if (!result.valid) {
               failed = true;
               console.error(`✗ "${title}"\n  ${result.message}`);
