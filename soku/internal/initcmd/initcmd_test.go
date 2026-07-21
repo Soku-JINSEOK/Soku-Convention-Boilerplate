@@ -148,6 +148,7 @@ func TestCatalogRenderingUsesExactTokensAndJavaPaths(t *testing.T) {
 
 func TestDownstreamCIRenderingRejectsMalformedMarkersAndUsesFallback(t *testing.T) {
 	source := mustRead(t, "../../../templates/_shared/ci/downstream-ci.yml")
+	source = []byte(strings.ReplaceAll(strings.ReplaceAll(string(source), "\r\n", "\n"), "\r", "\n"))
 	configuration, err := renderDownstreamCI(source, []string{"mysql"})
 	if err != nil {
 		t.Fatal(err)

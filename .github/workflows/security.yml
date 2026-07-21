@@ -68,7 +68,7 @@ jobs:
         run: |
           test -s LICENSE
           test -s soku/THIRD_PARTY_NOTICES.md
-          rg -n 'MIT|Apache|BSD|third[- ]party' soku/THIRD_PARTY_NOTICES.md
+          grep -En 'MIT|Apache|BSD|third[- ]party' soku/THIRD_PARTY_NOTICES.md
 
   go-vulnerabilities:
     name: Go vulnerability checks
