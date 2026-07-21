@@ -103,3 +103,59 @@ body:
         - **Planning:** <actual tool or None>
     validations:
       required: true
+  - type: textarea
+    id: reproduction_steps
+    attributes:
+      label: 🧪 Reproduction Steps
+      description: |
+        Describe a minimal, deterministic sequence that reproduces the issue.
+      value: |
+        ### 1) Preconditions
+
+        <!-- OS, repo state, feature flag, version, branch, and relevant context. -->
+
+        ### 2) Exact Steps
+
+        <!-- Commands, input, sequence, and expected intermediate state. -->
+
+        ### 3) Actual vs Expected
+
+        <!-- What happened and what should have happened. -->
+    validations:
+      required: true
+  - type: textarea
+    id: impact_scope
+    attributes:
+      label: 🎯 Usage Context and Operational Scope
+      description: |
+        Record who is affected, where it runs, and which paths, stacks, and workflows are in scope.
+      value: |
+        ### Affected readers
+
+        <!-- Who uses the affected path (e.g., maintainers, operators, end users). -->
+
+        ### Affected areas
+
+        <!-- Scope by stack, area, docs, or profile; include language and deployment boundary. -->
+
+        ### Non-impacted areas
+
+        <!-- Explicitly list what should remain unchanged. -->
+    validations:
+      required: true
+  - type: textarea
+    id: debug_artifacts
+    attributes:
+      label: 🧷 Evidence and Failure Signals
+      description: |
+        Attach logs, snippets, screenshots, and reproducible artifacts.
+      value: |
+        ### Logs / traces
+
+        <!-- Paste redacted evidence that demonstrates the failure. -->
+
+        ### Related code/docs
+
+        <!-- Links or paths to where the evidence originates. -->
+    validations:
+      required: true

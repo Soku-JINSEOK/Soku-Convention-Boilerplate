@@ -16,6 +16,18 @@ test('accepts a standard fix title', () => {
   assert.equal(result.valid, true);
 });
 
+test('accepts bot-style conventional title when option enabled', () => {
+  const result = validateContributionTitle('fix(deps): bump dependency', {
+    allowConventionalWithoutGitmoji: true,
+  });
+  assert.equal(result.valid, true);
+});
+
+test('rejects bot-style conventional title when option is disabled', () => {
+  const result = validateContributionTitle('fix(deps): bump dependency');
+  assert.equal(result.valid, false);
+});
+
 test('accepts a breaking change title', () => {
   const result = validateContributionTitle('💥 feat!(api): remove legacy endpoint');
   assert.equal(result.valid, true);

@@ -103,3 +103,48 @@ body:
         - **Planning:** <actual tool or None>
     validations:
       required: true
+  - type: textarea
+    id: operations_scope
+    attributes:
+      label: 🛠️ Operational Scope
+      description: Clarify maintenance boundaries and service impact.
+      value: |
+        ### Affected operations
+
+        <!-- Maintenance jobs, schedules, and owners. -->
+
+        ### Constraints
+
+        <!-- Downtime window, rollout, approval gates, and external dependencies. -->
+    validations:
+      required: true
+  - type: textarea
+    id: behavior_preservation
+    attributes:
+      label: 🧱 Behavior Preservation Baseline
+      description: Define which behaviors are stable versus intentionally changed.
+      value: |
+        ### Stable behaviors
+
+        <!-- What must not change for users and operators. -->
+
+        ### Planned behavior changes
+
+        <!-- Only the necessary modifications and rationale. -->
+    validations:
+      required: true
+  - type: textarea
+    id: delivery_risk
+    attributes:
+      label: 🚨 Delivery Boundary and Rollback
+      description: Add explicit cutoff and rollback steps for operational safety.
+      value: |
+        ### Delivery boundary
+
+        <!-- Environments, feature flags, and acceptance checkpoints. -->
+
+        ### Rollback criterion
+
+        <!-- Specific condition and rollback mechanism. -->
+    validations:
+      required: true

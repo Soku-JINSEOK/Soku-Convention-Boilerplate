@@ -24,14 +24,16 @@ const DEPENDABOT_BOT_LOGIN = 'dependabot[bot]';
 
 export function contributionTitleOptionsForAuthor(author) {
   if (author === DEPENDABOT_BOT_LOGIN) {
-    return {maxLength: null};
+    return {allowConventionalWithoutGitmoji: true, maxLength: null};
   }
   return {};
 }
 
 export function validateContributionTitle(title, options = {}) {
-  const {maxLength = DEFAULT_MAX_TITLE_LENGTH} = options || {};
-
+  const {
+    allowConventionalWithoutGitmoji = false,
+    maxLength = DEFAULT_MAX_TITLE_LENGTH,
+  } = options || {};
   const value = title.trim();
   let isBreaking = false;
   let convention = null;
@@ -56,9 +58,13 @@ export function validateContributionTitle(title, options = {}) {
     convention = TITLE_CONVENTIONS.find(([emoji, type]) =>
       value.startsWith(`${emoji} ${type}(`),
     );
-    if (convention) {
-      const [emoji, type] = convention;
-      prefixLength = `${emoji} ${type}(`.length;
+    if (!convention && allowConventionalWithoutGitmoji) {
+      convention = TITLE_CONVENTIONS.find(([_, type]) => value.startsWith(`${type}(`));
+      if (convention) {
+        prefixLength = `${convention[1]}(`.length;
+      }
+    } else if (convention) {
+      prefixLength = `${convention[0]} ${convention[1]}(`.length;
     }
   }
 

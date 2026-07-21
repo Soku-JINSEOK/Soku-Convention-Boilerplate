@@ -83,12 +83,15 @@ jobs:
             docs/issues/issue-41-task-report.md
             docs/issues/issue-44-task-report.md
             docs/issues/issue-56-task-report.md
+            docs/issues/issue-55-task-report.md
             LICENSE
             SECURITY.md
             .editorconfig
             .gitmessage
             .github/PULL_REQUEST_TEMPLATE.md
             .github/COMMENT_TEMPLATES.md
+            .github/validate-pr-governance.mjs
+            .github/validate-pr-governance.test.mjs
             .github/ISSUE_TEMPLATE/bug_report.yml
             .github/ISSUE_TEMPLATE/chore_task.yml
             .github/ISSUE_TEMPLATE/config.yml
@@ -221,6 +224,9 @@ jobs:
 
       - name: Run contribution-title regression tests
         run: node --test templates/_shared/commitlint/*.test.mjs
+
+      - name: Run pull-request governance regression tests
+        run: node --test .github/validate-pr-governance.test.mjs
 
       - name: Run release tag gate regression tests
         run: scripts/verify-release-tag_test.sh
