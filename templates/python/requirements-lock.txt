@@ -38,7 +38,7 @@ pytest==9.1.1
     # via your-project-name (pyproject.toml)
 pytokens==0.4.1
     # via black
-ruff==0.15.21
+ruff==0.15.22
     # via your-project-name (pyproject.toml)
 typing-extensions==4.16.0
     # via mypy
