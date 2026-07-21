@@ -219,7 +219,7 @@ For a published immutable release, Go understands the repository's submodule
 tag and installs it by module version:
 
 ```bash
-go install github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/soku@v0.1.1
+go install github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/soku@v0.1.2
 ```
 
 ## Verify a Release Download
@@ -229,7 +229,7 @@ then verify it before extraction. For example:
 
 ```bash
 sha256sum --check --ignore-missing checksums.txt
-tar -xzf soku_v0.1.1_linux_amd64.tar.gz
+tar -xzf soku_v0.1.2_linux_amd64.tar.gz
 ./soku --version
 ```
 
@@ -245,7 +245,7 @@ Linux arm64, macOS amd64, macOS arm64, and Windows amd64 archives:
 ```bash
 cd soku
 ./scripts/package.sh \
-  --version v0.1.1 \
+  --version v0.1.2 \
   --commit 0123456789abcdef0123456789abcdef01234567 \
   --built-at 2026-07-18T00:00:00Z \
   --output-dir ./dist

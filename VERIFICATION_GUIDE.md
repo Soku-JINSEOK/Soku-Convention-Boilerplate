@@ -15,9 +15,10 @@ specific limitation and the follow-up needed to close it.
 ## Supported Release Baseline
 
 - Current boilerplate convention package: `v1.0.0`
-- Recommended CLI: `soku/v0.1.1`
-- Superseded CLI: `soku/v0.1.0`; use `soku/v0.1.1`, which preserves the same
-  public CLI contract and corrects GitHub source-archive handling.
+- Recommended CLI: `soku/v0.1.2`
+- Superseded CLIs: `soku/v0.1.0` and `soku/v0.1.1`; use `soku/v0.1.2`, which
+  preserves manifest-v1 and Provider API v1 while making the fetched provider
+  revision authoritative and fully supporting optional legacy provider `ref`.
 
 Published tags and releases are immutable. Verification must never move,
 delete, or reuse them, and must not publish a new release as a side effect.
@@ -131,16 +132,16 @@ the sanitized incident and remediation status.
 
 ## Published Artifact Checks
 
-For `v1.0.0` and `soku/v0.1.1`:
+For `v1.0.0` and `soku/v0.1.2`:
 
 1. Resolve each public tag and verify its signed annotated tag record and release
    metadata without changing either object.
-2. Download every `soku/v0.1.1` asset to a temporary directory.
+2. Download every `soku/v0.1.2` asset to a temporary directory.
 3. Verify `checksums.txt`, archive names, archive contents, executable modes, and
    embedded version/commit/build metadata.
 4. Smoke-test the native archive on the available platform.
 5. Run `go install
-   github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/soku@soku/v0.1.1` in an
+   github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/soku@v0.1.2` in an
    isolated Go cache and use it for a read-only `v1.0.0` lifecycle smoke test.
 
 Delete only the temporary audit directory after recording results. Release

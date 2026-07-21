@@ -16,8 +16,9 @@
 ## 📦 現在検証済みのベースライン
 
 現在のボイラープレート規約パッケージは `v1.0.0` です。推奨 CLI は
-`soku/v0.1.1` であり、公開 CLI contract を維持しながら GitHub source
-archive 処理を修正した version として `soku/v0.1.0` を置き換えます。
+`soku/v0.1.2` であり、manifest-v1 と Provider API v1 を維持しながら、実際に
+fetch した provider revision を authoritative に扱う version として
+`soku/v0.1.1` を置き換えます。
 ローカル、hosted、release、governance、security、cost の検証については
 [VERIFICATION_GUIDE.md](./VERIFICATION_GUIDE.md) を参照してください。
 

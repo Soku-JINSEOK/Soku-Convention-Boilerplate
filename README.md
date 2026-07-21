@@ -16,8 +16,8 @@ For the canonical operating design, start with [BLUEPRINT.md](./BLUEPRINT.md).
 ## 📦 Current Verified Baseline
 
 The current boilerplate convention package is `v1.0.0`. The recommended CLI is
-`soku/v0.1.1`; it supersedes `soku/v0.1.0` while preserving the public CLI
-contract and correcting GitHub source-archive handling. See
+`soku/v0.1.2`; it supersedes `soku/v0.1.1` while preserving manifest-v1 and
+Provider API v1 and making the fetched provider revision authoritative. See
 [VERIFICATION_GUIDE.md](./VERIFICATION_GUIDE.md) for local, hosted, release,
 governance, security, and cost verification.
 

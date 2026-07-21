@@ -22,8 +22,9 @@ configuration. Lifecycle state remains hash-only and never stores sanitized or
 raw configuration, credentials, or secrets. Add hermetic regression coverage
 and an opt-in real-Git conformance test pinned to a public immutable commit.
 
-Prepare, but do not publish, the `soku/v0.1.2` compatibility and release
-preflight record. Existing tags and Releases remain immutable.
+Prepare the `soku/v0.1.2` compatibility and release preflight record, then
+publish it only after separate explicit approval. Existing tags and Releases
+remain immutable.
 
 ## Planned Implementation
 
@@ -48,6 +49,9 @@ preflight record. Existing tags and Releases remain immutable.
 7. Run the complete local and hosted validation gates, merge through the
    protected merge-commit workflow, verify `main`, and record evidence on
    Issue #44 without closing it or publishing `soku/v0.1.2`.
+8. After separate publication approval, create and verify the signed annotated
+   tag, push only `soku/v0.1.2`, verify the tag-triggered Release workflow and
+   all six assets, then record the public baseline in a follow-up evidence PR.
 
 ## Acceptance Criteria
 
@@ -71,8 +75,10 @@ preflight record. Existing tags and Releases remain immutable.
   proposed `soku/v0.1.2` patch.
 - The strict aggregate `Validation Gate`, post-merge `main` gate, and manual
   validation-only release preflight pass.
-- No `soku/v0.1.2` tag or GitHub Release is created, and Issue #44 remains open
-  with `status:in-progress` pending separate publication approval.
+- Publication is separately approved; the signed annotated `soku/v0.1.2` tag
+  resolves to the reviewed source commit, the tag-triggered Release gate
+  passes, and the five platform archives plus `checksums.txt` are verified
+  before Issue #44 is closed.
 
 ## Approval
 
@@ -82,15 +88,19 @@ preflight record. Existing tags and Releases remain immutable.
 - **Approval boundary:** Implementation must not begin until explicit approval
   of this report is recorded on Issue #44 or its Draft PR. Publishing a tag or
   Release and closing Issue #44 require separate later approval.
+- **Publication approval:** `Soku-JINSEOK` explicitly approved
+  `soku/v0.1.2` publication on 2026-07-21 before the signed tag was created.
 
 ## Implementation Status
 
 Provider schema, decoder, revision planning, examples, hermetic and pinned HTTPS
-conformance, lifecycle documentation, CI, and the proposed `soku/v0.1.2` record
-were implemented and merged in pull request #50. PR Validation run
-`29755588302`, post-merge `main` Validation run `29756161515`, and validation-only
-release preflight `29756307978` passed. The `soku/v0.1.2` tag and GitHub Release
-remain absent pending separate publication approval, so Issue #44 remains open.
+conformance, lifecycle documentation, CI, and the `soku/v0.1.2` record were
+implemented and merged in pull requests #50 and #51. The final reviewed source
+is `31e20630db73c18b76d9cd6bc8278c1eb9361356`; post-merge `main` Validation run
+`29792689662` and validation-only Release preflight `29792983455` passed. After
+separate publication approval, the signed annotated tag was published and
+tag-triggered Release run `29795573297` created the public GitHub Release and
+all six expected assets.
 
 ## Verification
 
@@ -118,7 +128,23 @@ remain absent pending separate publication approval, so Issue #44 remains open.
   `8995a029ca5100b9594c16cd5f877a8791616d78`, post-merge `main` run
   `29756161515`, and validation-only release preflight `29756307978`.
 - Verified: the preflight publish job was skipped and no `soku/v0.1.2` tag or
-  GitHub Release exists.
+  GitHub Release existed before separate publication approval.
+- Passed: local and GitHub verification of the signed annotated tag; remote tag
+  object `93255a4df748b8ccf044d8a37a17b32e0736e122` resolves to source commit
+  `31e20630db73c18b76d9cd6bc8278c1eb9361356`.
+- Passed: tag-triggered Release run `29795573297`, including signed-record
+  verification, the full aggregate `Validation Gate`, five-target package
+  snapshot, and GitHub Release publication.
+- Passed: all five platform archives and `checksums.txt` are uploaded and their
+  SHA-256 values verify. Every archive contains only `LICENSE`,
+  `THIRD_PARTY_NOTICES.md`, and the executable with its executable mode.
+- Passed: Linux amd64 archive smoke and embedded metadata verification reported
+  version `v0.1.2`, source commit
+  `31e20630db73c18b76d9cd6bc8278c1eb9361356`, and build time
+  `2026-07-21T01:16:38Z`.
+- Passed: isolated-cache `go install
+  github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/soku@v0.1.2` and installed
+  binary version smoke.
 
 ## AI Assistance
 
@@ -148,8 +174,8 @@ configuration, credential, secret을 저장하지 않습니다. Hermetic regress
 커버리지와 공개 immutable commit에 고정한 opt-in real-Git conformance
 test를 추가합니다.
 
-`soku/v0.1.2` compatibility 및 release preflight 기록은 준비하되
-발행하지 않습니다. 기존 tag와 Release는 불변으로 유지합니다.
+`soku/v0.1.2` compatibility 및 release preflight 기록을 준비하고, 별도 명시적
+승인 후에만 발행합니다. 기존 tag와 Release는 불변으로 유지합니다.
 
 ## 계획된 구현
 
@@ -173,6 +199,9 @@ test를 추가합니다.
 7. 전체 local/hosted validation gate를 통과하고 protected merge-commit
    workflow로 병합한 뒤 `main`과 Issue #44에 증거를 기록하되,
    Issue를 닫거나 `soku/v0.1.2`를 발행하지 않습니다.
+8. 별도 발행 승인 후 signed annotated tag를 생성·검증하고
+   `soku/v0.1.2`만 push한 뒤 tag-triggered Release workflow와 자산 6개를
+   검증하고 후속 증거 PR에 공개 baseline을 기록합니다.
 
 ## 수용 기준
 
@@ -195,8 +224,9 @@ test를 추가합니다.
   boilerplate `v1.0.0` compatibility를 `soku/v0.1.2` patch 기록에 명시합니다.
 - Strict aggregate `Validation Gate`, 병합 후 `main` gate, manual
   validation-only release preflight가 통과합니다.
-- `soku/v0.1.2` tag/GitHub Release를 생성하지 않고 Issue #44와
-  `status:in-progress`를 별도 발행 승인 전까지 유지합니다.
+- 발행을 별도로 승인받고 signed annotated `soku/v0.1.2` tag가 검토된 source
+  commit을 가리키며 tag-triggered Release gate가 통과하고 5개 플랫폼 archive와
+  `checksums.txt`를 검증한 뒤 Issue #44를 닫습니다.
 
 ## 승인
 
@@ -206,15 +236,19 @@ test를 추가합니다.
 - **승인 경계:** Issue #44 또는 Draft PR에 본 보고서의 명시적 승인이
   기록되기 전에는 구현을 시작하지 않습니다. Tag/Release 발행과 Issue #44
   종료는 후속 별도 승인이 필요합니다.
+- **발행 승인:** `Soku-JINSEOK`이 2026-07-21 signed tag 생성 전에
+  `soku/v0.1.2` 발행을 명시적으로 승인했습니다.
 
 ## 구현 현황
 
 Provider schema, decoder, revision planning, 예제, hermetic/pinned HTTPS
-conformance, lifecycle 문서, CI, `soku/v0.1.2` 제안 기록을 PR #50으로 구현해
-병합했습니다. PR Validation run `29755588302`, post-merge `main` Validation run
-`29756161515`, validation-only release preflight `29756307978`이 통과했습니다.
-별도 발행 승인을 기다리므로 `soku/v0.1.2` tag와 GitHub Release는 없고
-Issue #44는 열린 상태를 유지합니다.
+conformance, lifecycle 문서, CI, `soku/v0.1.2` 기록을 PR #50과 #51로 구현해
+병합했습니다. 최종 검토 source는
+`31e20630db73c18b76d9cd6bc8278c1eb9361356`이며 post-merge `main` Validation
+run `29792689662`와 validation-only Release preflight `29792983455`가
+통과했습니다. 별도 발행 승인 후 signed annotated tag를 공개했고,
+tag-triggered Release run `29795573297`이 공개 GitHub Release와 예상 자산
+6개를 생성했습니다.
 
 ## 검증
 
@@ -238,7 +272,21 @@ Issue #44는 열린 상태를 유지합니다.
   `8995a029ca5100b9594c16cd5f877a8791616d78`, post-merge `main` run
   `29756161515`, validation-only release preflight `29756307978`.
 - 확인: preflight publish job은 skip됐고 `soku/v0.1.2` tag와 GitHub Release는
-  존재하지 않습니다.
+  별도 발행 승인 전에는 존재하지 않았습니다.
+- 통과: local/GitHub signed annotated tag 검증. Remote tag object
+  `93255a4df748b8ccf044d8a37a17b32e0736e122`는 source commit
+  `31e20630db73c18b76d9cd6bc8278c1eb9361356`으로 resolve됩니다.
+- 통과: tag-triggered Release run `29795573297`의 signed-record 검증, 전체
+  aggregate `Validation Gate`, 5-target package snapshot, GitHub Release 발행.
+- 통과: 5개 플랫폼 archive와 `checksums.txt` 업로드 및 SHA-256 검증. 모든
+  archive는 `LICENSE`, `THIRD_PARTY_NOTICES.md`, 실행 권한이 있는 binary만
+  포함합니다.
+- 통과: Linux amd64 archive smoke 및 내장 metadata 검증에서 version
+  `v0.1.2`, source commit `31e20630db73c18b76d9cd6bc8278c1eb9361356`,
+  build time `2026-07-21T01:16:38Z` 확인.
+- 통과: 격리된 cache의 `go install
+  github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/soku@v0.1.2` 및 설치
+  binary version smoke.
 
 ## AI 지원
 

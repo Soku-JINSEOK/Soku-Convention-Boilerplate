@@ -16,10 +16,10 @@
 ## 📦 현재 검증된 베이스라인
 
 현재 보일러플레이트 컨벤션 패키지는 `v1.0.0`입니다. 권장 CLI는
-`soku/v0.1.1`이며, 공개 CLI 계약을 유지하면서 GitHub 소스 아카이브 처리를
-수정한 버전으로 `soku/v0.1.0`을 대체합니다. 로컬·hosted·릴리스·거버넌스·
-보안·비용 검증은 [VERIFICATION_GUIDE.md](./VERIFICATION_GUIDE.md)를
-참고하십시오.
+`soku/v0.1.2`이며, manifest-v1과 Provider API v1을 유지하면서 실제 fetch한
+provider revision을 authoritative하게 사용하도록 `soku/v0.1.1`을 대체합니다.
+로컬·hosted·릴리스·거버넌스·보안·비용 검증은
+[VERIFICATION_GUIDE.md](./VERIFICATION_GUIDE.md)를 참고하십시오.
 
 ---
 
