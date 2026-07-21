@@ -13,7 +13,7 @@ permissions:
   contents: read
 
 jobs:
-{{STACK_JOBS}}
+# {{STACK_JOBS}}
   mysql:
     name: MySQL schema
     runs-on: ubuntu-latest

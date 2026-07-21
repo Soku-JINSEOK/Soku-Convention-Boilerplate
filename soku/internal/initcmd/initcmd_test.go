@@ -175,25 +175,26 @@ func TestDownstreamCIRenderingRejectsMalformedMarkersAndUsesFallback(t *testing.
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(templatesCI), "go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.12.2") {
+	templatesCIText := strings.ReplaceAll(strings.ReplaceAll(string(templatesCI), "\r\n", "\n"), "\r", "\n")
+	if !strings.Contains(templatesCIText, "go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.12.2") {
 		t.Fatal("templates-ci workflow does not pin golangci-lint binary")
 	}
-	if !strings.Contains(string(templatesCI), "$(go env GOPATH)/bin/golangci-lint run ./...") {
+	if !strings.Contains(templatesCIText, "$(go env GOPATH)/bin/golangci-lint run ./...") {
 		t.Fatal("templates-ci workflow does not execute installed golangci-lint binary")
 	}
-	if strings.Contains(string(templatesCI), "golangci/golangci-lint-action") {
+	if strings.Contains(templatesCIText, "golangci/golangci-lint-action") {
 		t.Fatal("templates-ci workflow still uses golangci-lint GitHub Action")
 	}
-	if !strings.Contains(string(templatesCI), "  mysql:\n") {
+	if !strings.Contains(templatesCIText, "  mysql:\n") {
 		t.Fatal("templates-ci workflow is missing MySQL check job")
 	}
-	if !strings.Contains(string(templatesCI), "  postgresql:\n") {
+	if !strings.Contains(templatesCIText, "  postgresql:\n") {
 		t.Fatal("templates-ci workflow is missing PostgreSQL check job")
 	}
-	if !strings.Contains(string(templatesCI), "  gcloud:\n") {
+	if !strings.Contains(templatesCIText, "  gcloud:\n") {
 		t.Fatal("templates-ci workflow is missing gcloud check job")
 	}
-	if !strings.Contains(string(templatesCI), "  aws-azure-config:\n") {
+	if !strings.Contains(templatesCIText, "  aws-azure-config:\n") {
 		t.Fatal("templates-ci workflow is missing AWS/Azure configuration check job")
 	}
 

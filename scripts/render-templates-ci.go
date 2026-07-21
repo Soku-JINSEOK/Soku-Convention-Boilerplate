@@ -9,7 +9,14 @@ import (
 	"strings"
 )
 
-const stackJobsToken = "{{STACK_JOBS}}"
+const stackJobsToken = "# {{STACK_JOBS}}"
+
+var requiredTemplateJobs = []string{
+	"mysql",
+	"postgresql",
+	"gcloud",
+	"aws-azure-config",
+}
 
 var ciJobIDs = map[string]bool{
 	"configuration":              true,
@@ -58,7 +65,8 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-		if strings.TrimSuffix(string(existing), "\n") != strings.TrimSuffix(rendered, "\n") {
+		existingNormalized := normalizeText(string(existing))
+		if strings.TrimSuffix(existingNormalized, "\n") != strings.TrimSuffix(rendered, "\n") {
 			panic("generated templates-ci is out of date")
 		}
 		return
@@ -80,10 +88,11 @@ func render() (string, error) {
 		return "", err
 	}
 
-	templateText, err := os.ReadFile(*template)
+	templateRaw, err := os.ReadFile(*template)
 	if err != nil {
 		return "", err
 	}
+	templateText := normalizeText(string(templateRaw))
 
 	blocks, err := parseMarkedCIJobBlocks(string(sourceText))
 	if err != nil {
@@ -103,8 +112,24 @@ func render() (string, error) {
 		return "", errors.New("template missing stack job token")
 	}
 	templateContent := strings.Replace(string(templateText), stackJobsToken, strings.Join(stackJobs, "\n\n"), 1)
+	if err := validateRenderedWorkflow(templateContent); err != nil {
+		return "", err
+	}
 
 	return ensureTrailingNewline(templateContent), nil
+}
+
+func validateRenderedWorkflow(content string) error {
+	for _, jobID := range requiredTemplateJobs {
+		pattern := regexp.MustCompile(`(?m)^  ` + regexp.QuoteMeta(jobID) + `:`)
+		if !pattern.MatchString(content) {
+			return fmt.Errorf("required templates-ci workflow job %q is missing", jobID)
+		}
+	}
+	if strings.Contains(content, stackJobsToken) {
+		return errors.New("templates-ci workflow token was not replaced")
+	}
+	return nil
 }
 
 func parseMarkedCIJobBlocks(text string) (map[string][]string, error) {
