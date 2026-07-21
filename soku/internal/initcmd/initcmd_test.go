@@ -164,7 +164,7 @@ func TestDownstreamCIRenderingRejectsMalformedMarkersAndUsesFallback(t *testing.
 	if !strings.Contains(goWorkflow, "go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.12.2") {
 		t.Fatal("rendered Go CI does not pin golangci-lint binary version")
 	}
-	if !strings.Contains(goWorkflow, "\"$(go env GOPATH)/bin/golangci-lint\" run ./...") {
+	if !strings.Contains(goWorkflow, "'\"$(go env GOPATH)/bin/golangci-lint\" run ./...'") {
 		t.Fatal("rendered Go CI does not execute installed golangci-lint binary")
 	}
 	if strings.Contains(goWorkflow, "golangci/golangci-lint-action") {
@@ -179,7 +179,7 @@ func TestDownstreamCIRenderingRejectsMalformedMarkersAndUsesFallback(t *testing.
 	if !strings.Contains(templatesCIText, "go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.12.2") {
 		t.Fatal("templates-ci workflow does not pin golangci-lint binary")
 	}
-	if !strings.Contains(templatesCIText, "\"$(go env GOPATH)/bin/golangci-lint\" run ./...") {
+	if !strings.Contains(templatesCIText, "'\"$(go env GOPATH)/bin/golangci-lint\" run ./...'") {
 		t.Fatal("templates-ci workflow does not execute installed golangci-lint binary")
 	}
 	if strings.Contains(templatesCIText, "golangci/golangci-lint-action") {
