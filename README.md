@@ -13,13 +13,16 @@ It is designed not just as a starter, but as a repeatable foundation for buildin
 
 For the canonical operating design, start with [BLUEPRINT.md](./BLUEPRINT.md).
 
-## 📦 Current Verified Baseline
+## 📦 Current Published Baseline
 
-The current boilerplate convention package is `v1.0.0`. The recommended CLI is
-`soku/v0.1.2`; it supersedes `soku/v0.1.1` while preserving manifest-v1 and
-Provider API v1 and making the fetched provider revision authoritative. See
-[VERIFICATION_GUIDE.md](./VERIFICATION_GUIDE.md) for local, hosted, release,
-governance, security, and cost verification.
+The current published boilerplate convention package is `v1.0.0`, and the
+recommended published CLI is `soku/v0.1.2`. Boilerplate `v1.0.0` is immutable
+and has known development-template limitations: generated JavaScript output
+fails `init --verify`, and its dependency snapshots predate the current `tmp`
+and Jackson fixes. Issue #41 prepares `v1.0.1` as the reviewed successor; do not
+treat `v1.0.0` as a fully verified recommendation or consume `v1.0.1` until its
+signed tag is published. See [VERIFICATION_GUIDE.md](./VERIFICATION_GUIDE.md)
+for the complete checks.
 
 ---
 

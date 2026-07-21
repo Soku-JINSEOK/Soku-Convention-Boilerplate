@@ -13,13 +13,15 @@
 
 標準的な設計および運用モデルについては、[BLUEPRINT.md](./BLUEPRINT.md) を参照してください。
 
-## 📦 現在検証済みのベースライン
+## 📦 現在公開中のベースライン
 
-現在のボイラープレート規約パッケージは `v1.0.0` です。推奨 CLI は
-`soku/v0.1.2` であり、manifest-v1 と Provider API v1 を維持しながら、実際に
-fetch した provider revision を authoritative に扱う version として
-`soku/v0.1.1` を置き換えます。
-ローカル、hosted、release、governance、security、cost の検証については
+現在公開中のボイラープレート規約パッケージは `v1.0.0`、推奨される公開 CLI
+は `soku/v0.1.2` です。不変のボイラープレート `v1.0.0` には既知の開発
+template 制限があります。生成された JavaScript 出力が `init --verify` を
+通過せず、依存関係 snapshot は現在の `tmp` および Jackson 修正前の状態です。
+Issue #41 は `v1.0.1` を review 済みの後継版として準備します。Signed tag が
+公開されるまでは、`v1.0.0` を完全に検証済みの推奨版として扱わず、
+`v1.0.1` も使用しないでください。完全な検証は
 [VERIFICATION_GUIDE.md](./VERIFICATION_GUIDE.md) を参照してください。
 
 ---
