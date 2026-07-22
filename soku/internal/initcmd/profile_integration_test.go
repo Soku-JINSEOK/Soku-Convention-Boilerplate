@@ -254,6 +254,30 @@ func TestIntegrationPendingConnectedAndRollback(t *testing.T) {
 		if _, err := Run(context.Background(), integrationInitOptions(root, configPath), staticFetcher{snapshot: snapshot}); err != nil {
 			t.Fatal(err)
 		}
+		mergeableHashes := map[string]string{}
+		for _, path := range []string{".editorconfig", ".gitignore"} {
+			content := append(readProjectPath(t, root, path), []byte("\n# downstream-owned entry\n")...)
+			if err := os.WriteFile(filepath.Join(root, path), content, 0o644); err != nil {
+				t.Fatal(err)
+			}
+			hash, err := manifest.HashContent(content, "text")
+			if err != nil {
+				t.Fatal(err)
+			}
+			mergeableHashes[path] = hash
+		}
+		document, err := manifest.NewStore(root).Load()
+		if err != nil {
+			t.Fatal(err)
+		}
+		for index := range document.Files {
+			if hash, ok := mergeableHashes[document.Files[index].Path]; ok {
+				document.Files[index].BaselineSHA256 = hash
+			}
+		}
+		if err := manifest.NewStore(root).Write(document); err != nil {
+			t.Fatal(err)
+		}
 		before := readTree(t, root)
 		options := TransitionOptions{Root: root, TargetRelease: "v1.0.0", Yes: true, IntegrationSource: providerSource, IntegrationRef: providerRef, IntegrationConfigPath: configPath, IntegrationFetcher: staticIntegrationFetcher{bundle: bundle, available: true}, ApplyHook: func(stage, _ string) error {
 			if stage == "before-manifest" {
@@ -272,9 +296,14 @@ func TestIntegrationPendingConnectedAndRollback(t *testing.T) {
 		if err != nil || report.State != "applied" {
 			t.Fatalf("provider connection = %#v, %v", report, err)
 		}
-		document, err := manifest.NewStore(root).Load()
+		document, err = manifest.NewStore(root).Load()
 		if err != nil || document.Integrations[0].LifecycleState != "connected" {
 			t.Fatalf("connected manifest = %#v, %v", document.Integrations, err)
+		}
+		for _, file := range document.Files {
+			if hash, ok := mergeableHashes[file.Path]; ok && file.BaselineSHA256 != hash {
+				t.Fatalf("mergeable baseline %s = %s, want %s", file.Path, file.BaselineSHA256, hash)
+			}
 		}
 	})
 }

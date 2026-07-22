@@ -27,6 +27,12 @@ rejects malformed or ambiguous markers, and retains a deterministic legacy
 parser for older boilerplate sources. No manifest, catalog, profile, provider,
 ownership, secret, or delivery contract changes.
 
+The client also preserves the recorded downstream baseline for an unchanged
+mergeable file when a same-release Provider transition rewrites the manifest.
+This prevents an applied integration from reporting false drift for locally
+merged `.editorconfig` or `.gitignore` bytes without changing merge semantics
+or ownership.
+
 The release supports existing lifecycle state from `v1.0.0` and `v1.0.1` and
 is the full-verification client for companion boilerplate `v1.0.2`. Existing
 `soku/v0.1.1` and `soku/v0.1.2` tags remain immutable and are not rewritten.

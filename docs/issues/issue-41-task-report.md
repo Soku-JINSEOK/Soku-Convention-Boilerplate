@@ -138,6 +138,12 @@ current `main` and `soku/v0.1.2`.
   formatter-compatible scalars; the CLI reads that source instead of embedding
   a second job definition. Legacy marker-free releases remain readable through
   a bounded compatibility parser.
+- A public report-hub Provider adoption exposed another `soku/v0.1.2` defect:
+  a same-release Provider transition preserved customized mergeable file bytes
+  but replaced their manifest baselines with upstream hashes, causing false
+  drift immediately after apply. The corrective client preserves the accepted
+  downstream baseline for unchanged mergeable paths. A pending-to-connected
+  Provider regression covers both `.editorconfig` and `.gitignore`.
 - Boilerplate security automation is connected to the required Validation Gate,
   with scheduled scans, Dependabot configuration, CodeQL default setup, and an
   active immutable release-tag ruleset (`19336418`).
