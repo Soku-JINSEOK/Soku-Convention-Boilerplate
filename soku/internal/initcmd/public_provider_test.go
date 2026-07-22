@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"os/exec"
 	"path/filepath"
 	"testing"
 
@@ -100,7 +101,13 @@ func TestControlPlaneProviderLiteralByteProvenance(t *testing.T) {
 			t.Fatalf("invalid provenance entry: %#v", entry)
 		}
 		seen[entryPath] = true
-		sum := sha256.Sum256(mustRead(t, filepath.Join(root, entryPath)))
+		content, err := exec.Command(
+			"git", "-C", root, "show", "HEAD:"+filepath.ToSlash(entryPath),
+		).Output()
+		if err != nil {
+			t.Fatalf("read Git blob %s: %v", entryPath, err)
+		}
+		sum := sha256.Sum256(content)
 		if hex.EncodeToString(sum[:]) != expected {
 			t.Fatalf("literal-byte hash mismatch: %s", entryPath)
 		}
