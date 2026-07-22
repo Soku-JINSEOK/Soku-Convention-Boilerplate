@@ -242,3 +242,14 @@ test('Terraform separates foundation from digest-pinned runtime', () => {
   assert.doesNotMatch(variables, /"cloudrun\.googleapis\.com"/);
   assert.match(versions, /backend "gcs" \{\}/);
 });
+
+test('container builds target Cloud Run amd64 and expose a health endpoint', () => {
+  const bootstrap = readFileSync(join(root, 'scripts/gcp-bootstrap.sh'), 'utf8');
+  const plan = readFileSync(join(root, 'scripts/cd-plan.sh'), 'utf8');
+  const dockerfile = readFileSync(join(root, 'templates/gcloud/Dockerfile'), 'utf8');
+  assert.match(bootstrap, /docker build --platform linux\/amd64/);
+  assert.match(plan, /docker build --platform linux\/amd64/);
+  assert.match(dockerfile, /\/app\/health/);
+  assert.match(dockerfile, /apk add --no-cache busybox-extras/);
+  assert.match(dockerfile, /CMD \["httpd", "-f", "-p", "8080"/);
+});

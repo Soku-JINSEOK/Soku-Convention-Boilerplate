@@ -235,7 +235,7 @@ fi
 IMAGE_ID=""
 IMAGE_DIGEST=""
 if [[ "$ROLLBACK_ONLY" != true ]]; then
-  run_cmd docker-build docker build -t "$FULL_IMAGE_NAME" "$CONTAINER_PATH"
+  run_cmd docker-build docker build --platform linux/amd64 -t "$FULL_IMAGE_NAME" "$CONTAINER_PATH"
   IMAGE_ID="$(docker inspect --format '{{.Id}}' "$FULL_IMAGE_NAME")"
 fi
 

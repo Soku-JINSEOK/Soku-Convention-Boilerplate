@@ -66,7 +66,7 @@ print_commands() {
 gcloud storage buckets describe gs://${STATE_BUCKET} || gcloud storage buckets create gs://${STATE_BUCKET} --project=${PROJECT_ID} --location=${REGION} --uniform-bucket-level-access
 terraform -chdir=infra/gcp init -backend-config=bucket=${STATE_BUCKET} -backend-config=prefix=cloud-run
 terraform -chdir=infra/gcp apply -var=project_id=${PROJECT_ID} -var=region=${REGION} -var=service_name=${SERVICE} -var=artifact_repository=${ARTIFACT_REPOSITORY} -var=deploy_runtime=false
-docker build -t ${IMAGE_TAG} templates/gcloud
+docker build --platform linux/amd64 -t ${IMAGE_TAG} templates/gcloud
 docker push ${IMAGE_TAG}
 terraform -chdir=infra/gcp apply ... -var=deploy_runtime=true -var=image_uri=<repository@sha256:digest>
 gh variable set GCP_PROJECT_ID/GCP_REGION/GCP_SERVICE_NAME/GCP_ARTIFACT_REPOSITORY/GCP_WIF_PROVIDER/GCP_WIF_SERVICE_ACCOUNT
@@ -89,7 +89,7 @@ terraform -chdir="$INFRA_DIR" init -reconfigure -input=false -backend-config="bu
 COMMON_VARS=(-input=false -auto-approve -var="project_id=$PROJECT_ID" -var="region=$REGION" -var="service_name=$SERVICE" -var="artifact_repository=$ARTIFACT_REPOSITORY" -var="github_org=$GITHUB_ORG" -var="github_repo=$GITHUB_REPO")
 terraform -chdir="$INFRA_DIR" apply "${COMMON_VARS[@]}" -var="deploy_runtime=false"
 gcloud auth configure-docker "${REGION}-docker.pkg.dev" --quiet
-docker build -t "$IMAGE_TAG" "$REPO_ROOT/templates/gcloud"
+docker build --platform linux/amd64 -t "$IMAGE_TAG" "$REPO_ROOT/templates/gcloud"
 docker push "$IMAGE_TAG"
 IMAGE_URI="$(gcloud artifacts docker images describe "$IMAGE_TAG" --project="$PROJECT_ID" --format='value(image_summary.fully_qualified_digest)')"
 if [[ ! "$IMAGE_URI" =~ @sha256:[0-9a-fA-F]{64}$ ]]; then echo "Could not resolve immutable image digest" >&2; exit 4; fi

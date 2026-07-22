@@ -8,4 +8,8 @@ FROM alpine:3.21
 WORKDIR /app
 EXPOSE 8080
 
-CMD ["sh", "-c", "echo \"Replace templates/gcloud/Dockerfile with your service container definition.\" && exec sleep infinity"]
+RUN apk add --no-cache busybox-extras \
+    && printf 'ok\n' > /app/index.html \
+    && cp /app/index.html /app/health
+
+CMD ["httpd", "-f", "-p", "8080", "-h", "/app"]
