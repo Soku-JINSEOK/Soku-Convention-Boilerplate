@@ -15,13 +15,11 @@ For the canonical operating design, start with [BLUEPRINT.md](./BLUEPRINT.md).
 
 ## 📦 Current Published Baseline
 
-The current published releases are boilerplate `v1.0.3` and CLI
-`soku/v0.1.4`. Their signed records, complete hosted gates, packages, and
-checksums passed, but required public four-stack smoke found that Python Ruff
-traverses a generated JavaScript `node_modules` tree. Issue #41 therefore
-continues with the single-axis boilerplate `v1.0.4` candidate; keep existing
-tags immutable and use the new baseline only after its separately approved
-signed tag and Release are published. See
+The current published releases are boilerplate `v1.0.5` and CLI
+`soku/v0.1.4`. The signed `v1.0.5` corrective release excludes lifecycle-owned
+`.soku/` state from JavaScript and TypeScript formatting after public migration
+smoke exposed the boundary in immutable `v1.0.4`. Existing tags remain
+immutable; use `v1.0.5` as the current boilerplate baseline. See
 [VERIFICATION_GUIDE.md](./VERIFICATION_GUIDE.md) for the complete checks.
 
 ---
@@ -156,6 +154,7 @@ This boilerplate is intended to serve as:
 - [STACK_CONFIGS.md](./docs/guides/STACK_CONFIGS.md): copyable starter configuration sets by stack
 - [README_GUIDE.md](./docs/guides/README_GUIDE.md): how repository README files should be written and maintained
 - [INIT_GUIDE.md](./docs/guides/INIT_GUIDE.md): stack-detection and setup checklist for AI agents bootstrapping a downstream repository
+- [CLOUD_RUN_CICD.md](./docs/guides/CLOUD_RUN_CICD.md): local parity and Cloud Run CD pipeline guide (OIDC/WIF, plan/deploy, rollback, evidence)
 - [APPLICABILITY.md](./docs/guides/APPLICABILITY.md): which parts of this boilerplate apply to personal projects vs. teams
 - [LANGUAGE_SELECTION.md](./docs/guides/LANGUAGE_SELECTION.md): how to choose a programming language for a new project or feature
 

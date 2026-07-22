@@ -15,14 +15,11 @@
 
 ## 📦 現在公開中のベースライン
 
-現在公開中の release は boilerplate `v1.0.3` と CLI `soku/v0.1.4` です。
-署名 record、完全な hosted gate、package、checksum は成功しましたが、必須の
-公開 four-stack smoke で Python Ruff が同時生成された JavaScript
-`node_modules` を検査して失敗する問題が見つかりました。そのため Issue #41 は
-単一軸の boilerplate `v1.0.4` 候補として継続します。既存 tag は不変のまま
-保持し、別途承認された署名 tag と Release
-の公開後に新 baseline を使用して
-ください。完全な検証は
+現在公開中の release は boilerplate `v1.0.5` と CLI `soku/v0.1.4` です。
+署名済み `v1.0.5` corrective release は、immutable `v1.0.4` の公開 migration
+smoke で確認された境界を修正し、lifecycle-owned `.soku/` state を JavaScript
+および TypeScript formatting の対象外にします。既存 tag は不変のまま保持し、
+現在の boilerplate baseline として `v1.0.5` を使用してください。完全な検証は
 [VERIFICATION_GUIDE.md](./VERIFICATION_GUIDE.md) を参照してください。
 
 ---

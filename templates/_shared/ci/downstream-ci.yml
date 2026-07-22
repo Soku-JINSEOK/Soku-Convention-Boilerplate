@@ -17,7 +17,6 @@ jobs:
   # The blocks below are the canonical source for soku's generated workflow.
   # Keep each block fully commented so this file remains a safe manual starter.
   # The CLI enables only the selected blocks using the markers.
-
 # soku:job-begin javascript-typescript-node
   # javascript-typescript-node:
   #   name: JS/TS/Node

@@ -420,3 +420,12 @@ Validation run `29905883947`의 repository, runtime-template, lifecycle,
 five-target package, dependency/license, OSV, Gitleaks 및 aggregate
 `Validation Gate`가 통과했습니다. 별도 metadata run `29906318004`에서 현재
 title/body/labels/assignee/Ready 상태와 `PR Metadata Gate`가 통과했습니다.
+
+## v1.0.5 발행 완료
+
+Signed annotated tag `v1.0.5`는 reviewed main commit
+`8535a9870267f640f924a56449ed2b6178920a85`를 가리키며 GitHub signature
+verification이 `valid`입니다. Tag-triggered Release workflow
+`29912948933`이 성공했고 2026-07-22에 GitHub Release가 발행됐습니다.
+Boilerplate-only Release에는 CLI asset이 없으며 `soku/v0.1.4`가 호환 CLI로
+유지됩니다. 현재 공개 보일러플레이트 baseline은 `v1.0.5`입니다.

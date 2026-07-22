@@ -23,8 +23,13 @@ pnpm-debug.log*
 
 # Tool caches
 .npm-cache/
+.tmp-ci-local-python/
 .eslintcache
 .turbo/
+
+# Deployment output and ephemeral Google credentials
+.cd/
+gha-creds-*.json
 
 # Node.js
 node_modules/
@@ -65,4 +70,3 @@ out/
 *.tfstate.*
 .serverless/
 .aws-sam/
-

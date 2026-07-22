@@ -14,12 +14,10 @@ specific limitation and the follow-up needed to close it.
 
 ## Supported Release Baseline
 
-- Current published boilerplate convention package: `v1.0.3` (corrective
-  `v1.0.4` single-axis candidate pending)
+- Current published boilerplate convention package: `v1.0.5`
 - Current published CLI: `soku/v0.1.4`
-- Recommended full-verification baseline: boilerplate `v1.0.4` with
-  `soku/v0.1.4`, only after the separately approved signed `v1.0.4` tag and
-  GitHub Release exist.
+- Recommended full-verification baseline: boilerplate `v1.0.5` with
+  `soku/v0.1.4`.
 - Superseded CLIs: `soku/v0.1.0` and `soku/v0.1.1`; use `soku/v0.1.2`, which
   preserves manifest-v1 and Provider API v1 while making the fetched provider
   revision authoritative and fully supporting optional legacy provider `ref`.
@@ -32,8 +30,10 @@ specific limitation and the follow-up needed to close it.
   pair was published to correct those defects.
 - Published `v1.0.3` and `soku/v0.1.4` correct those defects, but required
   public four-stack smoke found that Python Ruff traverses a generated
-  JavaScript `node_modules` tree. Use `v1.0.4` after its signed Release is
-  published.
+  JavaScript `node_modules` tree. Published `v1.0.4` corrected that boundary,
+  and its public migration smoke found that JavaScript formatting traversed
+  lifecycle-owned `.soku/` state. Published `v1.0.5` excludes `.soku/` from
+  JavaScript and TypeScript formatting and is the current baseline.
 
 Published tags and releases are immutable. Verification must never move,
 delete, or reuse them, and must not publish a new release as a side effect.
@@ -68,6 +68,54 @@ pwsh -NoProfile -Command \
 scripts/verify-sync-parity.sh
 scripts/verify-release-tag_test.sh
 ```
+
+## Local CI/CD Parity and Cloud Run Deploy Commands
+
+These are the canonical local commands for this repository's CD contract:
+
+```bash
+scripts/ci-local.sh --skip-infra
+```
+
+```bash
+scripts/cd-plan.sh \
+  --environment dev \
+  --project-id <GCP_PROJECT_ID> \
+  --region <GCP_REGION> \
+  --service-name <CLOUD_RUN_SERVICE> \
+  --artifact-repository <ARTIFACT_REPOSITORY> \
+  --image-repository <IMAGE_REPOSITORY> \
+  --skip-infra \
+  --skip-image-push
+```
+
+Image-pushing plans require a registry digest and record the immutable digest URI
+as `CD_PLAN_IMAGE_URI`; the tag URI is retained as `CD_PLAN_IMAGE_TAG_URI` for audit.
+Use `--rollback-only` to create rollback metadata without Docker, local checks, or
+Terraform.
+
+```bash
+scripts/cd-deploy.sh \
+  --plan-file .cd/dev/<short-sha>/cd-plan.env \
+  --health-path /health \
+  --health-attempts 18 \
+  --health-delay 10 \
+  --confirm
+```
+
+Rollback command (manual):
+
+```bash
+scripts/cd-deploy.sh \
+  --plan-file .cd/dev/<short-sha>/cd-plan.env \
+  --rollback-only \
+  --rollback-revision <revision-id> \
+  --confirm
+```
+
+Deployment evidence is emitted as JSON in the path provided by the `evidence_file`
+field in `$GITHUB_OUTPUT`. It records tag and digest URIs, pre-deploy and new
+revisions, rollback target, run attempt, and final status.
 
 ## `soku` Checks
 
