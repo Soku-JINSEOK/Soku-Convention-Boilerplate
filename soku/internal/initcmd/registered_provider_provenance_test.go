@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"os/exec"
 	"path/filepath"
 	"testing"
 )
@@ -47,7 +48,12 @@ func TestRegisteredProviderLiteralByteProvenance(t *testing.T) {
 		}
 		seen[bundle.ProviderID] = true
 		for _, file := range bundle.Files {
-			content := mustRead(t, filepath.Join(root, filepath.FromSlash(file.Path)))
+			content, err := exec.Command(
+				"git", "-C", root, "show", "HEAD:"+filepath.ToSlash(file.Path),
+			).Output()
+			if err != nil {
+				t.Fatalf("read Git blob %s: %v", file.Path, err)
+			}
 			sum := sha256.Sum256(content)
 			if hex.EncodeToString(sum[:]) != file.SHA256 {
 				t.Fatalf("literal-byte hash mismatch: %s", file.Path)
