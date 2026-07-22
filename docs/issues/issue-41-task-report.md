@@ -414,3 +414,9 @@ regression으로 경계를 고정합니다. `soku/v0.1.4` CLI와 manifest/provid
 계약은 변경하지 않으며, 검토·preflight 후 별도 signed-tag 발행 승인을
 요구합니다. Issue #41은 이 후속 corrective release의 public migration smoke까지
 완료한 뒤 종결합니다.
+
+PR #84의 reviewed head `fb4e462f002b52f7534784f7fbfabb8194842bc0`에서 hosted
+Validation run `29905883947`의 repository, runtime-template, lifecycle,
+five-target package, dependency/license, OSV, Gitleaks 및 aggregate
+`Validation Gate`가 통과했습니다. 별도 metadata run `29906318004`에서 현재
+title/body/labels/assignee/Ready 상태와 `PR Metadata Gate`가 통과했습니다.
