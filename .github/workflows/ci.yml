@@ -20,7 +20,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Setup Node.js
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
@@ -83,12 +83,15 @@ jobs:
             docs/issues/issue-41-task-report.md
             docs/issues/issue-44-task-report.md
             docs/issues/issue-56-task-report.md
+            docs/issues/issue-55-task-report.md
             LICENSE
             SECURITY.md
             .editorconfig
             .gitmessage
             .github/PULL_REQUEST_TEMPLATE.md
             .github/COMMENT_TEMPLATES.md
+            .github/validate-pr-governance.mjs
+            .github/validate-pr-governance.test.mjs
             .github/ISSUE_TEMPLATE/bug_report.yml
             .github/ISSUE_TEMPLATE/chore_task.yml
             .github/ISSUE_TEMPLATE/config.yml
@@ -222,6 +225,9 @@ jobs:
       - name: Run contribution-title regression tests
         run: node --test templates/_shared/commitlint/*.test.mjs
 
+      - name: Run pull-request governance regression tests
+        run: node --test .github/validate-pr-governance.test.mjs
+
       - name: Run release tag gate regression tests
         run: scripts/verify-release-tag_test.sh
 
@@ -250,7 +256,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Parse PowerShell sync script
         shell: pwsh
@@ -287,7 +293,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Setup Go
         uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
@@ -330,7 +336,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Setup Go
         uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
@@ -374,7 +380,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Setup Go
         uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
@@ -410,7 +416,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Setup Go
         uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
