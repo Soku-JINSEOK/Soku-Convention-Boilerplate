@@ -6,9 +6,9 @@ Publish the reviewed `ci-cd-control-plane-v1` declarative bundle and composite
 action in the public Boilerplate repository without exposing private
 control-plane access, credentials, executable provider code, or mutable refs.
 
-This first publication phase deliberately omits the caller workflow. After this
-PR merges, a second PR will pin that caller to this phase's immutable full
-commit and will replace the pending mirror entry in the provenance ledger.
+The first publication phase deliberately omitted the caller workflow. Its
+immutable merge commit is now recorded in the provenance ledger and used as
+the exact action revision in the separately reviewed caller.
 
 ## Delivered contract
 
@@ -25,6 +25,8 @@ commit and will replace the pending mirror entry in the provenance ledger.
   repository using the published provider contract.
 - Python tests reject mutable or uppercase refs, unsafe paths, unknown sources,
   symlinks, non-UTF-8 input, and literal-byte tampering.
+- The manual caller uses read-only contents permission, consumes no secret, and
+  pins the public action to `c5435ea36d88dbe3b4b2c373265206943c53fcbf`.
 
 ## Verification
 
@@ -37,8 +39,7 @@ commit and will replace the pending mirror entry in the provenance ledger.
 
 ## Security and delivery boundary
 
-The action does not fetch private repositories, receive secrets, execute remote
-provider code, enable delivery, or create cloud resources. The public caller is
-not valid until it is added in phase two with the immutable merge commit from
-this phase. Merge, Project status changes, Issue closure, and delivery remain
-separate approval boundaries.
+The action and caller do not fetch private repositories, receive secrets,
+execute remote provider code, enable delivery, or create cloud resources. The
+caller is manual and read-only, and the provenance ledger keeps
+`delivery_enabled` false.

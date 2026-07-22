@@ -11,6 +11,10 @@
   },
   "public_files": [
     {
+      "path": ".github/workflows/connect-control-plane-provider.yml",
+      "sha256": "337a03d3964a95bfdb6ca22008a8c7328c9a4f3f551c2ca70e418e6a672c6cda"
+    },
+    {
       "path": ".github/soku/ci-cd-control-plane-v1.yml",
       "sha256": "f72121194a48fc3a6a521033c4248652c7889fd0ba86ea8b10270a854b9a0f56"
     },
@@ -40,8 +44,8 @@
     }
   ],
   "public_mirror": {
-    "state": "awaiting-merge",
-    "commit": null
+    "state": "merged",
+    "commit": "c5435ea36d88dbe3b4b2c373265206943c53fcbf"
   },
   "delivery_enabled": false
 }

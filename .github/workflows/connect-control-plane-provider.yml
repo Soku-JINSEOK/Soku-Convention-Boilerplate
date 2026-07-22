@@ -1,0 +1,26 @@
+name: Connect reviewed control-plane provider
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  connect:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - id: provider
+        uses: Soku-JINSEOK/Soku-Convention-Boilerplate/soku/actions/ci-cd-control-plane-v1@c5435ea36d88dbe3b4b2c373265206943c53fcbf
+        with:
+          configuration-path: .github/soku/ci-cd-control-plane-v1.yml
+
+      - name: Connect provider through soku
+        shell: bash
+        run: |
+          soku init \
+            --integration-source '${{ steps.provider.outputs.integration-source }}' \
+            --integration-ref '${{ steps.provider.outputs.integration-ref }}' \
+            --integration-config '${{ steps.provider.outputs.integration-config }}'

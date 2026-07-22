@@ -81,12 +81,12 @@ func TestControlPlaneProviderLiteralByteProvenance(t *testing.T) {
 		t.Fatalf("invalid public provenance identity: %#v", ledger)
 	}
 	mirror, ok := ledger["public_mirror"].(map[string]any)
-	if !ok || mirror["state"] != "awaiting-merge" ||
-		mirror["commit"] != nil {
-		t.Fatalf("invalid pending public mirror: %#v", mirror)
+	if !ok || mirror["state"] != "merged" ||
+		mirror["commit"] != "c5435ea36d88dbe3b4b2c373265206943c53fcbf" {
+		t.Fatalf("invalid public mirror: %#v", mirror)
 	}
 	entries, ok := ledger["public_files"].([]any)
-	if !ok || len(entries) != 7 {
+	if !ok || len(entries) != 8 {
 		t.Fatalf("public provenance files = %#v", ledger["public_files"])
 	}
 	seen := map[string]bool{}
@@ -111,5 +111,17 @@ func TestControlPlaneProviderLiteralByteProvenance(t *testing.T) {
 		if hex.EncodeToString(sum[:]) != expected {
 			t.Fatalf("literal-byte hash mismatch: %s", entryPath)
 		}
+	}
+	caller := string(mustRead(
+		t, "../../../.github/workflows/connect-control-plane-provider.yml",
+	))
+	if !bytes.Contains(
+		[]byte(caller),
+		[]byte("ci-cd-control-plane-v1@"+mirror["commit"].(string)),
+	) {
+		t.Fatal("public caller is not pinned to the recorded mirror commit")
+	}
+	if bytes.Contains([]byte(caller), []byte("secrets.")) {
+		t.Fatal("public caller must not consume secrets")
 	}
 }
