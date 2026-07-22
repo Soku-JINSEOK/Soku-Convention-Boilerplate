@@ -124,7 +124,7 @@ func TestCatalogRenderingUsesExactTokensAndJavaPaths(t *testing.T) {
 		t.Fatal("CI was not selected deterministically")
 	}
 	prettierIgnore := string(paths[".prettierignore"].Content)
-	for _, crossStackPath := range []string{".github/workflows/*.yml", ".golangci.yml"} {
+	for _, crossStackPath := range []string{".soku/", ".github/workflows/*.yml", ".golangci.yml"} {
 		if !strings.Contains(prettierIgnore, crossStackPath+"\n") {
 			t.Errorf("multi-stack Prettier boundary is missing %s", crossStackPath)
 		}
