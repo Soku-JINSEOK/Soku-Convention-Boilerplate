@@ -84,6 +84,7 @@ jobs:
             docs/issues/issue-44-task-report.md
             docs/issues/issue-54-task-report.md
             docs/issues/issue-56-task-report.md
+            docs/issues/issue-78-task-report.md
             docs/issues/issue-55-task-report.md
             LICENSE
             SECURITY.md
@@ -190,6 +191,7 @@ jobs:
             soku/internal/initcmd/profile.go
             soku/internal/initcmd/profile_integration_test.go
             soku/internal/initcmd/public_provider_test.go
+            soku/internal/initcmd/registered_provider_provenance_test.go
             soku/internal/initcmd/source.go
             soku/internal/initcmd/transaction.go
             soku/internal/initcmd/upgrade.go
@@ -200,6 +202,7 @@ jobs:
             soku/internal/lifecyclee2e/provider_conformance_test.go
             soku/internal/lifecyclee2e/provider_network_conformance_test.go
             soku/internal/lifecyclee2e/public_provider_conformance_test.go
+            soku/internal/lifecyclee2e/registered_downstream_provider_test.go
             soku/internal/manifest/manifest.go
             soku/internal/manifest/manifest_test.go
             soku/internal/manifest/replace_unix.go
@@ -218,6 +221,12 @@ jobs:
             soku/providers/ai-collaboration/example-config.yml
             soku/providers/ai-collaboration/provider-v1.json
             soku/providers/ai-collaboration/templates/ai-collaboration.yml
+            soku/providers/provenance/registered-downstream-v1.json
+            soku/providers/archviz-control-plane-v1/provider-v1.json
+            soku/providers/cutvi-control-plane-v1/provider-v1.json
+            soku/providers/report-hub-control-plane-v1/provider-v1.json
+            soku/providers/soku-pr-site-control-plane-v1/provider-v1.json
+            soku/scripts/sync_downstream_providers.py
             .github/soku/ci-cd-control-plane-v1.yml
             docs/callers/ci-cd-control-plane-v1.yml
             soku/actions/ci-cd-control-plane-v1/action.yml

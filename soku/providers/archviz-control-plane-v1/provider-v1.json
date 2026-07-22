@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "id": "archviz-control-plane-v1",
+  "source": "github:Soku-JINSEOK/Soku-Convention-Boilerplate/soku/providers/archviz-control-plane-v1",
+  "provider_api_version": "1",
+  "provider_schema_version": "1",
+  "compatible_soku": ">=0.1.2 <1.0.0",
+  "configuration_schema_hash": "734e8cef4f9ddec49f774c0220bee9f29396958772d1a44bbfe2ce1ec3300e44",
+  "configuration_hash": "2bb1951055de2068f27381e220367b912e5f9c89a53c533a48206e006970a4b5",
+  "compatible_profiles": [
+    "bootstrap",
+    "scaled",
+    "standard"
+  ],
+  "outputs": [
+    {
+      "template": "templates/control-plane-provider.yml",
+      "path": ".github/control-plane-provider.yml",
+      "content_mode": "text"
+    }
+  ]
+}

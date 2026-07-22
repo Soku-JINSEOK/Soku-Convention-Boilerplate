@@ -1,0 +1,118 @@
+{
+  "schema_version": 1,
+  "hash_algorithm": "sha256-raw-bytes",
+  "control_plane": {
+    "repository": "https://github.com/Soku-JINSEOK/ci-cd-control-plane",
+    "merge_commit": "ea24298d8081d8108f3b5d280a9e401c6b54df47",
+    "manifest_path": "integrations/soku/provider-api-v1/downstream-manifest-v1.json",
+    "manifest_sha256": "5c84d53a7d5ec29f753155b4d3a5990fb0c0986a77fe1ee4c606664b2ffffbad"
+  },
+  "source_rewrite": "provider-v1.json:source-only",
+  "bundles": [
+    {
+      "project_id": "cutvi",
+      "provider_id": "cutvi-control-plane-v1",
+      "files": [
+        {
+          "path": "soku/providers/cutvi-control-plane-v1/configuration.schema.json",
+          "sha256": "bf2fe597591f128b2d1d187b1c623a09355dbf25233ddd4581279823c841a06f",
+          "central_sha256": "bf2fe597591f128b2d1d187b1c623a09355dbf25233ddd4581279823c841a06f"
+        },
+        {
+          "path": "soku/providers/cutvi-control-plane-v1/example-config.yml",
+          "sha256": "a04f10c9d950f33d276c5bdbba10954f0a1d1194b162472f53721e3a686161c8",
+          "central_sha256": "a04f10c9d950f33d276c5bdbba10954f0a1d1194b162472f53721e3a686161c8"
+        },
+        {
+          "path": "soku/providers/cutvi-control-plane-v1/provider-v1.json",
+          "sha256": "3fc261702546b87f69ff091daacbbf89ad959cd5a5f93d3d0e0d1c6d12e9535c",
+          "central_sha256": "57582b62e0b3ddb7f4e0edf9e870856dc1c2dc2563cbf36fc1bf82aae042e474"
+        },
+        {
+          "path": "soku/providers/cutvi-control-plane-v1/templates/control-plane-provider.yml",
+          "sha256": "be3470bd684877d19499938eaffacff972c7bf5abd2cb333de9acb2dee6eade7",
+          "central_sha256": "be3470bd684877d19499938eaffacff972c7bf5abd2cb333de9acb2dee6eade7"
+        }
+      ]
+    },
+    {
+      "project_id": "archviz",
+      "provider_id": "archviz-control-plane-v1",
+      "files": [
+        {
+          "path": "soku/providers/archviz-control-plane-v1/configuration.schema.json",
+          "sha256": "734e8cef4f9ddec49f774c0220bee9f29396958772d1a44bbfe2ce1ec3300e44",
+          "central_sha256": "734e8cef4f9ddec49f774c0220bee9f29396958772d1a44bbfe2ce1ec3300e44"
+        },
+        {
+          "path": "soku/providers/archviz-control-plane-v1/example-config.yml",
+          "sha256": "2bb1951055de2068f27381e220367b912e5f9c89a53c533a48206e006970a4b5",
+          "central_sha256": "2bb1951055de2068f27381e220367b912e5f9c89a53c533a48206e006970a4b5"
+        },
+        {
+          "path": "soku/providers/archviz-control-plane-v1/provider-v1.json",
+          "sha256": "254de82a328fdc81868840896c2e41ccac15fe3da9c87c49606d72b8264ed4ce",
+          "central_sha256": "b60685c4bd261aa9bd1fd4a48bf7ddccc9befc0b2a5fa59911ebdacba84c5205"
+        },
+        {
+          "path": "soku/providers/archviz-control-plane-v1/templates/control-plane-provider.yml",
+          "sha256": "57f087825d5f80fef1c9573a8d07eef7eb3223c23857130da96b05ee1b67e931",
+          "central_sha256": "57f087825d5f80fef1c9573a8d07eef7eb3223c23857130da96b05ee1b67e931"
+        }
+      ]
+    },
+    {
+      "project_id": "report-hub",
+      "provider_id": "report-hub-control-plane-v1",
+      "files": [
+        {
+          "path": "soku/providers/report-hub-control-plane-v1/configuration.schema.json",
+          "sha256": "42fddbcf3a6e154441979e51fe5497c500c0eb22411a55232670e4caaeb723bb",
+          "central_sha256": "42fddbcf3a6e154441979e51fe5497c500c0eb22411a55232670e4caaeb723bb"
+        },
+        {
+          "path": "soku/providers/report-hub-control-plane-v1/example-config.yml",
+          "sha256": "40a496a02836b88797c01ad89e35c7696276602f18c24f089f725048e46d2716",
+          "central_sha256": "40a496a02836b88797c01ad89e35c7696276602f18c24f089f725048e46d2716"
+        },
+        {
+          "path": "soku/providers/report-hub-control-plane-v1/provider-v1.json",
+          "sha256": "bc521863951150ad977c1cac8f463916e082afd6f34198d394ae494f241cb373",
+          "central_sha256": "b0ef198778abcd85b022372dfc47f4ea4ab8565e2d3def95631fbf46454a6cc4"
+        },
+        {
+          "path": "soku/providers/report-hub-control-plane-v1/templates/control-plane-provider.yml",
+          "sha256": "cffe2ecdecd4f2533b9c6522c2ace68f0fe862c57a9c15a63843427c596c8e44",
+          "central_sha256": "cffe2ecdecd4f2533b9c6522c2ace68f0fe862c57a9c15a63843427c596c8e44"
+        }
+      ]
+    },
+    {
+      "project_id": "soku-pr-site",
+      "provider_id": "soku-pr-site-control-plane-v1",
+      "files": [
+        {
+          "path": "soku/providers/soku-pr-site-control-plane-v1/configuration.schema.json",
+          "sha256": "435b823d5d08ad37b3506b4bea2313f5d55f6065ff26c55f62fd1588be3f832b",
+          "central_sha256": "435b823d5d08ad37b3506b4bea2313f5d55f6065ff26c55f62fd1588be3f832b"
+        },
+        {
+          "path": "soku/providers/soku-pr-site-control-plane-v1/example-config.yml",
+          "sha256": "95316168b5d490a4035e7879c858b88f5f3a4469a7db2391ac2a5db454bd3ee6",
+          "central_sha256": "95316168b5d490a4035e7879c858b88f5f3a4469a7db2391ac2a5db454bd3ee6"
+        },
+        {
+          "path": "soku/providers/soku-pr-site-control-plane-v1/provider-v1.json",
+          "sha256": "1b42a4f3fb0b0a615732ca50d08179a1d930d256d32ba7810bf2a7ec9b593abf",
+          "central_sha256": "dc396467b76dbcad4e1839dcf287c4b4a6c7b9af589ba7cbfe279d26414ef6f6"
+        },
+        {
+          "path": "soku/providers/soku-pr-site-control-plane-v1/templates/control-plane-provider.yml",
+          "sha256": "8b166c5ff31919c62ebaf4ff30f893c8511192ec8c4c942b52f73862bd4d0e38",
+          "central_sha256": "8b166c5ff31919c62ebaf4ff30f893c8511192ec8c4c942b52f73862bd4d0e38"
+        }
+      ]
+    }
+  ],
+  "delivery_enabled": false
+}

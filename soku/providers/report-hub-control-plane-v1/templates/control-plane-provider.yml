@@ -1,0 +1,8 @@
+schema_version: 1
+provider_id: report-hub-control-plane-v1
+registry_ref: 16caa523e1eb0884117ba19d1409a4294cd9d43d
+pipeline:
+  kind: manual-deploy
+  template: apps-script-v2
+governance_profile: apps-script
+delivery_enabled: false
