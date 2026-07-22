@@ -27,6 +27,13 @@ rejects malformed or ambiguous markers, and retains a deterministic legacy
 parser for older boilerplate sources. No manifest, catalog, profile, provider,
 ownership, secret, or delivery contract changes.
 
+After publication, a same-release Provider transition exposed a client defect:
+`soku/v0.1.3` preserves the customized bytes of an unchanged mergeable file but
+can replace its recorded downstream baseline with the upstream hash. That can
+report false drift for locally merged `.editorconfig` or `.gitignore` content.
+The public tag and archives remain immutable; the correction is deferred to a
+subsequent CLI patch release.
+
 The release supports existing lifecycle state from `v1.0.0` and `v1.0.1` and
 is the full-verification client for companion boilerplate `v1.0.2`. Existing
 `soku/v0.1.1` and `soku/v0.1.2` tags remain immutable and are not rewritten.
