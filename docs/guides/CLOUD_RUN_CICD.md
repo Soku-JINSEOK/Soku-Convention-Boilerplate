@@ -79,7 +79,9 @@ runtime targets are configured and reviewed.
 The deployer has project-level Cloud Run administration because service creation
 requires it, but Artifact Registry write access is limited to the configured
 repository and `iam.serviceAccountUser` is limited to the dedicated runtime
-service account. It has no project-level Token Creator role.
+service account. It has no project-level Token Creator role. The deployer can
+mint an ID token only for itself and has service-scoped Cloud Run Invoker access,
+which lets the deployment script authenticate its private `/health` request.
 
 ## Recovery
 

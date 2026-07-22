@@ -236,6 +236,7 @@ set_traffic_revision() {
 run_health_check() {
   local service_url="$1"
   local attempt=1
+  local identity_token=""
   local path
 
   path="$(normalize_health_path "$HEALTH_PATH")"
@@ -244,8 +245,16 @@ run_health_check() {
     return 1
   fi
 
+  if ! identity_token="$(gcloud auth print-identity-token \
+    --audiences="${service_url%/}")" || [[ -z "$identity_token" ]]; then
+    echo "Unable to acquire an identity token for the private Cloud Run health check" >&2
+    return 1
+  fi
+
   while ((attempt <= HEALTH_ATTEMPTS)); do
-    if curl -fsS --max-time 10 "${service_url%/}${path}" >/dev/null 2>&1; then
+    if curl -fsS --max-time 10 \
+      --header "Authorization: Bearer $identity_token" \
+      "${service_url%/}${path}" >/dev/null 2>&1; then
       echo "Health check passed on attempt $attempt"
       return 0
     fi

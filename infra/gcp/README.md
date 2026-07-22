@@ -7,6 +7,9 @@ keeping both stages in one remote GCS state.
   service accounts, IAM, and GitHub Workload Identity Federation. It needs no
   container image. The deployer may act as only the dedicated runtime service
   account and may write only to the configured Artifact Registry repository.
+  It can mint an ID token only for itself and invoke only this Cloud Run service,
+  allowing authenticated private post-deploy health checks without project-wide
+  Token Creator or Invoker access.
 - Runtime (`deploy_runtime=true`) creates Cloud Run and requires an immutable
   `repository@sha256:<digest>` value in `image_uri`.
 

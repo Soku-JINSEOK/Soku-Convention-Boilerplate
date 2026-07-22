@@ -80,7 +80,8 @@ test('failed deploy health check restores the exact pre-deploy revision', () => 
   const count = join(temp, 'describe-count');
   executable(join(bin, 'gcloud'), `
 echo "$*" >> '${log}'
-if [[ "$*" == *"status.url"* ]]; then echo https://service.example;
+if [[ "$*" == *"print-identity-token"* ]]; then echo test-identity-token;
+elif [[ "$*" == *"status.url"* ]]; then echo https://service.example;
 elif [[ "$*" == *"latestReadyRevisionName"* ]]; then
   n=0; [[ -f '${count}' ]] && n=$(< '${count}'); n=$((n + 1)); echo "$n" > '${count}'
   if ((n == 1)); then echo service-pre; else echo service-new; fi
@@ -96,6 +97,7 @@ elif [[ "$*" == *"revisions list"* ]]; then echo service-older; fi`);
     GITHUB_RUN_ATTEMPT: '1',
   });
   assert.equal(result.status, 1);
+  assert.match(readFileSync(log, 'utf8'), /auth print-identity-token --audiences=https:\/\/service\.example/);
   assert.match(readFileSync(log, 'utf8'), /--to-revisions=service-pre=100/);
   assert.doesNotMatch(readFileSync(log, 'utf8'), /--to-revisions=service-older=100/);
   const evidence = JSON.parse(readFileSync(join(temp, 'deploy-dev-test-run-1.json')));
@@ -109,7 +111,8 @@ test('manual rollback evidence distinguishes success, missing target, and failed
     const bin = join(temp, 'bin');
     spawnSync('mkdir', ['-p', bin]);
     executable(join(bin, 'gcloud'), `
-if [[ "$*" == *"status.url"* ]]; then echo https://service.example;
+if [[ "$*" == *"print-identity-token"* ]]; then echo test-identity-token;
+elif [[ "$*" == *"status.url"* ]]; then echo https://service.example;
 elif [[ "$*" == *"latestReadyRevisionName"* ]]; then echo service-current;
 elif [[ "$*" == *"revisions list"* ]]; then ${scenario === 'missing' ? ':' : 'echo service-target;'} fi`);
     executable(join(bin, 'curl'), scenario === 'unhealthy' ? 'exit 1' : 'exit 0');
@@ -245,7 +248,9 @@ test('Terraform separates foundation from digest-pinned runtime', () => {
   assert.match(main, /account_id\s+= "\$\{substr\(var\.service_name, 0, 20\)\}-runtime"/);
   assert.match(main, /account_id\s+= "\$\{substr\(var\.service_name, 0, 15\)\}-gh-deployer"/);
   assert.match(main, /resource "google_service_account_iam_member" "deployer_runtime_user"/);
-  assert.doesNotMatch(main, /roles\/iam\.serviceAccountTokenCreator/);
+  assert.match(main, /resource "google_service_account_iam_member" "deployer_self_token_creator"/);
+  assert.doesNotMatch(main, /resource "google_project_iam_member"[\s\S]{0,300}roles\/iam\.serviceAccountTokenCreator/);
+  assert.match(main, /resource "google_cloud_run_service_iam_member" "deployer_invoker"/);
   assert.doesNotMatch(main, /resource "google_project_iam_member" "deployer_artifact_registry_writer"/);
   assert.match(main, /assertion\.repository_id/);
   assert.match(main, /assertion\.repository_owner_id/);

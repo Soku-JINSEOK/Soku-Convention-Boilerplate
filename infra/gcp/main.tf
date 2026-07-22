@@ -48,6 +48,12 @@ resource "google_service_account_iam_member" "deployer_runtime_user" {
   member             = "serviceAccount:${google_service_account.github_actions_deployer.email}"
 }
 
+resource "google_service_account_iam_member" "deployer_self_token_creator" {
+  service_account_id = google_service_account.github_actions_deployer.name
+  role               = "roles/iam.serviceAccountTokenCreator"
+  member             = "serviceAccount:${google_service_account.github_actions_deployer.email}"
+}
+
 resource "google_artifact_registry_repository_iam_member" "deployer_repository_writer" {
   location   = var.region
   repository = google_artifact_registry_repository.repository.repository_id
@@ -116,6 +122,15 @@ resource "google_cloud_run_service_iam_member" "public_invoker" {
   service  = google_cloud_run_service.service[0].name
   role     = "roles/run.invoker"
   member   = "allUsers"
+}
+
+resource "google_cloud_run_service_iam_member" "deployer_invoker" {
+  count    = var.deploy_runtime ? 1 : 0
+  location = google_cloud_run_service.service[0].location
+  project  = var.project_id
+  service  = google_cloud_run_service.service[0].name
+  role     = "roles/run.invoker"
+  member   = "serviceAccount:${google_service_account.github_actions_deployer.email}"
 }
 
 resource "google_iam_workload_identity_pool" "github" {

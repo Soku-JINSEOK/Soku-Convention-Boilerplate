@@ -126,6 +126,7 @@ FOUNDATION_TARGETS=(
   -target=google_service_account.github_actions_deployer
   -target=google_project_iam_member.deployer_run_admin
   -target=google_service_account_iam_member.deployer_runtime_user
+  -target=google_service_account_iam_member.deployer_self_token_creator
   -target=google_artifact_registry_repository_iam_member.deployer_repository_writer
   -target=google_iam_workload_identity_pool.github
   -target=google_iam_workload_identity_pool_provider.github
