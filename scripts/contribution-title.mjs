@@ -1,39 +1,20 @@
 export const TITLE_CONVENTIONS = Object.freeze([
   ['✨', 'feat'],
   ['🐛', 'fix'],
-  ['♻️', 'refactor'],
-  ['🎨', 'style'],
   ['📚', 'docs'],
   ['✅', 'test'],
   ['🔧', 'chore'],
   ['🚀', 'perf'],
   ['📦', 'build'],
   ['👷', 'ci'],
-  ['🔥', 'remove'],
-  ['🚑', 'hotfix'],
-  ['🔖', 'release'],
   ['🔄', 'sync'],
   ['🔒️', 'security'],
-  ['⏪️', 'revert'],
 ]);
 
 const SCOPE_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const ENGLISH_SUBJECT_PATTERN = /^[\x20-\x7e]+$/;
-const DEFAULT_MAX_TITLE_LENGTH = 72;
-const DEPENDABOT_BOT_LOGIN = 'dependabot[bot]';
 
-export function contributionTitleOptionsForAuthor(author) {
-  if (author === DEPENDABOT_BOT_LOGIN) {
-    return {allowConventionalWithoutGitmoji: true, maxLength: null};
-  }
-  return {};
-}
-
-export function validateContributionTitle(title, options = {}) {
-  const {
-    allowConventionalWithoutGitmoji = false,
-    maxLength = DEFAULT_MAX_TITLE_LENGTH,
-  } = options || {};
+export function validateContributionTitle(title) {
   const value = title.trim();
   let isBreaking = false;
   let convention = null;
@@ -58,13 +39,9 @@ export function validateContributionTitle(title, options = {}) {
     convention = TITLE_CONVENTIONS.find(([emoji, type]) =>
       value.startsWith(`${emoji} ${type}(`),
     );
-    if (!convention && allowConventionalWithoutGitmoji) {
-      convention = TITLE_CONVENTIONS.find(([_, type]) => value.startsWith(`${type}(`));
-      if (convention) {
-        prefixLength = `${convention[1]}(`.length;
-      }
-    } else if (convention) {
-      prefixLength = `${convention[0]} ${convention[1]}(`.length;
+    if (convention) {
+      const [emoji, type] = convention;
+      prefixLength = `${emoji} ${type}(`.length;
     }
   }
 
@@ -104,10 +81,10 @@ export function validateContributionTitle(title, options = {}) {
   if (subject.endsWith('.')) {
     return {valid: false, message: 'Subject must not end with a period.'};
   }
-  if (maxLength !== null && value.length > maxLength) {
+  if (value.length > 72) {
     return {
       valid: false,
-      message: `Title exceeds ${maxLength} characters (currently ${value.length}).`,
+      message: `Title exceeds 72 characters (currently ${value.length}).`,
     };
   }
 
