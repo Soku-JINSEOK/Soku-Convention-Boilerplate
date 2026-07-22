@@ -1,0 +1,63 @@
+name: Contribution Title Check
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+
+permissions:
+  contents: read
+
+jobs:
+  contribution-title:
+    name: Contribution Title Convention
+    if: github.event.action != 'edited' || github.event.changes.title != null
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
+        with:
+          node-version: "22"
+
+      - name: Run contribution-title regression tests
+        run: node --test scripts/contribution-title.test.mjs
+
+      - name: Validate pull request and commit titles
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          node --input-type=module - <<'NODE'
+          import {execFileSync} from 'node:child_process';
+          import {validateContributionTitle} from './scripts/contribution-title.mjs';
+
+          const mergeBase = execFileSync(
+            'git',
+            ['merge-base', process.env.BASE_SHA, process.env.HEAD_SHA],
+            {encoding: 'utf8'},
+          ).trim();
+          const output = execFileSync(
+            'git',
+            ['log', '--no-merges', '--format=%s', `${mergeBase}..${process.env.HEAD_SHA}`],
+            {encoding: 'utf8'},
+          ).trim();
+          const titles = [process.env.PR_TITLE, ...output.split('\n').filter(Boolean)];
+          let failed = false;
+
+          for (const title of titles) {
+            const result = validateContributionTitle(title ?? '');
+            if (result.valid) {
+              console.log(`✓ "${title}"`);
+            } else {
+              failed = true;
+              console.error(`✗ "${title}"\n  ${result.message}`);
+            }
+          }
+
+          if (failed) process.exit(1);
+          NODE
