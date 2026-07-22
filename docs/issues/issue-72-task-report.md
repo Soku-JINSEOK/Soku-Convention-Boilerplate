@@ -1,11 +1,11 @@
-# Issue 9 Task Report
+# Issue 72 Task Report
 
 ## Goal and Background
 
 Resolve central governance template drift in `Soku-Convention-Boilerplate` under
-[`ci-cd-control-plane#9`](https://github.com/Soku-JINSEOK/ci-cd-control-plane/issues/9).
+[`Soku-Convention-Boilerplate#72`](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/issues/72).
 This distribution is part of the approved repository-operations rollout tracked
-by `ci-cd-control-plane#21`.
+by `ci-cd-control-plane#9` and `ci-cd-control-plane#21`.
 
 ## Proposed Approach
 
