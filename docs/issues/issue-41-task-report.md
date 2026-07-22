@@ -398,3 +398,25 @@ commit은 병합하지 않았고, `1436435`의 Issue #41 제한 경고 의도만
 ## AI 지원
 
 - **계획/구현/초안 작성:** OpenAI Codex
+
+## v1.0.4 공개 마이그레이션 후속 발견
+
+Signed `v1.0.4` 발행과 fresh four-stack 검증은 성공했습니다. 그러나 공개
+`soku/v0.1.4`로 clean `v1.0.3` snapshot을 `v1.0.4`로 업그레이드한 뒤 전체
+stack 명령을 다시 실행하자 `npm run format:check`가 lifecycle-owned
+`.soku/manifest.json`을 검사해 실패했습니다. Go, Java, Node lint/type/test/build는
+그 전에 모두 통과했으며, `v1.0.3` → `v1.0.4` diff는 문서화한 대로
+`pyproject.toml` 한 파일만 변경했습니다.
+
+공개 tag는 불변이므로 `v1.0.4`를 변경하지 않습니다. 후속 `v1.0.5`는
+JavaScript/TypeScript `.prettierignore`에 `.soku/`를 추가하고 catalog rendering
+regression으로 경계를 고정합니다. `soku/v0.1.4` CLI와 manifest/provider/profile
+계약은 변경하지 않으며, 검토·preflight 후 별도 signed-tag 발행 승인을
+요구합니다. Issue #41은 이 후속 corrective release의 public migration smoke까지
+완료한 뒤 종결합니다.
+
+PR #84의 reviewed head `fb4e462f002b52f7534784f7fbfabb8194842bc0`에서 hosted
+Validation run `29905883947`의 repository, runtime-template, lifecycle,
+five-target package, dependency/license, OSV, Gitleaks 및 aggregate
+`Validation Gate`가 통과했습니다. 별도 metadata run `29906318004`에서 현재
+title/body/labels/assignee/Ready 상태와 `PR Metadata Gate`가 통과했습니다.

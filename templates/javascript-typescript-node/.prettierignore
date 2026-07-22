@@ -1,5 +1,6 @@
 dist/
 coverage/
 node_modules/
+.soku/
 .github/workflows/*.yml
 .golangci.yml
