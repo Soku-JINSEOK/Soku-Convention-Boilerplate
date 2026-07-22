@@ -22,7 +22,7 @@ resource "google_artifact_registry_repository" "repository" {
 
 resource "google_service_account" "cloud_run_runtime" {
   project      = var.project_id
-  account_id   = "${var.service_name}-runtime"
+  account_id   = "${substr(var.service_name, 0, 20)}-runtime"
   display_name = "Cloud Run runtime identity for ${var.service_name}"
 
   depends_on = [google_project_service.required_apis]
@@ -30,7 +30,7 @@ resource "google_service_account" "cloud_run_runtime" {
 
 resource "google_service_account" "github_actions_deployer" {
   project      = var.project_id
-  account_id   = "${var.service_name}-gh-deployer"
+  account_id   = "${substr(var.service_name, 0, 16)}-gh-deployer"
   display_name = "GitHub Actions deployer identity for ${var.service_name}"
 
   depends_on = [google_project_service.required_apis]
