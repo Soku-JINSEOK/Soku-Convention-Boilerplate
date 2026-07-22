@@ -25,7 +25,8 @@ merge `ea24298d8081d8108f3b5d280a9e401c6b54df47`.
 - [x] Targeted public provider and lifecycle tests pass.
 - [x] Go test/race/vet, lifecycle, package reproducibility, Node governance,
   Python action, Markdown/YAML, and whitespace checks pass locally.
-- [ ] Hosted CI, security, and pull-request policy checks pass.
+- [x] Hosted Linux/macOS/Windows, runtime-template, package, security, CodeQL,
+  governance, and aggregate Validation Gate checks pass.
 
 ## Security and Delivery Boundary
 
