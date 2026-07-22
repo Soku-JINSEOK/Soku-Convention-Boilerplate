@@ -63,20 +63,6 @@ body:
     - security
   validations:
     required: true
-- type: textarea
-  id: summary_ko
-  attributes:
-    label: 🇰🇷 한국어 요약
-    description: 목표, 변경 범위, 비파괴 조건, 검증 기준을 요약하세요.
-  validations:
-    required: true
-- type: textarea
-  id: summary_ja
-  attributes:
-    label: 🇯🇵 日本語の要約
-    description: 目標、変更範囲、非破壊条件、検証基準を要約してください。
-  validations:
-    required: true
 - type: checkboxes
   id: safety
   attributes:
@@ -96,3 +82,25 @@ body:
       - `npm run lint`
 
       - `git diff --check`'
+- type: textarea
+  id: summary_ko
+  attributes:
+    label: 🇰🇷 한국어 요약
+    description: 목표, 변경 범위, 비파괴 조건, 검증 기준을 요약하세요.
+  validations:
+    required: true
+- type: textarea
+  id: summary_ja
+  attributes:
+    label: 🇯🇵 日本語の要約
+    description: 目標、変更範囲、非破壊条件、検証基準を要約してください。
+  validations:
+    required: true
+- type: textarea
+  id: ai_assistance
+  attributes:
+    label: 🤖 AI Assistance
+    description: Record every tool used or None.
+    value: '- **Planning/implementation/drafting:** <actual tool or None>'
+  validations:
+    required: true

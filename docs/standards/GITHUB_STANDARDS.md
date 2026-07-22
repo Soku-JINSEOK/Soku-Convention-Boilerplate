@@ -187,11 +187,26 @@ scripts/sync-labels.sh --repo <owner>/<repo>
 | `type:` | `bug`, `feature`, `chore`, `docs`, `refactor` |
 | `priority:` | `p0-critical`, `p1-high`, `p2-normal`, `p3-low` |
 | `status:` | `triage`, `ready`, `in-progress`, `blocked`, `done` |
-| `area:` | `docs`, `tooling`, `ci`, `templates` (example set — adapt per project) |
+| `area:` | `docs`, `standards`, `tooling`, `ci`, `templates`, `automation`, `security` (example set — adapt per project) |
 
 Issue forms (`.github/ISSUE_TEMPLATE/*.yml`) apply a `type:` label by default (`type:bug`, `type:feature`, `type:chore`) and use the same normative-source, multilingual-summary, verification, security, risk, and AI-assistance structure as the pull request template. Apply priority and area labels as issue metadata rather than duplicating them in the issue body. Run `sync-labels.sh` before those forms are used, or issue creation will silently drop a default label that does not exist.
 
-A solo project can usually run with `type:` alone; `priority:`/`status:`/`area:` exist to coordinate work across people and can be added later once multiple contributors are involved (see [`docs/guides/APPLICABILITY.md`](../guides/APPLICABILITY.md)).
+The `boilerplate` and other complete governance profiles require at least one
+canonical `type:` label and one canonical `area:` label on every pull request.
+A lightweight downstream profile may relax the `area:` requirement for a solo
+project only when that profile and its validator explicitly document the
+exception. `priority:` and `status:` remain optional coordination metadata (see
+[`docs/guides/APPLICABILITY.md`](../guides/APPLICABILITY.md)).
+
+Common Metadata is strict: `Issue:` contains exactly one local `Closes #N` or
+`Related to #N` relation, `Task report:` is
+`docs/issues/issue-N-task-report.md` for that same Issue and names an existing
+file, and `Governance profile:` matches the repository-rendered profile. Every
+pull request is assigned to `Soku-JINSEOK`; Draft pull requests use only the
+non-closing relation. The metadata gate reads the current GitHub pull request
+state before validating it so rapid label, assignment, body, title, or Draft
+changes cannot be evaluated from a stale event payload. Custom labels remain
+allowed alongside the required canonical labels.
 
 **Rule: never create an issue or PR unlabeled.** When opening an issue or PR (via `gh issue create`, `gh pr create`, or the GitHub UI), attach at least a `type:` label in the same action — check `gh label list` (or this catalog) first if unsure what exists, rather than creating it bare and labeling as a follow-up step. An unlabeled issue/PR is harder to triage and defeats the point of having a catalog at all.
 

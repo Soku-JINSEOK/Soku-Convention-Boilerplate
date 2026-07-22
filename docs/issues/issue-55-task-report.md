@@ -8,7 +8,7 @@ This report captures the metadata normalization and governance hardening work tr
 ## Implementation Snapshot
 
 The repository-local implementation was rebased onto `origin/main` at
-`ea8b3a5ac6c3692f9535a570ead15813b53ca8f4`. GitHub mutations use a fresh read
+`2aad7940c4ed4883f69452cb41899cd563007c5c`. GitHub mutations use a fresh read
 immediately before each batch. Closed pull requests remain closed and unmerged.
 
 ### Exact relationship and label mutation manifest
@@ -52,8 +52,11 @@ closed. Existing labels were preserved; only the manifest additions were made.
 
 A fresh completion audit found eight historical pull requests that still had a
 canonical `type:*` label but no canonical `area:*` label. The following exact
-label-only manifest was recorded before the supplemental batch. The selected
-areas match each pull request's linked Issue labels and changed-file scope.
+label-only manifest was declared in the execution log before the supplemental
+batch and copied into this report after the mutations completed. The selected
+areas match each pull request's linked Issue labels and changed-file scope; the
+table is therefore an audit record, not evidence that this file was committed
+before execution.
 
 | PR | Preserved state | Exact label additions | Post-mutation body SHA-256 |
 | --- | --- | --- | --- |
@@ -69,9 +72,10 @@ areas match each pull request's linked Issue labels and changed-file scope.
 The batch used only `gh pr edit --add-label`; it supplied no body, title, state,
 merge, or review arguments. Post-mutation reads verified that all eight pull
 requests remain closed and merged, retain `assignee=Soku-JINSEOK`, and have the
-listed canonical labels. The body hashes above use the exact output of
+listed canonical labels. The body hashes above are legacy evidence with mixed
+newline handling. They use the exact output of
 `gh api repos/Soku-JINSEOK/Soku-Convention-Boilerplate/pulls/<n> --jq .body`
-including the output newline.
+including the CLI-added output newline, and are retained rather than rewritten.
 
 The implementation pull request `#70` was also assigned to `Soku-JINSEOK`
 without changing its body, labels, state, or Project membership.
@@ -120,7 +124,11 @@ Issue #69 was updated to explicitly separate open (#60, #61, #66) and closed-unm
 - `#55`: `In progress` / `P1` / `L` / `Governance` (`Target date: 2026-07-31`)
 - `#69`: `In progress` / `P2` / `M` / `Engineering` (`Target date: 2026-07-31`)
 
-### Body hash ledger (SHA-256, post-mutation)
+### Legacy body hash ledger (SHA-256, mixed newline handling)
+
+These values are retained as originally recorded. Some were calculated from
+raw body bytes and some from CLI-formatted output, so they must not be compared
+as one canonical dataset.
 
 - `#41`: `02c450f236f8d37debc5417d2469bb2d07a30e40d10aa45d718b50720cf550de`
 - `#54`: `37f4fc2957ebf95095e19d6196c52466380c8196604e479ab09c177f30e9f5d5`
@@ -130,15 +138,90 @@ Issue #69 was updated to explicitly separate open (#60, #61, #66) and closed-unm
 - `#61`: `9dfcbd67b7c154e373cccdf52e8fb45f239883ef76213ed3688615e59afaf49a`
 - `#66`: `4665fd39aff6989c3e1c387b9238d0e01caf5a8b0be2ed60867a04ba166470d2`
 
+### Canonical current-state body ledger
+
+The canonical procedure hashes only the raw UTF-8 bytes of the JSON `body`
+value, without an output newline:
+
+```bash
+curl -fsSL "https://api.github.com/repos/<owner>/<repo>/<issues|pulls>/<n>" \
+  | jq -j '.body // ""' \
+  | shasum -a 256
+```
+
+Fresh public API reads on 2026-07-22 produced:
+
+| Target | Canonical body SHA-256 |
+| --- | --- |
+| Issue #41 | `e4b408db77dde80280573c1080b82a1a155026bc247f16b2453c1fbe09087e81` |
+| Issue #54 | `c530ea93d5283d96e77c4a786ee475360dcf71ab7a5d538754c97161a9104f80` |
+| Issue #55 | `2469649c2a7136ec8bd99647c0e9f00e3b7299da915efe70670880e9cddc409f` |
+| Issue #69 | `bbba3774046753fed4a87b8d1609d550e8e32ae787df105eb80c780368075e37` |
+| PR #7 | `b46c6869bcad7bdd5fb543097ad0060d95f65bc8362f82e889b2549fa6e6d4b0` |
+| PR #26 | `db1b3cd7bfeb3ef35121967c3bd97f664b69c494e9f3bbbcd7467600cd4d9d21` |
+| PR #29 | `c56fb13aef6213ab2324e063b2bad913e7c5001c36059f5c4dc11e4349352dbf` |
+| PR #30 | `7b237ec2bec19d36625eaf0e8c3ec30499d8e2de4347872a4611a4a9f9f11021` |
+| PR #31 | `3e887ab8004bd9b881c2b9b3f5d70f2462bf3c634adac26fb4fbd51dfd609a7e` |
+| PR #32 | `af31b8857f6d486eaa028bd180e2169043ec59f87a127192e597b6321dc9a3f9` |
+| PR #33 | `b88c307847cc53e0aa04be9f7d61c6ee5fcb924852b21f05d6847c2dac7d1c56` |
+| PR #50 | `e9524334f93ad06959cf5214e3dfef105ddf428341083f1168f12ec2ead0152b` |
+| PR #60 | `b6216e81898bb429044ecb1d7c35eaf37f20b239e7b1b21674bc600bb74f35fd` |
+| PR #61 | `eb75b1c206c6e35e2100ff4aefaf16c7e8cdc89fd20a5274e43f50d76554707a` |
+| PR #66 | `4a56ac49f49ef33fd2efd475a6f2dced3e1c377d66defe7fb2909b1a04420f85` |
+
+### Project workflow evidence
+
+Project #2 workflow #7 was created as the native auto-add workflow for open
+issues in this repository. A fresh GraphQL read on 2026-07-22 returned
+`name=Auto-add to project`, `enabled=true`, and
+`updatedAt=2026-07-21T20:14:04Z`. The workflow filter is not exposed by the
+`ProjectV2Workflow` GraphQL type; the execution-time record is
+`repo:Soku-JINSEOK/Soku-Convention-Boilerplate is:issue is:open`. This report
+distinguishes that recorded configuration from the API-observed activation
+state and does not claim that the workflow existed before the mutation manifest
+was declared.
+
+### Canonical label reconciliation
+
+The catalog remained authoritative. After a fresh read, the approved exact
+mutation manifest updated only these four existing labels through
+`scripts/sync-labels.sh`; no custom labels were removed or rewritten:
+
+| Label | Color | Description |
+| --- | --- | --- |
+| `area:standards` | `bfd4f2` | Standards, governance, and policy conventions |
+| `area:templates` | `d4c5f9` | Copyable starter configuration sets under templates/ |
+| `area:automation` | `c8f7c5` | Automation workflows and operational orchestration |
+| `area:security` | `a5b6f7` | Security boundaries, safeguards, and secret handling |
+
+A post-mutation read on 2026-07-22 matched each name, color, and description to
+`.github/labels.yml` exactly.
+
 ### Verification commands
 
+- `node --test templates/_shared/commitlint/*.test.mjs .github/validate-pr-governance.test.mjs .github/issue-form-order.test.mjs .github/validation-workflow.test.mjs`
+  plus the rendered `scripts/contribution-title.test.mjs` and
+  `scripts/pull-request-policy.test.mjs` ✓ pass, 63 tests
 - `npx --yes yaml-lint@1.7.0 .github/*.yml .github/**/*.yml` ✓ pass
-- `npx --yes markdownlint-cli2@0.22.1 --config .markdownlint.jsonc "**/*.md" "#**/node_modules/**"` ✓ pass
-- `node --test templates/_shared/commitlint/*.test.mjs` ✓ pass
-- `GITHUB_EVENT_PATH=/tmp/gh-event-55-pr-60.json node .github/validate-pr-governance.mjs` ✓ pass
+- Python YAML parse over `.github/**/*.yml` ✓ pass, 16 files
+- `npx --yes markdownlint-cli2@0.22.1 --config .markdownlint.jsonc "**/*.md" "#**/node_modules/**"`
+  ✓ pass, 63 files and 0 errors
+- `go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.10` ✓ pass
+- `scripts/verify-release-tag_test.sh` ✓ pass
+- `bash -n scripts/*.sh soku/scripts/*.sh` ✓ pass
 - `git diff --check` ✓ clean
+- `shellcheck` and PowerShell sync parity remain unavailable locally; hosted
+  validation is required before merge.
 
 ## Notes
 
-- PR bodies for `#60`, `#61`, `#66` preserve original release evidence and now satisfy required heading/metadata/checklist order requirements.
+- The follow-up policy requires canonical catalog labels, assignee, a single
+  exact Issue relation, a matching existing task report, the rendered profile,
+  ordered headings, checked verification, and explicit AI disclosure.
+- Code-bearing events create `Validation Gate` and `PR Metadata Gate`.
+  Metadata-only events skip the heavy groups and dynamically name the full gate
+  check `Full Validation Not Required`, while metadata validation reads the
+  current pull request through the GitHub API.
+- PR bodies for `#60`, `#61`, `#66` preserve original release evidence and must
+  be updated to the strict metadata contract before merge.
 - Post-mutation hashes are recorded only after a fresh verification read; no expected hash is presented as observed evidence.
