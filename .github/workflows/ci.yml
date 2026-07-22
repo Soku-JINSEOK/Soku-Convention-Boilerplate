@@ -58,9 +58,16 @@ jobs:
             docs/guides/STACK_CONFIGS.md
             docs/guides/README_GUIDE.md
             docs/guides/INIT_GUIDE.md
+            docs/guides/CLOUD_RUN_CICD.md
             docs/guides/APPLICABILITY.md
             docs/guides/LANGUAGE_SELECTION.md
             VERIFICATION_GUIDE.md
+            infra/gcp/main.tf
+            infra/gcp/variables.tf
+            infra/gcp/versions.tf
+            infra/gcp/outputs.tf
+            infra/gcp/README.md
+            infra/gcp/.terraform.lock.hcl
             docs/issues/TASK_REPORT_TEMPLATE.md
             docs/releases/v1.0.0.md
             docs/releases/v1.0.1.md
@@ -89,6 +96,7 @@ jobs:
             docs/issues/issue-54-task-report.md
             docs/issues/issue-56-task-report.md
             docs/issues/issue-78-task-report.md
+            docs/issues/issue-87-task-report.md
             docs/issues/issue-55-task-report.md
             LICENSE
             SECURITY.md
@@ -100,6 +108,7 @@ jobs:
             .github/validate-pr-governance.test.mjs
             .github/issue-form-order.test.mjs
             .github/validation-workflow.test.mjs
+            .github/deploy-gcp.test.mjs
             .github/ISSUE_TEMPLATE/bug_report.yml
             .github/ISSUE_TEMPLATE/chore_task.yml
             .github/ISSUE_TEMPLATE/config.yml
@@ -109,6 +118,7 @@ jobs:
             .github/CODEOWNERS
             .github/workflows/ci.yml
             .github/workflows/release.yml
+            .github/workflows/deploy-gcp.yml
             .github/workflows/security.yml
             .github/workflows/templates-ci.yml
             .github/workflows/validation.yml
@@ -167,6 +177,10 @@ jobs:
             scripts/create-release-tag.sh
             scripts/verify-release-tag.sh
             scripts/verify-release-tag_test.sh
+            scripts/ci-local.sh
+            scripts/cd-plan.sh
+            scripts/cd-deploy.sh
+            scripts/gcp-bootstrap.sh
             scripts/verify-sync-parity.sh
             soku/README.md
             soku/THIRD_PARTY_NOTICES.md
@@ -263,7 +277,7 @@ jobs:
           scripts/pull-request-policy.test.mjs
 
       - name: Run pull-request governance regression tests
-        run: node --test .github/validate-pr-governance.test.mjs .github/issue-form-order.test.mjs .github/validation-workflow.test.mjs
+        run: node --test .github/validate-pr-governance.test.mjs .github/issue-form-order.test.mjs .github/validation-workflow.test.mjs .github/deploy-gcp.test.mjs
 
       - name: Run public provider action regression tests
         run: python3 soku/actions/ci-cd-control-plane-v1/test_validate_config.py

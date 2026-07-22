@@ -69,6 +69,54 @@ scripts/verify-sync-parity.sh
 scripts/verify-release-tag_test.sh
 ```
 
+## Local CI/CD Parity and Cloud Run Deploy Commands
+
+These are the canonical local commands for this repository's CD contract:
+
+```bash
+scripts/ci-local.sh --skip-infra
+```
+
+```bash
+scripts/cd-plan.sh \
+  --environment dev \
+  --project-id <GCP_PROJECT_ID> \
+  --region <GCP_REGION> \
+  --service-name <CLOUD_RUN_SERVICE> \
+  --artifact-repository <ARTIFACT_REPOSITORY> \
+  --image-repository <IMAGE_REPOSITORY> \
+  --skip-infra \
+  --skip-image-push
+```
+
+Image-pushing plans require a registry digest and record the immutable digest URI
+as `CD_PLAN_IMAGE_URI`; the tag URI is retained as `CD_PLAN_IMAGE_TAG_URI` for audit.
+Use `--rollback-only` to create rollback metadata without Docker, local checks, or
+Terraform.
+
+```bash
+scripts/cd-deploy.sh \
+  --plan-file .cd/dev/<short-sha>/cd-plan.env \
+  --health-path /health \
+  --health-attempts 18 \
+  --health-delay 10 \
+  --confirm
+```
+
+Rollback command (manual):
+
+```bash
+scripts/cd-deploy.sh \
+  --plan-file .cd/dev/<short-sha>/cd-plan.env \
+  --rollback-only \
+  --rollback-revision <revision-id> \
+  --confirm
+```
+
+Deployment evidence is emitted as JSON in the path provided by the `evidence_file`
+field in `$GITHUB_OUTPUT`. It records tag and digest URIs, pre-deploy and new
+revisions, rollback target, run attempt, and final status.
+
 ## `soku` Checks
 
 ```bash

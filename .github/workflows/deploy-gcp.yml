@@ -1,0 +1,107 @@
+name: Deploy to GCP (Cloud Run)
+
+on:
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: Safe check, deployment, or traffic rollback
+        type: choice
+        required: true
+        default: check
+        options: [check, deploy, rollback]
+      environment:
+        description: Deployment environment
+        type: choice
+        required: true
+        default: dev
+        options: [dev, staging, prod]
+      rollback_revision:
+        description: Optional revision for rollback
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Static deployment check
+    if: ${{ inputs.operation == 'check' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Validate without cloud access
+        run: |
+          bash -n scripts/gcp-bootstrap.sh scripts/cd-plan.sh scripts/cd-deploy.sh scripts/ci-local.sh
+          node --test .github/deploy-gcp.test.mjs
+
+  deploy:
+    name: Deploy to Cloud Run
+    if: ${{ inputs.operation == 'deploy' }}
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
+        with:
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_WIF_SERVICE_ACCOUNT }}
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3.0.1
+      - name: Build, push, and resolve deployment plan
+        id: plan
+        run: |
+          scripts/cd-plan.sh --environment "${{ inputs.environment }}" \
+            --project-id "${{ vars.GCP_PROJECT_ID }}" --region "${{ vars.GCP_REGION }}" \
+            --service-name "${{ vars.GCP_SERVICE_NAME }}" \
+            --artifact-repository "${{ vars.GCP_ARTIFACT_REPOSITORY }}" \
+            --output-dir "${{ github.workspace }}/.cd" --skip-local-checks --skip-infra --push-image
+      - name: Deploy immutable image
+        run: scripts/cd-deploy.sh --plan-file "${{ github.workspace }}/.cd/${{ steps.plan.outputs.plan_file }}" --confirm
+      - name: Archive deployment evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: deploy-evidence-${{ inputs.environment }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ github.workspace }}/.cd/deploy-*.json
+          if-no-files-found: warn
+          retention-days: 30
+
+  rollback:
+    name: Roll back Cloud Run traffic
+    if: ${{ inputs.operation == 'rollback' }}
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
+        with:
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_WIF_SERVICE_ACCOUNT }}
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3.0.1
+      - name: Create rollback plan
+        id: plan
+        run: |
+          scripts/cd-plan.sh --environment "${{ inputs.environment }}" \
+            --project-id "${{ vars.GCP_PROJECT_ID }}" --region "${{ vars.GCP_REGION }}" \
+            --service-name "${{ vars.GCP_SERVICE_NAME }}" \
+            --artifact-repository "${{ vars.GCP_ARTIFACT_REPOSITORY }}" \
+            --output-dir "${{ github.workspace }}/.cd" --rollback-only
+      - name: Roll back traffic
+        env:
+          ROLLBACK_REVISION: ${{ inputs.rollback_revision }}
+        run: |
+          args=(--plan-file "${{ github.workspace }}/.cd/${{ steps.plan.outputs.plan_file }}" --rollback-only --confirm)
+          if [[ -n "$ROLLBACK_REVISION" ]]; then args+=(--rollback-revision "$ROLLBACK_REVISION"); fi
+          scripts/cd-deploy.sh "${args[@]}"

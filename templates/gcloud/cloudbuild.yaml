@@ -1,13 +1,47 @@
 steps:
-  - name: gcr.io/cloud-builders/docker
+  - name: Build image
+    id: build
+    name: gcr.io/cloud-builders/docker
     args:
       - build
       - -t
       - ${_IMAGE}
       - .
+
+  - name: Push image
+    id: push
+    name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - ${_IMAGE}
+
+  - name: Deploy to Cloud Run
+    id: deploy
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - ${_SERVICE_NAME}
+      - --image
+      - ${_IMAGE}
+      - --project
+      - ${PROJECT_ID}
+      - --region
+      - ${_REGION}
+      - --platform
+      - managed
+      - --allow-unauthenticated
+      - --quiet
+
 images:
   - ${_IMAGE}
+
 substitutions:
-  _IMAGE: gcr.io/$PROJECT_ID/your-service
+  _IMAGE: asia-northeast1-docker.pkg.dev/your-gcp-project/your-artifact-registry/your-service:${SHORT_SHA}
+  _SERVICE_NAME: your-service
+  _REGION: asia-northeast1
+  _REGISTRY: asia-northeast1-docker.pkg.dev
+
 options:
   logging: CLOUD_LOGGING_ONLY
