@@ -19,7 +19,8 @@ security update declarations, ownership metadata, and labels.
 - [x] Existing schedules, groups, assignees, labels, and security update
   declarations remain unchanged.
 - [x] The focused Node regression, YAML parsing, and whitespace checks pass.
-- [ ] Hosted validation passes after the current Actions account gate clears.
+- [x] PR #86 hosted validation, CodeQL, dependency, OSV, secret, and Go
+  vulnerability checks passed, including the aggregate Validation Gate.
 
 ## Security and Approval Boundary
 
