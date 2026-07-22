@@ -109,7 +109,7 @@ variable "enabled_apis" {
   type        = list(string)
   default = [
     "artifactregistry.googleapis.com",
-    "cloudrun.googleapis.com",
+    "run.googleapis.com",
     "iam.googleapis.com",
     "sts.googleapis.com",
     "compute.googleapis.com",
