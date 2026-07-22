@@ -248,6 +248,9 @@ test('container builds target Cloud Run amd64 and expose a health endpoint', () 
   const plan = readFileSync(join(root, 'scripts/cd-plan.sh'), 'utf8');
   const dockerfile = readFileSync(join(root, 'templates/gcloud/Dockerfile'), 'utf8');
   assert.match(bootstrap, /docker build --platform linux\/amd64/);
+  assert.match(bootstrap, /FOUNDATION_TARGETS=\(/);
+  assert.match(bootstrap, /-target=google_iam_workload_identity_pool_provider\.github/);
+  assert.match(bootstrap, /apply "\$\{COMMON_VARS\[@\]\}" "\$\{FOUNDATION_TARGETS\[@\]\}" -var="deploy_runtime=false"/);
   assert.match(plan, /docker build --platform linux\/amd64/);
   assert.match(dockerfile, /\/app\/health/);
   assert.match(dockerfile, /apk add --no-cache busybox-extras/);

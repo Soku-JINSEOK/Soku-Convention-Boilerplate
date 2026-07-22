@@ -47,7 +47,9 @@ The apply sequence is:
 
 1. Create `gs://<GCP_PROJECT_ID>-tfstate` if it does not exist.
 2. Initialize the partial GCS backend with prefix `cloud-run`.
-3. Apply foundation Terraform with `deploy_runtime=false`; no image is needed.
+3. Apply only the explicit foundation Terraform targets with
+   `deploy_runtime=false`; no image is needed and an existing runtime is not
+   destroyed on a repeated bootstrap.
 4. Build and push the bootstrap image, then resolve its immutable digest.
 5. Apply runtime Terraform with `deploy_runtime=true` and the digest URI.
 6. Upsert the six repository variables with `gh variable set`.

@@ -65,7 +65,7 @@ print_commands() {
   cat <<EOF
 gcloud storage buckets describe gs://${STATE_BUCKET} || gcloud storage buckets create gs://${STATE_BUCKET} --project=${PROJECT_ID} --location=${REGION} --uniform-bucket-level-access
 terraform -chdir=infra/gcp init -backend-config=bucket=${STATE_BUCKET} -backend-config=prefix=cloud-run
-terraform -chdir=infra/gcp apply -var=project_id=${PROJECT_ID} -var=region=${REGION} -var=service_name=${SERVICE} -var=artifact_repository=${ARTIFACT_REPOSITORY} -var=deploy_runtime=false
+terraform -chdir=infra/gcp apply <foundation-targets> -var=project_id=${PROJECT_ID} -var=region=${REGION} -var=service_name=${SERVICE} -var=artifact_repository=${ARTIFACT_REPOSITORY} -var=deploy_runtime=false
 docker build --platform linux/amd64 -t ${IMAGE_TAG} templates/gcloud
 docker push ${IMAGE_TAG}
 terraform -chdir=infra/gcp apply ... -var=deploy_runtime=true -var=image_uri=<repository@sha256:digest>
@@ -87,7 +87,21 @@ if ! gcloud storage buckets describe "gs://${STATE_BUCKET}" --project="$PROJECT_
 fi
 terraform -chdir="$INFRA_DIR" init -reconfigure -input=false -backend-config="bucket=$STATE_BUCKET" -backend-config="prefix=cloud-run"
 COMMON_VARS=(-input=false -auto-approve -var="project_id=$PROJECT_ID" -var="region=$REGION" -var="service_name=$SERVICE" -var="artifact_repository=$ARTIFACT_REPOSITORY" -var="github_org=$GITHUB_ORG" -var="github_repo=$GITHUB_REPO")
-terraform -chdir="$INFRA_DIR" apply "${COMMON_VARS[@]}" -var="deploy_runtime=false"
+FOUNDATION_TARGETS=(
+  -target=google_project_service.required_apis
+  -target=google_artifact_registry_repository.repository
+  -target=google_service_account.cloud_run_runtime
+  -target=google_service_account.github_actions_deployer
+  -target=google_project_iam_member.deployer_run_admin
+  -target=google_project_iam_member.deployer_artifact_registry_writer
+  -target=google_project_iam_member.deployer_service_account_user
+  -target=google_project_iam_member.deployer_token_creator
+  -target=google_artifact_registry_repository_iam_member.deployer_repository_writer
+  -target=google_iam_workload_identity_pool.github
+  -target=google_iam_workload_identity_pool_provider.github
+  -target=google_service_account_iam_member.github_deployer_wi
+)
+terraform -chdir="$INFRA_DIR" apply "${COMMON_VARS[@]}" "${FOUNDATION_TARGETS[@]}" -var="deploy_runtime=false"
 gcloud auth configure-docker "${REGION}-docker.pkg.dev" --quiet
 docker build --platform linux/amd64 -t "$IMAGE_TAG" "$REPO_ROOT/templates/gcloud"
 docker push "$IMAGE_TAG"

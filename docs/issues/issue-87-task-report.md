@@ -38,7 +38,9 @@ through an explicitly selected manual workflow operation.
 
 ## Implementation Status
 
-Implemented locally. No GCP resources or Repository Variables were changed.
+Implemented and applied to `ci-cd-control-plane` with the documented defaults.
+The GCS backend, foundation resources, bootstrap image, private Cloud Run
+runtime, WIF connection, and six Repository Variables are active.
 
 ## Verification
 
@@ -47,6 +49,9 @@ Implemented locally. No GCP resources or Repository Variables were changed.
 - [x] Terraform 1.8.5 format check and provider-backed validation pass.
 - [x] Repository Node tests, Go tests, release-tag tests, Python provider action
   tests, and whitespace checks pass.
+- [x] Live bootstrap completed; Cloud Run revision
+  `soku-convention-boilerplate-00001-ltw` is `Ready=True` and authenticated
+  `/health` returns `ok`.
 
 ## AI Assistance
 
@@ -87,11 +92,13 @@ Issue #87은 하나의 GCP 프로젝트 ID에서 foundation 리소스, GitHub OI
 
 ## 구현 현황
 
-로컬 구현을 완료했습니다. 실제 GCP 및 GitHub Variables는 변경하지 않았습니다.
+구현과 `ci-cd-control-plane` 실제 적용을 완료했습니다. GCS state,
+foundation, 비공개 Cloud Run, WIF, GitHub Variables 6개가 활성화됐습니다.
 
 ## 검증
 
 - [x] 셸, Node, Terraform, Go, Python 및 공백 검사를 통과했습니다.
+- [x] Cloud Run `Ready=True`와 인증된 `/health` 응답 `ok`를 확인했습니다.
 
 ## AI 지원
 
