@@ -6,6 +6,10 @@ const workflow = readFileSync(
   new URL('./workflows/validation.yml', import.meta.url),
   'utf8',
 );
+const releaseWorkflow = readFileSync(
+  new URL('./workflows/release.yml', import.meta.url),
+  'utf8',
+);
 
 test('separates full validation from current PR metadata validation', () => {
   assert.match(workflow, /'Validation Gate' \|\| 'Full Validation Not Required'/);
@@ -49,4 +53,21 @@ test('does not subscribe to closed pull request events', () => {
   ]) {
     assert.match(trigger[1], new RegExp(`\\b${action}\\b`));
   }
+});
+
+test('release preflight can call validation without enabling delivery', () => {
+  assert.match(releaseWorkflow, /boilerplate-tag:[\s\S]*default: v1\.0\.2/);
+  assert.match(releaseWorkflow, /cli-tag:[\s\S]*default: soku\/v0\.1\.3/);
+  assert.match(
+    releaseWorkflow,
+    /permissions:\n\s+contents: read\n\s+pull-requests: read/,
+  );
+  assert.match(
+    releaseWorkflow,
+    /github\.event_name == 'push' &&\n\s+github\.repository == 'Soku-JINSEOK\/Soku-Convention-Boilerplate'/,
+  );
+  assert.doesNotMatch(
+    releaseWorkflow,
+    /github\.event_name == 'workflow_dispatch'[^\n]*deliver/,
+  );
 });
