@@ -34,8 +34,8 @@ contribution-title validators that the profile audit requires.
 
 ## Implementation Status
 
-Implemented on branch `agent/governance-template-distribution`; draft pull
-request publication and hosted validation remain.
+Implemented and published in PR #71 on branch
+`agent/governance-template-distribution`; hosted validation passed.
 
 ## Verification
 
@@ -48,6 +48,8 @@ request publication and hosted validation remain.
 - `scripts/verify-sync-parity.sh`: unavailable because `pwsh` is not installed;
   hosted validation remains required.
 - `actionlint`: unavailable locally; hosted validation remains required.
+- GitHub Actions `Validation` run `29882460796`: passed, including the
+  aggregate `Validation Gate` and hosted actionlint/sync parity coverage.
 - `npm test` and `npm run lint`: not applicable because this repository has no
   root `package.json`; both commands returned `ENOENT` and are not claimed as
   passes.
