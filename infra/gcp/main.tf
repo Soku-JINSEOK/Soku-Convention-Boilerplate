@@ -133,7 +133,7 @@ resource "google_cloud_run_service_iam_member" "public_invoker" {
 resource "google_iam_workload_identity_pool" "github" {
   count                     = var.enable_wif ? 1 : 0
   workload_identity_pool_id = var.wif_pool_id
-  display_name              = "github-actions-${var.service_name}"
+  display_name              = "github-${substr(var.service_name, 0, 20)}"
   description               = "Workload Identity Pool for GitHub Actions deploy workflows."
 
   depends_on = [google_project_service.required_apis]
@@ -143,7 +143,7 @@ resource "google_iam_workload_identity_pool_provider" "github" {
   count                              = var.enable_wif ? 1 : 0
   workload_identity_pool_id          = google_iam_workload_identity_pool.github[0].workload_identity_pool_id
   workload_identity_pool_provider_id = var.wif_provider_id
-  display_name                       = "github-provider-${var.service_name}"
+  display_name                       = "github-${substr(var.service_name, 0, 20)}"
   description                        = "OIDC provider for GitHub Actions"
   disabled                           = false
   attribute_mapping = {

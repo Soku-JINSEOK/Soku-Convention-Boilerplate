@@ -237,6 +237,7 @@ test('Terraform separates foundation from digest-pinned runtime', () => {
   assert.match(main, /account_id\s+= "\$\{substr\(var\.service_name, 0, 20\)\}-runtime"/);
   assert.match(main, /account_id\s+= "\$\{substr\(var\.service_name, 0, 15\)\}-gh-deployer"/);
   assert.doesNotMatch(main, /allowed_audiences/);
+  assert.equal((main.match(/display_name\s+= "github-\$\{substr\(var\.service_name, 0, 20\)\}"/g) ?? []).length, 2);
   assert.match(variables, /"run\.googleapis\.com"/);
   assert.doesNotMatch(variables, /"cloudrun\.googleapis\.com"/);
   assert.match(versions, /backend "gcs" \{\}/);
