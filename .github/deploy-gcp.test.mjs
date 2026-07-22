@@ -90,12 +90,15 @@ elif [[ "$*" == *"revisions list"* ]]; then echo service-older; fi`);
   const plan = join(temp, 'plan.env');
   writeFileSync(plan, `CD_PLAN_ENVIRONMENT=dev\nCD_PLAN_COMMIT_SHA=abc\nCD_PLAN_IMAGE_TAG_URI=${repository}:abc\nCD_PLAN_IMAGE_URI=${repository}@${digest}\nCD_PLAN_PROJECT_ID=project\nCD_PLAN_REGION=asia\nCD_PLAN_SERVICE_NAME=service\n`);
   const result = run('cd-deploy.sh', ['--plan-file', plan, '--health-attempts', '1', '--health-delay', '0', '--confirm'], {
-    PATH: `${bin}:${process.env.PATH}`, CD_DEPLOY_EVIDENCE_DIR: temp,
+    PATH: `${bin}:${process.env.PATH}`,
+    CD_DEPLOY_EVIDENCE_DIR: temp,
+    GITHUB_RUN_ID: 'test-run',
+    GITHUB_RUN_ATTEMPT: '1',
   });
   assert.equal(result.status, 1);
   assert.match(readFileSync(log, 'utf8'), /--to-revisions=service-pre=100/);
   assert.doesNotMatch(readFileSync(log, 'utf8'), /--to-revisions=service-older=100/);
-  const evidence = JSON.parse(readFileSync(join(temp, 'deploy-dev-manual-1.json')));
+  const evidence = JSON.parse(readFileSync(join(temp, 'deploy-dev-test-run-1.json')));
   assert.equal(evidence.final_status, 'rolled-back');
   assert.equal(evidence.rollback_target, 'service-pre');
 });
@@ -115,10 +118,13 @@ elif [[ "$*" == *"revisions list"* ]]; then ${scenario === 'missing' ? ':' : 'ec
     const args = ['--plan-file', plan, '--rollback-only', '--health-attempts', '1', '--health-delay', '0', '--confirm'];
     if (scenario !== 'missing') args.push('--rollback-revision', 'service-target');
     const result = run('cd-deploy.sh', args, {
-      PATH: `${bin}:${process.env.PATH}`, CD_DEPLOY_EVIDENCE_DIR: temp,
+      PATH: `${bin}:${process.env.PATH}`,
+      CD_DEPLOY_EVIDENCE_DIR: temp,
+      GITHUB_RUN_ID: 'test-run',
+      GITHUB_RUN_ATTEMPT: '1',
     });
     assert.equal(result.status, scenario === 'success' ? 0 : scenario === 'missing' ? 4 : 9);
-    const evidence = JSON.parse(readFileSync(join(temp, 'deploy-prod-manual-1.json')));
+    const evidence = JSON.parse(readFileSync(join(temp, 'deploy-prod-test-run-1.json')));
     assert.equal(evidence.final_status, scenario === 'success' ? 'manual-rollback' : 'manual-rollback-failed');
     assert.equal(evidence.error, scenario === 'missing' ? 'missing-revision' : scenario === 'unhealthy' ? 'healthcheck-failed' : '');
   }
