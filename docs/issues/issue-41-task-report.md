@@ -20,8 +20,14 @@ target is the companion corrective pair `v1.0.2` + `soku/v0.1.3`. Existing
 
 The source-authoritative renderer, security Validation Gate, Dependabot/tag
 protections, and the two-repository security work are tracked before public
-publication. New security issues are Boilerplate #56 and Control Plane #27;
-Boilerplate #54 remains blocked on Control Plane #19's public contract.
+publication. Boilerplate #54 and #56 and Control Plane #19, #26, and #27 are
+complete; their public-provider and supply-chain evidence now form release
+prerequisites rather than blockers.
+
+GitHub Issue #41 was manually closed on 2026-07-22 before the corrective pair
+was published. That repository state does not satisfy this report's completion
+criteria. Repository-operation approval was granted to reopen the Issue and
+return it to active Project status for the corrective release.
 
 The published `soku/v0.1.2` CLI remains the current historical client. This task
 prepares, validates, publishes, and publicly exercises the corrective
@@ -135,17 +141,24 @@ current `main` and `soku/v0.1.2`.
 - Boilerplate security automation is connected to the required Validation Gate,
   with scheduled scans, Dependabot configuration, CodeQL default setup, and an
   active immutable release-tag ruleset (`19336418`).
-- Control Plane security hardening is prepared in the temporary audit checkout
-  for Issue #27: Python installs use a hash-locked requirements file, dashboard
-  audit covers development dependencies, and security workflow checks are
-  added. Its changes still require a separate PR because the local `.git`
-  metadata is read-only in this environment.
+- Control Plane Issue #27 is delivered by merged PR #36. Python installs use a
+  hash-locked requirements file, the dashboard audit covers development
+  dependencies, and hosted Gitleaks, OSV, Action-pin, license, and Terraform
+  lock checks passed before merge.
 - The next implementation PR must use `Related to #41`; only the final PR after
   public lifecycle evidence may use a closing keyword.
 
 ## Verification
 
 ### Corrective verification update (2026-07-21)
+
+- The first `v1.0.2`/`soku/v0.1.3` validation-only preflight on final provider
+  main commit `29cbaeb8daf34d69a09bd10b4e8b7046fc6373bc` produced startup failure
+  before creating jobs. The Release caller granted only `contents: read`, while
+  the reusable Validation workflow also declares `pull-requests: read`. The
+  release-candidate fix passes that read-only permission, updates the manual
+  defaults to the corrective pair, and adds a regression test that delivery
+  remains restricted to tag pushes. A hosted rerun is required after merge.
 
 - Passed: `soku` and `templates/go` unit tests, vet, format/import checks,
   lifecycle conformance, five-target package reproducibility, release-tag
