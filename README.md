@@ -19,9 +19,10 @@ The current published releases are boilerplate `v1.0.2` and CLI
 `soku/v0.1.3`. Their signed records, complete hosted gates, packages, and
 checksums passed, but required public four-stack smoke found that the
 JavaScript formatter traverses and rejects two generated cross-stack YAML
-files. Issue #41 therefore continues with the single-axis corrective
-boilerplate `v1.0.3`; keep existing tags immutable and use the new baseline
-only after its separately approved signed tag and Release are published. See
+files. Issue #41 therefore continues with corrective companion candidates
+boilerplate `v1.0.3` and CLI `soku/v0.1.4`; keep existing tags immutable and use
+the new baseline only after its separately approved signed tags and Releases
+are published. See
 [VERIFICATION_GUIDE.md](./VERIFICATION_GUIDE.md) for the complete checks.
 
 ---

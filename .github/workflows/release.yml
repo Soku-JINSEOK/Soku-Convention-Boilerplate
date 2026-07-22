@@ -10,7 +10,7 @@ on:
       cli-tag:
         description: CLI tag to validate without publishing
         required: true
-        default: soku/v0.1.3
+        default: soku/v0.1.4
   push:
     tags:
       - "v*"
