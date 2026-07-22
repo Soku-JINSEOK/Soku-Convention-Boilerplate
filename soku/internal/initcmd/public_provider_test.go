@@ -7,12 +7,15 @@ import (
 	"encoding/json"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/santhosh-tekuri/jsonschema/v6"
 )
 
 const publicProviderRoot = "../../providers/ci-cd-control-plane-v1"
+
+const publicMirrorCommit = "c5435ea36d88dbe3b4b2c373265206943c53fcbf"
 
 func TestPublishedControlPlaneProviderBundle(t *testing.T) {
 	metadata := mustRead(t, publicProviderRoot+"/provider-v1.json")
@@ -81,12 +84,12 @@ func TestControlPlaneProviderLiteralByteProvenance(t *testing.T) {
 		t.Fatalf("invalid public provenance identity: %#v", ledger)
 	}
 	mirror, ok := ledger["public_mirror"].(map[string]any)
-	if !ok || mirror["state"] != "awaiting-merge" ||
-		mirror["commit"] != nil {
-		t.Fatalf("invalid pending public mirror: %#v", mirror)
+	if !ok || mirror["state"] != "published" ||
+		mirror["commit"] != publicMirrorCommit {
+		t.Fatalf("invalid published public mirror: %#v", mirror)
 	}
 	entries, ok := ledger["public_files"].([]any)
-	if !ok || len(entries) != 7 {
+	if !ok || len(entries) != 8 {
 		t.Fatalf("public provenance files = %#v", ledger["public_files"])
 	}
 	seen := map[string]bool{}
@@ -110,6 +113,35 @@ func TestControlPlaneProviderLiteralByteProvenance(t *testing.T) {
 		sum := sha256.Sum256(content)
 		if hex.EncodeToString(sum[:]) != expected {
 			t.Fatalf("literal-byte hash mismatch: %s", entryPath)
+		}
+	}
+}
+
+func TestControlPlaneProviderCallerContract(t *testing.T) {
+	caller := string(mustRead(
+		t,
+		"../../../docs/callers/ci-cd-control-plane-v1.yml",
+	))
+	actionPin := "Soku-JINSEOK/Soku-Convention-Boilerplate/" +
+		"soku/actions/ci-cd-control-plane-v1@" + publicMirrorCommit
+	if strings.Count(caller, actionPin) != 1 {
+		t.Fatalf("caller must use the immutable public action once")
+	}
+	for _, argument := range []string{
+		"--integration-source '${{ steps.provider.outputs.integration-source }}'",
+		"--integration-ref '${{ steps.provider.outputs.integration-ref }}'",
+		"--integration-config '${{ steps.provider.outputs.integration-config }}'",
+	} {
+		if strings.Count(caller, argument) != 1 {
+			t.Fatalf("caller argument %q must appear once", argument)
+		}
+	}
+	for _, forbidden := range []string{
+		"secrets.", "token:", "password", "private", "curl ", "wget ",
+		"git clone", "go run", "python ", "bash -c", "sh -c",
+	} {
+		if strings.Contains(strings.ToLower(caller), forbidden) {
+			t.Fatalf("caller contains forbidden capability %q", forbidden)
 		}
 	}
 }
