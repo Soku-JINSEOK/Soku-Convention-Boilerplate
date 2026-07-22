@@ -87,6 +87,30 @@ variable "github_repo" {
   default     = "your-repo"
 }
 
+variable "github_repository_id" {
+  description = "Immutable numeric GitHub repository ID used by the WIF trust condition."
+  type        = string
+  default     = null
+  nullable    = true
+
+  validation {
+    condition     = var.github_repository_id == null || can(regex("^[0-9]+$", var.github_repository_id))
+    error_message = "github_repository_id must be a numeric GitHub repository ID."
+  }
+}
+
+variable "github_repository_owner_id" {
+  description = "Immutable numeric GitHub repository owner ID used by the WIF trust condition."
+  type        = string
+  default     = null
+  nullable    = true
+
+  validation {
+    condition     = var.github_repository_owner_id == null || can(regex("^[0-9]+$", var.github_repository_owner_id))
+    error_message = "github_repository_owner_id must be a numeric GitHub owner ID."
+  }
+}
+
 variable "wif_pool_id" {
   description = "Workload Identity Pool ID."
   type        = string

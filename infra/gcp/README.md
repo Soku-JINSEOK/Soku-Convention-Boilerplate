@@ -5,7 +5,8 @@ keeping both stages in one remote GCS state.
 
 - Foundation (`deploy_runtime=false`) enables APIs and creates Artifact Registry,
   service accounts, IAM, and GitHub Workload Identity Federation. It needs no
-  container image.
+  container image. The deployer may act as only the dedicated runtime service
+  account and may write only to the configured Artifact Registry repository.
 - Runtime (`deploy_runtime=true`) creates Cloud Run and requires an immutable
   `repository@sha256:<digest>` value in `image_uri`.
 
@@ -22,6 +23,12 @@ Set `GCP_PROJECT_ID=<id>` and run `scripts/gcp-bootstrap.sh` to preview the full
 sequence. `--project-id` is also supported and takes precedence over the
 environment. Actual creation additionally requires
 `--apply --confirm-project-id <id>`.
+
+During apply, the bootstrap resolves immutable GitHub repository and owner IDs.
+The WIF provider accepts only the configured repository IDs, `refs/heads/main`,
+and `.github/workflows/deploy-gcp.yml` from `main`. The state bucket is hardened
+with uniform access, enforced public-access prevention, object versioning, and
+no legacy project Viewer object access.
 
 The outputs `wif_provider_name` and `deployer_service_account_email` map directly
 to the GitHub repository variables `GCP_WIF_PROVIDER` and

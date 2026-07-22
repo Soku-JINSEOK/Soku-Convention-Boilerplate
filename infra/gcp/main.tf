@@ -42,22 +42,10 @@ resource "google_project_iam_member" "deployer_run_admin" {
   member  = "serviceAccount:${google_service_account.github_actions_deployer.email}"
 }
 
-resource "google_project_iam_member" "deployer_artifact_registry_writer" {
-  project = var.project_id
-  role    = "roles/artifactregistry.writer"
-  member  = "serviceAccount:${google_service_account.github_actions_deployer.email}"
-}
-
-resource "google_project_iam_member" "deployer_service_account_user" {
-  project = var.project_id
-  role    = "roles/iam.serviceAccountUser"
-  member  = "serviceAccount:${google_service_account.github_actions_deployer.email}"
-}
-
-resource "google_project_iam_member" "deployer_token_creator" {
-  project = var.project_id
-  role    = "roles/iam.serviceAccountTokenCreator"
-  member  = "serviceAccount:${google_service_account.github_actions_deployer.email}"
+resource "google_service_account_iam_member" "deployer_runtime_user" {
+  service_account_id = google_service_account.cloud_run_runtime.name
+  role               = "roles/iam.serviceAccountUser"
+  member             = "serviceAccount:${google_service_account.github_actions_deployer.email}"
 }
 
 resource "google_artifact_registry_repository_iam_member" "deployer_repository_writer" {
@@ -147,12 +135,32 @@ resource "google_iam_workload_identity_pool_provider" "github" {
   description                        = "OIDC provider for GitHub Actions"
   disabled                           = false
   attribute_mapping = {
-    "google.subject"       = "assertion.sub"
-    "attribute.repository" = "assertion.repository"
+    "google.subject"                = "assertion.sub"
+    "attribute.repository"          = "assertion.repository"
+    "attribute.repository_id"       = "assertion.repository_id"
+    "attribute.repository_owner_id" = "assertion.repository_owner_id"
+    "attribute.ref"                 = "assertion.ref"
+    "attribute.workflow_ref"        = "assertion.workflow_ref"
   }
-  attribute_condition = "assertion.repository == \"${var.github_org}/${var.github_repo}\""
+  attribute_condition = join(" && ", [
+    "assertion.repository == \"${var.github_org}/${var.github_repo}\"",
+    "assertion.repository_id == \"${coalesce(var.github_repository_id, "missing")}\"",
+    "assertion.repository_owner_id == \"${coalesce(var.github_repository_owner_id, "missing")}\"",
+    "assertion.ref == \"refs/heads/main\"",
+    "assertion.workflow_ref == \"${var.github_org}/${var.github_repo}/.github/workflows/deploy-gcp.yml@refs/heads/main\"",
+  ])
   oidc {
     issuer_uri = "https://token.actions.githubusercontent.com"
+  }
+
+  lifecycle {
+    precondition {
+      condition = (
+        var.github_repository_id != null &&
+        var.github_repository_owner_id != null
+      )
+      error_message = "github_repository_id and github_repository_owner_id are required when WIF is enabled."
+    }
   }
 }
 

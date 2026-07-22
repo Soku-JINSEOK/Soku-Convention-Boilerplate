@@ -17,7 +17,9 @@ The bootstrap command registers exactly these GitHub Repository Variables:
 | `GCP_WIF_PROVIDER` | Full Terraform WIF provider resource name |
 | `GCP_WIF_SERVICE_ACCOUNT` | Terraform deployer service-account email |
 
-OIDC/WIF requires no long-lived service-account JSON secret.
+OIDC/WIF requires no long-lived service-account JSON secret. Its trust condition
+requires the immutable GitHub repository and owner IDs, the `main` ref, and the
+exact `.github/workflows/deploy-gcp.yml` workflow on `main`.
 
 ## From project ID to first infrastructure
 
@@ -45,8 +47,11 @@ scripts/gcp-bootstrap.sh \
 
 The apply sequence is:
 
-1. Create `gs://<GCP_PROJECT_ID>-tfstate` if it does not exist.
-2. Initialize the partial GCS backend with prefix `cloud-run`.
+1. Create `gs://<GCP_PROJECT_ID>-tfstate` if it does not exist, then enforce
+   uniform bucket-level access, public access prevention, object versioning,
+   and removal of legacy project Viewer read bindings.
+2. Resolve immutable GitHub repository and owner IDs and initialize the partial
+   GCS backend with prefix `cloud-run`.
 3. Apply only the explicit foundation Terraform targets with
    `deploy_runtime=false`; no image is needed and an existing runtime is not
    destroyed on a repeated bootstrap.
@@ -54,9 +59,9 @@ The apply sequence is:
 5. Apply runtime Terraform with `deploy_runtime=true` and the digest URI.
 6. Upsert the six repository variables with `gh variable set`.
 
-Bucket lookup/creation and variable writes are safe to repeat. Terraform uses the
-same remote state for both stages; state and project-specific tfvars are never
-committed.
+Bucket lookup/creation, protection updates, legacy Viewer cleanup, and variable
+writes are safe to repeat. Terraform uses the same remote state for both stages;
+state and project-specific tfvars are never committed.
 
 ## First dev deployment
 
@@ -66,8 +71,15 @@ commands. Then select `operation=deploy` and `environment=dev`. Only deploy and
 rollback jobs receive `id-token: write` and authenticate to GCP.
 
 The deployment builds and pushes a commit-tagged image, resolves the immutable
-digest, deploys it, checks `/health`, and stores evidence. Protect staging and
-production with GitHub Environment reviewers as a separate operational step.
+digest, deploys it, checks `/health`, and stores evidence. Only `dev` is exposed
+by this workflow. Staging and production stay unavailable until separate GitHub
+Environments, approval rules, environment-scoped variables, and isolated GCP
+runtime targets are configured and reviewed.
+
+The deployer has project-level Cloud Run administration because service creation
+requires it, but Artifact Registry write access is limited to the configured
+repository and `iam.serviceAccountUser` is limited to the dedicated runtime
+service account. It has no project-level Token Creator role.
 
 ## Recovery
 

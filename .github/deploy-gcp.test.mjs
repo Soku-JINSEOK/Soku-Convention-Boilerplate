@@ -190,7 +190,9 @@ elif [[ "$*" == *"output -raw deployer_service_account_email"* ]]; then
 fi`);
   executable(join(bin, 'gh'), `
 echo "gh $*" >> '${log}'
-if [[ "$*" == "repo view"* ]]; then echo owner/repository; fi`);
+if [[ "$*" == "repo view"* ]]; then echo owner/repository;
+elif [[ "$*" == "api repos/owner/repository --jq .id" ]]; then echo 123456;
+elif [[ "$*" == "api repos/owner/repository --jq .owner.id" ]]; then echo 7890; fi`);
 
   const result = run('gcp-bootstrap.sh', [
     '--apply', '--confirm-project-id', 'app-project-123',
@@ -198,6 +200,10 @@ if [[ "$*" == "repo view"* ]]; then echo owner/repository; fi`);
   assert.equal(result.status, 0, result.stderr);
   const commands = readFileSync(log, 'utf8');
   assert.match(commands, /gcloud storage buckets create gs:\/\/app-project-123-tfstate/);
+  assert.match(commands, /gcloud storage buckets update gs:\/\/app-project-123-tfstate --uniform-bucket-level-access --public-access-prevention --versioning/);
+  assert.match(commands, /gh api repos\/owner\/repository --jq \.id/);
+  assert.match(commands, /github_repository_id=123456/);
+  assert.match(commands, /github_repository_owner_id=7890/);
   assert.match(commands, /terraform .* apply .*deploy_runtime=false/);
   assert.match(commands, /docker push asia-northeast1-docker\.pkg\.dev\/app-project-123\/cloud-run\/soku-convention-boilerplate:bootstrap/);
   assert.match(commands, /terraform .* apply .*deploy_runtime=true .*image_uri=.*@sha256:b{64}/);
@@ -220,6 +226,8 @@ test('deployment workflow is manual and check cannot authenticate or deploy', ()
   }
   assert.doesNotMatch(workflow, /^\s*push:/m);
   assert.match(workflow, /operation:[\s\S]*default: check[\s\S]*options: \[check, deploy, rollback\]/);
+  assert.match(workflow, /environment:[\s\S]*default: dev[\s\S]*options: \[dev\]/);
+  assert.doesNotMatch(workflow, /options: \[dev, staging, prod\]/);
   const checkJob = workflow.match(/  check:\n([\s\S]*?)\n  deploy:/)?.[1] ?? '';
   assert.doesNotMatch(checkJob, /google-github-actions|gcloud auth|docker push|terraform plan|cd-deploy\.sh --/);
   assert.match(workflow, /if: \$\{\{ inputs\.operation == 'deploy' \}\}/);
@@ -236,6 +244,16 @@ test('Terraform separates foundation from digest-pinned runtime', () => {
   assert.match(main, /resource "google_cloud_run_service"[\s\S]*count\s+= var\.deploy_runtime \? 1 : 0/);
   assert.match(main, /account_id\s+= "\$\{substr\(var\.service_name, 0, 20\)\}-runtime"/);
   assert.match(main, /account_id\s+= "\$\{substr\(var\.service_name, 0, 15\)\}-gh-deployer"/);
+  assert.match(main, /resource "google_service_account_iam_member" "deployer_runtime_user"/);
+  assert.doesNotMatch(main, /roles\/iam\.serviceAccountTokenCreator/);
+  assert.doesNotMatch(main, /resource "google_project_iam_member" "deployer_artifact_registry_writer"/);
+  assert.match(main, /assertion\.repository_id/);
+  assert.match(main, /assertion\.repository_owner_id/);
+  assert.match(main, /assertion\.ref == \\"refs\/heads\/main\\"/);
+  assert.match(main, /assertion\.workflow_ref/);
+  assert.doesNotMatch(main, /assertion\.job_workflow_ref/);
+  assert.match(variables, /variable "github_repository_id"/);
+  assert.match(variables, /variable "github_repository_owner_id"/);
   assert.doesNotMatch(main, /allowed_audiences/);
   assert.equal((main.match(/display_name\s+= "github-\$\{substr\(var\.service_name, 0, 20\)\}"/g) ?? []).length, 2);
   assert.match(variables, /"run\.googleapis\.com"/);

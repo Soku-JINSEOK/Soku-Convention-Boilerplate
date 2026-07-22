@@ -64,8 +64,12 @@ print_summary() {
 print_commands() {
   cat <<EOF
 gcloud storage buckets describe gs://${STATE_BUCKET} || gcloud storage buckets create gs://${STATE_BUCKET} --project=${PROJECT_ID} --location=${REGION} --uniform-bucket-level-access
+gcloud storage buckets update gs://${STATE_BUCKET} --uniform-bucket-level-access --public-access-prevention --versioning
+gcloud storage buckets remove-iam-policy-binding gs://${STATE_BUCKET} --member=projectViewer:${PROJECT_ID} --role=<legacy-reader-role>
+gh api repos/<owner>/<repo> --jq .id
+gh api repos/<owner>/<repo> --jq .owner.id
 terraform -chdir=infra/gcp init -backend-config=bucket=${STATE_BUCKET} -backend-config=prefix=cloud-run
-terraform -chdir=infra/gcp apply <foundation-targets> -var=project_id=${PROJECT_ID} -var=region=${REGION} -var=service_name=${SERVICE} -var=artifact_repository=${ARTIFACT_REPOSITORY} -var=deploy_runtime=false
+terraform -chdir=infra/gcp apply <foundation-targets> -var=project_id=${PROJECT_ID} -var=region=${REGION} -var=service_name=${SERVICE} -var=artifact_repository=${ARTIFACT_REPOSITORY} -var=github_repository_id=<id> -var=github_repository_owner_id=<id> -var=deploy_runtime=false
 docker build --platform linux/amd64 -t ${IMAGE_TAG} templates/gcloud
 docker push ${IMAGE_TAG}
 terraform -chdir=infra/gcp apply ... -var=deploy_runtime=true -var=image_uri=<repository@sha256:digest>
@@ -76,26 +80,52 @@ EOF
 print_summary
 if [[ "$APPLY" != true ]]; then print_commands; exit 0; fi
 
-for command in gcloud terraform docker gh; do command -v "$command" >/dev/null || { echo "Required command not found: $command" >&2; exit 3; }; done
+for command in gcloud terraform docker gh jq; do command -v "$command" >/dev/null || { echo "Required command not found: $command" >&2; exit 3; }; done
 if [[ -z "$GITHUB_REPOSITORY" ]]; then GITHUB_REPOSITORY="$(gh repo view --json nameWithOwner --jq .nameWithOwner)"; fi
 if [[ ! "$GITHUB_REPOSITORY" =~ ^[^/]+/[^/]+$ ]]; then echo "Invalid GitHub repository: $GITHUB_REPOSITORY" >&2; exit 2; fi
 GITHUB_ORG="${GITHUB_REPOSITORY%%/*}"
 GITHUB_REPO="${GITHUB_REPOSITORY##*/}"
+GITHUB_REPOSITORY_ID="$(gh api "repos/$GITHUB_REPOSITORY" --jq '.id')"
+GITHUB_REPOSITORY_OWNER_ID="$(gh api "repos/$GITHUB_REPOSITORY" --jq '.owner.id')"
+if [[ ! "$GITHUB_REPOSITORY_ID" =~ ^[0-9]+$ || ! "$GITHUB_REPOSITORY_OWNER_ID" =~ ^[0-9]+$ ]]; then
+  echo "Could not resolve immutable GitHub repository and owner IDs" >&2
+  exit 4
+fi
 
 if ! gcloud storage buckets describe "gs://${STATE_BUCKET}" --project="$PROJECT_ID" >/dev/null 2>&1; then
   gcloud storage buckets create "gs://${STATE_BUCKET}" --project="$PROJECT_ID" --location="$REGION" --uniform-bucket-level-access
 fi
+gcloud storage buckets update "gs://${STATE_BUCKET}" \
+  --uniform-bucket-level-access --public-access-prevention --versioning
+for role in roles/storage.legacyBucketReader roles/storage.legacyObjectReader; do
+  if gcloud storage buckets get-iam-policy "gs://${STATE_BUCKET}" --format=json | \
+    jq -e --arg role "$role" --arg member "projectViewer:$PROJECT_ID" \
+      '.bindings[]? | select(.role == $role and ((.members // []) | index($member)))' \
+      >/dev/null; then
+    gcloud storage buckets remove-iam-policy-binding "gs://${STATE_BUCKET}" \
+      --member="projectViewer:$PROJECT_ID" --role="$role"
+  fi
+done
 terraform -chdir="$INFRA_DIR" init -reconfigure -input=false -backend-config="bucket=$STATE_BUCKET" -backend-config="prefix=cloud-run"
-COMMON_VARS=(-input=false -auto-approve -var="project_id=$PROJECT_ID" -var="region=$REGION" -var="service_name=$SERVICE" -var="artifact_repository=$ARTIFACT_REPOSITORY" -var="github_org=$GITHUB_ORG" -var="github_repo=$GITHUB_REPO")
+COMMON_VARS=(
+  -input=false
+  -auto-approve
+  -var="project_id=$PROJECT_ID"
+  -var="region=$REGION"
+  -var="service_name=$SERVICE"
+  -var="artifact_repository=$ARTIFACT_REPOSITORY"
+  -var="github_org=$GITHUB_ORG"
+  -var="github_repo=$GITHUB_REPO"
+  -var="github_repository_id=$GITHUB_REPOSITORY_ID"
+  -var="github_repository_owner_id=$GITHUB_REPOSITORY_OWNER_ID"
+)
 FOUNDATION_TARGETS=(
   -target=google_project_service.required_apis
   -target=google_artifact_registry_repository.repository
   -target=google_service_account.cloud_run_runtime
   -target=google_service_account.github_actions_deployer
   -target=google_project_iam_member.deployer_run_admin
-  -target=google_project_iam_member.deployer_artifact_registry_writer
-  -target=google_project_iam_member.deployer_service_account_user
-  -target=google_project_iam_member.deployer_token_creator
+  -target=google_service_account_iam_member.deployer_runtime_user
   -target=google_artifact_registry_repository_iam_member.deployer_repository_writer
   -target=google_iam_workload_identity_pool.github
   -target=google_iam_workload_identity_pool_provider.github

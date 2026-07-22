@@ -10,11 +10,11 @@ on:
         default: check
         options: [check, deploy, rollback]
       environment:
-        description: Deployment environment
+        description: Protected deployment environment (staging/prod are not enabled yet)
         type: choice
         required: true
         default: dev
-        options: [dev, staging, prod]
+        options: [dev]
       rollback_revision:
         description: Optional revision for rollback
         required: false

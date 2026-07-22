@@ -14,12 +14,10 @@ specific limitation and the follow-up needed to close it.
 
 ## Supported Release Baseline
 
-- Current published boilerplate convention package: `v1.0.3` (corrective
-  `v1.0.4` single-axis candidate pending)
+- Current published boilerplate convention package: `v1.0.5`
 - Current published CLI: `soku/v0.1.4`
-- Recommended full-verification baseline: boilerplate `v1.0.4` with
-  `soku/v0.1.4`, only after the separately approved signed `v1.0.4` tag and
-  GitHub Release exist.
+- Recommended full-verification baseline: boilerplate `v1.0.5` with
+  `soku/v0.1.4`.
 - Superseded CLIs: `soku/v0.1.0` and `soku/v0.1.1`; use `soku/v0.1.2`, which
   preserves manifest-v1 and Provider API v1 while making the fetched provider
   revision authoritative and fully supporting optional legacy provider `ref`.
@@ -32,8 +30,10 @@ specific limitation and the follow-up needed to close it.
   pair was published to correct those defects.
 - Published `v1.0.3` and `soku/v0.1.4` correct those defects, but required
   public four-stack smoke found that Python Ruff traverses a generated
-  JavaScript `node_modules` tree. Use `v1.0.4` after its signed Release is
-  published.
+  JavaScript `node_modules` tree. Published `v1.0.4` corrected that boundary,
+  and its public migration smoke found that JavaScript formatting traversed
+  lifecycle-owned `.soku/` state. Published `v1.0.5` excludes `.soku/` from
+  JavaScript and TypeScript formatting and is the current baseline.
 
 Published tags and releases are immutable. Verification must never move,
 delete, or reuse them, and must not publish a new release as a side effect.
