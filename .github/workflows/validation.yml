@@ -161,13 +161,7 @@ jobs:
         run: node .github/validate-pr-governance.mjs
 
   validation-gate:
-    name: >-
-      ${{ (github.event_name != 'pull_request' ||
-      github.event.action == 'opened' ||
-      github.event.action == 'synchronize' ||
-      github.event.action == 'reopened' ||
-      (github.event.action == 'edited' && github.event.changes.base != null)) &&
-      'Validation Gate' || 'Full Validation Not Required' }}
+    name: Validation Gate
     if: always()
     needs:
       - repository
