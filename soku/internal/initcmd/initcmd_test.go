@@ -123,6 +123,12 @@ func TestCatalogRenderingUsesExactTokensAndJavaPaths(t *testing.T) {
 	if strings.Contains(string(paths[".github/workflows/ci.yml"].Content), "# javascript") || !strings.Contains(string(paths[".github/workflows/ci.yml"].Content), "java-spring:") {
 		t.Fatal("CI was not selected deterministically")
 	}
+	prettierIgnore := string(paths[".prettierignore"].Content)
+	for _, crossStackPath := range []string{".github/workflows/*.yml", ".golangci.yml"} {
+		if !strings.Contains(prettierIgnore, crossStackPath+"\n") {
+			t.Errorf("multi-stack Prettier boundary is missing %s", crossStackPath)
+		}
+	}
 	workflow := string(paths[".github/workflows/ci.yml"].Content)
 	if !strings.Contains(workflow, "      - run: black --check .\n") {
 		t.Fatal("generated Python CI does not run black --check .")

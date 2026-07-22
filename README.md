@@ -15,13 +15,13 @@ For the canonical operating design, start with [BLUEPRINT.md](./BLUEPRINT.md).
 
 ## 📦 Current Published Baseline
 
-The current published boilerplate convention package is `v1.0.1`, and the
-current published CLI is `soku/v0.1.2`. Immutable `v1.0.0` retains its known
-development-template limitations, while `v1.0.1` contains the reviewed
-dependency and documentation fixes but still exposes a generated-workflow
-renderer defect in the published CLI. Issue #41 is therefore continuing as the
-corrective `v1.0.2` + `soku/v0.1.3` pair; use that pair only after its separate
-signed tags and Releases are published. See
+The current published releases are boilerplate `v1.0.2` and CLI
+`soku/v0.1.3`. Their signed records, complete hosted gates, packages, and
+checksums passed, but required public four-stack smoke found that the
+JavaScript formatter traverses and rejects two generated cross-stack YAML
+files. Issue #41 therefore continues with the single-axis corrective
+boilerplate `v1.0.3`; keep existing tags immutable and use the new baseline
+only after its separately approved signed tag and Release are published. See
 [VERIFICATION_GUIDE.md](./VERIFICATION_GUIDE.md) for the complete checks.
 
 ---

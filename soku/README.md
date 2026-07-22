@@ -6,8 +6,8 @@ parsing and output, transactional `init`, the portable manifest-v1 record, and
 read-only `status` diagnostics, immutable release comparison, and transactional
 core upgrades.
 
-The recommended full-verification baseline is the companion pair
-`v1.0.2` + `soku/v0.1.3` after their signed public Releases exist. Existing
+The recommended full-verification baseline is boilerplate `v1.0.3` with
+`soku/v0.1.3` after the signed public `v1.0.3` Release exists. Existing
 `v1.0.0`, `v1.0.1`, `soku/v0.1.1`, and `soku/v0.1.2` objects remain immutable
 historical compatibility baselines.
 
@@ -23,7 +23,7 @@ nothing.
 ```bash
 soku init \
   --boilerplate-source https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate \
-  --boilerplate-release v1.0.2 \
+  --boilerplate-release v1.0.3 \
   --stack javascript-typescript-node \
   --project-name example-service \
   --dry-run
@@ -102,7 +102,7 @@ The equivalent strict YAML file is a flat mapping. Unknown fields are rejected:
 ```yaml
 schema_version: 1
 boilerplate_source: https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate
-boilerplate_release: v1.0.2
+boilerplate_release: v1.0.3
 stacks:
   - go
   - postgresql

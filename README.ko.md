@@ -15,12 +15,13 @@
 
 ## 📦 현재 공개 베이스라인
 
-현재 공개 보일러플레이트 컨벤션 패키지는 `v1.0.1`이고 공개 CLI는
-`soku/v0.1.2`입니다. 불변 `v1.0.0`의 개발 템플릿 제한은 보존되며,
-`v1.0.1`에는 dependency와 문서 수정이 포함됐지만 공개 CLI의 generated
-workflow renderer 결함이 남아 있습니다. 따라서 Issue #41은 교정 쌍
-`v1.0.2` + `soku/v0.1.3`으로 계속 진행 중이며, 별도 서명 tag와 Release가
-발행되기 전에는 해당 쌍을 사용하지 마십시오. 전체 검사는
+현재 공개 release는 보일러플레이트 `v1.0.2`와 CLI `soku/v0.1.3`입니다.
+서명 record, 전체 hosted gate, package, checksum은 통과했지만 필수 공개
+four-stack smoke에서 JavaScript formatter가 함께 생성된 cross-stack YAML 두
+개를 검사해 실패하는 문제가 발견됐습니다. 따라서 Issue #41은 단일 축
+교정 보일러플레이트 `v1.0.3`으로 계속 진행합니다. 기존 tag는 불변으로
+보존하고, 별도 승인된 서명 tag와 Release가 발행된 후 새 baseline을
+사용하십시오. 전체 검사는
 [VERIFICATION_GUIDE.md](./VERIFICATION_GUIDE.md)를 참고하십시오.
 
 ---

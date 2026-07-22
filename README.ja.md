@@ -15,12 +15,13 @@
 
 ## 📦 現在公開中のベースライン
 
-現在公開中のボイラープレート規約パッケージは `v1.0.1`、公開 CLI は
-`soku/v0.1.2` です。不変 `v1.0.0` の template 制限は保持され、`v1.0.1`
-には dependency と文書の修正が含まれますが、公開 CLI の generated workflow
-renderer 不具合が残っています。そのため Issue #41 は修正版の組み合わせ
-`v1.0.2` + `soku/v0.1.3` として継続中です。別途署名された tag と Release が
-公開されるまでは、この組み合わせを使用しないでください。完全な検証は
+現在公開中の release は boilerplate `v1.0.2` と CLI `soku/v0.1.3` です。
+署名 record、完全な hosted gate、package、checksum は成功しましたが、必須の
+公開 four-stack smoke で JavaScript formatter が同時生成された cross-stack
+YAML 二件を検査して失敗する問題が見つかりました。そのため Issue #41 は
+単一軸の修正版 boilerplate `v1.0.3` として継続します。既存 tag は不変のまま
+保持し、別途承認された署名 tag と Release の公開後に新 baseline を使用して
+ください。完全な検証は
 [VERIFICATION_GUIDE.md](./VERIFICATION_GUIDE.md) を参照してください。
 
 ---
