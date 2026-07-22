@@ -92,6 +92,8 @@ jobs:
             .github/COMMENT_TEMPLATES.md
             .github/validate-pr-governance.mjs
             .github/validate-pr-governance.test.mjs
+            .github/issue-form-order.test.mjs
+            .github/validation-workflow.test.mjs
             .github/ISSUE_TEMPLATE/bug_report.yml
             .github/ISSUE_TEMPLATE/chore_task.yml
             .github/ISSUE_TEMPLATE/config.yml
@@ -104,6 +106,8 @@ jobs:
             .github/workflows/security.yml
             .github/workflows/templates-ci.yml
             .github/workflows/validation.yml
+            .github/workflows/contribution-title-check.yml
+            .github/workflows/pull-request-policy.yml
             .github/labels.yml
             .github/dependabot.yml
             templates/javascript-typescript-node/package.json
@@ -149,6 +153,10 @@ jobs:
             scripts/sync-boilerplate.ps1
             scripts/sync-boilerplate.sh
             scripts/sync-labels.sh
+            scripts/contribution-title.mjs
+            scripts/contribution-title.test.mjs
+            scripts/pull-request-policy.mjs
+            scripts/pull-request-policy.test.mjs
             scripts/setup-git-signing.sh
             scripts/create-release-tag.sh
             scripts/verify-release-tag.sh
@@ -223,10 +231,13 @@ jobs:
           done
 
       - name: Run contribution-title regression tests
-        run: node --test templates/_shared/commitlint/*.test.mjs
+        run: >-
+          node --test templates/_shared/commitlint/*.test.mjs
+          scripts/contribution-title.test.mjs
+          scripts/pull-request-policy.test.mjs
 
       - name: Run pull-request governance regression tests
-        run: node --test .github/validate-pr-governance.test.mjs
+        run: node --test .github/validate-pr-governance.test.mjs .github/issue-form-order.test.mjs .github/validation-workflow.test.mjs
 
       - name: Run release tag gate regression tests
         run: scripts/verify-release-tag_test.sh

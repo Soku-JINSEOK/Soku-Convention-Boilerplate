@@ -1,221 +1,189 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import test from "node:test";
-import {validatePullRequest} from "./pull-request-policy.mjs";
+import {
+  readCanonicalLabels,
+  readExpectedProfile,
+  validatePullRequest,
+} from "./pull-request-policy.mjs";
 
 const validBody = `## 🔗 Common Metadata
-Closes #12
+
+- **Issue:** Related to #21
+- **Task report:** \`docs/issues/issue-21-task-report.md\`
+- **Governance profile:** \`control-plane\`
+
 ## 🇬🇧 English — Normative Source
+
 ### 🎯 Goal
+
 Goal
+
 ### 📦 Scope
+
 Scope
+
 ### ✅ Acceptance Criteria
+
 Criteria
+
 ### 🔒️ Security Boundary
+
 Boundary
+
 ### 🧪 Verification
+
 - [x] npm test — passed
+
 ### ⚠️ Risks and Follow-up
+
 Risks
+
 ## 🇰🇷 한국어 요약
+
 ### 🎯 목표
+
 목표
+
 ### 📦 핵심 범위
+
 범위
+
 ### 🧪 검증
+
 검증
+
 ### 🔒️ 비파괴 조건
+
 조건
+
 ### ⚠️ 잔여 위험과 후속 작업
+
 위험
+
 ## 🇯🇵 日本語の要約
+
 ### 🎯 目標
+
 目標
+
 ### 📦 主な範囲
+
 範囲
+
 ### 🧪 検証
+
 検証
+
 ### 🔒️ 非破壊条件
+
 条件
+
 ### ⚠️ 残存リスクと後続作業
+
 リスク
+
 ## Gitmoji Checklist
+
 - [x] ✨ Feature
+
 ## 🤖 AI Assistance
-Codex`;
-const validTitle = "✨ feat(dashboard): add portfolio metrics";
 
-test("accepts a linked, labeled, verified pull request", () => {
+- **Planning/implementation/drafting:** OpenAI Codex`;
+
+const validTitle = "✨ feat(governance): enforce repository contract";
+const canonicalLabels = new Set([
+  "type:feature",
+  "type:chore",
+  "area:registry",
+  "area:ci",
+]);
+
+function validPullRequest(overrides = {}) {
+  return {
+    title: validTitle,
+    body: validBody,
+    labels: ["type:feature", "area:registry", "custom:kept"],
+    assignees: ["Soku-JINSEOK"],
+    canonicalLabels,
+    expectedProfile: "control-plane",
+    taskReportExists: (path) => path === "docs/issues/issue-21-task-report.md",
+    ...overrides,
+  };
+}
+
+function errors(overrides = {}) {
+  return validatePullRequest(validPullRequest(overrides));
+}
+
+test("accepts canonical and custom labels with complete metadata", () => {
+  assert.deepEqual(errors(), []);
+});
+
+test("reads repository label and profile sources", () => {
   assert.deepEqual(
-    validatePullRequest({
-      title: validTitle,
-      body: validBody,
-      labels: ["type:feature", "area:dashboard"],
-      files: ["apps/dashboard/a.ts"],
-      assignees: ["Soku-JINSEOK"],
-    }),
-    [],
+    [...readCanonicalLabels('- name: "type:feature"\n- name: area:ci\n')],
+    ["type:feature", "area:ci"],
   );
-});
-
-test("accepts a non-closing issue relationship", () => {
-  const body = validBody.replace("Closes #12", "Related to #12");
-  assert.deepEqual(
-    validatePullRequest({
-      title: validTitle,
-      body,
-      labels: ["type:feature", "area:dashboard"],
-      files: ["apps/dashboard/a.ts"],
-      assignees: ["Soku-JINSEOK"],
-    }),
-    [],
-  );
-});
-
-test("rejects closing keywords on draft pull requests", () => {
-  assert.match(
-    validatePullRequest({
-      title: validTitle,
-      body: validBody,
-      labels: ["type:feature", "area:dashboard"],
-      files: ["apps/dashboard/a.ts"],
-      assignees: ["Soku-JINSEOK"],
-      isDraft: true,
-    }).join(" "),
-    /Draft PRs must use only Related to or Refs/,
-  );
-});
-
-test("accepts non-closing references on draft pull requests", () => {
-  const body = validBody.replace("Closes #12", "Related to #12");
-  assert.deepEqual(
-    validatePullRequest({
-      title: validTitle,
-      body,
-      labels: ["type:feature", "area:dashboard"],
-      files: ["apps/dashboard/a.ts"],
-      assignees: ["Soku-JINSEOK"],
-      isDraft: true,
-    }),
-    [],
-  );
-});
-
-test("accepts local and qualified Refs relationships", () => {
-  for (const reference of ["Refs #12", "Refs Soku-JINSEOK/CutVi#101"]) {
-    const body = validBody.replace("Closes #12", reference);
-    assert.deepEqual(
-      validatePullRequest({
-        title: validTitle,
-        body,
-        labels: ["type:feature", "area:dashboard"],
-        files: ["apps/dashboard/a.ts"],
-        assignees: ["Soku-JINSEOK"],
-      }),
-      [],
-    );
-  }
-});
-
-test("rejects placeholders, missing labels, and a malformed issue reference", () => {
-  const errors = validatePullRequest({
-    title: "bad",
-    body: "Related to #\n<actual tool or None>",
-    labels: [],
-    files: [],
-  });
-  assert.equal(errors.length, 9);
-});
-
-test("rejects a pull request without the required assignee", () => {
-  assert.match(
-    validatePullRequest({
-      title: validTitle,
-      body: validBody,
-      labels: ["type:feature", "area:dashboard"],
-      files: ["apps/dashboard/a.ts"],
-    }).join(" "),
-    /assigned to Soku-JINSEOK/,
-  );
-});
-
-test("handles malformed assignee entries safely", () => {
   assert.equal(
-    validatePullRequest({
-      title: validTitle,
-      body: validBody,
-      labels: ["type:feature", "area:dashboard"],
-      files: ["apps/dashboard/a.ts"],
-      assignees: [null, 42],
-    }).filter((message) => message.includes("assigned to Soku-JINSEOK"))[0],
-    "PR must be assigned to Soku-JINSEOK.",
+    readExpectedProfile("- **Governance profile:** `boilerplate`\n"),
+    "boilerplate",
   );
 });
 
-test("reruns policy when assignment or draft state changes", () => {
+test("rejects labels that merely imitate canonical axes", () => {
+  assert.match(errors({labels: ["type:invented", "area:registry"]}).join(" "), /canonical type/);
+  assert.match(errors({labels: ["type:feature", "area:invented"]}).join(" "), /canonical area/);
+});
+
+test("rejects missing assignment", () => {
+  assert.match(errors({assignees: []}).join(" "), /assigned to Soku-JINSEOK/);
+});
+
+test("rejects closing relationships for Draft pull requests", () => {
+  assert.match(
+    errors({body: validBody.replace("Related to #21", "Closes #21"), isDraft: true}).join(" "),
+    /Draft PRs/,
+  );
+});
+
+test("rejects missing, multiple, and unsupported Issue relationships", () => {
+  assert.match(errors({body: validBody.replace("Related to #21", "Refs #21")}).join(" "), /exactly one/);
+  assert.match(
+    errors({body: validBody.replace("Related to #21", "Related to #21; Closes #22")}).join(" "),
+    /exactly one/,
+  );
+});
+
+test("binds the task report to the Issue and requires the file", () => {
+  assert.match(
+    errors({body: validBody.replace("issue-21-task-report", "issue-22-task-report")}).join(" "),
+    /must match/,
+  );
+  assert.match(errors({taskReportExists: () => false}).join(" "), /does not exist/);
+});
+
+test("requires the repository governance profile", () => {
+  assert.match(
+    errors({body: validBody.replace("`control-plane`", "`boilerplate`")}).join(" "),
+    /Governance profile must be control-plane/,
+  );
+});
+
+test("rejects heading, placeholder, verification, and AI errors", () => {
+  assert.match(errors({body: validBody.replace("## 🇰🇷", "## missing 🇰🇷")}).join(" "), /heading order/);
+  assert.match(errors({body: validBody.replace("Goal\n", "TODO\n")}).join(" "), /placeholder/);
+  assert.match(errors({body: validBody.replace("- [x] npm", "- [ ] npm")}).join(" "), /checked result/);
+  assert.match(errors({body: validBody.replace("OpenAI Codex", "Undisclosed")}).join(" "), /AI assistance/i);
+});
+
+test("workflow reruns on metadata changes and reads the current PR", () => {
   const workflow = fs.readFileSync(
     new URL("../.github/workflows/pull-request-policy.yml", import.meta.url),
     "utf8",
   );
-  assert.match(workflow, /types:\s*\[[^\]]*assigned[^\]]*unassigned[^\]]*\]/);
-  assert.match(
-    workflow,
-    /types:\s*\[[^\]]*ready_for_review[^\]]*converted_to_draft[^\]]*\]/,
-  );
-});
-
-test("validates the current pull request metadata instead of a stale event", () => {
-  const workflow = fs.readFileSync(
-    new URL("../.github/workflows/pull-request-policy.yml", import.meta.url),
-    "utf8",
-  );
-  assert.match(
-    workflow,
-    /gh api "repos\/\$\{GITHUB_REPOSITORY\}\/pulls\/\$\{PR_NUMBER\}"/,
-  );
-  assert.match(
-    workflow,
-    /CURRENT_PR_EVENT_PATH:\s*\/tmp\/current-pr-event\.json/,
-  );
-});
-
-test("rejects missing or reordered PR #2 sections", () => {
-  const body = validBody.replace(
-    "## 🇰🇷 한국어 요약",
-    "## 🇯🇵 日本語の要約",
-  );
-  assert.match(
-    validatePullRequest({
-      title: validTitle,
-      body,
-      labels: ["type:feature", "area:dashboard"],
-      files: [],
-      assignees: ["Soku-JINSEOK"],
-    }).join(" "),
-    /PR #2 section order/,
-  );
-});
-
-test("requires a task report for schema, delivery, security, and large work", () => {
-  assert.match(
-    validatePullRequest({
-      title: validTitle,
-      body: validBody,
-      labels: ["type:chore", "area:registry"],
-      files: ["registry/schema/x.json"],
-      assignees: ["Soku-JINSEOK"],
-    }).join(" "),
-    /task report/,
-  );
-  assert.deepEqual(
-    validatePullRequest({
-      title: validTitle,
-      body: `${validBody}\ndocs/issues/issue-12-task-report.md`,
-      labels: ["type:chore", "area:registry"],
-      files: ["registry/schema/x.json"],
-      assignees: ["Soku-JINSEOK"],
-    }),
-    [],
-  );
+  assert.match(workflow, /assigned, unassigned/);
+  assert.match(workflow, /ready_for_review, converted_to_draft/);
+  assert.match(workflow, /gh api "repos\/\$\{GITHUB_REPOSITORY\}\/pulls\/\$\{PR_NUMBER\}"/);
+  assert.match(workflow, /CURRENT_PR_EVENT_PATH:\s*\/tmp\/current-pr-event\.json/);
 });

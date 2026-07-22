@@ -12,14 +12,9 @@ jobs:
   policy:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           fetch-depth: 0
-      - name: Collect changed files
-        env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-        run: git diff --name-only "$BASE_SHA" "$HEAD_SHA" > /tmp/changed-files
       - name: Read current pull request metadata
         env:
           GH_TOKEN: ${{ github.token }}
@@ -29,6 +24,5 @@ jobs:
             | jq '{pull_request: .}' > /tmp/current-pr-event.json
       - name: Validate pull request contract
         env:
-          CHANGED_FILES_PATH: /tmp/changed-files
           CURRENT_PR_EVENT_PATH: /tmp/current-pr-event.json
         run: node scripts/pull-request-policy.mjs

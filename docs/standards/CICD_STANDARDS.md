@@ -64,12 +64,20 @@ Avoid building opaque pipelines that only one person can maintain.
 For this boilerplate, one top-level Validation workflow must run on every pull
 request and every push to `main`. It calls the complete repository and
 runtime-template workflows, enforces the pull-request title and every in-scope
-commit title, and aggregates their results into one stable `Validation Gate`.
-Required branch protection targets that aggregate gate. Component workflows are
+commit title. Code-bearing events aggregate repository, template, and security
+results into `Validation Gate`; every pull request event validates current
+title, body, labels, assignee, and Draft state through `PR Metadata Gate`.
+Metadata-only events create `Full Validation Not Required` instead of a new
+`Validation Gate`, so they preserve the successful full-validation check on the
+unchanged head commit. Full and metadata validation use independent concurrency
+groups, and closed pull request events do not start this workflow.
+Required branch protection targets `Validation Gate` and `PR Metadata Gate`.
+Component workflows are
 reusable implementation details and must not also trigger independently, which
 would duplicate execution.
 
-Cancel older in-progress validation for the same ref. Keep default workflow
+Cancel older in-progress validation within the same full or metadata domain.
+Keep default workflow
 permissions at `contents: read`; only the release delivery job may request
 `contents: write`, after the shared validation and signed release-record checks
 succeed. Pin every external action to a verified full commit SHA and retain a
