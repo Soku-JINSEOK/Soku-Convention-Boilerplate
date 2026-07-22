@@ -6,9 +6,10 @@ Publish the reviewed `ci-cd-control-plane-v1` declarative bundle and composite
 action in the public Boilerplate repository without exposing private
 control-plane access, credentials, executable provider code, or mutable refs.
 
-This first publication phase deliberately omits the caller workflow. After this
-PR merges, a second PR will pin that caller to this phase's immutable full
-commit and will replace the pending mirror entry in the provenance ledger.
+The first publication phase deliberately omitted the caller workflow. Its
+squash merge produced commit
+`c5435ea36d88dbe3b4b2c373265206943c53fcbf`; the second phase pins the caller
+to that immutable commit and marks the public mirror as published.
 
 ## Delivered contract
 
@@ -25,6 +26,10 @@ commit and will replace the pending mirror entry in the provenance ledger.
   repository using the published provider contract.
 - Python tests reject mutable or uppercase refs, unsafe paths, unknown sources,
   symlinks, non-UTF-8 input, and literal-byte tampering.
+- The public caller invokes the immutable action and passes only its three
+  bounded outputs to the corresponding `soku --integration-*` arguments.
+- Caller conformance rejects mutable action refs, extra integration arguments,
+  secret-like inputs, private access, network fetches, and remote code execution.
 
 ## Verification
 
@@ -32,13 +37,14 @@ commit and will replace the pending mirror entry in the provenance ledger.
 - `python3 -m unittest discover -s soku/actions -p 'test_*.py'`
 - Provider and configuration JSON schema validation
 - Raw-byte SHA-256 ledger verification
+- Exact-ref caller conformance and prohibited-capability checks
 - Markdown, YAML, actionlint, repository hygiene, and `git diff --check`
 - Hosted full Validation and PR Metadata gates before merge
 
 ## Security and delivery boundary
 
 The action does not fetch private repositories, receive secrets, execute remote
-provider code, enable delivery, or create cloud resources. The public caller is
-not valid until it is added in phase two with the immutable merge commit from
-this phase. Merge, Project status changes, Issue closure, and delivery remain
-separate approval boundaries.
+provider code, enable delivery, or create cloud resources. The caller is a
+copyable example under `docs/callers/`, not an enabled repository workflow.
+Merge, Project status changes, Issue closure, and delivery remain separate
+approval boundaries.

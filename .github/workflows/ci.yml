@@ -219,6 +219,7 @@ jobs:
             soku/providers/ai-collaboration/provider-v1.json
             soku/providers/ai-collaboration/templates/ai-collaboration.yml
             .github/soku/ci-cd-control-plane-v1.yml
+            docs/callers/ci-cd-control-plane-v1.yml
             soku/actions/ci-cd-control-plane-v1/action.yml
             soku/actions/ci-cd-control-plane-v1/test_validate_config.py
             soku/actions/ci-cd-control-plane-v1/validate-config.py
@@ -265,7 +266,7 @@ jobs:
       - name: Validate GitHub YAML
         run: >-
           npx --yes yaml-lint@1.7.0 .github/*.yml .github/**/*.yml
-          soku/actions/**/*.yml soku/providers/**/*.yml
+          docs/callers/*.yml soku/actions/**/*.yml soku/providers/**/*.yml
 
       - name: Validate GitHub Actions semantics
         run: >-
