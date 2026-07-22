@@ -5,8 +5,9 @@
   "control_plane": {
     "repository": "https://github.com/Soku-JINSEOK/ci-cd-control-plane",
     "baseline_commit": "16caa523e1eb0884117ba19d1409a4294cd9d43d",
-    "bundle_review_commit": "4e34993ad8b4bcdc4e31073fd1f96cd04ee5b903",
-    "public_contract_review_commit": "19b925cf4c3a7156e0d11cd16630fc7490cecee9"
+    "baseline_delivery_commit": "4e37dada9884b738ecc19e714360b38bdcec3a24",
+    "bundle_delivery_commit": "b67a1c6df6f2318fea31f94e72fe3a44c1276c18",
+    "public_contract_delivery_commit": "e97915511bfdae86724aefe7b1273eef761cd423"
   },
   "public_files": [
     {
