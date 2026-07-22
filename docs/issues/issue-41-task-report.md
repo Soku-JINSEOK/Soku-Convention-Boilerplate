@@ -150,6 +150,25 @@ current `main` and `soku/v0.1.2`.
 
 ## Verification
 
+### Published smoke follow-up (2026-07-22)
+
+- Published signed tags `v1.0.2` and `soku/v0.1.3` resolve to reviewed source
+  commit `94df168861edb3ab3d136a4a0e5dd9b23d49fec5`. Both tag-triggered Release
+  runs passed the full repository, runtime-template, security, three-OS
+  lifecycle, five-target package, and aggregate gates. The boilerplate Release
+  has no assets; the CLI Release has five platform archives plus
+  `checksums.txt`, and every downloaded archive passed its published checksum.
+- Failed: the required public four-application-stack `init --yes --verify`
+  using the published macOS arm64 `soku/v0.1.3` archive and boilerplate
+  `v1.0.2`. Go, Java, JavaScript tests, typecheck, lint, and build passed, but
+  JavaScript `prettier --check .` rejected generated `.github/workflows/ci.yml`
+  and `.golangci.yml`. The CLI correctly aborted before writing the manifest.
+- Corrective action: keep both published tags immutable and release a
+  boilerplate-only `v1.0.3` patch. Its JavaScript `.prettierignore` excludes
+  only the two cross-stack YAML surfaces, which retain dedicated YAML, action,
+  and Go lint validation. `soku/v0.1.3` remains the compatible CLI; no new CLI
+  release is required.
+
 ### Corrective verification update (2026-07-21)
 
 - The first `v1.0.2`/`soku/v0.1.3` validation-only preflight on final provider
@@ -176,9 +195,10 @@ current `main` and `soku/v0.1.2`.
   Gitleaks, and whitespace checks. Hosted CI remains required for its locked
   Python registry tests and dashboard audit; local execution intentionally did
   not export private dependency metadata or install missing validator packages.
-- Not run locally: `shellcheck`, race/golangci-lint, hosted cloud/database
-  gates, and the public `v1.0.2`/`soku/v0.1.3` lifecycle smoke. These remain
-  release-gate requirements after a reviewable commit is available.
+- Historical local limitation before publication: `shellcheck`,
+  race/golangci-lint, hosted cloud/database gates, and the public lifecycle
+  smoke were not yet run. The hosted gates later passed; the public smoke
+  produced the `v1.0.3` corrective finding recorded above.
 
 - Passed: targeted Markdown lint and `git diff --check` for the report-only
   Draft PR.
@@ -208,8 +228,9 @@ current `main` and `soku/v0.1.2`.
   race/golangci-lint, sync parity, and the aggregate Validation Gate. The prior
   run was cancelled by the PR title update and did not identify a product or CI
   defect.
-- Pending: post-merge `main`, validation-only Release preflight, separately
-  approved signed-tag delivery, and public lifecycle/security smoke.
+- Pending: merge the `v1.0.3` corrective candidate, run validation-only
+  preflight, obtain separate signed-tag delivery approval, and repeat fresh and
+  migration public lifecycle smoke against the immutable published Release.
 
 ## AI Assistance
 
