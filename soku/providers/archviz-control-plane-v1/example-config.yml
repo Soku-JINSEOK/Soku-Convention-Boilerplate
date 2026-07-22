@@ -1,0 +1,11 @@
+schema_version: 1
+provider_id: archviz-control-plane-v1
+repository: Soku-JINSEOK/archviz
+project_id: archviz
+visibility: private
+pipeline:
+  kind: artifact-release
+  template: go-react-v1
+governance_profile: go-react
+registry_ref: 16caa523e1eb0884117ba19d1409a4294cd9d43d
+delivery_enabled: false

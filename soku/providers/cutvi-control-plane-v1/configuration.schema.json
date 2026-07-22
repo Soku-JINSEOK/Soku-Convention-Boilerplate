@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "cutvi-control-plane-v1 configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "provider_id",
+    "repository",
+    "project_id",
+    "visibility",
+    "pipeline",
+    "governance_profile",
+    "registry_ref",
+    "delivery_enabled"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "provider_id": {
+      "const": "cutvi-control-plane-v1"
+    },
+    "repository": {
+      "const": "Soku-JINSEOK/CutVi"
+    },
+    "project_id": {
+      "const": "cutvi"
+    },
+    "visibility": {
+      "const": "private"
+    },
+    "pipeline": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "template"
+      ],
+      "properties": {
+        "kind": {
+          "const": "release"
+        },
+        "template": {
+          "const": "electron-v1"
+        }
+      }
+    },
+    "governance_profile": {
+      "const": "electron"
+    },
+    "registry_ref": {
+      "const": "16caa523e1eb0884117ba19d1409a4294cd9d43d"
+    },
+    "delivery_enabled": {
+      "const": false
+    }
+  }
+}

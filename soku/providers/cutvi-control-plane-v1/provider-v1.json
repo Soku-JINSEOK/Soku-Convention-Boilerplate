@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "id": "cutvi-control-plane-v1",
+  "source": "github:Soku-JINSEOK/Soku-Convention-Boilerplate/soku/providers/cutvi-control-plane-v1",
+  "provider_api_version": "1",
+  "provider_schema_version": "1",
+  "compatible_soku": ">=0.1.2 <1.0.0",
+  "configuration_schema_hash": "bf2fe597591f128b2d1d187b1c623a09355dbf25233ddd4581279823c841a06f",
+  "configuration_hash": "a04f10c9d950f33d276c5bdbba10954f0a1d1194b162472f53721e3a686161c8",
+  "compatible_profiles": [
+    "bootstrap",
+    "scaled",
+    "standard"
+  ],
+  "outputs": [
+    {
+      "template": "templates/control-plane-provider.yml",
+      "path": ".github/control-plane-provider.yml",
+      "content_mode": "text"
+    }
+  ]
+}

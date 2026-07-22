@@ -80,6 +80,13 @@ exact compatible bundle adds only its declared outputs and records `connected`.
 Pending-to-connected and profile/provider changes use the same manifest-last
 transaction and rollback boundary as core upgrades.
 
+The public mirror includes exact registered bundles for `cutvi`, `archviz`,
+`report-hub`, and `soku-pr-site` under `providers/<project>-control-plane-v1/`.
+They share the generic loader and differ only through their reviewed metadata,
+configuration schema, configuration bytes, and literal output. The provenance
+ledger at `providers/provenance/registered-downstream-v1.json` binds the
+control-plane merge and all public bytes. No caller is enabled automatically.
+
 The pending artifact contains exactly `schema_version`, `id`, portable
 `source`, authoritative `ref`, and `configuration_hash`. A sanitized
 configuration can be submitted only through a provider-owned channel outside

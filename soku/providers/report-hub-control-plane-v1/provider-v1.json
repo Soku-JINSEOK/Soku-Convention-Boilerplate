@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "id": "report-hub-control-plane-v1",
+  "source": "github:Soku-JINSEOK/Soku-Convention-Boilerplate/soku/providers/report-hub-control-plane-v1",
+  "provider_api_version": "1",
+  "provider_schema_version": "1",
+  "compatible_soku": ">=0.1.2 <1.0.0",
+  "configuration_schema_hash": "42fddbcf3a6e154441979e51fe5497c500c0eb22411a55232670e4caaeb723bb",
+  "configuration_hash": "40a496a02836b88797c01ad89e35c7696276602f18c24f089f725048e46d2716",
+  "compatible_profiles": [
+    "bootstrap",
+    "scaled",
+    "standard"
+  ],
+  "outputs": [
+    {
+      "template": "templates/control-plane-provider.yml",
+      "path": ".github/control-plane-provider.yml",
+      "content_mode": "text"
+    }
+  ]
+}

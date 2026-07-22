@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "id": "soku-pr-site-control-plane-v1",
+  "source": "github:Soku-JINSEOK/Soku-Convention-Boilerplate/soku/providers/soku-pr-site-control-plane-v1",
+  "provider_api_version": "1",
+  "provider_schema_version": "1",
+  "compatible_soku": ">=0.1.2 <1.0.0",
+  "configuration_schema_hash": "435b823d5d08ad37b3506b4bea2313f5d55f6065ff26c55f62fd1588be3f832b",
+  "configuration_hash": "95316168b5d490a4035e7879c858b88f5f3a4469a7db2391ac2a5db454bd3ee6",
+  "compatible_profiles": [
+    "bootstrap",
+    "scaled",
+    "standard"
+  ],
+  "outputs": [
+    {
+      "template": "templates/control-plane-provider.yml",
+      "path": ".github/control-plane-provider.yml",
+      "content_mode": "text"
+    }
+  ]
+}
