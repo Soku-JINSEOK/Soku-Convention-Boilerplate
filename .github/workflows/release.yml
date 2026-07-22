@@ -6,7 +6,7 @@ on:
       boilerplate-tag:
         description: Boilerplate tag to validate without publishing
         required: true
-        default: v1.0.3
+        default: v1.0.4
       cli-tag:
         description: CLI tag to validate without publishing
         required: true
