@@ -96,7 +96,12 @@ variable "wif_pool_id" {
 variable "wif_provider_id" {
   description = "Workload Identity Provider ID under the pool."
   type        = string
-  default     = "gha"
+  default     = "github"
+
+  validation {
+    condition     = length(var.wif_provider_id) >= 4 && length(var.wif_provider_id) <= 32
+    error_message = "wif_provider_id must contain between 4 and 32 characters."
+  }
 }
 
 variable "enabled_apis" {

@@ -30,7 +30,7 @@ resource "google_service_account" "cloud_run_runtime" {
 
 resource "google_service_account" "github_actions_deployer" {
   project      = var.project_id
-  account_id   = "${substr(var.service_name, 0, 16)}-gh-deployer"
+  account_id   = "${substr(var.service_name, 0, 15)}-gh-deployer"
   display_name = "GitHub Actions deployer identity for ${var.service_name}"
 
   depends_on = [google_project_service.required_apis]
@@ -152,8 +152,7 @@ resource "google_iam_workload_identity_pool_provider" "github" {
   }
   attribute_condition = "assertion.repository == \"${var.github_org}/${var.github_repo}\""
   oidc {
-    issuer_uri        = "https://token.actions.githubusercontent.com"
-    allowed_audiences = ["https://token.actions.githubusercontent.com"]
+    issuer_uri = "https://token.actions.githubusercontent.com"
   }
 }
 
