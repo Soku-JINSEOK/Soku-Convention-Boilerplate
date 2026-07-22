@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "id": "ci-cd-control-plane-v1",
+  "source": "github:Soku-JINSEOK/Soku-Convention-Boilerplate/soku/providers/ci-cd-control-plane-v1",
+  "provider_api_version": "1",
+  "provider_schema_version": "1",
+  "compatible_soku": ">=0.1.2 <1.0.0",
+  "configuration_schema_hash": "3e0171ebf312108fef37f377d54994bfd247d35f7539b1a70d4cd3c7beb3490c",
+  "configuration_hash": "f72121194a48fc3a6a521033c4248652c7889fd0ba86ea8b10270a854b9a0f56",
+  "compatible_profiles": ["bootstrap", "scaled", "standard"],
+  "outputs": [
+    {
+      "template": "templates/control-plane-provider.yml",
+      "path": ".github/control-plane-provider.yml",
+      "content_mode": "text"
+    }
+  ]
+}

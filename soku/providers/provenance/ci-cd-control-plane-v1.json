@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "provider_id": "ci-cd-control-plane-v1",
+  "hash_algorithm": "sha256-raw-bytes",
+  "control_plane": {
+    "repository": "https://github.com/Soku-JINSEOK/ci-cd-control-plane",
+    "baseline_commit": "16caa523e1eb0884117ba19d1409a4294cd9d43d",
+    "bundle_review_commit": "4e34993ad8b4bcdc4e31073fd1f96cd04ee5b903",
+    "public_contract_review_commit": "19b925cf4c3a7156e0d11cd16630fc7490cecee9"
+  },
+  "public_files": [
+    {
+      "path": ".github/soku/ci-cd-control-plane-v1.yml",
+      "sha256": "f72121194a48fc3a6a521033c4248652c7889fd0ba86ea8b10270a854b9a0f56"
+    },
+    {
+      "path": "soku/actions/ci-cd-control-plane-v1/action.yml",
+      "sha256": "6907b2e2d1c99b0a96e944c9239a8d6ef67984d64b58454fb7bfb73554bd199a"
+    },
+    {
+      "path": "soku/actions/ci-cd-control-plane-v1/validate-config.py",
+      "sha256": "5c65acb75e9b77e1574b9775506c91558ca0d7218136f8a04a989a151a3727f7"
+    },
+    {
+      "path": "soku/providers/ci-cd-control-plane-v1/configuration.schema.json",
+      "sha256": "3e0171ebf312108fef37f377d54994bfd247d35f7539b1a70d4cd3c7beb3490c"
+    },
+    {
+      "path": "soku/providers/ci-cd-control-plane-v1/example-config.yml",
+      "sha256": "f72121194a48fc3a6a521033c4248652c7889fd0ba86ea8b10270a854b9a0f56"
+    },
+    {
+      "path": "soku/providers/ci-cd-control-plane-v1/provider-v1.json",
+      "sha256": "cc482eebb38d8e904b6667d3d85f6d8e9f3a5baa730c4e7ed1a50e9f82a29abc"
+    },
+    {
+      "path": "soku/providers/ci-cd-control-plane-v1/templates/control-plane-provider.yml",
+      "sha256": "8ca4232918e5089c68249c50e048bd4209c854599d2537f8df6390a5dfe078f8"
+    }
+  ],
+  "public_mirror": {
+    "state": "awaiting-merge",
+    "commit": null
+  },
+  "delivery_enabled": false
+}

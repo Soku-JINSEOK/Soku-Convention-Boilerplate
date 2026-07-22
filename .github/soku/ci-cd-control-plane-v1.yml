@@ -1,0 +1,11 @@
+schema_version: 1
+provider_id: ci-cd-control-plane-v1
+repository: Soku-JINSEOK/Soku-Convention-Boilerplate
+project_id: soku-convention-boilerplate
+visibility: public
+pipeline:
+  kind: hygiene
+  template: boilerplate-hygiene-v1
+governance_profile: boilerplate
+registry_ref: 16caa523e1eb0884117ba19d1409a4294cd9d43d
+delivery_enabled: false
