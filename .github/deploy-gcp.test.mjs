@@ -434,7 +434,7 @@ test('Terraform separates foundation from digest-pinned runtime', () => {
   assert.match(variables, /variable "image_uri"[\s\S]*default\s+= null[\s\S]*@sha256:/);
   assert.match(main, /resource "google_cloud_run_service"[\s\S]*count\s+= var\.deploy_runtime \? 1 : 0/);
   assert.match(main, /account_id\s+= "\$\{substr\(var\.service_name, 0, 20\)\}-runtime"/);
-  assert.match(main, /account_id\s+= "\$\{substr\(var\.service_name, 0, 15\)\}-gh-deployer"/);
+  assert.match(main, /account_id\s+= "\$\{substr\(var\.service_name, 0, 16\)\}-gh-deployer"/);
   assert.match(main, /resource "google_service_account_iam_member" "deployer_runtime_user"/);
   assert.match(main, /resource "google_service_account_iam_member" "deployer_self_token_creator"/);
   assert.doesNotMatch(main, /resource "google_project_iam_member"[\s\S]{0,300}roles\/iam\.serviceAccountTokenCreator/);
