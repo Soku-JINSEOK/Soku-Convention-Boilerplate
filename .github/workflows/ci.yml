@@ -82,6 +82,7 @@ jobs:
             docs/issues/issue-40-task-report.md
             docs/issues/issue-41-task-report.md
             docs/issues/issue-44-task-report.md
+            docs/issues/issue-54-task-report.md
             docs/issues/issue-56-task-report.md
             docs/issues/issue-55-task-report.md
             LICENSE
@@ -188,6 +189,7 @@ jobs:
             soku/internal/initcmd/plan.go
             soku/internal/initcmd/profile.go
             soku/internal/initcmd/profile_integration_test.go
+            soku/internal/initcmd/public_provider_test.go
             soku/internal/initcmd/source.go
             soku/internal/initcmd/transaction.go
             soku/internal/initcmd/upgrade.go
@@ -197,6 +199,7 @@ jobs:
             soku/internal/lifecyclee2e/core_lifecycle_test.go
             soku/internal/lifecyclee2e/provider_conformance_test.go
             soku/internal/lifecyclee2e/provider_network_conformance_test.go
+            soku/internal/lifecyclee2e/public_provider_conformance_test.go
             soku/internal/manifest/manifest.go
             soku/internal/manifest/manifest_test.go
             soku/internal/manifest/replace_unix.go
@@ -215,6 +218,15 @@ jobs:
             soku/providers/ai-collaboration/example-config.yml
             soku/providers/ai-collaboration/provider-v1.json
             soku/providers/ai-collaboration/templates/ai-collaboration.yml
+            .github/soku/ci-cd-control-plane-v1.yml
+            soku/actions/ci-cd-control-plane-v1/action.yml
+            soku/actions/ci-cd-control-plane-v1/test_validate_config.py
+            soku/actions/ci-cd-control-plane-v1/validate-config.py
+            soku/providers/ci-cd-control-plane-v1/configuration.schema.json
+            soku/providers/ci-cd-control-plane-v1/example-config.yml
+            soku/providers/ci-cd-control-plane-v1/provider-v1.json
+            soku/providers/ci-cd-control-plane-v1/templates/control-plane-provider.yml
+            soku/providers/provenance/ci-cd-control-plane-v1.json
             soku/scripts/package.sh
             soku/scripts/package_test.sh
             soku/scripts/run_lifecycle_gate.sh
@@ -239,6 +251,9 @@ jobs:
       - name: Run pull-request governance regression tests
         run: node --test .github/validate-pr-governance.test.mjs .github/issue-form-order.test.mjs .github/validation-workflow.test.mjs
 
+      - name: Run public provider action regression tests
+        run: python3 soku/actions/ci-cd-control-plane-v1/test_validate_config.py
+
       - name: Run release tag gate regression tests
         run: scripts/verify-release-tag_test.sh
 
@@ -248,7 +263,9 @@ jobs:
           "**/*.md" "#**/node_modules/**"
 
       - name: Validate GitHub YAML
-        run: npx --yes yaml-lint@1.7.0 .github/*.yml .github/**/*.yml
+        run: >-
+          npx --yes yaml-lint@1.7.0 .github/*.yml .github/**/*.yml
+          soku/actions/**/*.yml soku/providers/**/*.yml
 
       - name: Validate GitHub Actions semantics
         run: >-

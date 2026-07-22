@@ -1,0 +1,30 @@
+name: Resolve ci-cd-control-plane-v1 integration
+description: Validate the reviewed configuration and expose immutable soku arguments.
+
+inputs:
+  configuration-path:
+    description: Repository-relative path to the reviewed integration YAML.
+    required: true
+
+outputs:
+  integration-source:
+    description: Portable public Provider API bundle source.
+    value: ${{ steps.contract.outputs.integration-source }}
+  integration-ref:
+    description: Full commit SHA used to fetch this public action and bundle.
+    value: ${{ steps.contract.outputs.integration-ref }}
+  integration-config:
+    description: Validated repository-relative configuration path.
+    value: ${{ steps.contract.outputs.integration-config }}
+
+runs:
+  using: composite
+  steps:
+    - id: contract
+      name: Validate immutable provider contract
+      shell: bash
+      env:
+        CONFIGURATION_PATH: ${{ inputs.configuration-path }}
+        INTEGRATION_REF: ${{ github.action_ref }}
+        INTEGRATION_SOURCE: github:Soku-JINSEOK/Soku-Convention-Boilerplate/soku/providers/ci-cd-control-plane-v1
+      run: python3 "${{ github.action_path }}/validate-config.py"
