@@ -19,7 +19,7 @@ updates:
     ignore:
       - dependency-name: "*"
         update-types:
-          - major
+          - version-update:semver-major
     assignees:
       - Soku-JINSEOK
     labels:
@@ -47,7 +47,7 @@ updates:
     ignore:
       - dependency-name: "*"
         update-types:
-          - major
+          - version-update:semver-major
     assignees:
       - Soku-JINSEOK
     labels:
@@ -75,7 +75,7 @@ updates:
     ignore:
       - dependency-name: "*"
         update-types:
-          - major
+          - version-update:semver-major
     assignees:
       - Soku-JINSEOK
     labels:
@@ -103,7 +103,7 @@ updates:
     ignore:
       - dependency-name: "*"
         update-types:
-          - major
+          - version-update:semver-major
     assignees:
       - Soku-JINSEOK
     labels:
