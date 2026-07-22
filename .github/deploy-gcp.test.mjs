@@ -439,6 +439,7 @@ test('Terraform separates foundation from digest-pinned runtime', () => {
   assert.match(main, /resource "google_service_account_iam_member" "deployer_self_token_creator"/);
   assert.doesNotMatch(main, /resource "google_project_iam_member"[\s\S]{0,300}roles\/iam\.serviceAccountTokenCreator/);
   assert.match(main, /resource "google_cloud_run_service_iam_member" "deployer_invoker"/);
+  assert.doesNotMatch(main, /roles\/iam\.serviceAccountTokenCreator/);
   assert.doesNotMatch(main, /resource "google_project_iam_member" "deployer_artifact_registry_writer"/);
   assert.match(main, /assertion\.repository_id/);
   assert.match(main, /assertion\.repository_owner_id/);

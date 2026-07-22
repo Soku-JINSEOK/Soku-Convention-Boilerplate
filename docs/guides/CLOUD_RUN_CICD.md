@@ -97,6 +97,7 @@ The deploy helper also assigns 100% traffic to the resolved ready revision and
 verifies Cloud Run's reported percentage before calling `/health`. A missing or
 non-100% value fails the deployment and restores the exact pre-deploy revision.
 Successful evidence records `verified_traffic_percent: 100`.
+service account. It has no project-level Token Creator role.
 
 ## Recovery
 
