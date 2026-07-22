@@ -234,9 +234,21 @@ current `main` and `soku/v0.1.2`.
   race/golangci-lint, sync parity, and the aggregate Validation Gate. The prior
   run was cancelled by the PR title update and did not identify a product or CI
   defect.
-- Pending: merge the `v1.0.3` corrective candidate, run validation-only
-  preflight, obtain separate signed-tag delivery approval, and repeat fresh and
-  migration public lifecycle smoke against the immutable published Release.
+- Passed: corrective PR #80 merged as verified `d06a2ce13d29e447ab922a5ca87b1bbf2b2ab48a`
+  after a fresh full hosted run; all required gates passed with no pending or
+  failed checks and no unresolved review threads.
+- Passed: baseline-preservation PR #81 rebased onto that source and merged as
+  verified `e45b4ecac1b74520f98330b4bd18da84546b1dc7`. Its fresh hosted run passed
+  the full repository, runtime-template, security, package, three-OS lifecycle,
+  `Validation Gate`, and `PR Metadata Gate` checks.
+- Candidate: publish boilerplate `v1.0.3` with corrective CLI `soku/v0.1.4`
+  from one reviewed source commit. The companion records preserve all existing
+  public tags and make the mergeable-baseline correction independently
+  versioned instead of attributing it to immutable `soku/v0.1.3`.
+- Pending: merge the final release-record candidate, run validation-only
+  preflight with `v1.0.3`/`soku/v0.1.4`, obtain separate signed-tag delivery
+  approval, and repeat fresh and migration public lifecycle smoke against the
+  immutable published Releases.
 
 ## AI Assistance
 

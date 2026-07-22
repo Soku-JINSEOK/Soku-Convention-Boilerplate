@@ -19,8 +19,9 @@
 署名 record、完全な hosted gate、package、checksum は成功しましたが、必須の
 公開 four-stack smoke で JavaScript formatter が同時生成された cross-stack
 YAML 二件を検査して失敗する問題が見つかりました。そのため Issue #41 は
-単一軸の修正版 boilerplate `v1.0.3` として継続します。既存 tag は不変のまま
-保持し、別途承認された署名 tag と Release の公開後に新 baseline を使用して
+修正版 companion 候補の boilerplate `v1.0.3` と CLI `soku/v0.1.4` として
+継続します。既存 tag は不変のまま保持し、別途承認された署名 tag と Release
+の公開後に新 baseline を使用して
 ください。完全な検証は
 [VERIFICATION_GUIDE.md](./VERIFICATION_GUIDE.md) を参照してください。
 

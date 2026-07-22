@@ -14,12 +14,12 @@ specific limitation and the follow-up needed to close it.
 
 ## Supported Release Baseline
 
-- Current published boilerplate convention package: `v1.0.2` (single-axis
-  corrective `v1.0.3` candidate pending)
+- Current published boilerplate convention package: `v1.0.2` (corrective
+  `v1.0.3` companion candidate pending)
 - Current published CLI: `soku/v0.1.3`
 - Recommended full-verification baseline: boilerplate `v1.0.3` with
-  `soku/v0.1.3`, only after the separately approved signed `v1.0.3` tag and
-  GitHub Release exist.
+  `soku/v0.1.4`, only after the separately approved signed companion tags and
+  GitHub Releases exist.
 - Superseded CLIs: `soku/v0.1.0` and `soku/v0.1.1`; use `soku/v0.1.2`, which
   preserves manifest-v1 and Provider API v1 while making the fetched provider
   revision authoritative and fully supporting optional legacy provider `ref`.
@@ -27,8 +27,9 @@ specific limitation and the follow-up needed to close it.
   and its dependency snapshots predate the current `tmp` and Jackson fixes.
 - Published `v1.0.2` and `soku/v0.1.3` contain the source-authoritative
   renderer, but their public four-stack smoke found a cross-stack Prettier
-  boundary defect. Use `v1.0.3` for fresh multi-stack initialization after its
-  signed Release is published.
+  boundary defect, and `soku/v0.1.3` can record a false baseline after an
+  unchanged mergeable-file transition. Use the `v1.0.3`/`soku/v0.1.4`
+  companion pair after both signed Releases are published.
 
 Published tags and releases are immutable. Verification must never move,
 delete, or reuse them, and must not publish a new release as a side effect.
@@ -143,7 +144,7 @@ the sanitized incident and remediation status.
 ## Published Artifact Checks
 
 For `v1.0.0`, `v1.0.1`, `v1.0.2`, and the corrective baseline
-`v1.0.3`/`soku/v0.1.3`:
+`v1.0.3`/`soku/v0.1.4`:
 
 1. Resolve each public tag and verify its signed annotated tag record and release
    metadata without changing either object.

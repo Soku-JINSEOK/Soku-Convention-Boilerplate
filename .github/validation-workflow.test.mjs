@@ -57,7 +57,7 @@ test('does not subscribe to closed pull request events', () => {
 
 test('release preflight can call validation without enabling delivery', () => {
   assert.match(releaseWorkflow, /boilerplate-tag:[\s\S]*default: v1\.0\.3/);
-  assert.match(releaseWorkflow, /cli-tag:[\s\S]*default: soku\/v0\.1\.3/);
+  assert.match(releaseWorkflow, /cli-tag:[\s\S]*default: soku\/v0\.1\.4/);
   assert.match(
     releaseWorkflow,
     /permissions:\n\s+contents: read\n\s+pull-requests: read/,

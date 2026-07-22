@@ -7,9 +7,9 @@ read-only `status` diagnostics, immutable release comparison, and transactional
 core upgrades.
 
 The recommended full-verification baseline is boilerplate `v1.0.3` with
-`soku/v0.1.3` after the signed public `v1.0.3` Release exists. Existing
-`v1.0.0`, `v1.0.1`, `soku/v0.1.1`, and `soku/v0.1.2` objects remain immutable
-historical compatibility baselines.
+`soku/v0.1.4` after both signed public Releases exist. Existing `v1.0.0`,
+`v1.0.1`, `v1.0.2`, `soku/v0.1.1`, `soku/v0.1.2`, and `soku/v0.1.3` objects
+remain immutable historical compatibility baselines.
 
 ## Transactional Init
 
