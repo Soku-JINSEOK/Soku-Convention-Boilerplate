@@ -160,6 +160,11 @@ current `main` and `soku/v0.1.2`.
   defaults to the corrective pair, and adds a regression test that delivery
   remains restricted to tag pushes. A hosted rerun is required after merge.
 
+- Passed: corrective PR #77 hosted run `29892490977`, including the aggregate
+  Validation Gate, current PR Metadata Gate, five-language CodeQL, three-OS
+  lifecycle, five-target package snapshot, runtime templates, databases,
+  dependency/license/vulnerability checks, Gitleaks, OSV, and sync parity.
+
 - Passed: `soku` and `templates/go` unit tests, vet, format/import checks,
   lifecycle conformance, five-target package reproducibility, release-tag
   regression, Markdown/YAML lint, actionlint, and `git diff --check`.
