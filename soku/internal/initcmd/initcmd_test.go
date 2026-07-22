@@ -129,6 +129,12 @@ func TestCatalogRenderingUsesExactTokensAndJavaPaths(t *testing.T) {
 			t.Errorf("multi-stack Prettier boundary is missing %s", crossStackPath)
 		}
 	}
+	pythonConfig := string(paths["pyproject.toml"].Content)
+	for _, boundary := range []string{`"node_modules"`, `exclude = ["node_modules/"]`} {
+		if !strings.Contains(pythonConfig, boundary) {
+			t.Errorf("multi-stack Python boundary is missing %s", boundary)
+		}
+	}
 	workflow := string(paths[".github/workflows/ci.yml"].Content)
 	if !strings.Contains(workflow, "      - run: black --check .\n") {
 		t.Fatal("generated Python CI does not run black --check .")

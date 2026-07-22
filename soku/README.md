@@ -6,10 +6,10 @@ parsing and output, transactional `init`, the portable manifest-v1 record, and
 read-only `status` diagnostics, immutable release comparison, and transactional
 core upgrades.
 
-The recommended full-verification baseline is boilerplate `v1.0.3` with
-`soku/v0.1.4` after both signed public Releases exist. Existing `v1.0.0`,
-`v1.0.1`, `v1.0.2`, `soku/v0.1.1`, `soku/v0.1.2`, and `soku/v0.1.3` objects
-remain immutable historical compatibility baselines.
+The recommended full-verification baseline is boilerplate `v1.0.4` with
+`soku/v0.1.4` after the signed public `v1.0.4` Release exists. Existing
+boilerplate and CLI tags, including `v1.0.3` and `soku/v0.1.4`, remain immutable
+historical compatibility baselines.
 
 ## Transactional Init
 

@@ -249,6 +249,20 @@ current `main` and `soku/v0.1.2`.
   preflight with `v1.0.3`/`soku/v0.1.4`, obtain separate signed-tag delivery
   approval, and repeat fresh and migration public lifecycle smoke against the
   immutable published Releases.
+- Published: signed annotated `v1.0.3` and `soku/v0.1.4` resolve to verified
+  source `dcb04af12fe2962f748983fc12aac1850f60c11e`. Both tag-triggered Release
+  runs passed their full validation and delivery jobs. The CLI Release contains
+  five archives plus `checksums.txt`; every downloaded archive matched its
+  published SHA-256 checksum.
+- Failed public smoke: four-stack `init --yes --verify` passed Go, Java, and all
+  JavaScript lint/typecheck/test/build/Prettier checks, then Python Ruff scanned
+  `node_modules/flatted/python/flatted.py` and rejected third-party JavaScript
+  dependency code. The CLI aborted before applying the manifest.
+- Corrective action: keep both public tags immutable and publish a single-axis
+  boilerplate `v1.0.4` PATCH. The Python template excludes `node_modules` from
+  Ruff and mypy discovery while continuing to check Python `src` and `tests`.
+  A rendered multi-stack regression fixes this boundary. `soku/v0.1.4` remains
+  the compatible CLI and no replacement CLI tag is required.
 
 ## AI Assistance
 

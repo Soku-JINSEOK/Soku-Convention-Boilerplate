@@ -15,12 +15,12 @@
 
 ## 📦 현재 공개 베이스라인
 
-현재 공개 release는 보일러플레이트 `v1.0.2`와 CLI `soku/v0.1.3`입니다.
+현재 공개 release는 보일러플레이트 `v1.0.3`과 CLI `soku/v0.1.4`입니다.
 서명 record, 전체 hosted gate, package, checksum은 통과했지만 필수 공개
-four-stack smoke에서 JavaScript formatter가 함께 생성된 cross-stack YAML 두
-개를 검사해 실패하는 문제가 발견됐습니다. 따라서 Issue #41은 교정 companion
-후보인 보일러플레이트 `v1.0.3`과 CLI `soku/v0.1.4`로 계속 진행합니다. 기존
-tag는 불변으로 보존하고, 별도 승인된 서명 tag와 Release가 발행된 후 새 baseline을
+four-stack smoke에서 Python Ruff가 함께 생성된 JavaScript `node_modules`를
+검사해 실패하는 문제가 발견됐습니다. 따라서 Issue #41은 단일 축 보일러플레이트
+`v1.0.4` 후보로 계속 진행합니다. 기존 tag는 불변으로 보존하고, 별도 승인된
+서명 tag와 Release가 발행된 후 새 baseline을
 사용하십시오. 전체 검사는
 [VERIFICATION_GUIDE.md](./VERIFICATION_GUIDE.md)를 참고하십시오.
 
