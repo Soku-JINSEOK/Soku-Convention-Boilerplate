@@ -205,6 +205,7 @@ jobs:
           RELEASE_TAG: ${{ needs.release-metadata.outputs.tag }}
         run: |
           version="${RELEASE_TAG#soku/}"
+          version="${version#v}"
           node soku/npm/scripts/prepare-package.mjs --version "$version" --repo-root "$GITHUB_WORKSPACE"
       - name: Publish npm package
         env:
