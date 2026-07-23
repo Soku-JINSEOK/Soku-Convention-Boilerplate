@@ -220,9 +220,9 @@ For `soku/v0.2.0` and later releases:
 
 1. Install the published wrapper package to a temporary prefix:
 
-```bash
-npm install -g @soku-jinseok/soku@0.2.0 --prefix "$RUNNER_TEMP/node-soku"
-```
+   ```bash
+   npm install -g @soku-jinseok/soku@0.2.0 --prefix "$RUNNER_TEMP/node-soku"
+   ```
 
 2. Run `soku --version` from that installation and confirm it matches
    `soku/v0.2.0` metadata.
