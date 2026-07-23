@@ -253,6 +253,18 @@ set_traffic_revision() {
     --quiet
 }
 
+get_revision_traffic_percent() {
+  local revision="$1"
+
+  gcloud run services describe "$CD_PLAN_SERVICE_NAME" \
+    --project "$CD_PLAN_PROJECT_ID" \
+    --region "$CD_PLAN_REGION" \
+    --platform managed \
+    --flatten='status.traffic[]' \
+    --filter="status.traffic.revisionName=$revision" \
+    --format='value(status.traffic.percent)'
+}
+
 run_health_check() {
   local service_url="$1"
   local attempt=1
@@ -301,6 +313,7 @@ record_evidence() {
   local new_revision="$4"
   local error_message="$5"
   local rollback_target="${6:-}"
+  local verified_traffic_percent="${7:-}"
 
   jq -n \
     --arg environment "$CD_PLAN_ENVIRONMENT" \
@@ -313,6 +326,7 @@ record_evidence() {
     --arg previous_revision "$previous_revision" \
     --arg new_revision "$new_revision" \
     --arg rollback_target "$rollback_target" \
+    --arg verified_traffic_percent "$verified_traffic_percent" \
     --arg status "$status" \
     --arg error "$error_message" \
     --arg actor "${GITHUB_ACTOR:-}" \
@@ -331,6 +345,11 @@ record_evidence() {
       pre_deploy_revision: $previous_revision,
       new_revision: $new_revision,
       rollback_target: $rollback_target,
+      verified_traffic_percent: (
+        if $verified_traffic_percent == "" then null
+        else ($verified_traffic_percent | tonumber)
+        end
+      ),
       error: $error,
       actor: $actor,
       run_id: $run_id,
@@ -380,6 +399,8 @@ perform_deploy() {
   local previous_revision=""
   local new_revision=""
   local service_url=""
+  local traffic_percent=""
+  local deploy_error=""
 
   previous_revision="$(get_current_revision)"
   echo "Current revision before deploy: ${previous_revision:-<none>}"
@@ -400,7 +421,7 @@ perform_deploy() {
 
   new_revision="$(get_current_revision)"
   service_url="$(get_service_url)"
-  if [[ -z "$service_url" ]]; then
+  if [[ -z "$new_revision" || -z "$service_url" ]]; then
     record_evidence "failed" "$evidence_file" "$previous_revision" "$new_revision" "service-url-missing"
     write_step_summary "failed" "$previous_revision" "$new_revision" "$service_url"
     if [[ -n "${GITHUB_OUTPUT:-}" ]]; then
@@ -409,7 +430,18 @@ perform_deploy() {
     exit 9
   fi
 
-  if ! run_health_check "$service_url"; then
+  if ! set_traffic_revision "$new_revision"; then
+    deploy_error="deploy-failed-traffic-update"
+  else
+    traffic_percent="$(get_revision_traffic_percent "$new_revision" || true)"
+    if [[ "$traffic_percent" != "100" ]]; then
+      deploy_error="deploy-failed-traffic-verification"
+    elif ! run_health_check "$service_url"; then
+      deploy_error="deploy-failed-healthcheck"
+    fi
+  fi
+
+  if [[ -n "$deploy_error" ]]; then
     local rollback_target
 
     if [[ -n "$previous_revision" ]]; then
@@ -419,7 +451,7 @@ perform_deploy() {
           new_revision="$(get_current_revision)"
           service_url="$(get_service_url)"
           if run_health_check "$service_url"; then
-            record_evidence "rolled-back" "$evidence_file" "$previous_revision" "$new_revision" "deploy-failed-healthcheck" "$rollback_target"
+            record_evidence "rolled-back" "$evidence_file" "$previous_revision" "$new_revision" "$deploy_error" "$rollback_target" "$traffic_percent"
             write_step_summary "rolled-back" "$previous_revision" "$rollback_target" "$service_url"
             if [[ -n "${GITHUB_OUTPUT:-}" ]]; then
               echo "evidence_file=$evidence_file" >> "$GITHUB_OUTPUT"
@@ -430,7 +462,7 @@ perform_deploy() {
       fi
     fi
 
-    record_evidence "failed" "$evidence_file" "$previous_revision" "$new_revision" "deploy-failed-healthcheck-and-rollback-failed" "${rollback_target:-}"
+    record_evidence "failed" "$evidence_file" "$previous_revision" "$new_revision" "${deploy_error}-and-rollback-failed" "${rollback_target:-}" "$traffic_percent"
     write_step_summary "failed" "$previous_revision" "$new_revision" "$service_url"
     if [[ -n "${GITHUB_OUTPUT:-}" ]]; then
       echo "evidence_file=$evidence_file" >> "$GITHUB_OUTPUT"
@@ -438,7 +470,7 @@ perform_deploy() {
     exit 9
   fi
 
-  record_evidence "success" "$evidence_file" "$previous_revision" "$new_revision" ""
+  record_evidence "success" "$evidence_file" "$previous_revision" "$new_revision" "" "" "$traffic_percent"
   write_step_summary "success" "$previous_revision" "$new_revision" "$service_url"
 
   if [[ -n "${GITHUB_OUTPUT:-}" ]]; then

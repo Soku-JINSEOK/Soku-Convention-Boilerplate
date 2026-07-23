@@ -93,6 +93,10 @@ non-hidden `deploy-evidence/` directory. The workflow uploads that directory eve
 when the operation fails and treats a missing evidence file as an operation
 failure. Inspect `final_status`, the before/after revisions, rollback target, and
 run URL in the downloaded artifact; no token or credential path is recorded.
+The deploy helper also assigns 100% traffic to the resolved ready revision and
+verifies Cloud Run's reported percentage before calling `/health`. A missing or
+non-100% value fails the deployment and restores the exact pre-deploy revision.
+Successful evidence records `verified_traffic_percent: 100`.
 
 ## Recovery
 
