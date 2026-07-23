@@ -12,6 +12,8 @@
 ## 🗺️ マスターブループリント
 
 標準的な設計および運用モデルについては、[BLUEPRINT.md](./BLUEPRINT.md) を参照してください。
+初回導入時の profile 選択から初期化と upgrade までは、
+[総合利用マニュアル](./docs/guides/USAGE_MANUAL.md) に従ってください。
 
 ## 📦 現在公開中のベースライン
 
@@ -148,6 +150,7 @@ smoke で確認された境界を修正し、lifecycle-owned `.soku/` state を 
 
 ### 🧭 `docs/guides/` — ベストプラクティスおよび案内ガイドドキュメント
 
+- [USAGE_MANUAL.md](./docs/guides/USAGE_MANUAL.md): 適用レベルと検証済み installation から governance、任意の GCP dev deploy、upgrade までをつなぐ人間向け開始点
 - [STACK_EXAMPLES.md](./docs/guides/STACK_EXAMPLES.md): 主要言語、DB、クラウドワークフローの構築例
 - [STACK_CONFIGS.md](./docs/guides/STACK_CONFIGS.md): スタック別設定ファイルテンプレート一覧
 - [README_GUIDE.md](./docs/guides/README_GUIDE.md): プロジェクトのREADMEを明確に維持するためのガイド

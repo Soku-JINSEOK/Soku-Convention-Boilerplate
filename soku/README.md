@@ -6,10 +6,11 @@ parsing and output, transactional `init`, the portable manifest-v1 record, and
 read-only `status` diagnostics, immutable release comparison, and transactional
 core upgrades.
 
-The recommended full-verification baseline is boilerplate `v1.0.4` with
-`soku/v0.1.4` after the signed public `v1.0.4` Release exists. Existing
-boilerplate and CLI tags, including `v1.0.3` and `soku/v0.1.4`, remain immutable
-historical compatibility baselines.
+The recommended full-verification baseline is the published boilerplate
+`v1.0.5` with CLI `soku/v0.1.4`. Existing boilerplate and CLI tags, including
+`v1.0.4` and `soku/v0.1.3`, remain immutable historical compatibility
+baselines. Human adopters should start with the
+[end-to-end usage manual](../docs/guides/USAGE_MANUAL.md).
 
 ## Transactional Init
 
@@ -23,7 +24,7 @@ nothing.
 ```bash
 soku init \
   --boilerplate-source https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate \
-  --boilerplate-release v1.0.3 \
+  --boilerplate-release v1.0.5 \
   --stack javascript-typescript-node \
   --project-name example-service \
   --dry-run
@@ -102,7 +103,7 @@ The equivalent strict YAML file is a flat mapping. Unknown fields are rejected:
 ```yaml
 schema_version: 1
 boilerplate_source: https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate
-boilerplate_release: v1.0.3
+boilerplate_release: v1.0.5
 stacks:
   - go
   - postgresql
@@ -231,7 +232,7 @@ For a published immutable release, Go understands the repository's submodule
 tag and installs it by module version:
 
 ```bash
-go install github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/soku@v0.1.2
+go install github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/soku@v0.1.4
 ```
 
 ## Verify a Release Download
@@ -241,7 +242,7 @@ then verify it before extraction. For example:
 
 ```bash
 sha256sum --check --ignore-missing checksums.txt
-tar -xzf soku_v0.1.2_linux_amd64.tar.gz
+tar -xzf soku_v0.1.4_linux_amd64.tar.gz
 ./soku --version
 ```
 
@@ -257,7 +258,7 @@ Linux arm64, macOS amd64, macOS arm64, and Windows amd64 archives:
 ```bash
 cd soku
 ./scripts/package.sh \
-  --version v0.1.2 \
+  --version v0.1.4 \
   --commit 0123456789abcdef0123456789abcdef01234567 \
   --built-at 2026-07-18T00:00:00Z \
   --output-dir ./dist
