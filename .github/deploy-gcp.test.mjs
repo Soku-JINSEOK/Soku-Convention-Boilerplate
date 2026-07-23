@@ -15,10 +15,11 @@ function executable(path, body) {
 }
 
 function run(script, args, env = {}) {
+  const summaryFile = join(mkdtempSync(join(tmpdir(), 'summary-')), 'step-summary.md');
   return spawnSync('bash', [join(root, 'scripts', script), ...args], {
     cwd: root,
     encoding: 'utf8',
-    env: {...process.env, ...env},
+    env: {GITHUB_STEP_SUMMARY: summaryFile, ...process.env, ...env},
   });
 }
 

@@ -15,6 +15,54 @@
 初回導入時の profile 選択から初期化と upgrade までは、
 [総合利用マニュアル](./docs/guides/USAGE_MANUAL.md) に従ってください。
 
+## ⚡ クイックスタート
+
+<details>
+<summary>最小コマンドで新規リポジトリを開始する</summary>
+
+運用スタイルに合う手順を1つ選択してください。
+
+### 1) 事前準備
+
+```bash
+soku --version
+```
+
+### 2) `soku` のインストール
+
+```bash
+npm install -g @soku-jinseok/soku@0.2.1
+```
+
+npm が利用できない場合は、`soku/v0.2.1` リリースのバイナリを取得し、`checksums.txt`で
+整合性を確認してインストールしてください。
+
+### 3) ブートストラップと検証
+
+```bash
+soku init \
+  --boilerplate-source https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate \
+  --boilerplate-release v1.0.5 \
+  --profile standard \
+  --stack javascript-typescript-node \
+  --project-name my-service \
+  --verify \
+  --dry-run
+```
+
+結果を確認したら、`--dry-run` を `--yes` に置き換えて適用します。
+
+### 4) PR/CI 前のローカル検証
+
+```bash
+make fmt-check
+make lint
+make test
+make build
+```
+
+</details>
+
 ## 📦 現在公開中のベースライン
 
 現在公開中の release は boilerplate `v1.0.5` と CLI `soku/v0.1.4` です。
