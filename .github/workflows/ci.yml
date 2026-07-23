@@ -98,6 +98,8 @@ jobs:
             docs/issues/issue-78-task-report.md
             docs/issues/issue-87-task-report.md
             docs/issues/issue-55-task-report.md
+            docs/issues/issue-98-task-report.md
+            docs/guides/USAGE_MANUAL.md
             LICENSE
             SECURITY.md
             .editorconfig
@@ -110,6 +112,7 @@ jobs:
             .github/issue-form-order.test.mjs
             .github/validation-workflow.test.mjs
             .github/deploy-gcp.test.mjs
+            .github/usage-manual.test.mjs
             .github/ISSUE_TEMPLATE/bug_report.yml
             .github/ISSUE_TEMPLATE/chore_task.yml
             .github/ISSUE_TEMPLATE/config.yml
@@ -285,6 +288,7 @@ jobs:
           .github/issue-form-order.test.mjs
           .github/validation-workflow.test.mjs
           .github/deploy-gcp.test.mjs
+          .github/usage-manual.test.mjs
 
       - name: Run public provider action regression tests
         run: python3 soku/actions/ci-cd-control-plane-v1/test_validate_config.py
