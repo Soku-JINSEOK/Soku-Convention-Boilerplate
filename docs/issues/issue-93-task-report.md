@@ -46,10 +46,10 @@ that a bot can satisfy.
 ## Implementation Status
 
 PR [#97](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/pull/97)
-contains the implementation. Its initial hosted run produced only the parent
-Validation workflow: one code-bearing run and metadata-only runs, with no
-independent component workflow. Full validation and both aggregate gates passed;
-merge and the post-merge #89/#90 refresh remain.
+contains the implementation. Its hosted run produced only the parent Validation
+workflow: one code-bearing run and metadata-only runs, with no independent
+component workflow. Full validation and both aggregate gates passed, and the
+post-merge #89/#90 refresh has now completed via user-confirmed squash merge.
 
 ## Verification
 
@@ -62,7 +62,7 @@ merge and the post-merge #89/#90 refresh remain.
 - Hosted code Validation — passed ([run 29973030102](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/actions/runs/29973030102))
 - Hosted metadata Validation — passed ([run 29973031297](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/actions/runs/29973031297))
 - Independent component workflow runs — none
-- #89/#90 refresh — pending merge
+- #89/#90 refresh — completed (squash merge and branch delete completed)
 
 ## AI Assistance
 
@@ -112,8 +112,8 @@ Dependabot에만 body/title 예외를 적용합니다.
 PR [#97](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/pull/97)에
 구현을 포함했습니다. 최초 hosted 실행은 상위 Validation workflow만 생성했으며 코드
 변경 run 1건과 metadata-only run으로 나뉘고 독립 component workflow는 생성되지
-않았습니다. 전체 validation과 두 aggregate gate가 통과했으며 병합과 병합 후
-Dependabot PR #89/#90 갱신이 남았습니다.
+않았습니다. 전체 validation과 두 aggregate gate가 통과했으며 #89/#90 병합 및 병합
+후 갱신은 사용자 확인 기준으로 완료된 상태입니다.
 
 ## 검증
 
@@ -126,7 +126,7 @@ Dependabot PR #89/#90 갱신이 남았습니다.
 - hosted 코드 Validation — 통과 ([run 29973030102](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/actions/runs/29973030102))
 - hosted metadata Validation — 통과 ([run 29973031297](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/actions/runs/29973031297))
 - 독립 component workflow run — 없음
-- #89/#90 갱신 — 병합 대기
+- #89/#90 갱신 — 완료
 
 ## AI 지원
 

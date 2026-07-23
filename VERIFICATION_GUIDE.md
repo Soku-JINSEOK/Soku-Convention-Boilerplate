@@ -214,6 +214,32 @@ assets must stay below 2 GiB each; GitHub currently documents no total release
 size or bandwidth limit, with up to 1,000 assets per release. See
 [About releases](https://docs.github.com/en/repositories/releasing-projects-on-github/about-releases).
 
+## npm Wrapper Checks (`@soku-jinseok/soku`)
+
+For `soku/v0.2.0` and later releases:
+
+1. Install the published wrapper package to a temporary prefix:
+
+```bash
+npm install -g @soku-jinseok/soku@0.2.0 --prefix "$RUNNER_TEMP/node-soku"
+```
+
+2. Run `soku --version` from that installation and confirm it matches
+   `soku/v0.2.0` metadata.
+3. Validate a lightweight command path (`soku status`) without making
+   destructive changes.
+
+If your environment blocks global install, validate offline by checking:
+
+```bash
+cd soku/npm
+npm test
+node scripts/prepare-package.mjs --version 0.2.0 --repo-root ../..
+```
+
+Record whether runtime verification passed, including any network or publish
+restriction that required a reduced evidence scope.
+
 ## Issue and Pull Request Audit
 
 Audit every issue and merged pull request in scope against the standards that

@@ -28,6 +28,9 @@ This repository publishes two independent version lines:
 | Boilerplate convention package | `vMAJOR.MINOR.PATCH` | A versioned convention baseline for downstream synchronization and lifecycle source selection. |
 | `soku` CLI | `soku/vMAJOR.MINOR.PATCH` | A signed source tag used to build the cross-platform CLI archives and GitHub Release. |
 
+For `soku/v0.2.0` and later, the same tag is also the source for the npm
+wrapper package `@soku-jinseok/soku`.
+
 A tag on one axis never creates, advances, or implies a release on the other
 axis. The versions may differ because CLI compatibility and boilerplate content
 evolve independently. The CLI release procedure is documented in
@@ -60,6 +63,8 @@ A CLI `soku/v*` release records:
 - the provider API/schema versions and profile rules it supports
 - the operating-system package matrix, checksum artifact, and lifecycle
   conformance evidence
+- npm wrapper availability (`@soku-jinseok/soku`) where the CLI tag is
+  `soku/v0.2.0` or later
 - any breaking behavior, read-only compatibility state, or manual recovery
   requirement
 
@@ -79,6 +84,10 @@ commit. A single-axis patch records `Companion tag: none` and relies on its
 explicit compatibility fields instead. CLI releases alone receive the five
 platform archives and
 `checksums.txt`; neither release axis is marked latest automatically.
+
+For `soku/v0.2.0` and later, the Release workflow also runs a separate npm
+publish path for `@soku-jinseok/soku`, but only after the GitHub Release
+delivery succeeds and release metadata is complete.
 
 Release tag helpers create and verify local tags but never push. When two axes
 are intentionally released from one reviewed commit, publish them with one

@@ -57,7 +57,11 @@ Every PR should answer:
 - What risks or tradeoffs exist?
 - What follow-up work remains?
 
-This boilerplate's own issue and pull request templates record English as the normative source and require Korean and Japanese summaries of the same goal, scope, verification, non-destructive boundary, and risk information. The English source also records explicit acceptance criteria. Downstream repositories should adapt those language blocks to the collaboration language selected in their `CONTRIBUTING.md` without weakening the underlying review contract.
+Pull requests are the full bilingual contract: English is normative and Korean/Japanese summaries, verification, security boundary, and risk follow-on sections are required.
+
+Issue templates are a lighter contract: English is normative for task framing, acceptance, and non-destructive boundary; priority/area metadata plus Korean/Japanese summaries are optional.
+
+Downstream repositories should adapt those language blocks and optional metadata to the collaboration language selected in their `CONTRIBUTING.md` without weakening the underlying review contract.
 
 The `Governance profile` field identifies a profile only when the repository is mapped in a documented governance registry linked from its operational documentation. Use the exact registered profile name when that mapping exists; otherwise use `None`. During downstream synchronization, do not copy the source repository's profile value unchanged: resolve the downstream repository's own registry mapping or replace the value with `None`.
 
@@ -189,7 +193,9 @@ scripts/sync-labels.sh --repo <owner>/<repo>
 | `status:` | `triage`, `ready`, `in-progress`, `blocked`, `done` |
 | `area:` | `docs`, `standards`, `tooling`, `ci`, `templates`, `automation`, `security` (example set — adapt per project) |
 
-Issue forms (`.github/ISSUE_TEMPLATE/*.yml`) apply a `type:` label by default (`type:bug`, `type:feature`, `type:chore`) and use the same normative-source, multilingual-summary, verification, security, risk, and AI-assistance structure as the pull request template. Apply priority and area labels as issue metadata rather than duplicating them in the issue body. Run `sync-labels.sh` before those forms are used, or issue creation will silently drop a default label that does not exist.
+Issue forms (`.github/ISSUE_TEMPLATE/*.yml`) apply a `type:` label by default (`type:bug`, `type:feature`, `type:chore`) and require English-core task fields plus safety and acceptance criteria. They do not require multilingual summaries, priority, area, or AI-assistance fields unless explicitly required by a downstream profile.
+
+Apply priority and area labels as issue metadata rather than duplicating them in the issue body. Run `sync-labels.sh` before those forms are used, or issue creation will silently drop a default label that does not exist.
 
 The `boilerplate` and other complete governance profiles require at least one
 canonical `type:` label and one canonical `area:` label on every pull request.

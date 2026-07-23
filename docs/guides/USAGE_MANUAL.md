@@ -76,6 +76,16 @@ checksum command with `shasum -a 256 --check`. On Windows, select
 `Get-FileHash -Algorithm SHA256`, and compare it with that asset's exact line in
 `checksums.txt` before extraction. Stop if the checksum or version differs.
 
+For `soku/v0.2.0` and later, you can also install via npm:
+
+```bash
+npm install -g @soku-jinseok/soku@0.2.0
+soku --version
+```
+
+The npm package resolves the same release archive from GitHub, validates its
+`checksums.txt` entry, caches a local executable, and executes it.
+
 ## 3. Detect stacks and preview initialization
 
 Run `soku` from the target repository root. Detection uses repository markers;
@@ -305,6 +315,7 @@ Never:
 
 - [ ] Adoption level and `bootstrap`, `standard`, or `scaled` profile recorded.
 - [ ] Boilerplate `v1.0.5` and CLI `soku/v0.1.4` selected independently.
+- [ ] For `soku/v0.2.0` and later, npm wrapper option is verified if used.
 - [ ] CLI archive checksum and reported version verified.
 - [ ] Stack IDs and required names confirmed with no placeholders.
 - [ ] `soku init --verify --dry-run` reviewed with no unexplained collisions.

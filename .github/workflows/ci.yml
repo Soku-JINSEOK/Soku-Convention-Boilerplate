@@ -80,6 +80,7 @@ jobs:
             docs/releases/soku-v0.1.2.md
             docs/releases/soku-v0.1.3.md
             docs/releases/soku-v0.1.4.md
+            docs/releases/soku-v0.2.0.md
             docs/issues/issue-16-task-report.md
             docs/issues/issue-17-task-report.md
             docs/issues/issue-18-task-report.md
@@ -100,6 +101,8 @@ jobs:
             docs/issues/issue-55-task-report.md
             docs/issues/issue-98-task-report.md
             docs/issues/issue-100-task-report.md
+            docs/issues/issue-101-task-report.md
+            docs/issues/issue-102-task-report.md
             docs/audits/github-governance-2026-07-23.md
             docs/guides/USAGE_MANUAL.md
             LICENSE
@@ -191,6 +194,12 @@ jobs:
             scripts/gcp-bootstrap.sh
             scripts/verify-sync-parity.sh
             soku/README.md
+            soku/npm/README.md
+            soku/npm/package.json
+            soku/npm/bin/soku.js
+            soku/npm/lib/launcher.mjs
+            soku/npm/lib/launcher.test.mjs
+            soku/npm/scripts/prepare-package.mjs
             soku/THIRD_PARTY_NOTICES.md
             soku/catalog/core-v1.json
             soku/catalog/index-v2.json
@@ -294,6 +303,15 @@ jobs:
           .github/deploy-gcp.test.mjs
           .github/usage-manual.test.mjs
           .github/github-governance-audit.test.mjs
+
+      - name: Run npm wrapper unit tests
+        run: >-
+          node --test soku/npm/lib/launcher.test.mjs
+
+      - name: Run npm wrapper package tests
+        run: >-
+          cd soku/npm &&
+          npm test
 
       - name: Run public provider action regression tests
         run: python3 soku/actions/ci-cd-control-plane-v1/test_validate_config.py
