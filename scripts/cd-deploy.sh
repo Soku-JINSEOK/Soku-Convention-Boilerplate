@@ -8,6 +8,7 @@ Usage: scripts/cd-deploy.sh \
   [--health-path /health] \
   [--health-attempts 18] \
   [--health-delay 10] \
+  [--identity-service-account <email>] \
   [--rollback-only] \
   [--rollback-revision <revision>] \
   [--confirm]
@@ -19,6 +20,9 @@ Options:
   --health-path <path>      Health endpoint path. Default: /health.
   --health-attempts <n>     Number of healthcheck retries. Default: 18.
   --health-delay <sec>      Delay between retries. Default: 10.
+  --identity-service-account <email>
+                            Optional service account impersonated when minting
+                            the private Cloud Run health-check identity token.
   --rollback-only           Perform manual rollback and skip new deployment.
   --rollback-revision <rev> Target revision for rollback.
   --confirm                 Skip manual confirmation prompt.
@@ -33,6 +37,7 @@ PLAN_FILE=""
 HEALTH_PATH="/health"
 HEALTH_ATTEMPTS=18
 HEALTH_DELAY=10
+IDENTITY_SERVICE_ACCOUNT=""
 ROLLBACK_ONLY=false
 ROLLBACK_REVISION=""
 CONFIRM=false
@@ -75,6 +80,15 @@ while ((${#})); do
       HEALTH_DELAY="$2"
       shift 2
       ;;
+    --identity-service-account)
+      if [[ "${2-}" == "" ]]; then
+        echo "Missing value for --identity-service-account" >&2
+        usage
+        exit 2
+      fi
+      IDENTITY_SERVICE_ACCOUNT="$2"
+      shift 2
+      ;;
     --rollback-only)
       ROLLBACK_ONLY=true
       shift
@@ -103,6 +117,12 @@ while ((${#})); do
       ;;
   esac
 done
+
+if [[ -n "$IDENTITY_SERVICE_ACCOUNT" &&
+  ! "$IDENTITY_SERVICE_ACCOUNT" =~ ^[a-zA-Z0-9][a-zA-Z0-9._-]*@[a-zA-Z0-9][a-zA-Z0-9.-]*\.gserviceaccount\.com$ ]]; then
+  echo "--identity-service-account must be a Google service-account email" >&2
+  exit 2
+fi
 
 if [[ -z "$PLAN_FILE" || ! -f "$PLAN_FILE" ]]; then
   echo "--plan-file is required and must exist" >&2
@@ -245,8 +265,14 @@ run_health_check() {
     return 1
   fi
 
-  if ! identity_token="$(gcloud auth print-identity-token \
-    --audiences="${service_url%/}")" || [[ -z "$identity_token" ]]; then
+  local token_args=()
+  if [[ -n "$IDENTITY_SERVICE_ACCOUNT" ]]; then
+    token_args+=(--impersonate-service-account="$IDENTITY_SERVICE_ACCOUNT")
+  fi
+  token_args+=(--audiences="${service_url%/}")
+
+  if ! identity_token="$(gcloud auth print-identity-token "${token_args[@]}")" ||
+    [[ -z "$identity_token" ]]; then
     echo "Unable to acquire an identity token for the private Cloud Run health check" >&2
     return 1
   fi
@@ -315,7 +341,7 @@ record_evidence() {
 }
 
 get_evidence_file() {
-  local output_dir="${CD_DEPLOY_EVIDENCE_DIR:-$REPO_ROOT/.cd}"
+  local output_dir="${CD_DEPLOY_EVIDENCE_DIR:-$REPO_ROOT/deploy-evidence}"
   mkdir -p "$output_dir"
   local safe_env="${CD_PLAN_ENVIRONMENT//[^a-zA-Z0-9_-]/_}"
   local safe_run="${GITHUB_RUN_ID:-manual}"

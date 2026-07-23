@@ -62,14 +62,18 @@ jobs:
             --artifact-repository "${{ vars.GCP_ARTIFACT_REPOSITORY }}" \
             --output-dir "${{ github.workspace }}/.cd" --skip-local-checks --skip-infra --push-image
       - name: Deploy immutable image
-        run: scripts/cd-deploy.sh --plan-file "${{ github.workspace }}/.cd/${{ steps.plan.outputs.plan_file }}" --confirm
+        run: |
+          scripts/cd-deploy.sh \
+            --plan-file "${{ github.workspace }}/.cd/${{ steps.plan.outputs.plan_file }}" \
+            --identity-service-account "${{ vars.GCP_WIF_SERVICE_ACCOUNT }}" \
+            --confirm
       - name: Archive deployment evidence
         if: ${{ always() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: deploy-evidence-${{ inputs.environment }}-${{ github.run_id }}-${{ github.run_attempt }}
-          path: ${{ github.workspace }}/.cd/deploy-*.json
-          if-no-files-found: warn
+          path: ${{ github.workspace }}/deploy-evidence/deploy-*.json
+          if-no-files-found: error
           retention-days: 30
 
   rollback:
@@ -102,6 +106,19 @@ jobs:
         env:
           ROLLBACK_REVISION: ${{ inputs.rollback_revision }}
         run: |
-          args=(--plan-file "${{ github.workspace }}/.cd/${{ steps.plan.outputs.plan_file }}" --rollback-only --confirm)
+          args=(
+            --plan-file "${{ github.workspace }}/.cd/${{ steps.plan.outputs.plan_file }}"
+            --identity-service-account "${{ vars.GCP_WIF_SERVICE_ACCOUNT }}"
+            --rollback-only
+            --confirm
+          )
           if [[ -n "$ROLLBACK_REVISION" ]]; then args+=(--rollback-revision "$ROLLBACK_REVISION"); fi
           scripts/cd-deploy.sh "${args[@]}"
+      - name: Archive rollback evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: rollback-evidence-${{ inputs.environment }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ github.workspace }}/deploy-evidence/deploy-*.json
+          if-no-files-found: error
+          retention-days: 30

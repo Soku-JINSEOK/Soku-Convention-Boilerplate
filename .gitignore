@@ -29,6 +29,7 @@ pnpm-debug.log*
 
 # Deployment output and ephemeral Google credentials
 .cd/
+deploy-evidence/
 gha-creds-*.json
 
 # Node.js

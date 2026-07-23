@@ -82,6 +82,17 @@ repository and `iam.serviceAccountUser` is limited to the dedicated runtime
 service account. It has no project-level Token Creator role. The deployer can
 mint an ID token only for itself and has service-scoped Cloud Run Invoker access,
 which lets the deployment script authenticate its private `/health` request.
+The workflow passes that service-account email explicitly to `cd-deploy.sh`,
+which mints an audience-bound ID token through service-account impersonation.
+Local callers may omit `--identity-service-account`; the helper then keeps the
+active-account token path for backward compatibility. Never enable shell tracing
+around this command or persist identity tokens or generated credential paths.
+
+Every deployment and rollback attempt writes a sanitized JSON record under the
+non-hidden `deploy-evidence/` directory. The workflow uploads that directory even
+when the operation fails and treats a missing evidence file as an operation
+failure. Inspect `final_status`, the before/after revisions, rollback target, and
+run URL in the downloaded artifact; no token or credential path is recorded.
 
 ## Recovery
 
