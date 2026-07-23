@@ -12,6 +12,8 @@ It is designed not just as a starter, but as a repeatable foundation for buildin
 ## 🗺️ Master Blueprint
 
 For the canonical operating design, start with [BLUEPRINT.md](./BLUEPRINT.md).
+For first-time adoption from profile selection through initialization and
+upgrades, follow the [end-to-end usage manual](./docs/guides/USAGE_MANUAL.md).
 
 ## 📦 Current Published Baseline
 
@@ -150,6 +152,7 @@ This boilerplate is intended to serve as:
 
 ### 🧭 `docs/guides/` — reference material and walkthroughs
 
+- [USAGE_MANUAL.md](./docs/guides/USAGE_MANUAL.md): the human start page from adoption level and verified installation through governance, optional GCP dev delivery, and upgrades
 - [STACK_EXAMPLES.md](./docs/guides/STACK_EXAMPLES.md): practical examples across common languages, frameworks, databases, and cloud workflows
 - [STACK_CONFIGS.md](./docs/guides/STACK_CONFIGS.md): copyable starter configuration sets by stack
 - [README_GUIDE.md](./docs/guides/README_GUIDE.md): how repository README files should be written and maintained
