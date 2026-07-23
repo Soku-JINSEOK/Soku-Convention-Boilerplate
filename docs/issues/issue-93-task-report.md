@@ -45,8 +45,11 @@ that a bot can satisfy.
 
 ## Implementation Status
 
-Implementation is complete locally on the dedicated Step 2 branch and awaits
-hosted validation after the preceding deployment PR is merged.
+PR [#97](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/pull/97)
+contains the implementation. Its initial hosted run produced only the parent
+Validation workflow: one code-bearing run and metadata-only runs, with no
+independent component workflow. Full validation and both aggregate gates passed;
+merge and the post-merge #89/#90 refresh remain.
 
 ## Verification
 
@@ -56,7 +59,10 @@ hosted validation after the preceding deployment PR is merged.
 - `yaml-lint` for repository GitHub YAML — passed
 - Markdown lint for all tracked docs and this report — passed
 - `git diff --check` — passed
-- Hosted Validation and #89/#90 refresh — pending
+- Hosted code Validation — passed ([run 29973030102](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/actions/runs/29973030102))
+- Hosted metadata Validation — passed ([run 29973031297](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/actions/runs/29973031297))
+- Independent component workflow runs — none
+- #89/#90 refresh — pending merge
 
 ## AI Assistance
 
@@ -103,8 +109,11 @@ Dependabot에만 body/title 예외를 적용합니다.
 
 ## 구현 현황
 
-Step 2 전용 브랜치의 로컬 구현을 완료했으며 선행 배포 PR 병합 후 hosted
-validation을 기다립니다.
+PR [#97](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/pull/97)에
+구현을 포함했습니다. 최초 hosted 실행은 상위 Validation workflow만 생성했으며 코드
+변경 run 1건과 metadata-only run으로 나뉘고 독립 component workflow는 생성되지
+않았습니다. 전체 validation과 두 aggregate gate가 통과했으며 병합과 병합 후
+#89/#90 갱신이 남았습니다.
 
 ## 검증
 
@@ -114,7 +123,10 @@ validation을 기다립니다.
 - repository GitHub YAML `yaml-lint` — 통과
 - 전체 tracked 문서와 본 보고서 Markdown lint — 통과
 - `git diff --check` — 통과
-- hosted Validation과 #89/#90 갱신 — 대기
+- hosted 코드 Validation — 통과 ([run 29973030102](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/actions/runs/29973030102))
+- hosted metadata Validation — 통과 ([run 29973031297](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/actions/runs/29973031297))
+- 독립 component workflow run — 없음
+- #89/#90 갱신 — 병합 대기
 
 ## AI 지원
 
