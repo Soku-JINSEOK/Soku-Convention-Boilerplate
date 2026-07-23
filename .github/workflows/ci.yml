@@ -99,6 +99,8 @@ jobs:
             docs/issues/issue-87-task-report.md
             docs/issues/issue-55-task-report.md
             docs/issues/issue-98-task-report.md
+            docs/issues/issue-100-task-report.md
+            docs/audits/github-governance-2026-07-23.md
             docs/guides/USAGE_MANUAL.md
             LICENSE
             SECURITY.md
@@ -113,6 +115,7 @@ jobs:
             .github/validation-workflow.test.mjs
             .github/deploy-gcp.test.mjs
             .github/usage-manual.test.mjs
+            .github/github-governance-audit.test.mjs
             .github/ISSUE_TEMPLATE/bug_report.yml
             .github/ISSUE_TEMPLATE/chore_task.yml
             .github/ISSUE_TEMPLATE/config.yml
@@ -177,6 +180,7 @@ jobs:
             scripts/contribution-title.test.mjs
             scripts/pull-request-policy.mjs
             scripts/pull-request-policy.test.mjs
+            scripts/github-governance-audit.mjs
             scripts/setup-git-signing.sh
             scripts/create-release-tag.sh
             scripts/verify-release-tag.sh
@@ -289,6 +293,7 @@ jobs:
           .github/validation-workflow.test.mjs
           .github/deploy-gcp.test.mjs
           .github/usage-manual.test.mjs
+          .github/github-governance-audit.test.mjs
 
       - name: Run public provider action regression tests
         run: python3 soku/actions/ci-cd-control-plane-v1/test_validate_config.py
