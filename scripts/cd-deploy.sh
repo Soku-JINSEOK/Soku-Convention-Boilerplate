@@ -260,9 +260,13 @@ get_revision_traffic_percent() {
     --project "$CD_PLAN_PROJECT_ID" \
     --region "$CD_PLAN_REGION" \
     --platform managed \
-    --flatten='status.traffic[]' \
-    --filter="status.traffic.revisionName=$revision" \
-    --format='value(status.traffic.percent)'
+    --format=json |
+    jq -r --arg revision "$revision" '
+      [.status.traffic[]? |
+        select(.revisionName == $revision) |
+        (.percent // 0)] |
+      if length == 0 then empty else add end
+    '
 }
 
 run_health_check() {
