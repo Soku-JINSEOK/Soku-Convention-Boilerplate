@@ -208,6 +208,18 @@ state before validating it so rapid label, assignment, body, title, or Draft
 changes cannot be evaluated from a stale event payload. Custom labels remain
 allowed alongside the required canonical labels.
 
+An exact Dependabot pull request is the only automated-author exception to the
+human-authored body contract. Both the author login `dependabot[bot]` and a
+`dependabot/` head ref must match. Its ecosystem must be registered in
+`.github/dependabot.yml`, and every changed file must be the corresponding
+manifest, lock file, or GitHub Actions workflow under that registered directory.
+Only then may the original Dependabot body, a long title, and Conventional
+Commit syntax without a gitmoji be accepted. The PR still requires
+`type:chore`, `area:tooling`, assignment to `Soku-JINSEOK`, and the complete
+Validation run. Similar usernames, other ref prefixes, unsupported ecosystems,
+or files outside that scope receive no exception. Dependency review and merge
+approval remain separate from this metadata exception.
+
 **Rule: never create an issue or PR unlabeled.** When opening an issue or PR (via `gh issue create`, `gh pr create`, or the GitHub UI), attach at least a `type:` label in the same action — check `gh label list` (or this catalog) first if unsure what exists, rather than creating it bare and labeling as a follow-up step. An unlabeled issue/PR is harder to triage and defeats the point of having a catalog at all.
 
 ## 📄 Templates

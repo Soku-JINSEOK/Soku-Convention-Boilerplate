@@ -76,6 +76,13 @@ Component workflows are
 reusable implementation details and must not also trigger independently, which
 would duplicate execution.
 
+The reusable contribution-title and pull-request-policy workflows fetch current
+PR metadata when called; they do not trust a possibly stale metadata event
+payload. Their caller retains separate full-validation and metadata concurrency
+domains. Only `Validation Gate` and `PR Metadata Gate` are required branch
+protection contexts; `Full Validation Not Required` is informational and never
+replaces a missing code-bearing validation result.
+
 Cancel older in-progress validation within the same full or metadata domain.
 Keep default workflow
 permissions at `contents: read`; only the release delivery job may request

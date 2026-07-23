@@ -1,63 +1,84 @@
 name: Contribution Title Check
 
 on:
-  pull_request:
-    types: [opened, synchronize, reopened, edited]
+  workflow_call:
 
 permissions:
   contents: read
+  pull-requests: read
 
 jobs:
   contribution-title:
     name: Contribution Title Convention
-    if: github.event.action != 'edited' || github.event.changes.title != null
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
 
-      - name: Set up Node.js
-        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
-          node-version: "22"
+          node-version: "24"
 
-      - name: Run contribution-title regression tests
-        run: node --test scripts/contribution-title.test.mjs
+      - name: Run contribution-title parity tests
+        run: >-
+          node --test
+          scripts/contribution-title.test.mjs
+          templates/_shared/commitlint/contribution-title.test.mjs
+
+      - name: Read current pull request metadata
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}" \
+            > /tmp/current-pr.json
+          {
+            echo "PR_TITLE=$(jq -r .title /tmp/current-pr.json)"
+            echo "PR_AUTHOR=$(jq -r .user.login /tmp/current-pr.json)"
+            echo "PR_HEAD_REF=$(jq -r .head.ref /tmp/current-pr.json)"
+            echo "BASE_SHA=$(jq -r .base.sha /tmp/current-pr.json)"
+            echo "HEAD_SHA=$(jq -r .head.sha /tmp/current-pr.json)"
+          } >> "$GITHUB_ENV"
 
       - name: Validate pull request and commit titles
-        env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-          PR_TITLE: ${{ github.event.pull_request.title }}
         run: |
           node --input-type=module - <<'NODE'
           import {execFileSync} from 'node:child_process';
-          import {validateContributionTitle} from './scripts/contribution-title.mjs';
+          import {
+            contributionTitleOptionsForPullRequest,
+            validateContributionTitle,
+          } from './scripts/contribution-title.mjs';
 
           const mergeBase = execFileSync(
             'git',
             ['merge-base', process.env.BASE_SHA, process.env.HEAD_SHA],
             {encoding: 'utf8'},
           ).trim();
-          const output = execFileSync(
+          const commitTitles = execFileSync(
             'git',
             ['log', '--no-merges', '--format=%s', `${mergeBase}..${process.env.HEAD_SHA}`],
             {encoding: 'utf8'},
-          ).trim();
-          const titles = [process.env.PR_TITLE, ...output.split('\n').filter(Boolean)];
+          ).trim().split('\n').filter(Boolean);
+          const options = contributionTitleOptionsForPullRequest(
+            process.env.PR_AUTHOR ?? '',
+            process.env.PR_HEAD_REF ?? '',
+          );
+          const checks = [
+            ['PR title', process.env.PR_TITLE ?? ''],
+            ...commitTitles.map((title) => ['commit title', title]),
+          ];
           let failed = false;
-
-          for (const title of titles) {
-            const result = validateContributionTitle(title ?? '');
+          for (const [source, title] of checks) {
+            const result = validateContributionTitle(title, options);
             if (result.valid) {
-              console.log(`✓ "${title}"`);
+              console.log(`✓ [${source}] "${title}"`);
             } else {
               failed = true;
-              console.error(`✗ "${title}"\n  ${result.message}`);
+              console.error(`✗ [${source}] "${title}"\n  ${result.message}`);
             }
           }
-
           if (failed) process.exit(1);
           NODE

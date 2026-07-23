@@ -22,9 +22,20 @@ const ENGLISH_SUBJECT_PATTERN = /^[\x20-\x7e]+$/;
 const DEFAULT_MAX_TITLE_LENGTH = 72;
 const DEPENDABOT_BOT_LOGIN = 'dependabot[bot]';
 
+export function isDependabotPullRequest(author, headRef) {
+  return author === DEPENDABOT_BOT_LOGIN && headRef.startsWith('dependabot/');
+}
+
 export function contributionTitleOptionsForAuthor(author) {
   if (author === DEPENDABOT_BOT_LOGIN) {
     return {allowConventionalWithoutGitmoji: true, maxLength: null};
+  }
+  return {};
+}
+
+export function contributionTitleOptionsForPullRequest(author, headRef) {
+  if (isDependabotPullRequest(author, headRef)) {
+    return contributionTitleOptionsForAuthor(author);
   }
   return {};
 }

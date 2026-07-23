@@ -55,148 +55,62 @@ jobs:
   contribution-titles:
     name: Contribution Title Convention
     if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
     concurrency:
       group: validation-metadata-titles-${{ github.event.pull_request.number }}
       cancel-in-progress: true
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-        with:
-          fetch-depth: 0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
-        with:
-          node-version: "24"
-
-      - name: Read current pull request title
-        env:
-          GH_TOKEN: ${{ github.token }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-        run: echo "PR_TITLE=$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}" --jq .title)" >> "$GITHUB_ENV"
-
-      - name: Validate pull request and commit titles
-        env:
-          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-        run: |
-          node --input-type=module - <<'NODE'
-          import {execSync} from 'node:child_process';
-          import {
-            contributionTitleOptionsForAuthor,
-            validateContributionTitle,
-          } from './templates/_shared/commitlint/contribution-title.mjs';
-
-          const prTitle = process.env.PR_TITLE || '';
-          const prAuthor = process.env.PR_AUTHOR || '';
-
-          const mergeBase = execSync(
-            `git merge-base ${process.env.BASE_SHA} ${process.env.HEAD_SHA}`,
-          ).toString().trim();
-          const commitLog = execSync(
-            `git log --no-merges --format=%H%x00%s%x00%aN%x00%aE ${mergeBase}..${process.env.HEAD_SHA}`,
-          ).toString().trim();
-
-          const commits = commitLog
-            .split('\n')
-            .filter(Boolean)
-            .map((line) => {
-              const [sha, title, authorName, authorEmail] = line.split('\x00');
-              return {sha, title, authorName, authorEmail};
-            });
-
-          const checks = [
-            {
-              source: 'PR title',
-              value: prTitle,
-              options: contributionTitleOptionsForAuthor(prAuthor),
-            },
-            ...commits.map((commit) => ({
-              source: `commit ${commit.sha}`,
-              value: commit.title,
-              options: contributionTitleOptionsForAuthor(commit.authorName),
-            })),
-          ];
-
-          let failed = false;
-          for (const item of checks) {
-            const result = validateContributionTitle(item.value, item.options);
-            if (!result.valid) {
-              failed = true;
-              console.error(`✗ [${item.source}] "${item.value}"\n  ${result.message}`);
-            } else {
-              console.log(`✓ [${item.source}] "${item.value}"`);
-            }
-          }
-
-          if (failed) process.exit(1);
-          NODE
+    uses: ./.github/workflows/contribution-title-check.yml
 
   governance-policy:
     name: PR Governance Policy
     if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
     concurrency:
       group: validation-metadata-governance-${{ github.event.pull_request.number }}
       cancel-in-progress: true
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-        with:
-          fetch-depth: 0
-
-      - name: Read current pull request metadata
-        env:
-          GH_TOKEN: ${{ github.token }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-        run: |
-          gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}" \
-            | jq '{pull_request: .}' > /tmp/current-pr-event.json
-
-      - name: Validate pull request metadata, template order, and audit fields
-        env:
-          CURRENT_PR_EVENT_PATH: /tmp/current-pr-event.json
-        run: node .github/validate-pr-governance.mjs
+    uses: ./.github/workflows/pull-request-policy.yml
 
   validation-gate:
     name: Validation Gate
-    if: always()
+    if: >-
+      always() &&
+      (github.event_name != 'pull_request' ||
+      github.event.action == 'opened' ||
+      github.event.action == 'synchronize' ||
+      github.event.action == 'reopened' ||
+      (github.event.action == 'edited' && github.event.changes.base != null))
     needs:
       - repository
       - templates
       - security
     runs-on: ubuntu-latest
     concurrency:
-      group: >-
-        ${{ (github.event_name != 'pull_request' ||
-        github.event.action == 'opened' ||
-        github.event.action == 'synchronize' ||
-        github.event.action == 'reopened' ||
-        (github.event.action == 'edited' && github.event.changes.base != null)) &&
-        'validation-full-gate' || 'validation-metadata-not-required' }}-${{
-        github.event.pull_request.number || github.ref }}
+      group: validation-full-gate-${{ github.event.pull_request.number || github.ref }}
       cancel-in-progress: true
     steps:
       - name: Require every validation group
         env:
-          FULL_VALIDATION_REQUIRED: ${{ github.event_name != 'pull_request' || github.event.action == 'opened' || github.event.action == 'synchronize' || github.event.action == 'reopened' || (github.event.action == 'edited' && github.event.changes.base != null) }}
           REPOSITORY_RESULT: ${{ needs.repository.result }}
           TEMPLATES_RESULT: ${{ needs.templates.result }}
           SECURITY_RESULT: ${{ needs.security.result }}
         shell: bash
         run: |
-          if [[ "$FULL_VALIDATION_REQUIRED" == true ]]; then
-            test "$REPOSITORY_RESULT" = success
-            test "$TEMPLATES_RESULT" = success
-            test "$SECURITY_RESULT" = success
-          else
-            test "$REPOSITORY_RESULT" = skipped
-            test "$TEMPLATES_RESULT" = skipped
-            test "$SECURITY_RESULT" = skipped
-            echo "Metadata-only event does not require full validation."
-          fi
+          test "$REPOSITORY_RESULT" = success
+          test "$TEMPLATES_RESULT" = success
+          test "$SECURITY_RESULT" = success
+
+  full-validation-not-required:
+    name: Full Validation Not Required
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.event.action != 'opened' &&
+      github.event.action != 'synchronize' &&
+      github.event.action != 'reopened' &&
+      !(github.event.action == 'edited' && github.event.changes.base != null)
+    runs-on: ubuntu-latest
+    concurrency:
+      group: validation-metadata-not-required-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+    steps:
+      - run: echo "Metadata-only event preserves the existing Validation Gate."
 
   pr-metadata-gate:
     name: PR Metadata Gate
