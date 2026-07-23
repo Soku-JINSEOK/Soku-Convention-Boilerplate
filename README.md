@@ -15,6 +15,54 @@ For the canonical operating design, start with [BLUEPRINT.md](./BLUEPRINT.md).
 For first-time adoption from profile selection through initialization and
 upgrades, follow the [end-to-end usage manual](./docs/guides/USAGE_MANUAL.md).
 
+## ⚡ Quick Start
+
+<details>
+<summary>Start a new repository with the minimum commands</summary>
+
+Choose one path that matches your workflow.
+
+### 1) Prepare baseline tools
+
+```bash
+soku --version
+```
+
+### 2) Install `soku`
+
+```bash
+npm install -g @soku-jinseok/soku@0.2.1
+```
+
+If npm is not available, install via binary from the `soku/v0.2.1` release page and
+verify with `checksums.txt`.
+
+### 3) Bootstrap and validate
+
+```bash
+soku init \
+  --boilerplate-source https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate \
+  --boilerplate-release v1.0.5 \
+  --profile standard \
+  --stack javascript-typescript-node \
+  --project-name my-service \
+  --verify \
+  --dry-run
+```
+
+If the plan is acceptable, apply the same command with `--yes` in place of `--dry-run`.
+
+### 4) Run local checks before opening PR
+
+```bash
+make fmt-check
+make lint
+make test
+make build
+```
+
+</details>
+
 ## 📦 Current Published Baseline
 
 The current published releases are boilerplate `v1.0.5` and CLI

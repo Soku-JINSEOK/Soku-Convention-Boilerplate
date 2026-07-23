@@ -1,6 +1,9 @@
 {
   // Preserve long-form multilingual documentation without forcing artificial wraps.
   "MD013": false,
+  "MD033": {
+    "allowed_elements": ["details", "summary", "br", "img", "kbd"]
+  },
   "ignores": [
     "**/node_modules/**",
     "**/.venv/**",

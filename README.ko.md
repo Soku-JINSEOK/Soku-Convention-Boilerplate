@@ -15,6 +15,54 @@
 최초 적용 시 profile 선택부터 초기화와 upgrade까지는
 [종합 사용 매뉴얼](./docs/guides/USAGE_MANUAL.md)을 따르십시오.
 
+## ⚡ 빠른 시작
+
+<details>
+<summary>최소 명령어로 새 저장소 시작하기</summary>
+
+운영 방식에 맞는 경로를 하나 선택해 진행하세요.
+
+### 1) 기본 도구 준비
+
+```bash
+soku --version
+```
+
+### 2) `soku` 설치
+
+```bash
+npm install -g @soku-jinseok/soku@0.2.1
+```
+
+npm을 사용할 수 없으면 `soku/v0.2.1` 릴리스의 바이너리를 받아 `checksums.txt`로
+무결성을 확인해 설치하세요.
+
+### 3) 부트스트랩 및 검증
+
+```bash
+soku init \
+  --boilerplate-source https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate \
+  --boilerplate-release v1.0.5 \
+  --profile standard \
+  --stack javascript-typescript-node \
+  --project-name my-service \
+  --verify \
+  --dry-run
+```
+
+검토 후에는 `--dry-run` 대신 `--yes`를 사용해 적용하세요.
+
+### 4) PR/CI 전에 로컬 검증
+
+```bash
+make fmt-check
+make lint
+make test
+make build
+```
+
+</details>
+
 ## 📦 현재 공개 베이스라인
 
 현재 공개 release는 보일러플레이트 `v1.0.5`와 CLI `soku/v0.1.4`입니다.
