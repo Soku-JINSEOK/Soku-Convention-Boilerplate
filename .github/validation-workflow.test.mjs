@@ -10,16 +10,21 @@ const releaseWorkflow = readFileSync(
   new URL('./workflows/release.yml', import.meta.url),
   'utf8',
 );
+const contributionWorkflow = readFileSync(
+  new URL('./workflows/contribution-title-check.yml', import.meta.url),
+  'utf8',
+);
+const policyWorkflow = readFileSync(
+  new URL('./workflows/pull-request-policy.yml', import.meta.url),
+  'utf8',
+);
 
 test('separates full validation from current PR metadata validation', () => {
   assert.match(workflow, /validation-gate:[\s\S]*name: Validation Gate/);
-  assert.doesNotMatch(workflow, /Full Validation Not Required/);
+  assert.match(workflow, /name: Full Validation Not Required/);
   assert.match(workflow, /name: PR Metadata Gate/);
-  assert.match(workflow, /CURRENT_PR_EVENT_PATH:\s*\/tmp\/current-pr-event\.json/);
-  assert.match(
-    workflow,
-    /gh api "repos\/\$\{GITHUB_REPOSITORY\}\/pulls\/\$\{PR_NUMBER\}"/,
-  );
+  assert.match(workflow, /uses: \.\/\.github\/workflows\/contribution-title-check\.yml/);
+  assert.match(workflow, /uses: \.\/\.github\/workflows\/pull-request-policy\.yml/);
 });
 
 test('runs full validation only for code-bearing pull request events', () => {
@@ -27,13 +32,14 @@ test('runs full validation only for code-bearing pull request events', () => {
     assert.match(workflow, new RegExp(`github\\.event\\.action == '${action}'`));
   }
   assert.match(workflow, /github\.event\.changes\.base != null/);
-  assert.match(workflow, /FULL_VALIDATION_REQUIRED:/);
+  assert.match(workflow, /REPOSITORY_RESULT:/);
 });
 
 test('metadata-only events preserve the required Validation Gate context', () => {
   assert.match(workflow, /validation-gate:\n\s+name: Validation Gate/);
-  assert.match(workflow, /Metadata-only event does not require full validation/);
-  assert.match(workflow, /'validation-full-gate' \|\| 'validation-metadata-not-required'/);
+  assert.match(workflow, /full-validation-not-required:/);
+  assert.match(workflow, /Metadata-only event preserves the existing Validation Gate/);
+  assert.match(workflow, /validation-metadata-not-required-/);
 });
 
 test('keeps full and metadata cancellation domains independent', () => {
@@ -42,7 +48,18 @@ test('keeps full and metadata cancellation domains independent', () => {
   assert.match(workflow, /group: validation-full-security-/);
   assert.match(workflow, /group: validation-metadata-titles-/);
   assert.match(workflow, /group: validation-metadata-governance-/);
+  assert.match(workflow, /group: validation-full-gate-/);
   assert.doesNotMatch(workflow, /^concurrency:/m);
+});
+
+test('only Validation directly subscribes to pull request and main push events', () => {
+  assert.match(workflow, /^\s{2}pull_request:/m);
+  assert.match(workflow, /^\s{2}push:/m);
+  for (const component of [contributionWorkflow, policyWorkflow]) {
+    assert.match(component, /^\s{2}workflow_call:/m);
+    assert.doesNotMatch(component, /^\s{2}pull_request:/m);
+    assert.doesNotMatch(component, /^\s{2}push:/m);
+  }
 });
 
 test('does not subscribe to closed pull request events', () => {

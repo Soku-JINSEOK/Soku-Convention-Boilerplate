@@ -3,7 +3,9 @@ import fs from "node:fs";
 import test from "node:test";
 import {
   readCanonicalLabels,
+  readDependabotConfigurations,
   readExpectedProfile,
+  validateDependabotFiles,
   validatePullRequest,
 } from "./pull-request-policy.mjs";
 
@@ -97,7 +99,20 @@ const canonicalLabels = new Set([
   "type:chore",
   "area:registry",
   "area:ci",
+  "area:tooling",
 ]);
+const dependabotSource = `version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+  - package-ecosystem: gomod
+    directory: /soku
+  - package-ecosystem: npm
+    directory: /templates/javascript-typescript-node
+  - package-ecosystem: pip
+    directory: /templates/python
+`;
+const dependabotConfigurations = readDependabotConfigurations(dependabotSource);
 
 function validPullRequest(overrides = {}) {
   return {
@@ -108,6 +123,7 @@ function validPullRequest(overrides = {}) {
     canonicalLabels,
     expectedProfile: "control-plane",
     taskReportExists: (path) => path === "docs/issues/issue-21-task-report.md",
+    dependabotConfigurations,
     ...overrides,
   };
 }
@@ -129,6 +145,15 @@ test("reads repository label and profile sources", () => {
     readExpectedProfile("- **Governance profile:** `boilerplate`\n"),
     "boilerplate",
   );
+});
+
+test("reads configured Dependabot ecosystems and directories", () => {
+  assert.deepEqual(dependabotConfigurations, [
+    {ecosystem: "github-actions", directory: "/"},
+    {ecosystem: "gomod", directory: "/soku"},
+    {ecosystem: "npm", directory: "/templates/javascript-typescript-node"},
+    {ecosystem: "pip", directory: "/templates/python"},
+  ]);
 });
 
 test("rejects labels that merely imitate canonical axes", () => {
@@ -177,13 +202,93 @@ test("rejects heading, placeholder, verification, and AI errors", () => {
   assert.match(errors({body: validBody.replace("OpenAI Codex", "Undisclosed")}).join(" "), /AI assistance/i);
 });
 
+function dependabotPullRequest(overrides = {}) {
+  return validPullRequest({
+    title: "build(deps): bump package group to the latest minor versions with extended release notes",
+    body: "Dependabot-generated release notes without the human template.",
+    labels: ["type:chore", "area:tooling"],
+    assignees: ["Soku-JINSEOK"],
+    author: "dependabot[bot]",
+    headRef: "dependabot/npm_and_yarn/templates/javascript-typescript-node/group",
+    changedFiles: [
+      "templates/javascript-typescript-node/package.json",
+      "templates/javascript-typescript-node/package-lock.json",
+    ],
+    ...overrides,
+  });
+}
+
+test("accepts configured Dependabot npm, pip, gomod, and Actions paths", () => {
+  const scenarios = [
+    [
+      "dependabot/npm_and_yarn/templates/javascript-typescript-node/group",
+      ["templates/javascript-typescript-node/package-lock.json"],
+    ],
+    [
+      "dependabot/pip/templates/python/group",
+      ["templates/python/requirements-lock.txt", "templates/python/pyproject.toml"],
+    ],
+    ["dependabot/go_modules/soku/group", ["soku/go.mod", "soku/go.sum"]],
+    [
+      "dependabot/github_actions/actions/group",
+      [".github/workflows/validation.yml"],
+    ],
+  ];
+  for (const [headRef, changedFiles] of scenarios) {
+    assert.deepEqual(
+      validatePullRequest(dependabotPullRequest({headRef, changedFiles})),
+      [],
+    );
+  }
+});
+
+test("rejects Dependabot impersonation and incorrect head refs as human PRs", () => {
+  for (const overrides of [
+    {author: "dependabot"},
+    {author: "dependabot-user"},
+    {headRef: "automation/npm_and_yarn/group"},
+  ]) {
+    const result = validatePullRequest(dependabotPullRequest(overrides));
+    assert.match(result.join(" "), /Gitmoji|Common Metadata/);
+  }
+});
+
+test("rejects Dependabot files outside its configured ecosystem scope", () => {
+  const result = validatePullRequest(
+    dependabotPullRequest({changedFiles: ["scripts/pull-request-policy.mjs"]}),
+  );
+  assert.match(result.join(" "), /outside its configured/);
+  assert.deepEqual(
+    validateDependabotFiles({
+      headRef: "dependabot/unsupported/example",
+      changedFiles: ["file.lock"],
+      configurations: dependabotConfigurations,
+    }),
+    ["Dependabot head ref does not identify a supported configured ecosystem."],
+  );
+});
+
+test("keeps Dependabot labels and assignment mandatory", () => {
+  assert.match(
+    validatePullRequest(
+      dependabotPullRequest({labels: ["type:chore", "area:ci"]}),
+    ).join(" "),
+    /area:tooling/,
+  );
+  assert.match(
+    validatePullRequest(dependabotPullRequest({assignees: []})).join(" "),
+    /assigned to Soku-JINSEOK/,
+  );
+});
+
 test("workflow reruns on metadata changes and reads the current PR", () => {
   const workflow = fs.readFileSync(
     new URL("../.github/workflows/pull-request-policy.yml", import.meta.url),
     "utf8",
   );
-  assert.match(workflow, /assigned, unassigned/);
-  assert.match(workflow, /ready_for_review, converted_to_draft/);
+  assert.match(workflow, /workflow_call/);
+  assert.doesNotMatch(workflow, /^\s{2}pull_request:/m);
   assert.match(workflow, /gh api "repos\/\$\{GITHUB_REPOSITORY\}\/pulls\/\$\{PR_NUMBER\}"/);
+  assert.match(workflow, /files\?per_page=100/);
   assert.match(workflow, /CURRENT_PR_EVENT_PATH:\s*\/tmp\/current-pr-event\.json/);
 });

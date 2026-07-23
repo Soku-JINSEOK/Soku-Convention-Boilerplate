@@ -1,8 +1,7 @@
 name: Pull Request Policy
 
 on:
-  pull_request:
-    types: [opened, edited, synchronize, labeled, unlabeled, assigned, unassigned, reopened, ready_for_review, converted_to_draft]
+  workflow_call:
 
 permissions:
   contents: read
@@ -10,18 +9,35 @@ permissions:
 
 jobs:
   policy:
-    runs-on: ubuntu-24.04
+    name: Pull Request Governance
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
-      - name: Read current pull request metadata
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: "24"
+
+      - name: Read current pull request metadata and changed files
         env:
           GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
           gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}" \
-            | jq '{pull_request: .}' > /tmp/current-pr-event.json
+            > /tmp/current-pr.json
+          gh api --paginate \
+            "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}/files?per_page=100" \
+            --jq '.[].filename' \
+            | jq -R -s 'split("\n") | map(select(length > 0))' \
+            > /tmp/current-pr-files.json
+          jq --slurpfile files /tmp/current-pr-files.json \
+            '{pull_request: (. + {changed_files_list: $files[0]})}' \
+            /tmp/current-pr.json > /tmp/current-pr-event.json
+
       - name: Validate pull request contract
         env:
           CURRENT_PR_EVENT_PATH: /tmp/current-pr-event.json

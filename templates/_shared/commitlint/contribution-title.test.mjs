@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 
 import {
   contributionTitleOptionsForAuthor,
+  contributionTitleOptionsForPullRequest,
+  isDependabotPullRequest,
   validateContributionTitle,
 } from './contribution-title.mjs';
 
@@ -116,4 +118,28 @@ test('skips length validation when maxLength is null', () => {
     maxLength: null,
   });
   assert.equal(result.valid, true);
+});
+
+test('requires exact Dependabot author and head ref for pull request options', () => {
+  assert.equal(
+    isDependabotPullRequest(
+      'dependabot[bot]',
+      'dependabot/npm_and_yarn/templates/example',
+    ),
+    true,
+  );
+  assert.deepEqual(
+    contributionTitleOptionsForPullRequest(
+      'dependabot[bot]',
+      'dependabot/npm_and_yarn/templates/example',
+    ),
+    {allowConventionalWithoutGitmoji: true, maxLength: null},
+  );
+  assert.deepEqual(
+    contributionTitleOptionsForPullRequest(
+      'dependabot[bot]',
+      'automation/npm_and_yarn/templates/example',
+    ),
+    {},
+  );
 });
