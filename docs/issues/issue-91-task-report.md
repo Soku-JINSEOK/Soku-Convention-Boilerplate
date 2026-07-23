@@ -70,6 +70,13 @@ authenticated `/health` and uploaded evidence, but exposed a missing invariant:
 Cloud Run reported the selected revision at 0% traffic. The issue remains open
 until the helper explicitly assigns and verifies 100% traffic.
 
+The first explicit readback deployment
+[run 29972332814](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/actions/runs/29972332814)
+successfully routed 100% traffic, but `gcloud run services describe` rejected
+the unsupported `--filter` flag. The fail-closed path restored the recorded
+revision, authenticated `/health`, and retained `rolled-back` evidence. The
+readback now uses the service JSON and selects the exact revision with `jq`.
+
 ## Verification
 
 - `bash -n scripts/gcp-bootstrap.sh scripts/cd-plan.sh scripts/cd-deploy.sh scripts/ci-local.sh` — passed
@@ -151,6 +158,13 @@ PR #92는 최초 digest 실패를 해결했습니다. 후속 PR
 인증된 `/health`와 증거 업로드에 성공했지만 선택 revision의 traffic이 0%로 보고되는
 누락된 불변 조건을 드러냈습니다. helper가 100% traffic을 명시적으로 할당·검증할
 때까지 Issue는 열린 상태로 유지합니다.
+
+첫 명시적 readback 배포
+[run 29972332814](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/actions/runs/29972332814)는
+100% traffic 전환에는 성공했지만 `gcloud run services describe`가 지원하지 않는
+`--filter` 인자를 거부했습니다. fail-closed 경로는 기록된 revision을 복구하고 인증된
+`/health`와 `rolled-back` 증거를 남겼습니다. readback은 service JSON에서 `jq`로 정확한
+revision을 선택하도록 변경합니다.
 
 ## 검증
 

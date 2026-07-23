@@ -130,7 +130,7 @@ test('failed deploy health check restores the exact pre-deploy revision', () => 
 echo "$*" >> '${log}'
 if [[ "$*" == *"print-identity-token"* ]]; then echo test-identity-token;
 elif [[ "$*" == *"status.url"* ]]; then echo https://service.example;
-elif [[ "$*" == *"status.traffic.percent"* ]]; then echo 100;
+elif [[ "$*" == *"--format=json"* ]]; then echo '{"status":{"traffic":[{"revisionName":"service-new","percent":100}]}}';
 elif [[ "$*" == *"latestReadyRevisionName"* ]]; then
   n=0; [[ -f '${count}' ]] && n=$(< '${count}'); n=$((n + 1)); echo "$n" > '${count}'
   if ((n == 1)); then echo service-pre; else echo service-new; fi
@@ -171,7 +171,7 @@ test('successful deploy keeps active-account token compatibility and writes evid
 echo "$*" >> '${log}'
 if [[ "$*" == *"print-identity-token"* ]]; then echo test-identity-token;
 elif [[ "$*" == *"status.url"* ]]; then echo https://service.example;
-elif [[ "$*" == *"status.traffic.percent"* ]]; then echo 100;
+elif [[ "$*" == *"--format=json"* ]]; then echo '{"status":{"traffic":[{"revisionName":"service-new","percent":100}]}}';
 elif [[ "$*" == *"latestReadyRevisionName"* ]]; then
   n=0; [[ -f '${count}' ]] && n=$(< '${count}'); n=$((n + 1)); echo "$n" > '${count}'
   if ((n == 1)); then echo service-pre; else echo service-new; fi
@@ -188,9 +188,12 @@ fi`);
     GITHUB_RUN_ATTEMPT: '1',
   });
   assert.equal(result.status, 0, result.stderr);
-  assert.match(readFileSync(log, 'utf8'), /auth print-identity-token --audiences=https:\/\/service\.example/);
-  assert.doesNotMatch(readFileSync(log, 'utf8'), /--impersonate-service-account/);
-  assert.match(readFileSync(log, 'utf8'), /--to-revisions=service-new=100/);
+  const commands = readFileSync(log, 'utf8');
+  assert.match(commands, /auth print-identity-token --audiences=https:\/\/service\.example/);
+  assert.doesNotMatch(commands, /--impersonate-service-account/);
+  assert.match(commands, /--to-revisions=service-new=100/);
+  assert.match(commands, /run services describe service .*--format=json/);
+  assert.doesNotMatch(commands, /--filter=/);
   const evidence = JSON.parse(readFileSync(join(temp, 'deploy-dev-success-run-1.json')));
   assert.equal(evidence.final_status, 'success');
   assert.equal(evidence.new_revision, 'service-new');
@@ -207,7 +210,7 @@ test('deploy rolls back when the new revision does not receive all traffic', () 
 echo "$*" >> '${log}'
 if [[ "$*" == *"print-identity-token"* ]]; then echo test-identity-token;
 elif [[ "$*" == *"status.url"* ]]; then echo https://service.example;
-elif [[ "$*" == *"status.traffic.percent"* ]]; then echo 0;
+elif [[ "$*" == *"--format=json"* ]]; then echo '{"status":{"traffic":[{"revisionName":"service-new","percent":0}]}}';
 elif [[ "$*" == *"latestReadyRevisionName"* ]]; then
   n=0; [[ -f '${count}' ]] && n=$(< '${count}'); n=$((n + 1)); echo "$n" > '${count}'
   if ((n == 1)); then echo service-pre; else echo service-new; fi
@@ -243,7 +246,7 @@ test('identity-token failure rolls traffic back and records failed recovery', ()
 echo "$*" >> '${log}'
 if [[ "$*" == *"print-identity-token"* ]]; then exit 1;
 elif [[ "$*" == *"status.url"* ]]; then echo https://service.example;
-elif [[ "$*" == *"status.traffic.percent"* ]]; then echo 100;
+elif [[ "$*" == *"--format=json"* ]]; then echo '{"status":{"traffic":[{"revisionName":"service-new","percent":100}]}}';
 elif [[ "$*" == *"latestReadyRevisionName"* ]]; then
   n=0; [[ -f '${count}' ]] && n=$(< '${count}'); n=$((n + 1)); echo "$n" > '${count}'
   if ((n == 1)); then echo service-pre; else echo service-new; fi
