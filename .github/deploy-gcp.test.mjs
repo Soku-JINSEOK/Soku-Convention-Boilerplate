@@ -130,6 +130,7 @@ test('failed deploy health check restores the exact pre-deploy revision', () => 
 echo "$*" >> '${log}'
 if [[ "$*" == *"print-identity-token"* ]]; then echo test-identity-token;
 elif [[ "$*" == *"status.url"* ]]; then echo https://service.example;
+elif [[ "$*" == *"status.traffic.percent"* ]]; then echo 100;
 elif [[ "$*" == *"latestReadyRevisionName"* ]]; then
   n=0; [[ -f '${count}' ]] && n=$(< '${count}'); n=$((n + 1)); echo "$n" > '${count}'
   if ((n == 1)); then echo service-pre; else echo service-new; fi
@@ -170,6 +171,7 @@ test('successful deploy keeps active-account token compatibility and writes evid
 echo "$*" >> '${log}'
 if [[ "$*" == *"print-identity-token"* ]]; then echo test-identity-token;
 elif [[ "$*" == *"status.url"* ]]; then echo https://service.example;
+elif [[ "$*" == *"status.traffic.percent"* ]]; then echo 100;
 elif [[ "$*" == *"latestReadyRevisionName"* ]]; then
   n=0; [[ -f '${count}' ]] && n=$(< '${count}'); n=$((n + 1)); echo "$n" > '${count}'
   if ((n == 1)); then echo service-pre; else echo service-new; fi
@@ -188,9 +190,47 @@ fi`);
   assert.equal(result.status, 0, result.stderr);
   assert.match(readFileSync(log, 'utf8'), /auth print-identity-token --audiences=https:\/\/service\.example/);
   assert.doesNotMatch(readFileSync(log, 'utf8'), /--impersonate-service-account/);
+  assert.match(readFileSync(log, 'utf8'), /--to-revisions=service-new=100/);
   const evidence = JSON.parse(readFileSync(join(temp, 'deploy-dev-success-run-1.json')));
   assert.equal(evidence.final_status, 'success');
   assert.equal(evidence.new_revision, 'service-new');
+  assert.equal(evidence.verified_traffic_percent, 100);
+});
+
+test('deploy rolls back when the new revision does not receive all traffic', () => {
+  const temp = mkdtempSync(join(tmpdir(), 'cd-deploy-traffic-failure-'));
+  const bin = join(temp, 'bin');
+  spawnSync('mkdir', ['-p', bin]);
+  const log = join(temp, 'gcloud.log');
+  const count = join(temp, 'describe-count');
+  executable(join(bin, 'gcloud'), `
+echo "$*" >> '${log}'
+if [[ "$*" == *"print-identity-token"* ]]; then echo test-identity-token;
+elif [[ "$*" == *"status.url"* ]]; then echo https://service.example;
+elif [[ "$*" == *"status.traffic.percent"* ]]; then echo 0;
+elif [[ "$*" == *"latestReadyRevisionName"* ]]; then
+  n=0; [[ -f '${count}' ]] && n=$(< '${count}'); n=$((n + 1)); echo "$n" > '${count}'
+  if ((n == 1)); then echo service-pre; else echo service-new; fi
+fi`);
+  executable(join(bin, 'curl'), 'exit 0');
+  const plan = join(temp, 'plan.env');
+  writeFileSync(plan, `CD_PLAN_ENVIRONMENT=dev\nCD_PLAN_COMMIT_SHA=abc\nCD_PLAN_IMAGE_TAG_URI=${repository}:abc\nCD_PLAN_IMAGE_URI=${repository}@${digest}\nCD_PLAN_PROJECT_ID=project\nCD_PLAN_REGION=asia\nCD_PLAN_SERVICE_NAME=service\n`);
+  const result = run('cd-deploy.sh', [
+    '--plan-file', plan, '--health-attempts', '1', '--health-delay', '0', '--confirm',
+  ], {
+    PATH: `${bin}:${process.env.PATH}`,
+    CD_DEPLOY_EVIDENCE_DIR: temp,
+    GITHUB_RUN_ID: 'traffic-failure-run',
+    GITHUB_RUN_ATTEMPT: '1',
+  });
+  assert.equal(result.status, 1, result.stderr);
+  const commands = readFileSync(log, 'utf8');
+  assert.match(commands, /--to-revisions=service-new=100/);
+  assert.match(commands, /--to-revisions=service-pre=100/);
+  const evidence = JSON.parse(readFileSync(join(temp, 'deploy-dev-traffic-failure-run-1.json')));
+  assert.equal(evidence.final_status, 'rolled-back');
+  assert.equal(evidence.error, 'deploy-failed-traffic-verification');
+  assert.equal(evidence.verified_traffic_percent, 0);
 });
 
 test('identity-token failure rolls traffic back and records failed recovery', () => {
@@ -203,6 +243,7 @@ test('identity-token failure rolls traffic back and records failed recovery', ()
 echo "$*" >> '${log}'
 if [[ "$*" == *"print-identity-token"* ]]; then exit 1;
 elif [[ "$*" == *"status.url"* ]]; then echo https://service.example;
+elif [[ "$*" == *"status.traffic.percent"* ]]; then echo 100;
 elif [[ "$*" == *"latestReadyRevisionName"* ]]; then
   n=0; [[ -f '${count}' ]] && n=$(< '${count}'); n=$((n + 1)); echo "$n" > '${count}'
   if ((n == 1)); then echo service-pre; else echo service-new; fi
