@@ -87,7 +87,7 @@ Issue [#102](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/issues/
 - `ai_assistance`
 
 동시에 `docs/standards/GITHUB_STANDARDS.md`의 규약 문구를 정렬하고,
-` .github/issue-form-order.test.mjs`에서 필수/선택 집합을 검증하도록
+`.github/issue-form-order.test.mjs`에서 필수/선택 집합을 검증하도록
 업데이트합니다.
 
 ## 계획된 구현
