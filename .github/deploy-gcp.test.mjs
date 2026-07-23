@@ -30,30 +30,78 @@ function planArgs(output) {
   ];
 }
 
-test('pushed plans use a digest URI and fail when the digest is unavailable', () => {
-  for (const available of [true, false]) {
-    const temp = mkdtempSync(join(tmpdir(), 'cd-plan-'));
-    const bin = join(temp, 'bin');
-    spawnSync('mkdir', ['-p', bin]);
-    executable(join(bin, 'gcloud'), ':');
-    executable(join(bin, 'docker'), `
+test('pushed plans prefer Artifact Registry digest when available', () => {
+  const temp = mkdtempSync(join(tmpdir(), 'cd-plan-registry-'));
+  const bin = join(temp, 'bin');
+  spawnSync('mkdir', ['-p', bin]);
+  executable(join(bin, 'gcloud'), `
+if [[ "$*" == *"artifacts docker images describe"* ]]; then
+  echo '${repository}@${digest}'
+else
+  :
+fi`);
+  executable(join(bin, 'docker'), `
 case "$1" in
   build|push) exit 0 ;;
   inspect)
-    if [[ "$*" == *"{{.Id}}"* ]]; then echo image-id;
-    ${available ? `else echo '${repository}@${digest}';` : 'else :;'} fi ;;
+    if [[ "$*" == *"{{.Id}}"* ]]; then echo image-id; else :; fi ;;
 esac`);
-    const result = run('cd-plan.sh', planArgs(join(temp, 'out')), {
-      PATH: `${bin}:${process.env.PATH}`,
-      GITHUB_SHA: '1234567890abcdef1234567890abcdef12345678',
-    });
-    assert.equal(result.status, available ? 0 : 11, result.stderr);
-    if (available) {
-      const plan = readFileSync(join(temp, 'out/dev/1234567890ab/cd-plan.env'), 'utf8');
-      assert.match(plan, new RegExp(`CD_PLAN_IMAGE_URI=${repository}@${digest}`));
-      assert.match(plan, /CD_PLAN_IMAGE_TAG_URI=.*:1234567890ab/);
-    }
-  }
+  const result = run('cd-plan.sh', planArgs(join(temp, 'out')), {
+    PATH: `${bin}:${process.env.PATH}`,
+    GITHUB_SHA: '1234567890abcdef1234567890abcdef12345678',
+  });
+  assert.equal(result.status, 0, result.stderr);
+  const plan = readFileSync(join(temp, 'out/dev/1234567890ab/cd-plan.env'), 'utf8');
+  assert.match(plan, new RegExp(`CD_PLAN_IMAGE_URI=${repository}@${digest}`));
+  assert.match(plan, /CD_PLAN_IMAGE_TAG_URI=.*:1234567890ab/);
+});
+
+test('pushed plans fall back to RepoDigests when Registry digest unavailable', () => {
+  const temp = mkdtempSync(join(tmpdir(), 'cd-plan-fallback-'));
+  const bin = join(temp, 'bin');
+  spawnSync('mkdir', ['-p', bin]);
+  executable(join(bin, 'gcloud'), `
+if [[ "$*" == *"artifacts docker images describe"* ]]; then
+  :
+else
+  :
+fi`);
+  executable(join(bin, 'docker'), `
+case "$1" in
+  build|push) exit 0 ;;
+  inspect)
+    if [[ "$*" == *"{{.Id}}"* ]]; then echo image-id; else echo '${repository}@${digest}'; fi ;;
+esac`);
+  const result = run('cd-plan.sh', planArgs(join(temp, 'out')), {
+    PATH: `${bin}:${process.env.PATH}`,
+    GITHUB_SHA: '1234567890abcdef1234567890abcdef12345678',
+  });
+  assert.equal(result.status, 0, result.stderr);
+  const plan = readFileSync(join(temp, 'out/dev/1234567890ab/cd-plan.env'), 'utf8');
+  assert.match(plan, new RegExp(`CD_PLAN_IMAGE_URI=${repository}@${digest}`));
+  assert.match(plan, /CD_PLAN_IMAGE_TAG_URI=.*:1234567890ab/);
+});
+
+test('pushed plans fail when no digest can be resolved', () => {
+  const temp = mkdtempSync(join(tmpdir(), 'cd-plan-missing-'));
+  const bin = join(temp, 'bin');
+  spawnSync('mkdir', ['-p', bin]);
+  executable(join(bin, 'gcloud'), `
+if [[ "$*" == *"artifacts docker images describe"* ]]; then
+  :
+else
+  :
+fi`);
+  executable(join(bin, 'docker'), `
+case "$1" in
+  build|push) exit 0 ;;
+  inspect) if [[ "$*" == *"{{.Id}}"* ]]; then echo image-id; else :; fi ;;
+esac`);
+  const result = run('cd-plan.sh', planArgs(join(temp, 'out')), {
+    PATH: `${bin}:${process.env.PATH}`,
+    GITHUB_SHA: '1234567890abcdef1234567890abcdef12345678',
+  });
+  assert.equal(result.status, 11, result.stderr);
 });
 
 test('rollback-only planning does not invoke Docker or Terraform', () => {

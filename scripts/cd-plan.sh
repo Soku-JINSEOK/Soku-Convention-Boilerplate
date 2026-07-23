@@ -192,6 +192,24 @@ run_cmd() {
   exit 10
 }
 
+resolve_image_digest_uri() {
+  local local_image_name="$1"
+  local project_id="$2"
+  local expected_prefix="${local_image_name%:*}@sha256:"
+  local digest_uri=""
+
+  digest_uri="$(gcloud artifacts docker images describe "$local_image_name" --project="$project_id" --format='value(image_summary.fully_qualified_digest)' 2>/dev/null || true)"
+  digest_uri="${digest_uri//$'\r'/}"
+  digest_uri="${digest_uri//$'\n'/}"
+  local digest_value="${digest_uri#"$expected_prefix"}"
+  if [[ "$digest_uri" == "$expected_prefix"* && "$digest_value" =~ ^[0-9a-fA-F]{64}$ ]]; then
+    echo "$digest_uri"
+    return 0
+  fi
+
+  return 1
+}
+
 require_value "$ENVIRONMENT" "--environment"
 require_value "$PROJECT_ID" "--project-id"
 require_value "$REGION" "--region"
@@ -242,7 +260,11 @@ fi
 if [[ "$PUSH_IMAGE" == true ]]; then
   run_cmd docker-configure-docker gcloud auth configure-docker "${REGION}-docker.pkg.dev" --quiet
   run_cmd docker-push docker push "$FULL_IMAGE_NAME"
-  IMAGE_DIGEST_URI="$(docker inspect --format '{{join .RepoDigests \"\\n\"}}' "$FULL_IMAGE_NAME" 2>/dev/null | sed -n "\\|^${FULL_IMAGE_NAME%:*}@sha256:[0-9a-fA-F]\\{64\\}$|{p;q;}" || true)"
+  IMAGE_DIGEST_URI="$(resolve_image_digest_uri "$FULL_IMAGE_NAME" "$PROJECT_ID" || true)"
+  if [[ -z "$IMAGE_DIGEST_URI" ]]; then
+    echo "Artifact Registry digest lookup unavailable for $FULL_IMAGE_NAME; falling back to docker image metadata"
+    IMAGE_DIGEST_URI="$(docker inspect --format '{{join .RepoDigests \"\\n\"}}' "$FULL_IMAGE_NAME" 2>/dev/null | sed -n "\\|^${FULL_IMAGE_NAME%:*}@sha256:[0-9a-fA-F]\\{64\\}$|{p;q;}" || true)"
+  fi
   if [[ -z "$IMAGE_DIGEST_URI" ]]; then
     echo "Image push completed but no repository digest was available for $FULL_IMAGE_NAME" >&2
     exit 11
