@@ -138,19 +138,108 @@ elif [[ "$*" == *"revisions list"* ]]; then echo service-older; fi`);
   executable(join(bin, 'curl'), `n=0; [[ -f '${curlCount}' ]] && n=$(< '${curlCount}'); n=$((n + 1)); echo "$n" > '${curlCount}'; ((n > 1))`);
   const plan = join(temp, 'plan.env');
   writeFileSync(plan, `CD_PLAN_ENVIRONMENT=dev\nCD_PLAN_COMMIT_SHA=abc\nCD_PLAN_IMAGE_TAG_URI=${repository}:abc\nCD_PLAN_IMAGE_URI=${repository}@${digest}\nCD_PLAN_PROJECT_ID=project\nCD_PLAN_REGION=asia\nCD_PLAN_SERVICE_NAME=service\n`);
-  const result = run('cd-deploy.sh', ['--plan-file', plan, '--health-attempts', '1', '--health-delay', '0', '--confirm'], {
+  const result = run('cd-deploy.sh', [
+    '--plan-file', plan,
+    '--identity-service-account', 'deployer@project.iam.gserviceaccount.com',
+    '--health-attempts', '1', '--health-delay', '0', '--confirm',
+  ], {
     PATH: `${bin}:${process.env.PATH}`,
     CD_DEPLOY_EVIDENCE_DIR: temp,
     GITHUB_RUN_ID: 'test-run',
     GITHUB_RUN_ATTEMPT: '1',
   });
   assert.equal(result.status, 1);
-  assert.match(readFileSync(log, 'utf8'), /auth print-identity-token --audiences=https:\/\/service\.example/);
+  assert.match(
+    readFileSync(log, 'utf8'),
+    /auth print-identity-token --impersonate-service-account=deployer@project\.iam\.gserviceaccount\.com --audiences=https:\/\/service\.example/,
+  );
   assert.match(readFileSync(log, 'utf8'), /--to-revisions=service-pre=100/);
   assert.doesNotMatch(readFileSync(log, 'utf8'), /--to-revisions=service-older=100/);
   const evidence = JSON.parse(readFileSync(join(temp, 'deploy-dev-test-run-1.json')));
   assert.equal(evidence.final_status, 'rolled-back');
   assert.equal(evidence.rollback_target, 'service-pre');
+});
+
+test('successful deploy keeps active-account token compatibility and writes evidence', () => {
+  const temp = mkdtempSync(join(tmpdir(), 'cd-deploy-success-'));
+  const bin = join(temp, 'bin');
+  spawnSync('mkdir', ['-p', bin]);
+  const log = join(temp, 'gcloud.log');
+  const count = join(temp, 'describe-count');
+  executable(join(bin, 'gcloud'), `
+echo "$*" >> '${log}'
+if [[ "$*" == *"print-identity-token"* ]]; then echo test-identity-token;
+elif [[ "$*" == *"status.url"* ]]; then echo https://service.example;
+elif [[ "$*" == *"latestReadyRevisionName"* ]]; then
+  n=0; [[ -f '${count}' ]] && n=$(< '${count}'); n=$((n + 1)); echo "$n" > '${count}'
+  if ((n == 1)); then echo service-pre; else echo service-new; fi
+fi`);
+  executable(join(bin, 'curl'), 'exit 0');
+  const plan = join(temp, 'plan.env');
+  writeFileSync(plan, `CD_PLAN_ENVIRONMENT=dev\nCD_PLAN_COMMIT_SHA=abc\nCD_PLAN_IMAGE_TAG_URI=${repository}:abc\nCD_PLAN_IMAGE_URI=${repository}@${digest}\nCD_PLAN_PROJECT_ID=project\nCD_PLAN_REGION=asia\nCD_PLAN_SERVICE_NAME=service\n`);
+  const result = run('cd-deploy.sh', [
+    '--plan-file', plan, '--health-attempts', '1', '--health-delay', '0', '--confirm',
+  ], {
+    PATH: `${bin}:${process.env.PATH}`,
+    CD_DEPLOY_EVIDENCE_DIR: temp,
+    GITHUB_RUN_ID: 'success-run',
+    GITHUB_RUN_ATTEMPT: '1',
+  });
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(readFileSync(log, 'utf8'), /auth print-identity-token --audiences=https:\/\/service\.example/);
+  assert.doesNotMatch(readFileSync(log, 'utf8'), /--impersonate-service-account/);
+  const evidence = JSON.parse(readFileSync(join(temp, 'deploy-dev-success-run-1.json')));
+  assert.equal(evidence.final_status, 'success');
+  assert.equal(evidence.new_revision, 'service-new');
+});
+
+test('identity-token failure rolls traffic back and records failed recovery', () => {
+  const temp = mkdtempSync(join(tmpdir(), 'cd-deploy-token-failure-'));
+  const bin = join(temp, 'bin');
+  spawnSync('mkdir', ['-p', bin]);
+  const log = join(temp, 'gcloud.log');
+  const count = join(temp, 'describe-count');
+  executable(join(bin, 'gcloud'), `
+echo "$*" >> '${log}'
+if [[ "$*" == *"print-identity-token"* ]]; then exit 1;
+elif [[ "$*" == *"status.url"* ]]; then echo https://service.example;
+elif [[ "$*" == *"latestReadyRevisionName"* ]]; then
+  n=0; [[ -f '${count}' ]] && n=$(< '${count}'); n=$((n + 1)); echo "$n" > '${count}'
+  if ((n == 1)); then echo service-pre; else echo service-new; fi
+fi`);
+  executable(join(bin, 'curl'), 'exit 99');
+  const plan = join(temp, 'plan.env');
+  writeFileSync(plan, `CD_PLAN_ENVIRONMENT=dev\nCD_PLAN_COMMIT_SHA=abc\nCD_PLAN_IMAGE_TAG_URI=${repository}:abc\nCD_PLAN_IMAGE_URI=${repository}@${digest}\nCD_PLAN_PROJECT_ID=project\nCD_PLAN_REGION=asia\nCD_PLAN_SERVICE_NAME=service\n`);
+  const result = run('cd-deploy.sh', [
+    '--plan-file', plan,
+    '--identity-service-account', 'deployer@project.iam.gserviceaccount.com',
+    '--health-attempts', '1', '--health-delay', '0', '--confirm',
+  ], {
+    PATH: `${bin}:${process.env.PATH}`,
+    CD_DEPLOY_EVIDENCE_DIR: temp,
+    GITHUB_RUN_ID: 'token-failure-run',
+    GITHUB_RUN_ATTEMPT: '1',
+  });
+  assert.equal(result.status, 9);
+  const commands = readFileSync(log, 'utf8');
+  assert.match(commands, /--to-revisions=service-pre=100/);
+  assert.equal((commands.match(/auth print-identity-token/g) ?? []).length, 2);
+  const evidence = JSON.parse(readFileSync(join(temp, 'deploy-dev-token-failure-run-1.json')));
+  assert.equal(evidence.final_status, 'failed');
+  assert.equal(evidence.rollback_target, 'service-pre');
+  assert.equal(evidence.error, 'deploy-failed-healthcheck-and-rollback-failed');
+  assert.doesNotMatch(JSON.stringify(evidence), /identity-token|gserviceaccount|credential/i);
+});
+
+test('identity service account rejects non-service-account addresses', () => {
+  const temp = mkdtempSync(join(tmpdir(), 'cd-deploy-invalid-identity-'));
+  const plan = join(temp, 'plan.env');
+  writeFileSync(plan, 'not-used=true\n');
+  const result = run('cd-deploy.sh', [
+    '--plan-file', plan, '--identity-service-account', 'person@example.com',
+  ]);
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /must be a Google service-account email/);
 });
 
 test('manual rollback evidence distinguishes success, missing target, and failed health', () => {
@@ -267,6 +356,7 @@ elif [[ "$*" == "api repos/owner/repository --jq .owner.id" ]]; then echo 7890; 
 
 test('deployment workflow is manual and check cannot authenticate or deploy', () => {
   const workflow = readFileSync(join(root, '.github/workflows/deploy-gcp.yml'), 'utf8');
+  const gitignore = readFileSync(join(root, '.gitignore'), 'utf8');
   for (const sha of [
     '7c6bc770dae815cd3e89ee6cdf493a5fab2cc093',
     'aa5489c8933f4cc7a4f7d45035b3b1440c9c10db',
@@ -283,7 +373,12 @@ test('deployment workflow is manual and check cannot authenticate or deploy', ()
   assert.doesNotMatch(checkJob, /google-github-actions|gcloud auth|docker push|terraform plan|cd-deploy\.sh --/);
   assert.match(workflow, /if: \$\{\{ inputs\.operation == 'deploy' \}\}/);
   assert.match(workflow, /if: \$\{\{ inputs\.operation == 'rollback' \}\}/);
-  assert.match(workflow, /if: \$\{\{ always\(\) \}\}[\s\S]*retention-days: 30/);
+  assert.equal((workflow.match(/--identity-service-account "\$\{\{ vars\.GCP_WIF_SERVICE_ACCOUNT \}\}"/g) ?? []).length, 2);
+  assert.equal((workflow.match(/path: \$\{\{ github\.workspace \}\}\/deploy-evidence\/deploy-\*\.json/g) ?? []).length, 2);
+  assert.equal((workflow.match(/if-no-files-found: error/g) ?? []).length, 2);
+  assert.equal((workflow.match(/if: \$\{\{ always\(\) \}\}/g) ?? []).length, 2);
+  assert.doesNotMatch(workflow, /path: .*\/\.cd\/deploy-/);
+  assert.match(gitignore, /^deploy-evidence\/$/m);
 });
 
 test('Terraform separates foundation from digest-pinned runtime', () => {
