@@ -1,0 +1,36 @@
+{
+  "name": "@soku-jinseok/soku",
+  "version": "0.2.0",
+  "description": "Cross-platform launcher for the soku CLI",
+  "type": "module",
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/tree/main/soku",
+  "repository": {
+    "type": "github",
+    "url": "https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate"
+  },
+  "bugs": {
+    "url": "https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/issues"
+  },
+  "bin": {
+    "soku": "./bin/soku.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "node --test *.test.mjs lib/*.test.mjs"
+  },
+  "files": [
+    "bin/",
+    "lib/",
+    "README.md",
+    "scripts/",
+    "package.json"
+  ],
+  "soku": {
+    "githubRepository": "Soku-JINSEOK/Soku-Convention-Boilerplate",
+    "minNpmVersion": "0.2.0",
+    "releaseNotesPrefix": "soku-v"
+  }
+}

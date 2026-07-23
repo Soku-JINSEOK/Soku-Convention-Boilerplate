@@ -10,7 +10,7 @@ projects:
 body:
 - type: markdown
   attributes:
-    value: English is the normative source. Korean and Japanese summaries are required and must not weaken approval, security, or verification conditions.
+    value: English is the normative source. Korean/Japanese summaries, priority, and area are optional; task fields, non-destructive boundary, acceptance, and security conditions remain required.
 - type: textarea
   id: defect
   attributes:
@@ -49,7 +49,7 @@ body:
     - P2 - normal
     - P3 - low
   validations:
-    required: true
+    required: false
 - type: dropdown
   id: area
   attributes:
@@ -62,7 +62,7 @@ body:
     - docs
     - security
   validations:
-    required: true
+    required: false
 - type: checkboxes
   id: safety
   attributes:
@@ -88,14 +88,14 @@ body:
     label: 🇰🇷 한국어 요약
     description: 목표, 변경 범위, 비파괴 조건, 검증 기준을 요약하세요.
   validations:
-    required: true
+    required: false
 - type: textarea
   id: summary_ja
   attributes:
     label: 🇯🇵 日本語の要約
     description: 目標、変更範囲、非破壊条件、検証基準を要約してください。
   validations:
-    required: true
+    required: false
 - type: textarea
   id: ai_assistance
   attributes:
@@ -103,4 +103,4 @@ body:
     description: Record every tool used or None.
     value: '- **Planning/implementation/drafting:** <actual tool or None>'
   validations:
-    required: true
+    required: false

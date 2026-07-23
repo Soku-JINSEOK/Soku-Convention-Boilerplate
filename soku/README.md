@@ -12,6 +12,20 @@ The recommended full-verification baseline is the published boilerplate
 baselines. Human adopters should start with the
 [end-to-end usage manual](../docs/guides/USAGE_MANUAL.md).
 
+CLI distribution is available in two equivalent paths:
+
+- GitHub releases (current baseline and all compatible CLI tags): download the
+  matching `soku/vX.Y.Z` archive from the release assets.
+- npm (`@soku-jinseok/soku`) from `soku/v0.2.0` onward:
+
+  ```bash
+  npm install -g @soku-jinseok/soku@0.2.0
+  soku --version
+  ```
+
+The npm wrapper verifies `checksums.txt` for the selected native release and caches
+the binary for your platform in your user cache.
+
 ## Transactional Init
 
 `soku init` accepts only a public GitHub HTTPS source and an exact, non-prerelease

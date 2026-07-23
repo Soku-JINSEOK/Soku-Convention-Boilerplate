@@ -176,3 +176,39 @@ jobs:
         run: >-
           gh release create "$RELEASE_TAG"
           --verify-tag --notes-from-tag --latest=false
+
+  publish-npm:
+    name: Publish npm package
+    needs:
+      - validation
+      - release-metadata
+      - deliver
+    if: >-
+      github.event_name == 'push' &&
+      github.repository == 'Soku-JINSEOK/Soku-Convention-Boilerplate' &&
+      needs.release-metadata.outputs.is-cli == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    steps:
+      - name: Checkout for npm publication
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+      - name: Setup Node.js for npm publish
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: "22"
+          registry-url: https://registry.npmjs.org
+      - name: Validate npm package metadata
+        env:
+          RELEASE_TAG: ${{ needs.release-metadata.outputs.tag }}
+        run: |
+          version="${RELEASE_TAG#soku/}"
+          node soku/npm/scripts/prepare-package.mjs --version "$version" --repo-root "$GITHUB_WORKSPACE"
+      - name: Publish npm package
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: >-
+          cd soku/npm &&
+          npm publish --provenance --access public
