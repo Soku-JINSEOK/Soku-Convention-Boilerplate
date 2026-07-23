@@ -113,7 +113,7 @@ PR [#97](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/pull/97)에
 구현을 포함했습니다. 최초 hosted 실행은 상위 Validation workflow만 생성했으며 코드
 변경 run 1건과 metadata-only run으로 나뉘고 독립 component workflow는 생성되지
 않았습니다. 전체 validation과 두 aggregate gate가 통과했으며 병합과 병합 후
-#89/#90 갱신이 남았습니다.
+Dependabot PR #89/#90 갱신이 남았습니다.
 
 ## 검증
 
