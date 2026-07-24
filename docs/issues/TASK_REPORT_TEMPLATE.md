@@ -33,6 +33,18 @@
 
 <!-- List only checks actually run and their results. -->
 
+## Public Disclosure Review
+
+<!-- Check before merge. A skipped or unchecked item is not a pass. -->
+
+- [ ] No credentials, tokens, private keys, or credential-bearing URLs
+- [ ] No private repository, project, or product names
+- [ ] No cloud project IDs, account numbers, service URLs, image URIs, or
+      revision identifiers
+- [ ] No personal billing, subscription, budget, or payment-status information
+- [ ] No personal email, phone, address, or local absolute path
+- [ ] No private Issue, PR, Project, or control-plane identifiers
+
 ## AI Assistance
 
 <!-- Replace with the actual tool used or `None`; do not leave placeholders. -->
@@ -73,6 +85,18 @@
 ## 검증
 
 <!-- 실제 실행한 검사와 결과만 작성합니다. -->
+
+## 공개 적합성 검토
+
+<!-- 병합 전 확인합니다. 건너뛰거나 체크하지 않은 항목은 통과가 아닙니다. -->
+
+- [ ] credential, token, private key, credential이 포함된 URL이 없음
+- [ ] 비공개 저장소·프로젝트·제품 이름이 없음
+- [ ] cloud project ID, 계정 번호, service URL, image URI, revision
+      식별자가 없음
+- [ ] 개인 청구·구독·budget·결제 상태 정보가 없음
+- [ ] 개인 이메일·전화번호·주소·로컬 절대 경로가 없음
+- [ ] 비공개 Issue·PR·Project·control-plane 식별자가 없음
 
 ## AI 지원
 

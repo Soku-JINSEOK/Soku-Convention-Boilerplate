@@ -32,7 +32,7 @@ def json_bytes(value: Any) -> bytes:
     return (json.dumps(value, ensure_ascii=False, indent=2) + "\n").encode()
 
 
-def expected(source_root: Path, commit: str) -> dict[Path, bytes]:
+def expected(source_root: Path, repository: str, commit: str) -> dict[Path, bytes]:
     """Return exact public bytes and their provenance ledger."""
     manifest_path = source_root / CENTRAL_MANIFEST
     manifest_bytes = manifest_path.read_bytes()
@@ -75,7 +75,7 @@ def expected(source_root: Path, commit: str) -> dict[Path, bytes]:
         "schema_version": 1,
         "hash_algorithm": "sha256-raw-bytes",
         "control_plane": {
-            "repository": "https://github.com/Soku-JINSEOK/ci-cd-control-plane",
+            "repository": repository,
             "merge_commit": commit,
             "manifest_path": CENTRAL_MANIFEST.as_posix(),
             "manifest_sha256": digest(manifest_bytes),
@@ -88,11 +88,19 @@ def expected(source_root: Path, commit: str) -> dict[Path, bytes]:
     return output
 
 
-def sync(repository: Path, source_root: Path, commit: str, check: bool) -> None:
+def sync(
+    public_repository_root: Path,
+    source_root: Path,
+    control_plane_repository: str,
+    commit: str,
+    check: bool,
+) -> None:
     """Write the public mirror or fail if committed bytes differ."""
     mismatches = []
-    for relative, data in expected(source_root, commit).items():
-        target = repository / relative
+    for relative, data in expected(
+        source_root, control_plane_repository, commit
+    ).items():
+        target = public_repository_root / relative
         if check:
             if not target.is_file() or target.read_bytes() != data:
                 mismatches.append(relative.as_posix())
@@ -107,6 +115,7 @@ def main() -> None:
     """Parse arguments and synchronize reviewed provider bytes."""
     parser = argparse.ArgumentParser()
     parser.add_argument("--source-root", type=Path, required=True)
+    parser.add_argument("--control-plane-repository", required=True)
     parser.add_argument("--control-plane-commit", required=True)
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args()
@@ -118,6 +127,7 @@ def main() -> None:
     sync(
         Path(__file__).resolve().parents[2],
         args.source_root.resolve(),
+        args.control_plane_repository,
         args.control_plane_commit,
         args.check,
     )

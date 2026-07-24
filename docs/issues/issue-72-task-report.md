@@ -5,7 +5,7 @@
 Resolve central governance template drift in `Soku-Convention-Boilerplate` under
 [`Soku-Convention-Boilerplate#72`](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/issues/72).
 This distribution is part of the approved repository-operations rollout tracked
-by `ci-cd-control-plane#9` and `ci-cd-control-plane#21`.
+by tracking issues in a private upstream control-plane repository.
 
 ## Proposed Approach
 

@@ -172,7 +172,6 @@ require_cmd curl "cd-deploy"
 CD_PLAN_ENVIRONMENT="$(load_plan_value CD_PLAN_ENVIRONMENT)"
 CD_PLAN_COMMIT_SHA="$(load_plan_value CD_PLAN_COMMIT_SHA)"
 CD_PLAN_IMAGE_URI="$(load_plan_value CD_PLAN_IMAGE_URI)"
-CD_PLAN_IMAGE_TAG_URI="$(load_plan_value CD_PLAN_IMAGE_TAG_URI)"
 CD_PLAN_PROJECT_ID="$(load_plan_value CD_PLAN_PROJECT_ID)"
 CD_PLAN_REGION="$(load_plan_value CD_PLAN_REGION)"
 CD_PLAN_SERVICE_NAME="$(load_plan_value CD_PLAN_SERVICE_NAME)"
@@ -313,52 +312,31 @@ run_health_check() {
 record_evidence() {
   local status="$1"
   local summary_file="$2"
-  local previous_revision="$3"
-  local new_revision="$4"
+  # $3/$4/$6 (previous_revision, new_revision, rollback_target) are
+  # intentionally not recorded in the public artifact this writes.
   local error_message="$5"
-  local rollback_target="${6:-}"
   local verified_traffic_percent="${7:-}"
 
   jq -n \
     --arg environment "$CD_PLAN_ENVIRONMENT" \
     --arg commit "$CD_PLAN_COMMIT_SHA" \
-    --arg project_id "$CD_PLAN_PROJECT_ID" \
-    --arg region "$CD_PLAN_REGION" \
-    --arg service_name "$CD_PLAN_SERVICE_NAME" \
-    --arg image_tag_uri "$CD_PLAN_IMAGE_TAG_URI" \
-    --arg image_digest_uri "$CD_PLAN_IMAGE_URI" \
-    --arg previous_revision "$previous_revision" \
-    --arg new_revision "$new_revision" \
-    --arg rollback_target "$rollback_target" \
     --arg verified_traffic_percent "$verified_traffic_percent" \
     --arg status "$status" \
     --arg error "$error_message" \
-    --arg actor "${GITHUB_ACTOR:-}" \
     --arg run_id "${GITHUB_RUN_ID:-}" \
     --arg run_attempt "${GITHUB_RUN_ATTEMPT:-}" \
-    --arg run_url "${GITHUB_SERVER_URL:-https://github.com}/${GITHUB_REPOSITORY:-}/actions/runs/${GITHUB_RUN_ID:-}" \
     '{
       environment: $environment,
       final_status: $status,
       commit: $commit,
-      project_id: $project_id,
-      region: $region,
-      service_name: $service_name,
-      image_tag_uri: $image_tag_uri,
-      image_digest_uri: $image_digest_uri,
-      pre_deploy_revision: $previous_revision,
-      new_revision: $new_revision,
-      rollback_target: $rollback_target,
       verified_traffic_percent: (
         if $verified_traffic_percent == "" then null
         else ($verified_traffic_percent | tonumber)
         end
       ),
       error: $error,
-      actor: $actor,
       run_id: $run_id,
       run_attempt: $run_attempt,
-      run_url: $run_url,
       timestamp: now
     }' > "$summary_file"
 }
@@ -374,9 +352,8 @@ get_evidence_file() {
 
 write_step_summary() {
   local status="$1"
-  local previous_revision="$2"
-  local new_revision="$3"
-  local service_url="$4"
+  # $2/$3/$4 (previous_revision, new_revision, service_url) are intentionally
+  # not written to the public step summary.
 
   if [[ -z "${GITHUB_STEP_SUMMARY:-}" ]]; then
     return 0
@@ -386,14 +363,7 @@ write_step_summary() {
     echo "### Cloud Run deployment evidence"
     echo "- Environment: $CD_PLAN_ENVIRONMENT"
     echo "- Status: $status"
-    echo "- Service: $CD_PLAN_SERVICE_NAME"
     echo "- Commit: $CD_PLAN_COMMIT_SHA"
-    echo "- Image: $CD_PLAN_IMAGE_URI"
-    echo "- Previous revision: ${previous_revision:-<none>}"
-    echo "- New revision: ${new_revision:-<none>}"
-    if [[ -n "$service_url" ]]; then
-      echo "- Service URL: $service_url"
-    fi
   } >> "$GITHUB_STEP_SUMMARY"
 }
 

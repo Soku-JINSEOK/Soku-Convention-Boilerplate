@@ -8,6 +8,13 @@ import test from 'node:test';
 const root = resolve(new URL('..', import.meta.url).pathname);
 const digest = `sha256:${'a'.repeat(64)}`;
 const repository = 'asia-docker.pkg.dev/project/artifacts/service';
+// Deploy evidence is a public Actions artifact — keep it to a minimal,
+// non-identifying field set (no project id, image URI, revision name,
+// actor, or service URL).
+const MINIMAL_EVIDENCE_KEYS = [
+  'commit', 'environment', 'error', 'final_status',
+  'run_attempt', 'run_id', 'timestamp', 'verified_traffic_percent',
+].toSorted();
 
 function executable(path, body) {
   writeFileSync(path, `#!/usr/bin/env bash\nset -euo pipefail\n${body}`);
@@ -159,7 +166,7 @@ elif [[ "$*" == *"revisions list"* ]]; then echo service-older; fi`);
   assert.doesNotMatch(readFileSync(log, 'utf8'), /--to-revisions=service-older=100/);
   const evidence = JSON.parse(readFileSync(join(temp, 'deploy-dev-test-run-1.json')));
   assert.equal(evidence.final_status, 'rolled-back');
-  assert.equal(evidence.rollback_target, 'service-pre');
+  assert.deepEqual(Object.keys(evidence).toSorted(), MINIMAL_EVIDENCE_KEYS);
 });
 
 test('successful deploy keeps active-account token compatibility and writes evidence', () => {
@@ -197,8 +204,8 @@ fi`);
   assert.doesNotMatch(commands, /--filter=/);
   const evidence = JSON.parse(readFileSync(join(temp, 'deploy-dev-success-run-1.json')));
   assert.equal(evidence.final_status, 'success');
-  assert.equal(evidence.new_revision, 'service-new');
   assert.equal(evidence.verified_traffic_percent, 100);
+  assert.deepEqual(Object.keys(evidence).toSorted(), MINIMAL_EVIDENCE_KEYS);
 });
 
 test('deploy rolls back when the new revision does not receive all traffic', () => {
@@ -235,6 +242,7 @@ fi`);
   assert.equal(evidence.final_status, 'rolled-back');
   assert.equal(evidence.error, 'deploy-failed-traffic-verification');
   assert.equal(evidence.verified_traffic_percent, 0);
+  assert.deepEqual(Object.keys(evidence).toSorted(), MINIMAL_EVIDENCE_KEYS);
 });
 
 test('identity-token failure rolls traffic back and records failed recovery', () => {
@@ -271,9 +279,9 @@ fi`);
   assert.equal((commands.match(/auth print-identity-token/g) ?? []).length, 2);
   const evidence = JSON.parse(readFileSync(join(temp, 'deploy-dev-token-failure-run-1.json')));
   assert.equal(evidence.final_status, 'failed');
-  assert.equal(evidence.rollback_target, 'service-pre');
   assert.equal(evidence.error, 'deploy-failed-healthcheck-and-rollback-failed');
   assert.doesNotMatch(JSON.stringify(evidence), /identity-token|gserviceaccount|credential/i);
+  assert.deepEqual(Object.keys(evidence).toSorted(), MINIMAL_EVIDENCE_KEYS);
 });
 
 test('identity service account rejects non-service-account addresses', () => {
@@ -312,6 +320,7 @@ elif [[ "$*" == *"revisions list"* ]]; then ${scenario === 'missing' ? ':' : 'ec
     const evidence = JSON.parse(readFileSync(join(temp, 'deploy-prod-test-run-1.json')));
     assert.equal(evidence.final_status, scenario === 'success' ? 'manual-rollback' : 'manual-rollback-failed');
     assert.equal(evidence.error, scenario === 'missing' ? 'missing-revision' : scenario === 'unhealthy' ? 'healthcheck-failed' : '');
+    assert.deepEqual(Object.keys(evidence).toSorted(), MINIMAL_EVIDENCE_KEYS);
   }
 });
 

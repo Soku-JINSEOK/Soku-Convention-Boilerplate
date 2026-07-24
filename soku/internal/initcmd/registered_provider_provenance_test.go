@@ -36,7 +36,7 @@ func TestRegisteredProviderLiteralByteProvenance(t *testing.T) {
 	if ledger.SchemaVersion != 1 ||
 		ledger.HashAlgorithm != "sha256-raw-bytes" ||
 		ledger.ControlPlane.MergeCommit !=
-			"ea24298d8081d8108f3b5d280a9e401c6b54df47" ||
+			"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" ||
 		ledger.SourceRewrite != "provider-v1.json:source-only" ||
 		ledger.DeliveryEnabled || len(ledger.Bundles) != 4 {
 		t.Fatalf("invalid registered provider provenance: %#v", ledger)

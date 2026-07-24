@@ -107,7 +107,7 @@ without changing its body, labels, state, or Project membership.
 | PR #60, #61, #66 | PR-only changelog body | wrapped under full issue template; original release/changelog/commit evidence retained | Added `## 🔗 Common Metadata`, `English/KO/JP` sections, checklist, and AI section |
 | Issues #41, #54, #55 | status labels mixed; project metadata inconsistent | Project fields now canonicalized | canonicalized through single source fields only |
 | Issue #41 | In Project: priority/status labels in legacy set + missing `workstream` consistency | `Status: In progress`, `Priority: P1`, `Size: L`, `Workstream: Delivery`; canonical `type/area` retained | fixed |
-| Issue #54 | In Project with no blocker notes | `Status: Blocked`, `Priority: P2`, `Size: M`, `Workstream: Engineering`; body updated with upstream blockers `ci-cd-control-plane#19/#25` | explicit boundary notes and blocker terms added |
+| Issue #54 | In Project with no blocker notes | `Status: Blocked`, `Priority: P2`, `Size: M`, `Workstream: Engineering`; body updated with upstream blockers in a private control-plane repository | explicit boundary notes and blocker terms added |
 | Issue #55 | No metadata lock-in fields | `Status: In progress`, `Priority: P1`, `Size: L`, `Workstream: Governance`, `Target date: 2026-07-31` | execution issue |
 | Aggregate Issue #69 | not present in Project metadata initially | Added to Project #2: `Status: In progress`, `Priority: P2`, `Size: M`, `Workstream: Engineering`, `Target date: 2026-07-31`; links to #60/#61/#66 with `Related to` | tracks monthly dependency rollup |
 

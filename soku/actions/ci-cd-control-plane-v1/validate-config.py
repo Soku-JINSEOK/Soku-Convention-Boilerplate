@@ -9,7 +9,7 @@ import re
 from pathlib import Path, PurePosixPath
 
 EXPECTED_CONFIGURATION_HASH = (
-    "f72121194a48fc3a6a521033c4248652c7889fd0ba86ea8b10270a854b9a0f56"
+    "56aa1ba994c95e320da869998ffb64ce634fdcfb0d457c03a02f770ef4f3bf4d"
 )
 EXPECTED_SOURCE = (
     "github:Soku-JINSEOK/Soku-Convention-Boilerplate/"
