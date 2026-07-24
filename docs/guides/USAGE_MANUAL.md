@@ -245,12 +245,16 @@ Local checks give fast feedback and can exercise tools installed on the
 developer machine:
 
 ```bash
-scripts/ci-local.sh --workspace .
+scripts/verify.sh --profile full --workspace .
 ```
 
-Use `--skip-infra` only when the change has no infrastructure surface. The
-[Verification Guide](../../VERIFICATION_GUIDE.md) lists exact repository,
-template, security, and parity commands.
+(`scripts/ci-local.sh` still works as a thin alias for the command above.)
+Use `--skip-infra` only when the change has no infrastructure surface, and
+`--skip-db` when Docker Compose isn't available for the local MySQL/PostgreSQL
+schema checks. The [Verification Guide](../../VERIFICATION_GUIDE.md) and
+[`verification/CLASSIFICATION.md`](../../verification/CLASSIFICATION.md) list
+exact repository, template, security, and parity commands, and which of them
+are `hosted-only`.
 
 Hosted Validation is the authoritative clean-run evidence across GitHub-hosted
 platforms. Push only after local checks pass, then inspect both aggregate gates.

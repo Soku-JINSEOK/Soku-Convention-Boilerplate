@@ -40,6 +40,14 @@ delete, or reuse them, and must not publish a new release as a side effect.
 
 ## Local Repository Checks
 
+`scripts/verify.sh --profile full` (a thin `scripts/ci-local.sh` still works
+as an alias) now runs the repository, `soku`, template, DB-schema, and
+security checks below in one pass, sourcing tool versions from
+`verification/tools.env`. See [`verification/CLASSIFICATION.md`](./verification/CLASSIFICATION.md)
+for exactly which checks that covers and which remain `hosted-only` (they are
+never a silent pass locally — `verify.sh` prints a notice instead). The
+commands below remain useful for running an individual check by hand.
+
 Run from the repository root unless a command changes directory explicitly.
 
 ```bash

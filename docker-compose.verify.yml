@@ -1,0 +1,40 @@
+# Local equivalents of the mysql/postgresql service containers used by the
+# hosted templates-ci.yml workflow, so verification/commands/db-schema.sh can
+# reproduce the schema-load checks on a developer machine. See
+# verification/CLASSIFICATION.md for context.
+services:
+  mysql:
+    image: ${MYSQL_IMAGE:-mysql:8}
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      MYSQL_DATABASE: template_check
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "--host=127.0.0.1",
+          "--port=3306",
+          "--protocol=tcp",
+          "--user=root",
+          "--silent",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  postgres:
+    image: ${POSTGRES_IMAGE:-postgres:16}
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: template_check
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
