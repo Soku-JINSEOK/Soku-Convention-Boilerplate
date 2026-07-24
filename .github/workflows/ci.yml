@@ -62,6 +62,15 @@ jobs:
             docs/guides/APPLICABILITY.md
             docs/guides/LANGUAGE_SELECTION.md
             VERIFICATION_GUIDE.md
+            verification/CLASSIFICATION.md
+            verification/tools.env
+            verification/commands/_lib.sh
+            verification/commands/repo-hygiene.sh
+            verification/commands/soku.sh
+            verification/commands/templates.sh
+            verification/commands/db-schema.sh
+            verification/commands/security.sh
+            docker-compose.verify.yml
             infra/gcp/main.tf
             infra/gcp/variables.tf
             infra/gcp/versions.tf
@@ -107,6 +116,7 @@ jobs:
             docs/issues/issue-101-task-report.md
             docs/issues/issue-102-task-report.md
             docs/issues/issue-110-task-report.md
+            docs/issues/issue-114-task-report.md
             docs/issues/issue-120-task-report.md
             docs/audits/github-governance-2026-07-23.md
             docs/guides/USAGE_MANUAL.md
@@ -194,6 +204,8 @@ jobs:
             scripts/verify-release-tag.sh
             scripts/verify-release-tag_test.sh
             scripts/ci-local.sh
+            scripts/verify.sh
+            scripts/verify.test.mjs
             scripts/cd-plan.sh
             scripts/cd-deploy.sh
             scripts/gcp-bootstrap.sh
@@ -324,6 +336,9 @@ jobs:
       - name: Run release tag gate regression tests
         run: scripts/verify-release-tag_test.sh
 
+      - name: Run verification entry point regression tests
+        run: node --test scripts/verify.test.mjs
+
       - name: Check Markdown formatting
         run: >-
           npx --yes markdownlint-cli2@0.22.1 --config .markdownlint.jsonc
@@ -342,8 +357,8 @@ jobs:
       - name: Validate shell scripts
         shell: bash
         run: |
-          bash -n scripts/*.sh soku/scripts/*.sh
-          shellcheck scripts/*.sh soku/scripts/*.sh
+          bash -n scripts/*.sh soku/scripts/*.sh verification/commands/*.sh
+          shellcheck scripts/*.sh soku/scripts/*.sh verification/commands/*.sh
 
   sync-parity:
     name: Sync Script Parity (sh vs ps1)
