@@ -40,7 +40,7 @@ through an explicitly selected manual workflow operation.
 
 ## Implementation Status
 
-Implemented and applied to `ci-cd-control-plane` with the documented defaults.
+Implemented and applied to a private downstream control-plane project with the documented defaults.
 The GCS backend, foundation resources, bootstrap image, private Cloud Run
 runtime, WIF connection, and six Repository Variables are active.
 The `dev` GitHub Environment accepts only protected branches; staging and
@@ -53,8 +53,8 @@ production remain unavailable.
 - [x] Terraform 1.15.8 format check and provider-backed validation pass.
 - [x] Repository Node tests, Go tests, release-tag tests, Python provider action
   tests, and whitespace checks pass.
-- [x] Hardened live bootstrap completed; Cloud Run revision
-  `soku-convention-boilerplate-00002-tdn` is `Ready=True` and remains private.
+- [x] Hardened live bootstrap completed; the deployed Cloud Run revision is
+  `Ready=True` and remains private.
 - [x] State uses enforced public-access prevention, uniform access, object
   versioning, seven-day soft delete, and no legacy project Viewer read binding.
 - [x] Deployer project IAM contains only `roles/run.admin`; repository-scoped
@@ -102,15 +102,14 @@ Issue #87은 하나의 GCP 프로젝트 ID에서 foundation 리소스, GitHub OI
 
 ## 구현 현황
 
-구현과 `ci-cd-control-plane` 실제 적용을 완료했습니다. GCS state,
+구현과 비공개 downstream control-plane 프로젝트에 대한 실제 적용을 완료했습니다. GCS state,
 foundation, 비공개 Cloud Run, WIF, GitHub Variables 6개가 활성화됐습니다.
 `dev` GitHub Environment는 보호 브랜치만 허용하며 staging/prod는 비활성입니다.
 
 ## 검증
 
 - [x] 셸, Node, Terraform, Go, Python 및 공백 검사를 통과했습니다.
-- [x] Cloud Run revision `soku-convention-boilerplate-00002-tdn`의
-  `Ready=True`와 비공개 상태를 확인했습니다.
+- [x] 배포된 Cloud Run revision의 `Ready=True`와 비공개 상태를 확인했습니다.
 - [x] state PAP/UBLA/versioning/soft delete와 Viewer binding 제거를 확인했습니다.
 - [x] 프로젝트 deployer IAM은 `roles/run.admin`만 남고 Token Creator는 deployer 자체 서비스 계정 범위로 제한됐습니다.
 

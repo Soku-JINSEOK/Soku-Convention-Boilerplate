@@ -70,5 +70,25 @@ out/
 .terraform/
 *.tfstate
 *.tfstate.*
+*.tfvars
+*.tfvars.json
+*.auto.tfvars
+*.auto.tfvars.json
+!*.tfvars.example
 .serverless/
 .aws-sam/
+
+# Keys, certificates, and cloud/package credentials
+*.pem
+*.key
+*.p12
+*.pfx
+*service-account*.json
+credentials*.json
+application_default_credentials.json
+.npmrc
+!.npmrc.example
+.pypirc
+.netrc
+kubeconfig
+kubeconfig.*

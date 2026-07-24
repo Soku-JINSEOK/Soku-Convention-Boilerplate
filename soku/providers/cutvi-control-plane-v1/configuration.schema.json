@@ -22,7 +22,7 @@
       "const": "cutvi-control-plane-v1"
     },
     "repository": {
-      "const": "Soku-JINSEOK/CutVi"
+      "const": "example-org/example-electron-app"
     },
     "project_id": {
       "const": "cutvi"
@@ -50,7 +50,7 @@
       "const": "electron"
     },
     "registry_ref": {
-      "const": "16caa523e1eb0884117ba19d1409a4294cd9d43d"
+      "const": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
     },
     "delivery_enabled": {
       "const": false

@@ -2,8 +2,8 @@
   "schema_version": 1,
   "hash_algorithm": "sha256-raw-bytes",
   "control_plane": {
-    "repository": "https://github.com/Soku-JINSEOK/ci-cd-control-plane",
-    "merge_commit": "ea24298d8081d8108f3b5d280a9e401c6b54df47",
+    "repository": "https://github.com/example-org/example-control-plane",
+    "merge_commit": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
     "manifest_path": "integrations/soku/provider-api-v1/downstream-manifest-v1.json",
     "manifest_sha256": "5c84d53a7d5ec29f753155b4d3a5990fb0c0986a77fe1ee4c606664b2ffffbad"
   },
@@ -15,23 +15,23 @@
       "files": [
         {
           "path": "soku/providers/cutvi-control-plane-v1/configuration.schema.json",
-          "sha256": "bf2fe597591f128b2d1d187b1c623a09355dbf25233ddd4581279823c841a06f",
-          "central_sha256": "bf2fe597591f128b2d1d187b1c623a09355dbf25233ddd4581279823c841a06f"
+          "sha256": "6edde0351675f9cd0f04c96328fec4c250515fbe35e50c26d0200e04654277ff",
+          "central_sha256": "6edde0351675f9cd0f04c96328fec4c250515fbe35e50c26d0200e04654277ff"
         },
         {
           "path": "soku/providers/cutvi-control-plane-v1/example-config.yml",
-          "sha256": "a04f10c9d950f33d276c5bdbba10954f0a1d1194b162472f53721e3a686161c8",
-          "central_sha256": "a04f10c9d950f33d276c5bdbba10954f0a1d1194b162472f53721e3a686161c8"
+          "sha256": "08693beda7e872e4607ce7b1a7518d94c28e7fb7f0809c08915b4d2e38258d9b",
+          "central_sha256": "08693beda7e872e4607ce7b1a7518d94c28e7fb7f0809c08915b4d2e38258d9b"
         },
         {
           "path": "soku/providers/cutvi-control-plane-v1/provider-v1.json",
-          "sha256": "3fc261702546b87f69ff091daacbbf89ad959cd5a5f93d3d0e0d1c6d12e9535c",
-          "central_sha256": "57582b62e0b3ddb7f4e0edf9e870856dc1c2dc2563cbf36fc1bf82aae042e474"
+          "sha256": "ed94b1249632ed4445ef1b003e621248e0068951768128def8b0bb833c8ee3cd",
+          "central_sha256": "ed94b1249632ed4445ef1b003e621248e0068951768128def8b0bb833c8ee3cd"
         },
         {
           "path": "soku/providers/cutvi-control-plane-v1/templates/control-plane-provider.yml",
-          "sha256": "be3470bd684877d19499938eaffacff972c7bf5abd2cb333de9acb2dee6eade7",
-          "central_sha256": "be3470bd684877d19499938eaffacff972c7bf5abd2cb333de9acb2dee6eade7"
+          "sha256": "992691b5e93fc291603779a1ba90491fcd7e6c1d864947ba44f81a7e398a274d",
+          "central_sha256": "992691b5e93fc291603779a1ba90491fcd7e6c1d864947ba44f81a7e398a274d"
         }
       ]
     },
@@ -41,23 +41,23 @@
       "files": [
         {
           "path": "soku/providers/archviz-control-plane-v1/configuration.schema.json",
-          "sha256": "734e8cef4f9ddec49f774c0220bee9f29396958772d1a44bbfe2ce1ec3300e44",
-          "central_sha256": "734e8cef4f9ddec49f774c0220bee9f29396958772d1a44bbfe2ce1ec3300e44"
+          "sha256": "f45a9d03802e52060ba6e9fae9c1a08e71924a52c8957a454dd5b6171aadf22b",
+          "central_sha256": "f45a9d03802e52060ba6e9fae9c1a08e71924a52c8957a454dd5b6171aadf22b"
         },
         {
           "path": "soku/providers/archviz-control-plane-v1/example-config.yml",
-          "sha256": "2bb1951055de2068f27381e220367b912e5f9c89a53c533a48206e006970a4b5",
-          "central_sha256": "2bb1951055de2068f27381e220367b912e5f9c89a53c533a48206e006970a4b5"
+          "sha256": "5b45de6b131836983bc2a6fbb7128b7714bf3ca21ede8d4715259be113825878",
+          "central_sha256": "5b45de6b131836983bc2a6fbb7128b7714bf3ca21ede8d4715259be113825878"
         },
         {
           "path": "soku/providers/archviz-control-plane-v1/provider-v1.json",
-          "sha256": "254de82a328fdc81868840896c2e41ccac15fe3da9c87c49606d72b8264ed4ce",
-          "central_sha256": "b60685c4bd261aa9bd1fd4a48bf7ddccc9befc0b2a5fa59911ebdacba84c5205"
+          "sha256": "565ee78f3eab97613410c4dace3f5b8c17008418dc68a26c56832a6ce3590c41",
+          "central_sha256": "565ee78f3eab97613410c4dace3f5b8c17008418dc68a26c56832a6ce3590c41"
         },
         {
           "path": "soku/providers/archviz-control-plane-v1/templates/control-plane-provider.yml",
-          "sha256": "57f087825d5f80fef1c9573a8d07eef7eb3223c23857130da96b05ee1b67e931",
-          "central_sha256": "57f087825d5f80fef1c9573a8d07eef7eb3223c23857130da96b05ee1b67e931"
+          "sha256": "05a6625326670a7975e76872d89a26c31278f6584a9aa2c11052feca7b1c774f",
+          "central_sha256": "05a6625326670a7975e76872d89a26c31278f6584a9aa2c11052feca7b1c774f"
         }
       ]
     },
@@ -67,23 +67,23 @@
       "files": [
         {
           "path": "soku/providers/report-hub-control-plane-v1/configuration.schema.json",
-          "sha256": "42fddbcf3a6e154441979e51fe5497c500c0eb22411a55232670e4caaeb723bb",
-          "central_sha256": "42fddbcf3a6e154441979e51fe5497c500c0eb22411a55232670e4caaeb723bb"
+          "sha256": "25bcdd055e3f22f3bc6e6e85e4283111b659801a458f86879290cd03a025a2ae",
+          "central_sha256": "25bcdd055e3f22f3bc6e6e85e4283111b659801a458f86879290cd03a025a2ae"
         },
         {
           "path": "soku/providers/report-hub-control-plane-v1/example-config.yml",
-          "sha256": "40a496a02836b88797c01ad89e35c7696276602f18c24f089f725048e46d2716",
-          "central_sha256": "40a496a02836b88797c01ad89e35c7696276602f18c24f089f725048e46d2716"
+          "sha256": "d4f20ad2e61b54576934f09d2c4dfb7b08c46427d879867574f140733e8654d3",
+          "central_sha256": "d4f20ad2e61b54576934f09d2c4dfb7b08c46427d879867574f140733e8654d3"
         },
         {
           "path": "soku/providers/report-hub-control-plane-v1/provider-v1.json",
-          "sha256": "bc521863951150ad977c1cac8f463916e082afd6f34198d394ae494f241cb373",
-          "central_sha256": "b0ef198778abcd85b022372dfc47f4ea4ab8565e2d3def95631fbf46454a6cc4"
+          "sha256": "3dc1cfd7d9098e7c9d4a894113fc6eafa11780ee22a71301dcba245a120b2a47",
+          "central_sha256": "3dc1cfd7d9098e7c9d4a894113fc6eafa11780ee22a71301dcba245a120b2a47"
         },
         {
           "path": "soku/providers/report-hub-control-plane-v1/templates/control-plane-provider.yml",
-          "sha256": "cffe2ecdecd4f2533b9c6522c2ace68f0fe862c57a9c15a63843427c596c8e44",
-          "central_sha256": "cffe2ecdecd4f2533b9c6522c2ace68f0fe862c57a9c15a63843427c596c8e44"
+          "sha256": "b996a8c9ecd80bb727436c8c537a542e6891a45e706bff43ba3e1dcb10566c09",
+          "central_sha256": "b996a8c9ecd80bb727436c8c537a542e6891a45e706bff43ba3e1dcb10566c09"
         }
       ]
     },
@@ -93,23 +93,23 @@
       "files": [
         {
           "path": "soku/providers/soku-pr-site-control-plane-v1/configuration.schema.json",
-          "sha256": "435b823d5d08ad37b3506b4bea2313f5d55f6065ff26c55f62fd1588be3f832b",
-          "central_sha256": "435b823d5d08ad37b3506b4bea2313f5d55f6065ff26c55f62fd1588be3f832b"
+          "sha256": "e940eb5a86c2904735602f8f807bce2f94766d701e87cf9bd336543744fae53d",
+          "central_sha256": "e940eb5a86c2904735602f8f807bce2f94766d701e87cf9bd336543744fae53d"
         },
         {
           "path": "soku/providers/soku-pr-site-control-plane-v1/example-config.yml",
-          "sha256": "95316168b5d490a4035e7879c858b88f5f3a4469a7db2391ac2a5db454bd3ee6",
-          "central_sha256": "95316168b5d490a4035e7879c858b88f5f3a4469a7db2391ac2a5db454bd3ee6"
+          "sha256": "ecef570d386066d417ed3203dc3cedbba99fc0a49fa3dbac7e26e189ae95ced6",
+          "central_sha256": "ecef570d386066d417ed3203dc3cedbba99fc0a49fa3dbac7e26e189ae95ced6"
         },
         {
           "path": "soku/providers/soku-pr-site-control-plane-v1/provider-v1.json",
-          "sha256": "1b42a4f3fb0b0a615732ca50d08179a1d930d256d32ba7810bf2a7ec9b593abf",
-          "central_sha256": "dc396467b76dbcad4e1839dcf287c4b4a6c7b9af589ba7cbfe279d26414ef6f6"
+          "sha256": "df8b2b05f9fa69cf6f7abd3070f96c54f7b38656f7f17b5f6d1fe65137d3da05",
+          "central_sha256": "df8b2b05f9fa69cf6f7abd3070f96c54f7b38656f7f17b5f6d1fe65137d3da05"
         },
         {
           "path": "soku/providers/soku-pr-site-control-plane-v1/templates/control-plane-provider.yml",
-          "sha256": "8b166c5ff31919c62ebaf4ff30f893c8511192ec8c4c942b52f73862bd4d0e38",
-          "central_sha256": "8b166c5ff31919c62ebaf4ff30f893c8511192ec8c4c942b52f73862bd4d0e38"
+          "sha256": "0059f07ff4c3ee8944975304d0d6cd3bb55bb9eb808bf328841ee2a99fb585d9",
+          "central_sha256": "0059f07ff4c3ee8944975304d0d6cd3bb55bb9eb808bf328841ee2a99fb585d9"
         }
       ]
     }

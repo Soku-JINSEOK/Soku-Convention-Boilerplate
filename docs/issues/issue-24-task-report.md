@@ -2,7 +2,7 @@
 
 ## Goal and Background
 
-Align the repository's Issue and pull request authoring formats with the operational structure demonstrated by `Soku-JINSEOK/ci-cd-control-plane` Issue #16 and pull request #8. This report tracks [Issue #24](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/issues/24).
+Align the repository's Issue and pull request authoring formats with the operational structure demonstrated by a private upstream control-plane repository's Issue and pull request. This report tracks [Issue #24](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/issues/24).
 
 ## Proposed Approach
 
@@ -51,7 +51,7 @@ Complete. The local templates, CI file list, standards documentation, and Issue 
 
 ## 목표 및 배경
 
-이 저장소의 Issue 및 PR 작성 형식을 `Soku-JINSEOK/ci-cd-control-plane` Issue #16과 PR #8에서 사용한 실제 운영 구조에 맞춥니다. 이 보고서는 [Issue #24](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/issues/24)를 추적합니다.
+이 저장소의 Issue 및 PR 작성 형식을 비공개 상위 control-plane 저장소의 Issue·PR에서 사용한 실제 운영 구조에 맞춥니다. 이 보고서는 [Issue #24](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/issues/24)를 추적합니다.
 
 ## 제안하는 접근
 

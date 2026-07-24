@@ -3,16 +3,16 @@
   "provider_id": "ci-cd-control-plane-v1",
   "hash_algorithm": "sha256-raw-bytes",
   "control_plane": {
-    "repository": "https://github.com/Soku-JINSEOK/ci-cd-control-plane",
-    "baseline_commit": "16caa523e1eb0884117ba19d1409a4294cd9d43d",
-    "baseline_delivery_commit": "4e37dada9884b738ecc19e714360b38bdcec3a24",
-    "bundle_delivery_commit": "b67a1c6df6f2318fea31f94e72fe3a44c1276c18",
-    "public_contract_delivery_commit": "e97915511bfdae86724aefe7b1273eef761cd423"
+    "repository": "https://github.com/example-org/example-control-plane",
+    "baseline_commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "baseline_delivery_commit": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "bundle_delivery_commit": "cccccccccccccccccccccccccccccccccccccccc",
+    "public_contract_delivery_commit": "dddddddddddddddddddddddddddddddddddddddd"
   },
   "public_files": [
     {
       "path": ".github/soku/ci-cd-control-plane-v1.yml",
-      "sha256": "f72121194a48fc3a6a521033c4248652c7889fd0ba86ea8b10270a854b9a0f56"
+      "sha256": "56aa1ba994c95e320da869998ffb64ce634fdcfb0d457c03a02f770ef4f3bf4d"
     },
     {
       "path": "docs/callers/ci-cd-control-plane-v1.yml",
@@ -24,23 +24,23 @@
     },
     {
       "path": "soku/actions/ci-cd-control-plane-v1/validate-config.py",
-      "sha256": "5c65acb75e9b77e1574b9775506c91558ca0d7218136f8a04a989a151a3727f7"
+      "sha256": "2c570d447fc5338fe20cc471c6e2f367677845c3287272b335d743a6e89bc24e"
     },
     {
       "path": "soku/providers/ci-cd-control-plane-v1/configuration.schema.json",
-      "sha256": "3e0171ebf312108fef37f377d54994bfd247d35f7539b1a70d4cd3c7beb3490c"
+      "sha256": "dc43dddbc863828f5a7529609a28d64de9e770e7d1b2b9c97890710fa75ebb32"
     },
     {
       "path": "soku/providers/ci-cd-control-plane-v1/example-config.yml",
-      "sha256": "f72121194a48fc3a6a521033c4248652c7889fd0ba86ea8b10270a854b9a0f56"
+      "sha256": "56aa1ba994c95e320da869998ffb64ce634fdcfb0d457c03a02f770ef4f3bf4d"
     },
     {
       "path": "soku/providers/ci-cd-control-plane-v1/provider-v1.json",
-      "sha256": "cc482eebb38d8e904b6667d3d85f6d8e9f3a5baa730c4e7ed1a50e9f82a29abc"
+      "sha256": "807c8b656f2b36e674b0847bed4b7347ea96e5ec9d7909d9e44f43d0c890df51"
     },
     {
       "path": "soku/providers/ci-cd-control-plane-v1/templates/control-plane-provider.yml",
-      "sha256": "8ca4232918e5089c68249c50e048bd4209c854599d2537f8df6390a5dfe078f8"
+      "sha256": "095994907061bffec3c18fd0da73f54f9ffd1416bbad24a0bffe2e856466c0fe"
     }
   ],
   "public_mirror": {

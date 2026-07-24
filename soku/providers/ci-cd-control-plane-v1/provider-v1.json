@@ -5,8 +5,8 @@
   "provider_api_version": "1",
   "provider_schema_version": "1",
   "compatible_soku": ">=0.1.2 <1.0.0",
-  "configuration_schema_hash": "3e0171ebf312108fef37f377d54994bfd247d35f7539b1a70d4cd3c7beb3490c",
-  "configuration_hash": "f72121194a48fc3a6a521033c4248652c7889fd0ba86ea8b10270a854b9a0f56",
+  "configuration_schema_hash": "dc43dddbc863828f5a7529609a28d64de9e770e7d1b2b9c97890710fa75ebb32",
+  "configuration_hash": "56aa1ba994c95e320da869998ffb64ce634fdcfb0d457c03a02f770ef4f3bf4d",
   "compatible_profiles": ["bootstrap", "scaled", "standard"],
   "outputs": [
     {
