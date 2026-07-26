@@ -65,7 +65,7 @@ make build
 
 ## 📦 현재 공개 베이스라인
 
-현재 공개 release는 보일러플레이트 `v1.0.5`와 CLI `soku/v0.1.4`입니다.
+현재 공개 release는 보일러플레이트 `v1.0.5`와 CLI `soku/v0.2.1`입니다.
 서명된 `v1.0.5` corrective release는 immutable `v1.0.4`의 공개 migration
 smoke에서 확인된 경계를 수정해 lifecycle-owned `.soku/` state를 JavaScript와
 TypeScript formatting 대상에서 제외합니다. 기존 tag는 불변으로 보존하며 현재

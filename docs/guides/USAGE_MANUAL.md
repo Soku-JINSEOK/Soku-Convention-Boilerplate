@@ -32,9 +32,10 @@ Record these decisions before initialization:
 
 ## 2. Obtain and verify the published baseline
 
-The current pair is boilerplate `v1.0.5` and CLI `soku/v0.1.4`. These are
-independent release axes. Never infer compatibility from matching version
-numbers or select `latest`.
+The current pair is boilerplate `v1.0.5` and CLI `soku/v0.2.1`. These are
+independent release axes. The verified lifecycle compatibility baseline remains
+`soku/v0.1.4`; never infer compatibility from matching version numbers or
+select `latest`.
 
 ### Verify the boilerplate source
 
@@ -57,16 +58,16 @@ compatibility records.
 
 ### Download and verify the CLI
 
-Download the `soku/v0.1.4` archive matching the platform and
+Download the `soku/v0.2.1` archive matching the platform and
 `checksums.txt` from the
-[CLI release](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/releases/tag/soku/v0.1.4).
+[CLI release](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/releases/tag/soku/v0.2.1).
 For Linux amd64:
 
 ```bash
-curl -LO https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/releases/download/soku/v0.1.4/checksums.txt
-curl -LO https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/releases/download/soku/v0.1.4/soku_v0.1.4_linux_amd64.tar.gz
-grep ' soku_v0.1.4_linux_amd64.tar.gz$' checksums.txt | sha256sum --check -
-tar -xzf soku_v0.1.4_linux_amd64.tar.gz
+curl -LO https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/releases/download/soku/v0.2.1/checksums.txt
+curl -LO https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/releases/download/soku/v0.2.1/soku_v0.2.1_linux_amd64.tar.gz
+grep ' soku_v0.2.1_linux_amd64.tar.gz$' checksums.txt | sha256sum --check -
+tar -xzf soku_v0.2.1_linux_amd64.tar.gz
 ./soku --version
 ```
 
@@ -79,7 +80,7 @@ checksum command with `shasum -a 256 --check`. On Windows, select
 For `soku/v0.2.0` and later, you can also install via npm:
 
 ```bash
-npm install -g @soku-jinseok/soku@0.2.0
+npm install -g @soku-jinseok/soku@0.2.1
 soku --version
 ```
 
@@ -318,7 +319,7 @@ Never:
 ## 12. First-adoption completion checklist
 
 - [ ] Adoption level and `bootstrap`, `standard`, or `scaled` profile recorded.
-- [ ] Boilerplate `v1.0.5` and CLI `soku/v0.1.4` selected independently.
+- [ ] Boilerplate `v1.0.5` and CLI `soku/v0.2.1` selected independently.
 - [ ] For `soku/v0.2.0` and later, npm wrapper option is verified if used.
 - [ ] CLI archive checksum and reported version verified.
 - [ ] Stack IDs and required names confirmed with no placeholders.

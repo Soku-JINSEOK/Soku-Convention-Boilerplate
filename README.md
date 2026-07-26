@@ -66,7 +66,7 @@ make build
 ## 📦 Current Published Baseline
 
 The current published releases are boilerplate `v1.0.5` and CLI
-`soku/v0.1.4`. The signed `v1.0.5` corrective release excludes lifecycle-owned
+`soku/v0.2.1`. The signed `v1.0.5` corrective release excludes lifecycle-owned
 `.soku/` state from JavaScript and TypeScript formatting after public migration
 smoke exposed the boundary in immutable `v1.0.4`. Existing tags remain
 immutable; use `v1.0.5` as the current boilerplate baseline. See

@@ -36,6 +36,24 @@ axis. The versions may differ because CLI compatibility and boilerplate content
 evolve independently. The CLI release procedure is documented in
 [`soku/README.md`](../../soku/README.md).
 
+## 🪪 Reviewed Release Identity
+
+The repository root [`release-identity.json`](../../release-identity.json) is
+the machine-readable authority for the current published boilerplate tag,
+native CLI tag, npm launcher version, release-note records, and tested lifecycle
+compatibility baseline.
+
+The current distribution version and compatibility baseline are separate
+fields. A newer CLI distribution may preserve behavior verified against an
+older lifecycle baseline; documentation must not describe that compatibility
+record as the latest published version.
+
+Any intentional release identity change must update the manifest and every
+derived surface in one reviewed change. CI validates README installation
+examples, npm package metadata, Release workflow defaults, usage guidance, and
+the selected release-note records. Historical release notes and already
+published identities remain immutable.
+
 Boilerplate releases use semantic-style tags in the form
 `vMAJOR.MINOR.PATCH`.
 

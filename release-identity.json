@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "boilerplate": {
+    "version": "1.0.5",
+    "tag": "v1.0.5",
+    "releaseNotes": "docs/releases/v1.0.5.md"
+  },
+  "cli": {
+    "version": "0.2.1",
+    "tag": "soku/v0.2.1",
+    "releaseNotes": "docs/releases/soku-v0.2.1.md"
+  },
+  "npm": {
+    "package": "@soku-jinseok/soku",
+    "version": "0.2.1"
+  },
+  "compatibility": {
+    "boilerplateTag": "v1.0.5",
+    "cliTag": "soku/v0.1.4",
+    "npmSupportedFromCliTag": "soku/v0.2.0"
+  }
+}
