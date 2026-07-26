@@ -64,6 +64,7 @@ jobs:
             VERIFICATION_GUIDE.md
             verification/CLASSIFICATION.md
             verification/tools.env
+            docs/standards/SUPPLY_CHAIN.md
             verification/commands/_lib.sh
             verification/commands/repo-hygiene.sh
             verification/commands/soku.sh
@@ -207,6 +208,8 @@ jobs:
             scripts/ci-local.sh
             scripts/verify.sh
             scripts/verify.test.mjs
+            scripts/verify-supply-chain.mjs
+            scripts/verify-supply-chain.test.mjs
             scripts/cd-plan.sh
             scripts/cd-deploy.sh
             scripts/gcp-bootstrap.sh
@@ -339,6 +342,11 @@ jobs:
 
       - name: Run verification entry point regression tests
         run: node --test scripts/verify.test.mjs
+
+      - name: Enforce immutable supply-chain inputs
+        run: |
+          node --test scripts/verify-supply-chain.test.mjs
+          node scripts/verify-supply-chain.mjs
 
       - name: Check Markdown formatting
         run: >-
