@@ -42,9 +42,23 @@ before Docker or runtime work when validation is enabled.
 
 ## Implementation Status
 
-Implemented locally. GitHub Actions and live Cloud Build trigger evidence remain
-pending until the Draft pull request is opened and merged in the documented
-order.
+Completed in [PR #137](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/pull/137)
+and its hermetic regression follow-up
+[PR #138](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/pull/138).
+The validation-only integration is enabled and both the pull-request trigger
+and automatic `main` trigger have completed successfully.
+
+The live evidence recorded on
+[issue #136](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/issues/136#issuecomment-5083015390)
+also confirms that the validation identity has only the documented logging
+role, has no user-managed key, and did not change the Cloud Run revision,
+traffic, image digest, or Artifact Registry inventory. The authenticated
+private health check remained healthy.
+
+Acceptance criterion 8 deliberately leaves live `/gcbrun` behavior for an
+external contributor without repository write permission as a separate
+follow-up. That test is not required to complete this validation-only
+implementation and does not weaken the existing writer-approval boundary.
 
 ## Verification
 
@@ -63,6 +77,14 @@ order.
 - `bash -n scripts/gcp-bootstrap.sh
   verification/commands/repo-hygiene.sh` (passing).
 - `git diff --check` (passing).
+- PR #137 validation and validation-only Cloud Build (passing).
+- PR #138 validation and validation-only Cloud Build (passing).
+- Automatic `main` Cloud Build for the merged PR #138 commit (passing).
+- [Main GitHub Validation run](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/actions/runs/30197504103)
+  (passing).
+- Live least-privilege IAM, key absence, Cloud Run immutability, Artifact
+  Registry immutability, and authenticated health evidence recorded in the
+  linked issue comment (passing).
 
 ## Public Disclosure Review
 
