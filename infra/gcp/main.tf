@@ -2,6 +2,13 @@ data "google_project" "current" {
   project_id = var.project_id
 }
 
+locals {
+  cloud_build_validation_account_id = format(
+    "cb-%s-ci",
+    substr(var.service_name, 0, min(24, length(var.service_name))),
+  )
+}
+
 resource "google_project_service" "required_apis" {
   for_each = toset(var.enabled_apis)
 
@@ -9,6 +16,16 @@ resource "google_project_service" "required_apis" {
   service = each.value
 
   disable_dependent_services = false
+}
+
+resource "google_project_service" "cloud_build" {
+  count = var.enable_cloud_build_validation ? 1 : 0
+
+  project = var.project_id
+  service = "cloudbuild.googleapis.com"
+
+  disable_dependent_services = false
+  disable_on_destroy         = false
 }
 
 resource "google_artifact_registry_repository" "repository" {
@@ -34,6 +51,26 @@ resource "google_service_account" "github_actions_deployer" {
   display_name = "GitHub Actions deployer identity for ${var.service_name}"
 
   depends_on = [google_project_service.required_apis]
+}
+
+resource "google_service_account" "cloud_build_validation" {
+  count = var.enable_cloud_build_validation ? 1 : 0
+
+  project      = var.project_id
+  account_id   = local.cloud_build_validation_account_id
+  display_name = "Cloud Build validation identity for ${var.service_name}"
+
+  depends_on = [
+    google_project_service.cloud_build,
+  ]
+}
+
+resource "google_project_iam_member" "cloud_build_validation_log_writer" {
+  count = var.enable_cloud_build_validation ? 1 : 0
+
+  project = var.project_id
+  role    = "roles/logging.logWriter"
+  member  = "serviceAccount:${google_service_account.cloud_build_validation[0].email}"
 }
 
 resource "google_project_iam_member" "deployer_run_admin" {
@@ -185,4 +222,65 @@ resource "google_service_account_iam_member" "github_deployer_wi" {
   service_account_id = google_service_account.github_actions_deployer.name
   role               = "roles/iam.workloadIdentityUser"
   member             = "principalSet://iam.googleapis.com/projects/${data.google_project.current.number}/locations/global/workloadIdentityPools/${google_iam_workload_identity_pool.github[0].workload_identity_pool_id}/attribute.repository/${var.github_org}/${var.github_repo}"
+}
+
+resource "google_cloudbuild_trigger" "pull_request" {
+  count = var.enable_cloud_build_validation ? 1 : 0
+
+  project            = var.project_id
+  location           = "global"
+  name               = "soku-convention-boilerplate-pr"
+  description        = "Validate pull requests without publishing or deploying artifacts."
+  filename           = "cloudbuild/validation.yaml"
+  service_account    = google_service_account.cloud_build_validation[0].id
+  include_build_logs = "INCLUDE_BUILD_LOGS_WITH_STATUS"
+
+  substitutions = {
+    _CLOUD_BUILD_SERVICE_ACCOUNT = google_service_account.cloud_build_validation[0].id
+  }
+
+  github {
+    owner = var.github_org
+    name  = var.github_repo
+
+    pull_request {
+      branch          = "^main$"
+      comment_control = "COMMENTS_ENABLED_FOR_EXTERNAL_CONTRIBUTORS_ONLY"
+    }
+  }
+
+  depends_on = [
+    google_project_iam_member.cloud_build_validation_log_writer,
+    google_project_service.cloud_build,
+  ]
+}
+
+resource "google_cloudbuild_trigger" "main" {
+  count = var.enable_cloud_build_validation ? 1 : 0
+
+  project            = var.project_id
+  location           = "global"
+  name               = "soku-convention-boilerplate-main"
+  description        = "Validate main without publishing or deploying artifacts."
+  filename           = "cloudbuild/validation.yaml"
+  service_account    = google_service_account.cloud_build_validation[0].id
+  include_build_logs = "INCLUDE_BUILD_LOGS_WITH_STATUS"
+
+  substitutions = {
+    _CLOUD_BUILD_SERVICE_ACCOUNT = google_service_account.cloud_build_validation[0].id
+  }
+
+  github {
+    owner = var.github_org
+    name  = var.github_repo
+
+    push {
+      branch = "^main$"
+    }
+  }
+
+  depends_on = [
+    google_project_iam_member.cloud_build_validation_log_writer,
+    google_project_service.cloud_build,
+  ]
 }

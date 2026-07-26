@@ -38,6 +38,19 @@ output "deployer_service_account_email" {
   value       = google_service_account.github_actions_deployer.email
 }
 
+output "cloud_build_validation_service_account_email" {
+  description = "Dedicated validation-only Cloud Build service account."
+  value       = var.enable_cloud_build_validation ? google_service_account.cloud_build_validation[0].email : null
+}
+
+output "cloud_build_validation_trigger_ids" {
+  description = "Validation-only Cloud Build trigger IDs."
+  value = var.enable_cloud_build_validation ? {
+    main         = google_cloudbuild_trigger.main[0].trigger_id
+    pull_request = google_cloudbuild_trigger.pull_request[0].trigger_id
+  } : null
+}
+
 output "wif_pool_id" {
   description = "Workload Identity Pool ID for deployment."
   value       = var.enable_wif ? google_iam_workload_identity_pool.github[0].workload_identity_pool_id : null

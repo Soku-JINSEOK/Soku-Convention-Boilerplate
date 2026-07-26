@@ -12,6 +12,10 @@ keeping both stages in one remote GCS state.
   Token Creator or Invoker access.
 - Runtime (`deploy_runtime=true`) creates Cloud Run and requires an immutable
   `repository@sha256:<digest>` value in `image_uri`.
+- Cloud Build validation (`enable_cloud_build_validation=true`) enables the
+  Cloud Build API and creates a dedicated service account with only
+  `roles/logging.logWriter`. It also creates two global, first-generation
+  GitHub App triggers. Neither trigger reuses the GitHub Actions deployer.
 
 The GCS backend is partial configuration. Initialize it with the project-derived
 bucket rather than committing backend values or state:
@@ -27,6 +31,21 @@ sequence. `--project-id` is also supported and takes precedence over the
 environment. Actual creation additionally requires
 `--apply --confirm-project-id <id>`.
 
+Add `--enable-cloud-build-validation` to the preview and apply commands to
+manage the opt-in validation resources. Retain the flag on later applies;
+omitting it restores the default `false` value and plans removal of the
+validation service account, IAM binding, and triggers.
+
+An apply with this flag is validation-only: after the targeted API, identity,
+IAM, and trigger apply succeeds, the bootstrap exits before Docker
+authentication, image build or push, runtime Terraform, and repository-variable
+writes. This keeps an existing Cloud Run service unchanged.
+
+Validation resources use the same state bucket with the isolated
+`cloud-build-validation` prefix. Cloud Run foundation and runtime resources
+remain under `cloud-run`, so later deployment plans cannot remove validation
+triggers through the variable's default `false` value.
+
 During apply, the bootstrap resolves immutable GitHub repository and owner IDs.
 The WIF provider accepts only the configured repository IDs, `refs/heads/main`,
 and `.github/workflows/deploy-gcp.yml` from `main`. The state bucket is hardened
@@ -36,3 +55,35 @@ no legacy project Viewer object access.
 The outputs `wif_provider_name` and `deployer_service_account_email` map directly
 to the GitHub repository variables `GCP_WIF_PROVIDER` and
 `GCP_WIF_SERVICE_ACCOUNT`.
+
+## Validation-only Cloud Build triggers
+
+The opt-in creates these triggers:
+
+| Trigger | Event | Branch | External contributor control |
+| --- | --- | --- | --- |
+| `soku-convention-boilerplate-pr` | Pull request | `^main$` | A writer must comment `/gcbrun` |
+| `soku-convention-boilerplate-main` | Push | `^main$` | Not applicable |
+
+Both triggers use `cloudbuild/validation.yaml`, run as the dedicated validation
+identity, store logs with `CLOUD_LOGGING_ONLY`, and return build status and log
+links to GitHub. The build runs Node 24 GCP regression tests, Terraform
+format/init/validate/tests, and an amd64 build of `templates/gcloud`. It has no
+artifact output, image push, secret access, or deployment step.
+
+The `github` block in each Terraform trigger is the first-generation GitHub App
+interface. Terraform trigger creation is also the connection check: apply fails
+if the repository is not already connected to the selected GCP project. This
+stack does not create a second-generation Cloud Build connection or repository.
+
+Keep the PR trigger informational until a controlled PR build and the
+post-merge main build both succeed. Confirm their repository, commit SHA, steps,
+service account, and log links, then verify that Artifact Registry and Cloud Run
+did not change. Only after that evidence exists should the exact PR check context
+observed on GitHub be added to `main` branch protection. Do not require the main
+push trigger.
+
+To roll back only the Cloud Build integration, plan and apply with
+`enable_cloud_build_validation=false`. This removes its triggers and dedicated
+IAM resources while preserving the enabled API, GitHub App connection, and
+GitHub Actions deployment path.

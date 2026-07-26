@@ -1,0 +1,37 @@
+steps:
+  - id: gcp-regression-tests
+    name: node:24.17.0-bookworm@sha256:733e1c06ada118ed9f6133a31aa1290be6929664026fb28821500437c61f2c6f
+    entrypoint: bash
+    args:
+      - -ceu
+      - >-
+        node --test
+        .github/deploy-gcp.test.mjs
+        .github/cloudbuild-validation.test.mjs
+
+  - id: terraform-validation
+    name: hashicorp/terraform:1.15.3@sha256:a12a7a9301bbab26589c0a353d5bdfc68bd1a52aa818cbdd698bf0dec094bd61
+    entrypoint: sh
+    dir: infra/gcp
+    args:
+      - -ceu
+      - |
+        terraform fmt -check -recursive
+        terraform init -backend=false -input=false
+        terraform validate
+        terraform test
+
+  - id: container-build
+    name: docker:29.6.1-cli@sha256:862099ada15c669000bef53aa4cb9d821262829f45b0dda2159ccb276443043b
+    args:
+      - build
+      - --platform
+      - linux/amd64
+      - --tag
+      - local/soku-convention-boilerplate-validation:${SHORT_SHA}
+      - templates/gcloud
+
+serviceAccount: ${_CLOUD_BUILD_SERVICE_ACCOUNT}
+
+options:
+  logging: CLOUD_LOGGING_ONLY

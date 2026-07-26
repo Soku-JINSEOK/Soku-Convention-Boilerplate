@@ -16,6 +16,7 @@ const VERSION_VARIABLE = /^\$\{[A-Z][A-Z0-9_]*\}$/;
 
 const PROTECTED_PATHS = [
   '.github/workflows',
+  'cloudbuild',
   'docker-compose.verify.yml',
   'scripts/create-release-tag.sh',
   'scripts/verify-release-tag.sh',
@@ -95,7 +96,12 @@ export function inspectContent(path, content) {
       );
     }
 
-    const image = line.match(/^\s*(?:#\s*)?image:\s*([^\s#]+)/);
+    const cloudBuildImage =
+      path.startsWith('cloudbuild/') &&
+      line.match(/^\s*(?:#\s*)?name:\s*([^\s#]+)/);
+    const image =
+      line.match(/^\s*(?:#\s*)?image:\s*([^\s#]+)/) ??
+      cloudBuildImage;
     if (image && !IMAGE_PIN.test(imageDefault(image[1]))) {
       findings.push(
         finding(

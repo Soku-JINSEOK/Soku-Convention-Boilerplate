@@ -4,6 +4,10 @@ This deployment path is manual by design. Local defaults and ordinary CI perform
 only syntax, formatting, validation, and mock regression checks. They never apply
 Terraform, push images, call GCP APIs, or deploy Cloud Run.
 
+Cloud Build validation is a separate opt-in path. It validates GCP-specific
+configuration but never publishes an image or deploys Cloud Run. Production
+delivery authority remains exclusively in the manual GitHub Actions workflow.
+
 ## Required repository variables
 
 The bootstrap command registers exactly these GitHub Repository Variables:
@@ -62,6 +66,81 @@ The apply sequence is:
 Bucket lookup/creation, protection updates, legacy Viewer cleanup, and variable
 writes are safe to repeat. Terraform uses the same remote state for both stages;
 state and project-specific tfvars are never committed.
+
+## Optional Cloud Build validation
+
+The GCP project must already have its first-generation Cloud Build GitHub App
+connection for this repository. Preview the additional API, dedicated service
+account, Logs Writer binding, and two triggers:
+
+```bash
+scripts/gcp-bootstrap.sh \
+  --enable-cloud-build-validation
+```
+
+Apply only after reviewing the preview and repeating the project ID:
+
+```bash
+scripts/gcp-bootstrap.sh \
+  --enable-cloud-build-validation \
+  --apply \
+  --confirm-project-id "$GCP_PROJECT_ID"
+```
+
+Trigger creation fails if the existing first-generation connection is
+unavailable. The bootstrap does not create or migrate to a second-generation
+connection. Keep the enable flag on subsequent bootstrap applies; the Terraform
+variable defaults to `false`, which is also the rollback setting.
+
+The enable flag uses a validation-only apply path. It exits after the targeted
+API, identity, IAM, and trigger resources succeed, before Docker authentication,
+image build or push, runtime Terraform, and GitHub repository-variable writes.
+This makes the integration apply safe to compare against an unchanged Cloud Run
+revision.
+
+The validation-only path stores state under the isolated
+`cloud-build-validation` GCS prefix. Existing foundation, runtime, and deployment
+plans keep using `cloud-run`, so their default `false` value cannot remove the
+validation triggers.
+
+The PR trigger, `soku-convention-boilerplate-pr`, validates pull requests whose
+target is `main`. External contributors require a repository writer to comment
+`/gcbrun`. The `soku-convention-boilerplate-main` trigger validates pushes to
+`main`. Both use a dedicated service account with only
+`roles/logging.logWriter`, Cloud Logging-only output, and
+`cloudbuild/validation.yaml`.
+
+The build runs the existing GCP deployment regression tests and the Cloud Build
+policy tests under Node 24, checks Terraform formatting and validity, executes
+Terraform mock plans, and builds `templates/gcloud` for `linux/amd64`. It does
+not push the resulting image, write to Artifact Registry, access secrets, or run
+a deployment command.
+
+Cloud Build does not replace the repository's existing pull-request policy.
+Before opening the validation PR, use the repository template, add one `type:*`
+and one `area:*` label, assign an owner, and keep a Draft linked with
+`Related to #N`. An immediate `PR Metadata Gate` failure that is replaced by a
+successful metadata-event run on the same head commit is a metadata violation,
+not a GCP incident. Classify it as a CI defect only when the current,
+metadata-complete head commit still fails. Cancelled duplicate runs are not
+Cloud Build failures.
+
+Treat both checks as informational at first. With a controlled PR and its merged
+`main` commit, verify the repository and commit SHA, all build steps, the
+dedicated service account, successful status, and GitHub log links. Also compare
+Artifact Registry images and Cloud Run revision, image digest, and traffic
+before and after, then confirm the authenticated `/health` response remains
+`ok`.
+
+After both builds have successful evidence, add only the exact PR check context
+shown by GitHub to `main` branch protection. Do not make the main push trigger a
+required check. Verify the required flow again with an external pull request and
+writer-issued `/gcbrun` approval.
+
+Rollback is an apply with `enable_cloud_build_validation=false`. It removes only
+the validation triggers, dedicated identity, and IAM binding. It preserves the
+enabled API, GitHub App connection, GitHub Actions deployer, Artifact Registry,
+and Cloud Run.
 
 ## First dev deployment
 
