@@ -10,6 +10,9 @@ const releaseWorkflow = readFileSync(
   new URL('./workflows/release.yml', import.meta.url),
   'utf8',
 );
+const releaseIdentity = JSON.parse(
+  readFileSync(new URL('../release-identity.json', import.meta.url), 'utf8'),
+);
 const contributionWorkflow = readFileSync(
   new URL('./workflows/contribution-title-check.yml', import.meta.url),
   'utf8',
@@ -80,8 +83,18 @@ test('does not subscribe to closed pull request events', () => {
 });
 
 test('release preflight can call validation without enabling delivery', () => {
-  assert.match(releaseWorkflow, /boilerplate-tag:[\s\S]*default: v1\.0\.5/);
-  assert.match(releaseWorkflow, /cli-tag:[\s\S]*default: soku\/v0\.1\.4/);
+  assert.match(
+    releaseWorkflow,
+    new RegExp(
+      `boilerplate-tag:[\\s\\S]*default: ${releaseIdentity.boilerplate.tag.replaceAll('.', '\\.')}`,
+    ),
+  );
+  assert.match(
+    releaseWorkflow,
+    new RegExp(
+      `cli-tag:[\\s\\S]*default: ${releaseIdentity.cli.tag.replaceAll('.', '\\.')}`,
+    ),
+  );
   assert.match(
     releaseWorkflow,
     /permissions:\n\s+contents: read\n\s+pull-requests: read/,
