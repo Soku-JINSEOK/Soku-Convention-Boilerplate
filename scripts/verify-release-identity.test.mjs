@@ -27,7 +27,7 @@ const identity = {
 };
 
 const currentIdentity =
-  'v1.0.5 soku/v0.2.1 @soku-jinseok/soku@0.2.1 soku/v0.1.4';
+  'v1.0.5 soku/v0.2.1 npm install -g @soku-jinseok/soku@0.2.1 soku/v0.1.4';
 const files = {
   'README.md': currentIdentity,
   'README.ko.md': currentIdentity,
