@@ -45,15 +45,20 @@ jobs:
           CLI_TAG: ${{ inputs.cli-tag }}
         shell: bash
         run: |
+          expected_fingerprint="$(
+            node -p "require('./release-identity.json').signing.activeFingerprint"
+          )"
           boilerplate_notes="docs/releases/${BOILERPLATE_TAG//\//-}.md"
           cli_notes="docs/releases/${CLI_TAG//\//-}.md"
           scripts/verify-release-tag.sh \
             --tag "$BOILERPLATE_TAG" \
             --notes-file "$boilerplate_notes" \
+            --expected-fingerprint "$expected_fingerprint" \
             --check-notes-only
           scripts/verify-release-tag.sh \
             --tag "$CLI_TAG" \
             --notes-file "$cli_notes" \
+            --expected-fingerprint "$expected_fingerprint" \
             --check-notes-only
 
       - name: Resolve tag release record
@@ -83,6 +88,9 @@ jobs:
           RELEASE_NOTES: ${{ steps.metadata.outputs.notes-file }}
         shell: bash
         run: |
+          expected_fingerprint="$(
+            node -p "require('./release-identity.json').signing.activeFingerprint"
+          )"
           curl --fail --silent --show-error --location \
             https://github.com/Soku-JINSEOK.gpg | gpg --batch --import
 
@@ -92,7 +100,8 @@ jobs:
             "refs/tags/$RELEASE_TAG:refs/tags/$RELEASE_TAG"
           scripts/verify-release-tag.sh \
             --tag "$RELEASE_TAG" \
-            --notes-file "$RELEASE_NOTES"
+            --notes-file "$RELEASE_NOTES" \
+            --expected-fingerprint "$expected_fingerprint"
 
           release_commit="$(git rev-list -n 1 "$RELEASE_TAG")"
           test "$release_commit" = "$GITHUB_SHA"
@@ -105,7 +114,8 @@ jobs:
               "refs/tags/$companion_tag:refs/tags/$companion_tag"
             scripts/verify-release-tag.sh \
               --tag "$companion_tag" \
-              --notes-file "$companion_notes"
+              --notes-file "$companion_notes" \
+              --expected-fingerprint "$expected_fingerprint"
             companion_commit="$(git rev-list -n 1 "$companion_tag")"
             test "$release_commit" = "$companion_commit"
             verified_tags+=("$companion_tag")

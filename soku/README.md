@@ -296,8 +296,10 @@ Release. Before creating release tags:
 2. Verify the version and supported Go toolchain.
 3. Run the complete repository and package verification suite.
 4. Run `scripts/create-release-tag.sh --tag <tag> --notes-file <path>` for each
-   release axis. The helper verifies clean, up-to-date `main`, creates the local
-   signed annotated tag, verifies it, and never pushes it.
+   release axis. The helper verifies clean, up-to-date `main`, requires the
+   configured GPG key's full primary fingerprint to match
+   `release-identity.json`, creates the local signed annotated tag, verifies it,
+   and never pushes it.
 5. Verify companion tags resolve to the same reviewed commit, then publish them
    together with `git push --atomic origin <boilerplate-tag> <cli-tag>`.
 6. The guarded Release workflow reuses full repository and runtime-template CI,

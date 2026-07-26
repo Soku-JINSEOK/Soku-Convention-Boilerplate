@@ -19,6 +19,8 @@ const PROTECTED_PATHS = [
   '.github/workflows',
   'cloudbuild',
   'docker-compose.verify.yml',
+  'docs/releases/SIGNER_ROTATIONS.md',
+  'release-identity.json',
   'scripts/create-release-tag.sh',
   'scripts/verify-release-tag.sh',
   'scripts/verify-release-tag_test.sh',

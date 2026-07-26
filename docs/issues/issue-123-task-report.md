@@ -43,10 +43,23 @@ the current distribution version.
 - The next reviewed CLI release must prove Trusted Publishing/OIDC with
   provenance and without `NPM_TOKEN`.
 - The previous long-lived npm token may be retired only after that success.
-- Tag verification must reject a valid signature outside the approved signer
-  set.
-- A reviewed signer-rotation procedure and tests must be added.
 - The exact-tag `hosted-full` release gate must remain intact.
+
+## Phase 3 Signer Trust
+
+- Pin the full primary GPG fingerprint shared by the configured local secret
+  key and the corresponding GitHub public key.
+- Require `verify-release-tag.sh` to compare GnuPG's `VALIDSIG` primary
+  fingerprint with that exact approved value.
+- Refuse tag creation when the configured local OpenPGP key does not resolve to
+  the active fingerprint in `release-identity.json`.
+- Maintain an append-only signer-rotation record with the previous and new
+  fingerprints, effective source boundary, reason, and verification result.
+- Exercise approved and cryptographically valid but unapproved generated keys
+  in an isolated `GNUPGHOME`.
+
+The signer controls may merge while #116 is gathering comparison data. They do
+not authorize a tag, GitHub Release, npm publication, or credential retirement.
 
 ## Non-destructive Boundary
 
