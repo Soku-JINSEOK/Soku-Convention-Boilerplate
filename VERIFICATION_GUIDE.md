@@ -145,6 +145,13 @@ The lifecycle gate covers the core and provider contract. The package check
 must reproduce the five supported target archives, checksums, file modes, and
 packaged binary smoke result without leaving tracked output.
 
+The hermetic lifecycle and provider fixtures run for every pull request,
+including pull requests from forks, without an explicit repository token. The
+external provider network-conformance fixture receives `GITHUB_TOKEN` only in
+trusted hosted contexts: same-repository pull requests, `main` or tag pushes,
+scheduled runs, and manual dispatches. Never use `pull_request_target` to check
+out or execute an untrusted pull-request head.
+
 ## Runtime-Template Checks
 
 Use the locked dependency files and commands documented in
