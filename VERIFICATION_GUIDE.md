@@ -50,6 +50,9 @@ scripts/verify.sh --profile fast
 scripts/verify.sh --profile fast --base <base-sha> --head <head-sha>
 scripts/verify.sh --profile fast --files-from changed-files.txt
 
+# Hosted-only, fail-closed changed-scope validation.
+scripts/verify.sh --profile ci-quick --base <base-sha> --head <head-sha>
+
 # Pre-push complete locally reproducible verification.
 scripts/verify.sh --profile full
 ```
@@ -60,6 +63,12 @@ runtime-template, database/config, or infrastructure smoke checks. Shared
 verification, generator, synchronization, workflow/lint, provider, catalog, or
 schema changes select every scope. An unknown path also selects every scope;
 the detector never guesses that a new path is harmless.
+
+`ci-quick` uses the same scope contract with an explicit commit range and
+rejects DB or infrastructure skips. The reusable
+`.github/workflows/ci-quick.yml` is called by `validation.yml`, which publishes
+the stable `CI Quick Gate` aggregate beside the unchanged `Validation Gate`
+during issue #116's observation window.
 
 `full` (also available through the compatibility wrapper
 `scripts/ci-local.sh`) runs the repository, `soku`, template, DB-schema,

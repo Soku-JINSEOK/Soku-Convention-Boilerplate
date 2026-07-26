@@ -13,6 +13,57 @@ permissions:
   pull-requests: read
 
 jobs:
+  quick:
+    name: Quick validation
+    if: >-
+      github.event_name != 'pull_request' ||
+      github.event.action == 'opened' ||
+      github.event.action == 'synchronize' ||
+      github.event.action == 'reopened' ||
+      (github.event.action == 'edited' && github.event.changes.base != null)
+    concurrency:
+      group: validation-quick-${{ github.event.pull_request.number || github.ref }}
+      cancel-in-progress: true
+    uses: ./.github/workflows/ci-quick.yml
+    with:
+      base-sha: ${{ github.event.pull_request.base.sha || github.event.before }}
+      head-sha: ${{ github.event.pull_request.head.sha || github.sha }}
+
+  quick-not-required:
+    name: CI Quick Not Required
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.event.action != 'opened' &&
+      github.event.action != 'synchronize' &&
+      github.event.action != 'reopened' &&
+      !(github.event.action == 'edited' && github.event.changes.base != null)
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Metadata-only event preserves the existing CI Quick Gate."
+
+  ci-quick-gate:
+    name: CI Quick Gate
+    if: always()
+    needs:
+      - quick
+      - quick-not-required
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require quick validation
+        env:
+          QUICK_RESULT: ${{ needs.quick.result }}
+          NOT_REQUIRED_RESULT: ${{ needs.quick-not-required.result }}
+        run: |
+          if [[ "$QUICK_RESULT" = success &&
+                "$NOT_REQUIRED_RESULT" = skipped ]]; then
+            exit 0
+          fi
+          if [[ "$QUICK_RESULT" = skipped &&
+                "$NOT_REQUIRED_RESULT" = success ]]; then
+            exit 0
+          fi
+          exit 1
+
   repository:
     name: Full repository validation
     if: >-
