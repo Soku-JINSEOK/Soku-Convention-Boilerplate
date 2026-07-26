@@ -18,5 +18,9 @@
     "boilerplateTag": "v1.0.5",
     "cliTag": "soku/v0.1.4",
     "npmSupportedFromCliTag": "soku/v0.2.0"
+  },
+  "signing": {
+    "activeFingerprint": "03944489C01275035F9D68049A359FC72B404DFC",
+    "rotationLog": "docs/releases/SIGNER_ROTATIONS.md"
   }
 }

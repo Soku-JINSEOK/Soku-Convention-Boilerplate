@@ -36,6 +36,67 @@ function requireSnippet(files, filePath, snippet, errors) {
   }
 }
 
+function verifySignerRotationLog(content, activeFingerprint, errors) {
+  if (typeof content !== 'string') return;
+
+  const rows = content
+    .split(/\r?\n/)
+    .filter((line) => line.startsWith('|'))
+    .map((line) => line.split('|').slice(1, -1).map((cell) => cell.trim()))
+    .filter(
+      (cells) =>
+        cells[0] !== 'Previous fingerprint' &&
+        !cells.every((cell) => /^-+$/.test(cell)),
+    );
+  if (rows.length === 0) {
+    errors.push('signer rotation log must contain at least one history row.');
+    return;
+  }
+
+  const normalizedFingerprint = (value) =>
+    value === 'none' ? value : value.replace(/^`|`$/g, '');
+  let previousNewFingerprint;
+  const observedFingerprints = new Set();
+
+  rows.forEach((cells, index) => {
+    if (cells.length !== 5 || cells.some((cell) => cell.length === 0)) {
+      errors.push(
+        `signer rotation history row ${index + 1} must contain five non-empty fields.`,
+      );
+      return;
+    }
+
+    const previousFingerprint = normalizedFingerprint(cells[0]);
+    const newFingerprint = normalizedFingerprint(cells[1]);
+    if (
+      (index === 0 && previousFingerprint !== 'none') ||
+      (index > 0 && previousFingerprint !== previousNewFingerprint)
+    ) {
+      errors.push(
+        `signer rotation history row ${index + 1} breaks fingerprint continuity.`,
+      );
+    }
+    if (!/^[A-F0-9]{40}$/.test(newFingerprint)) {
+      errors.push(
+        `signer rotation history row ${index + 1} has an invalid new fingerprint.`,
+      );
+    }
+    if (observedFingerprints.has(newFingerprint)) {
+      errors.push(
+        `signer rotation history row ${index + 1} reuses a fingerprint.`,
+      );
+    }
+    observedFingerprints.add(newFingerprint);
+    previousNewFingerprint = newFingerprint;
+  });
+
+  if (previousNewFingerprint !== activeFingerprint) {
+    errors.push(
+      'the final signer rotation fingerprint must match the active fingerprint.',
+    );
+  }
+}
+
 function workflowDefault(workflow, input) {
   return workflow.match(
     new RegExp(`${escapeRegExp(input)}:[\\s\\S]*?default:\\s*([^\\s]+)`),
@@ -48,6 +109,7 @@ export function verifyReleaseIdentity(identity, files) {
   const cli = identity?.cli ?? {};
   const npm = identity?.npm ?? {};
   const compatibility = identity?.compatibility ?? {};
+  const signing = identity?.signing ?? {};
 
   if (identity?.schemaVersion !== 1) {
     errors.push('schemaVersion must be 1.');
@@ -80,6 +142,19 @@ export function verifyReleaseIdentity(identity, files) {
     'compatibility.npmSupportedFromCliTag',
     errors,
   );
+  if (
+    typeof signing.activeFingerprint !== 'string' ||
+    !/^[A-F0-9]{40}$/.test(signing.activeFingerprint)
+  ) {
+    errors.push(
+      'signing.activeFingerprint must be an uppercase 40-character GPG fingerprint.',
+    );
+  }
+  if (signing.rotationLog !== 'docs/releases/SIGNER_ROTATIONS.md') {
+    errors.push(
+      'signing.rotationLog must reference docs/releases/SIGNER_ROTATIONS.md.',
+    );
+  }
 
   if (boilerplate.tag !== `v${boilerplate.version}`) {
     errors.push('boilerplate tag and version must match.');
@@ -168,6 +243,17 @@ export function verifyReleaseIdentity(identity, files) {
     errors,
   );
   requireSnippet(files, cli.releaseNotes, cli.tag, errors);
+  requireSnippet(
+    files,
+    signing.rotationLog,
+    `Current active fingerprint: \`${signing.activeFingerprint}\``,
+    errors,
+  );
+  verifySignerRotationLog(
+    files[signing.rotationLog],
+    signing.activeFingerprint,
+    errors,
+  );
 
   return errors;
 }
@@ -179,6 +265,9 @@ export function readReleaseIdentity(repositoryRoot) {
     ...requiredStaticFiles,
     identity.boilerplate.releaseNotes,
     identity.cli.releaseNotes,
+    ...(typeof identity.signing?.rotationLog === 'string'
+      ? [identity.signing.rotationLog]
+      : []),
   ];
   const files = Object.fromEntries(
     filePaths.map((filePath) => [

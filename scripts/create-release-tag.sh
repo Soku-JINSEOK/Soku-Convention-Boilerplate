@@ -84,9 +84,45 @@ if [[ -z "$signing_key" ]]; then
   echo "Error: user.signingkey is not configured." >&2
   exit 1
 fi
+signing_format="$(git config --get gpg.format || true)"
+if [[ -n "$signing_format" && "$signing_format" != "openpgp" ]]; then
+  echo "Error: release tags require an OpenPGP signing key." >&2
+  exit 1
+fi
+if [[ ! -f release-identity.json ]]; then
+  echo "Error: release-identity.json is required at the repository root." >&2
+  exit 1
+fi
+expected_fingerprint="$(
+  node -e '
+    const identity = require("./release-identity.json");
+    process.stdout.write(identity.signing?.activeFingerprint ?? "");
+  '
+)"
+if [[ ! "$expected_fingerprint" =~ ^[A-F0-9]{40}$ ]]; then
+  echo "Error: release identity has no valid active GPG fingerprint." >&2
+  exit 1
+fi
+if ! signing_key_details="$(
+  gpg --batch --with-colons --fingerprint --list-secret-keys "$signing_key" \
+    2>/dev/null
+)"; then
+  echo "Error: configured release signing key is unavailable." >&2
+  exit 1
+fi
+local_fingerprint="$(
+  awk -F: '$1 == "fpr" {print toupper($10); exit}' \
+    <<<"$signing_key_details"
+)"
+if [[ "$local_fingerprint" != "$expected_fingerprint" ]]; then
+  echo "Error: configured release signing key is not the approved signer." >&2
+  echo "Expected: $expected_fingerprint" >&2
+  echo "Actual:   ${local_fingerprint:-unresolved}" >&2
+  exit 1
+fi
 
 if [[ "$dry_run" == true ]]; then
-  echo "Dry run passed for $tag at $head_commit; no tag was created."
+  echo "Dry run passed for $tag at $head_commit with approved signer $local_fingerprint; no tag was created."
   exit 0
 fi
 

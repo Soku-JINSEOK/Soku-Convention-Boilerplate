@@ -224,6 +224,7 @@ jobs:
             scripts/verify-release-tag_test.sh
             scripts/verify-release-identity.mjs
             scripts/verify-release-identity.test.mjs
+            docs/releases/SIGNER_ROTATIONS.md
             scripts/ci-local.sh
             scripts/bootstrap-dev.sh
             scripts/bootstrap-dev.ps1

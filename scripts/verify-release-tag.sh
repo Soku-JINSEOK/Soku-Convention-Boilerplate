@@ -2,22 +2,28 @@
 set -euo pipefail
 
 usage() {
-  echo "Usage: $0 --tag <tag> --notes-file <path> [--check-notes-only]" >&2
+  echo "Usage: $0 --tag <tag> --notes-file <path> --expected-fingerprint <40-hex-fingerprint> [--check-notes-only]" >&2
 }
 
 tag=""
 notes_file=""
+expected_fingerprint=""
 check_notes_only=false
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --tag) tag="${2:-}"; shift 2 ;;
     --notes-file) notes_file="${2:-}"; shift 2 ;;
+    --expected-fingerprint) expected_fingerprint="${2:-}"; shift 2 ;;
     --check-notes-only) check_notes_only=true; shift ;;
     *) usage; exit 2 ;;
   esac
 done
 if [[ -z "$tag" || -z "$notes_file" || ! -f "$notes_file" ]]; then
   usage
+  exit 2
+fi
+if [[ ! "$expected_fingerprint" =~ ^[A-F0-9]{40}$ ]]; then
+  echo "Error: --expected-fingerprint must be an uppercase 40-character GPG fingerprint." >&2
   exit 2
 fi
 
@@ -88,7 +94,24 @@ if [[ "$object_type" != "tag" ]]; then
   echo "Error: $tag must be an annotated tag." >&2
   exit 1
 fi
-git verify-tag "$tag"
+if ! verification_output="$(git verify-tag --raw "$tag" 2>&1)"; then
+  printf '%s\n' "$verification_output" >&2
+  exit 1
+fi
+primary_fingerprint="$(
+  awk '/^\[GNUPG:\] VALIDSIG / {print toupper($NF); exit}' \
+    <<<"$verification_output"
+)"
+if [[ -z "$primary_fingerprint" ]]; then
+  echo "Error: tag verification did not report a GPG primary fingerprint." >&2
+  exit 1
+fi
+if [[ "$primary_fingerprint" != "$expected_fingerprint" ]]; then
+  echo "Error: tag signer fingerprint is not approved." >&2
+  echo "Expected: $expected_fingerprint" >&2
+  echo "Actual:   $primary_fingerprint" >&2
+  exit 1
+fi
 resolved_commit="$(git rev-list -n 1 "$tag")"
 annotation="$(git for-each-ref --format='%(contents)' "refs/tags/$tag")"
 for line in "${required_lines[@]}"; do
@@ -101,4 +124,4 @@ if ! grep -Fqx "Source commit: $resolved_commit" <<<"$annotation"; then
   echo "Error: signed annotation does not record its resolved source commit." >&2
   exit 1
 fi
-echo "Signed annotated tag contract passed for $tag at $resolved_commit."
+echo "Signed annotated tag contract passed for $tag at $resolved_commit with approved signer $primary_fingerprint."

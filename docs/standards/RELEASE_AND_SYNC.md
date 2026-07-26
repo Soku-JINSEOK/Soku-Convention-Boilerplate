@@ -112,6 +112,19 @@ are intentionally released from one reviewed commit, publish them with one
 atomic push. A public tag is immutable: never move, delete, or reuse it after a
 failure. Correct the defect and publish the affected axis's next patch version.
 
+### Release Signer Trust
+
+New release tags must use the full primary GPG fingerprint recorded at
+`signing.activeFingerprint` in `release-identity.json`. A valid signature from
+any other key is rejected. Short key IDs and signing-subkey fingerprints are
+not release identities.
+
+Signer changes follow the append-only
+[`SIGNER_ROTATIONS.md`](../releases/SIGNER_ROTATIONS.md) procedure. The rotation
+row and manifest change must be reviewed and merged before the replacement key
+signs a release. Historical public keys remain available so existing immutable
+tags can still be verified.
+
 ## 📥 Downstream Sync Rules
 
 - Pin downstream projects to a specific boilerplate tag.
