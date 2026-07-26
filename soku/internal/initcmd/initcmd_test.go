@@ -63,6 +63,35 @@ func TestPublishedCatalogMatchesSchema(t *testing.T) {
 		t.Fatal(err)
 	}
 	catalog := mustCatalog(t)
+	if len(catalog.Files) != 5 {
+		t.Fatalf("split shared files = %d, want 5", len(catalog.Files))
+	}
+	legacy := catalog
+	legacy.Files = append([]CatalogFile(nil), catalog.Files[:3]...)
+	legacy.Files[2].Source = "templates/_shared/ci/downstream-ci.yml"
+	legacyData, err := json.Marshal(legacy)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := DecodeCatalog(legacyData); err != nil {
+		t.Fatalf("legacy v1.0.5 catalog shape is no longer readable: %v", err)
+	}
+	incomplete := catalog
+	incomplete.Files = append([]CatalogFile(nil), catalog.Files[:4]...)
+	incompleteData, err := json.Marshal(incomplete)
+	if err != nil {
+		t.Fatal(err)
+	}
+	incompleteInstance, err := jsonschema.UnmarshalJSON(bytes.NewReader(incompleteData))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := compiled.Validate(incompleteInstance); err == nil {
+		t.Fatal("catalog schema accepts an incomplete four-file workflow set")
+	}
+	if _, err := DecodeCatalog(incompleteData); failureCode(err) != 5 {
+		t.Fatalf("incomplete split workflow set err=%v", err)
+	}
 	catalog.Stacks[0].Files[0].Output = "README.md"
 	unsafe, err := json.Marshal(catalog)
 	if err != nil {
@@ -115,7 +144,14 @@ func TestCatalogRenderingUsesExactTokensAndJavaPaths(t *testing.T) {
 			t.Fatalf("unresolved token in %s", change.Path)
 		}
 	}
-	for _, path := range []string{"db/mysql/schema.sql", "db/postgresql/schema.sql", "src/main/java/io/example/demo/profile/Application.java", ".github/workflows/ci.yml"} {
+	for _, path := range []string{
+		"db/mysql/schema.sql",
+		"db/postgresql/schema.sql",
+		"src/main/java/io/example/demo/profile/Application.java",
+		".github/workflows/ci.yml",
+		".github/workflows/full-validation.yml",
+		".github/workflows/security.yml",
+	} {
 		if _, ok := paths[path]; !ok {
 			t.Errorf("missing %s", path)
 		}
@@ -136,11 +172,29 @@ func TestCatalogRenderingUsesExactTokensAndJavaPaths(t *testing.T) {
 		}
 	}
 	workflow := string(paths[".github/workflows/ci.yml"].Content)
-	if !strings.Contains(workflow, "      - run: black --check .\n") {
-		t.Fatal("generated Python CI does not run black --check .")
+	fullWorkflow := string(paths[".github/workflows/full-validation.yml"].Content)
+	if !strings.Contains(fullWorkflow, "      - run: black --check .\n") {
+		t.Fatal("generated full Python CI does not run black --check .")
 	}
-	if strings.Contains(workflow, "pyink") {
+	if strings.Contains(workflow, "pyink") || strings.Contains(fullWorkflow, "pyink") {
 		t.Fatal("generated Python CI contains pyink")
+	}
+	if !strings.Contains(fullWorkflow, "name: Full Validation") ||
+		!strings.Contains(fullWorkflow, "schedule:") ||
+		strings.Contains(fullWorkflow, "pull_request:") {
+		t.Fatal("generated full validation does not have the scheduled/manual contract")
+	}
+	securityWorkflow := string(paths[".github/workflows/security.yml"].Content)
+	if !strings.Contains(securityWorkflow, "name: Security") ||
+		!strings.Contains(securityWorkflow, "gitleaks/v8@v8.24.2") ||
+		!strings.Contains(securityWorkflow, "pip-audit==2.10.0") {
+		t.Fatal("generated security workflow is missing reviewed audits")
+	}
+	if strings.Contains(workflow, "npm run format:check") {
+		t.Fatal("generated quick workflow contains a full-only formatting gate")
+	}
+	if !strings.Contains(fullWorkflow, "npm run format:check") {
+		t.Fatal("generated full workflow is missing its formatting gate")
 	}
 	for _, action := range []string{
 		"actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7",

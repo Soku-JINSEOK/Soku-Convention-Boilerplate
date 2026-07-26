@@ -124,7 +124,16 @@ Template files:
 
 Not tied to any single stack:
 
-- [`templates/_shared/ci/downstream-ci.yml`](../../templates/_shared/ci/downstream-ci.yml): starter CI workflow with stack jobs commented out, meant to be copied to a downstream repo's `.github/workflows/ci.yml`
+- [`templates/_shared/ci/downstream-ci-quick.yml`](../../templates/_shared/ci/downstream-ci-quick.yml):
+  pull-request and `main` quick validation rendered to
+  `.github/workflows/ci.yml`
+- [`templates/_shared/ci/downstream-ci.yml`](../../templates/_shared/ci/downstream-ci.yml):
+  scheduled/manual full validation rendered to
+  `.github/workflows/full-validation.yml`; the source filename remains for
+  legacy catalog compatibility
+- [`templates/_shared/ci/downstream-ci-security.yml`](../../templates/_shared/ci/downstream-ci-security.yml):
+  weekly/manual security validation rendered to
+  `.github/workflows/security.yml`
 - [`templates/_shared/agents/`](../../templates/_shared/agents/): tool-agnostic domain agent charters for parallel AI agent ownership under the [Multi-Domain Layout](../standards/PROJECT_STRUCTURE.md#multi-domain-layout-alternative)
 
 ## 🎬 Summary

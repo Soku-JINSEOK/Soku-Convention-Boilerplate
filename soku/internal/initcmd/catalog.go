@@ -15,8 +15,14 @@ import (
 var unresolvedTokenPattern = regexp.MustCompile(`\{\{[a-z_]+\}\}`)
 
 var catalogOutputs = map[string][]string{
-	"shared": {".editorconfig", ".gitignore", ".github/workflows/ci.yml"},
-	"aws":    {"buildspec.yml"}, "azure": {"azure-pipelines.yml"}, "gcp": {"Dockerfile", "cloudbuild.yaml"},
+	"shared": {
+		".editorconfig",
+		".gitignore",
+		".github/workflows/ci.yml",
+		".github/workflows/full-validation.yml",
+		".github/workflows/security.yml",
+	},
+	"aws": {"buildspec.yml"}, "azure": {"azure-pipelines.yml"}, "gcp": {"Dockerfile", "cloudbuild.yaml"},
 	"go":                         {".golangci.yml", "Makefile", "go.mod", "profile.go", "profile_test.go"},
 	"java-spring":                {"pom.xml", "src/main/java/{{java_group_path}}/profile/Application.java", "src/main/java/{{java_group_path}}/profile/ProfileMapper.java", "src/main/java/{{java_group_path}}/profile/User.java", "src/main/java/{{java_group_path}}/profile/UserResponse.java", "src/main/resources/application.yml", "src/test/java/{{java_group_path}}/profile/ProfileMapperTest.java"},
 	"javascript-typescript-node": {".prettierignore", "eslint.config.mjs", "package-lock.json", "package.json", "prettier.config.cjs", "src/profile.ts", "test/profile.test.ts", "tsconfig.json", "vitest.config.ts"},
@@ -45,10 +51,13 @@ func DecodeCatalog(data []byte) (Catalog, error) {
 		known[id] = true
 	}
 	seenStacks, seenOutputs := map[string]bool{}, map[string]string{}
-	if len(catalog.Files) != 3 {
-		return Catalog{}, fail(5, "catalog.incompatible", "core catalog must define exactly three shared files")
+	if len(catalog.Files) != 3 && len(catalog.Files) != 5 {
+		return Catalog{}, fail(5, "catalog.incompatible", "core catalog must define the legacy three-file or split five-file shared workflow set")
 	}
 	if err := validateDeclarations("shared", catalog.Files, seenOutputs); err != nil {
+		return Catalog{}, err
+	}
+	if err := validateSharedWorkflowSet(catalog.Files); err != nil {
 		return Catalog{}, err
 	}
 	for _, stack := range catalog.Stacks {
@@ -73,7 +82,7 @@ func validateDeclarations(scope string, files []CatalogFile, seenOutputs map[str
 	for _, output := range catalogOutputs[scope] {
 		allowed[output] = true
 	}
-	if (scope == "shared" && len(files) != len(allowed)) || len(files) > len(allowed) {
+	if len(files) > len(allowed) {
 		return fail(5, "catalog.incompatible", "%s declarations exceed the bounded standard output set", scope)
 	}
 	for _, file := range files {
@@ -93,10 +102,21 @@ func validateDeclarations(scope string, files []CatalogFile, seenOutputs map[str
 			return fail(5, "catalog.incompatible", "%s declaration %q has an invalid ownership or source boundary", scope, file.Output)
 		}
 		if scope == "shared" {
-			expectedStrategy := map[string]string{".editorconfig": "editorconfig-merge", ".gitignore": "gitignore-merge", ".github/workflows/ci.yml": "render"}
-			expectedSource := map[string]string{".editorconfig": ".editorconfig", ".gitignore": ".gitignore", ".github/workflows/ci.yml": "templates/_shared/ci/downstream-ci.yml"}
-			expectedClass := map[string]string{".editorconfig": "mergeable", ".gitignore": "mergeable", ".github/workflows/ci.yml": "core-managed"}
-			if file.Strategy != expectedStrategy[file.Output] || file.Source != expectedSource[file.Output] || file.Class != expectedClass[file.Output] {
+			expectedStrategy := map[string]string{
+				".editorconfig":                         "editorconfig-merge",
+				".gitignore":                            "gitignore-merge",
+				".github/workflows/ci.yml":              "render",
+				".github/workflows/full-validation.yml": "render",
+				".github/workflows/security.yml":        "render",
+			}
+			expectedClass := map[string]string{
+				".editorconfig":                         "mergeable",
+				".gitignore":                            "mergeable",
+				".github/workflows/ci.yml":              "core-managed",
+				".github/workflows/full-validation.yml": "core-managed",
+				".github/workflows/security.yml":        "core-managed",
+			}
+			if file.Strategy != expectedStrategy[file.Output] || file.Class != expectedClass[file.Output] {
 				return fail(5, "catalog.incompatible", "shared output %q has an invalid strategy, source, or class", file.Output)
 			}
 		}
@@ -110,6 +130,34 @@ func validateDeclarations(scope string, files []CatalogFile, seenOutputs map[str
 				return fail(5, "catalog.incompatible", "unsupported placeholder %q", placeholder)
 			}
 		}
+	}
+	return nil
+}
+
+func validateSharedWorkflowSet(files []CatalogFile) error {
+	expectedSources := map[string]string{
+		".editorconfig":                         ".editorconfig",
+		".gitignore":                            ".gitignore",
+		".github/workflows/ci.yml":              "templates/_shared/ci/downstream-ci-quick.yml",
+		".github/workflows/full-validation.yml": "templates/_shared/ci/downstream-ci.yml",
+		".github/workflows/security.yml":        "templates/_shared/ci/downstream-ci-security.yml",
+	}
+	if len(files) == 3 {
+		expectedSources[".github/workflows/ci.yml"] = "templates/_shared/ci/downstream-ci.yml"
+		delete(expectedSources, ".github/workflows/full-validation.yml")
+		delete(expectedSources, ".github/workflows/security.yml")
+	}
+	if len(files) != len(expectedSources) {
+		return fail(5, "catalog.incompatible", "shared workflow set has an invalid size")
+	}
+	for _, file := range files {
+		if file.Source != expectedSources[file.Output] {
+			return fail(5, "catalog.incompatible", "shared output %q has an invalid source", file.Output)
+		}
+		delete(expectedSources, file.Output)
+	}
+	if len(expectedSources) != 0 {
+		return fail(5, "catalog.incompatible", "shared workflow set is incomplete")
 	}
 	return nil
 }
@@ -185,7 +233,7 @@ func renderShared(snapshot SourceSnapshot, catalog Catalog, config Config, value
 		if !ok {
 			return nil, fail(5, "catalog.incompatible", "source release is missing %s", item.Source)
 		}
-		if item.Output == ".github/workflows/ci.yml" {
+		if strings.HasPrefix(item.Output, ".github/workflows/") {
 			var err error
 			content, err = renderDownstreamCI(content, config.Stacks)
 			if err != nil {

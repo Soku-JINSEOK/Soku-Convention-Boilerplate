@@ -7,7 +7,14 @@
   "properties": {
     "schema_version": {"const": 1},
     "profile": {"const": "standard"},
-    "files": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"$ref": "#/$defs/file"}},
+    "files": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/file"},
+      "anyOf": [
+        {"minItems": 3, "maxItems": 3},
+        {"minItems": 5, "maxItems": 5}
+      ]
+    },
     "stacks": {
       "type": "array",
       "minItems": 9,
