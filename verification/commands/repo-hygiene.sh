@@ -15,7 +15,7 @@ cd "$WORKSPACE"
 
 print_step "Shell syntax and shellcheck"
 shopt -s nullglob
-shell_files=(scripts/*.sh soku/scripts/*.sh verification/commands/*.sh)
+shell_files=(scripts/*.sh soku/scripts/*.sh verification/commands/*.sh .githooks/*)
 shopt -u nullglob
 if ((${#shell_files[@]})); then
   run_or_fail "shell::bash-syntax" 70 bash -n "${shell_files[@]}"
@@ -29,7 +29,10 @@ require_command node "regression::node" 72
 run_or_fail "regression::contribution-title" 72 node --test \
   templates/_shared/commitlint/contribution-title.test.mjs \
   scripts/contribution-title.test.mjs \
-  scripts/pull-request-policy.test.mjs
+  scripts/pull-request-policy.test.mjs \
+  scripts/detect-verification-scope.test.mjs \
+  scripts/scan-diff-secrets.test.mjs \
+  scripts/verify.test.mjs
 run_or_fail "regression::pr-governance" 72 node --test \
   .github/dependabot.test.mjs \
   .github/validate-pr-governance.test.mjs \
@@ -59,7 +62,9 @@ run_or_fail "lint::markdownlint" 73 npx --yes "markdownlint-cli2@${MARKDOWNLINT_
   --config .markdownlint.jsonc "**/*.md" "#**/node_modules/**"
 run_or_fail "lint::yaml" 73 npx --yes "yaml-lint@${YAML_LINT_VERSION}" \
   .github/*.yml .github/**/*.yml cloudbuild/*.yaml docs/callers/*.yml \
-  soku/actions/**/*.yml soku/providers/**/*.yml
+  soku/actions/**/*.yml soku/providers/**/*.yml verification/*.yml
+run_or_fail "lint::devcontainer-json" 73 node -e \
+  'JSON.parse(require("node:fs").readFileSync(".devcontainer/devcontainer.json", "utf8"))'
 require_command go "lint::actionlint" 73
 run_or_fail "lint::actionlint" 73 go run "github.com/rhysd/actionlint/cmd/actionlint@${ACTIONLINT_VERSION}" \
   .github/workflows/*.yml

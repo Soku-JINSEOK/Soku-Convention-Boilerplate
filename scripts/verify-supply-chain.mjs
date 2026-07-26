@@ -15,6 +15,7 @@ const EXACT_VERSION = /^v?\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/;
 const VERSION_VARIABLE = /^\$\{[A-Z][A-Z0-9_]*\}$/;
 
 const PROTECTED_PATHS = [
+  '.devcontainer',
   '.github/workflows',
   'cloudbuild',
   'docker-compose.verify.yml',
@@ -37,6 +38,7 @@ export const REQUIRED_UPDATE_TARGETS = [
   ['pip', '/templates/python'],
   ['maven', '/templates/java-spring'],
   ['docker', '/'],
+  ['docker', '/.devcontainer'],
   ['docker', '/templates/gcloud'],
   ['terraform', '/infra/gcp'],
 ];

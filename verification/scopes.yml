@@ -1,0 +1,211 @@
+{
+  "schemaVersion": 1,
+  "format": "json-compatible-yaml",
+  "allScopes": [
+    "soku",
+    "javascript-typescript-node",
+    "python",
+    "go",
+    "java-spring",
+    "mysql",
+    "postgresql",
+    "gcloud",
+    "cloud-config",
+    "infra-gcp"
+  ],
+  "rules": [
+    {
+      "id": "shared-verification-engine",
+      "paths": [
+        "verification/**",
+        "scripts/verify.sh",
+        "scripts/verify.ps1",
+        "scripts/detect-verification-scope.mjs",
+        "scripts/detect-verification-scope.test.mjs",
+        "scripts/bootstrap-dev.sh",
+        "scripts/bootstrap-dev.ps1",
+        ".githooks/**",
+        ".devcontainer/**"
+      ],
+      "scopes": "all",
+      "reason": "shared verification behavior can affect every scope"
+    },
+    {
+      "id": "generator-and-sync",
+      "paths": [
+        "scripts/render-templates-ci.go",
+        "scripts/sync-boilerplate.sh",
+        "scripts/sync-boilerplate.ps1",
+        "scripts/verify-sync-parity.sh",
+        "soku/internal/initcmd/**",
+        "soku/scripts/sync_downstream_providers.py",
+        "templates/_shared/**"
+      ],
+      "scopes": "all",
+      "reason": "generator or synchronization behavior can affect every scope"
+    },
+    {
+      "id": "lint-and-workflow-configuration",
+      "paths": [
+        ".editorconfig",
+        ".markdownlint.jsonc",
+        ".prettierignore",
+        ".github/workflows/**",
+        ".github/dependabot.yml",
+        "docker-compose.verify.yml"
+      ],
+      "scopes": "all",
+      "reason": "shared lint, dependency, workflow, or service configuration changed"
+    },
+    {
+      "id": "provider-and-catalog-contract",
+      "paths": [
+        "soku/catalog/**",
+        "soku/schema/**",
+        "soku/providers/**",
+        "soku/actions/**"
+      ],
+      "scopes": "all",
+      "reason": "provider, catalog, or schema contracts can affect every generated stack"
+    },
+    {
+      "id": "soku",
+      "paths": [
+        "soku/**"
+      ],
+      "scopes": [
+        "soku"
+      ],
+      "reason": "Soku source or package metadata changed"
+    },
+    {
+      "id": "javascript-typescript-node",
+      "paths": [
+        "templates/javascript-typescript-node/**"
+      ],
+      "scopes": [
+        "javascript-typescript-node"
+      ],
+      "reason": "JavaScript/TypeScript template changed"
+    },
+    {
+      "id": "python",
+      "paths": [
+        "templates/python/**"
+      ],
+      "scopes": [
+        "python"
+      ],
+      "reason": "Python template changed"
+    },
+    {
+      "id": "go",
+      "paths": [
+        "templates/go/**"
+      ],
+      "scopes": [
+        "go"
+      ],
+      "reason": "Go template changed"
+    },
+    {
+      "id": "java-spring",
+      "paths": [
+        "templates/java-spring/**"
+      ],
+      "scopes": [
+        "java-spring"
+      ],
+      "reason": "Java/Spring template changed"
+    },
+    {
+      "id": "mysql",
+      "paths": [
+        "templates/mysql/**"
+      ],
+      "scopes": [
+        "mysql"
+      ],
+      "reason": "MySQL schema changed"
+    },
+    {
+      "id": "postgresql",
+      "paths": [
+        "templates/postgresql/**"
+      ],
+      "scopes": [
+        "postgresql"
+      ],
+      "reason": "PostgreSQL schema changed"
+    },
+    {
+      "id": "gcloud",
+      "paths": [
+        "templates/gcloud/**",
+        "cloudbuild/**"
+      ],
+      "scopes": [
+        "gcloud"
+      ],
+      "reason": "GCP container template or validation changed"
+    },
+    {
+      "id": "cloud-config",
+      "paths": [
+        "templates/aws/**",
+        "templates/azure/**"
+      ],
+      "scopes": [
+        "cloud-config"
+      ],
+      "reason": "AWS or Azure configuration template changed"
+    },
+    {
+      "id": "infra-gcp",
+      "paths": [
+        "infra/gcp/**",
+        "scripts/gcp-bootstrap.sh",
+        "scripts/cd-plan.sh",
+        "scripts/cd-deploy.sh",
+        ".github/deploy-gcp.test.mjs",
+        ".github/cloudbuild-validation.test.mjs"
+      ],
+      "scopes": [
+        "infra-gcp"
+      ],
+      "reason": "GCP infrastructure or deployment contract changed"
+    },
+    {
+      "id": "repository-documentation",
+      "paths": [
+        "**/*.md",
+        "LICENSE",
+        "SECURITY.md"
+      ],
+      "scopes": [],
+      "reason": "repository documentation changed"
+    },
+    {
+      "id": "repository-metadata",
+      "paths": [
+        ".gitignore",
+        ".gitmessage",
+        ".github/ISSUE_TEMPLATE/**",
+        ".github/PULL_REQUEST_TEMPLATE.md",
+        ".github/COMMENT_TEMPLATES.md",
+        ".github/CODEOWNERS",
+        ".github/labels.yml",
+        "scripts/contribution-title.mjs",
+        "scripts/contribution-title.test.mjs",
+        "scripts/pull-request-policy.mjs",
+        "scripts/pull-request-policy.test.mjs"
+      ],
+      "scopes": [],
+      "reason": "repository-only metadata changed"
+    }
+  ],
+  "default": {
+    "scopes": "all",
+    "reason": "unknown path selected every scope (fail-closed)"
+  }
+}

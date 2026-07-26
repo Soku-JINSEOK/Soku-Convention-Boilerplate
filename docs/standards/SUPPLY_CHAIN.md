@@ -33,7 +33,7 @@ Dependabot must cover these tracked locations:
 | npm | `/soku/npm`, `/templates/javascript-typescript-node` |
 | Python | `/templates/python` |
 | Maven | `/templates/java-spring` |
-| Docker | `/`, `/templates/gcloud` |
+| Docker | `/`, `/.devcontainer`, `/templates/gcloud` |
 | Terraform | `/infra/gcp` |
 
 The verifier treats a missing entry as a regression.

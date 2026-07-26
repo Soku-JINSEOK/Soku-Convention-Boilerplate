@@ -92,11 +92,16 @@ nearby version comment so maintainers can audit upgrades.
 
 `verification/tools.env` and `verification/commands/*.sh` are the single
 source of truth for the tool versions and thresholds these hosted workflows
-and `scripts/verify.sh --profile full` both use locally-reproducible checks
-from. See [`verification/CLASSIFICATION.md`](../../verification/CLASSIFICATION.md)
-for the full local-capable/hosted-only/release-only/deployment-only
-breakdown. This is inventory and local tooling only — it does not change
-`Validation Gate` or `PR Metadata Gate` above.
+and `scripts/verify.sh` profiles use for locally reproducible checks.
+`--profile fast` uses the fail-closed changed-path mapping in
+`verification/scopes.yml`; `--profile full` runs every locally reproducible
+group. Repository hooks use fast at pre-commit and full at pre-push, but hooks
+and optional local reports remain bypassable developer feedback rather than a
+security boundary. See
+[`verification/CLASSIFICATION.md`](../../verification/CLASSIFICATION.md) for
+the full local-capable/hosted-only/release-only/deployment-only breakdown.
+This local tooling does not change `Validation Gate` or `PR Metadata Gate`
+above.
 
 ## 🌍 Environment Strategy
 

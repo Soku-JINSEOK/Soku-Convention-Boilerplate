@@ -26,6 +26,7 @@ pnpm-debug.log*
 .tmp-ci-local-python/
 .eslintcache
 .turbo/
+.soku/verification/
 
 # Deployment output and ephemeral Google credentials
 .cd/

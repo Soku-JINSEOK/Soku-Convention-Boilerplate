@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "format": "json-compatible-yaml",
+  "profiles": {
+    "fast": {
+      "always": [
+        "diff-whitespace",
+        "diff-secret-scan",
+        "repository-hygiene"
+      ],
+      "scopes": [
+        "soku",
+        "javascript-typescript-node",
+        "python",
+        "go",
+        "java-spring",
+        "mysql",
+        "postgresql",
+        "gcloud",
+        "cloud-config",
+        "infra-gcp"
+      ],
+      "excluded": [
+        "race",
+        "full-lifecycle",
+        "cross-platform",
+        "full-packaging",
+        "full-vulnerability-scan"
+      ]
+    },
+    "full": {
+      "groups": [
+        "repository-hygiene",
+        "soku",
+        "templates",
+        "database-schema",
+        "security",
+        "infrastructure"
+      ],
+      "localReport": {
+        "path": ".soku/verification/local-full.json",
+        "authoritative": false
+      }
+    }
+  }
+}

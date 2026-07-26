@@ -16,6 +16,12 @@ source "$SCRIPT_DIR/_lib.sh"
 cd "$WORKSPACE"
 require_command go "security" 110
 
+PIP_AUDIT_VENV=""
+cleanup() {
+  [[ -z "$PIP_AUDIT_VENV" ]] || rm -rf "$PIP_AUDIT_VENV"
+}
+trap cleanup EXIT
+
 print_step "Gitleaks secret scan (working tree, best-effort)"
 run_or_fail "security::gitleaks" 111 go run "github.com/zricethezav/gitleaks/v8@${GITLEAKS_VERSION}" \
   detect --source . --redact --no-banner
@@ -33,12 +39,29 @@ fi
 python_dir="$WORKSPACE/templates/python"
 if [[ -f "$python_dir/requirements-lock.txt" ]]; then
   print_step "Python template dependency audit"
+  pip_audit_command=()
   if ! command -v pip-audit >/dev/null 2>&1; then
     require_command python3 "security::pip-audit-install" 113
-    run_or_fail "security::pip-audit-install" 113 python3 -m pip install --disable-pip-version-check \
+    PIP_AUDIT_VENV="$(mktemp -d)"
+    rm -rf "$PIP_AUDIT_VENV"
+    python3 -m venv "$PIP_AUDIT_VENV"
+    if [[ -x "$PIP_AUDIT_VENV/bin/python" ]]; then
+      pip_audit_python="$PIP_AUDIT_VENV/bin/python"
+      pip_audit_command=("$PIP_AUDIT_VENV/bin/pip-audit")
+    else
+      pip_audit_python="$PIP_AUDIT_VENV/Scripts/python.exe"
+      pip_audit_command=("$PIP_AUDIT_VENV/Scripts/pip-audit.exe")
+    fi
+    run_or_fail "security::pip-audit-install" 113 \
+      "$pip_audit_python" -m pip install --disable-pip-version-check \
       "pip-audit==${PIP_AUDIT_VERSION}"
+  else
+    pip_audit_command=(pip-audit)
   fi
-  run_or_fail "security::pip-audit" 113 pip-audit --strict -r "$python_dir/requirements-lock.txt"
+  run_or_fail "security::pip-audit" 113 \
+    "${pip_audit_command[@]}" --strict -r "$python_dir/requirements-lock.txt"
+  cleanup
+  PIP_AUDIT_VENV=""
   print_step_end
 fi
 
