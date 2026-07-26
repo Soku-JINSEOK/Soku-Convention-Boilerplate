@@ -6,7 +6,7 @@ import {fileURLToPath, pathToFileURL} from 'node:url';
 
 const EXPECTED_NPM_CLI = '12.0.1';
 const EXPECTED_REPOSITORY =
-  'https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate.git';
+  'https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate';
 
 export function verifyNpmPublishing(workflow, packageJson) {
   const errors = [];

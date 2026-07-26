@@ -20,7 +20,7 @@ exact identity:
 
 The repository and workflow names are case-sensitive. The package
 `repository.url` must remain
-`https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate.git`.
+`https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate`.
 
 ## Workflow Contract
 

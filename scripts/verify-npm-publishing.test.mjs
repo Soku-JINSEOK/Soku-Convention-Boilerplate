@@ -23,8 +23,8 @@ jobs:
 
 const validPackage = {
   repository: {
-    type: 'git',
-    url: 'https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate.git',
+    type: 'github',
+    url: 'https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate',
   },
 };
 
