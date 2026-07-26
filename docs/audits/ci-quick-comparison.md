@@ -61,8 +61,9 @@ merged head commit.
 | PR | Merge commit | Quick run | Full run | Quick critical duration | Full critical duration | Quick runner-seconds | Full runner-seconds | Result |
 | --- | --- | --- | --- | ---: | ---: | ---: | ---: | --- |
 | [#142](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/pull/142) | `f483e56e9c10ebfb9caa4bf0b0c43ec595282aca` | [CI Quick Gate](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/actions/runs/30207657214/job/89808575715) | [Validation Gate](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/actions/runs/30207657214/job/89808585847) | 101 s | 109 s | 299 s | 894 s | Pass; 92.66% critical ratio; 66.55% runner reduction |
+| [#152](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/pull/152) | `67cbaf5456fbf3c069be2ddda01566531ca59a25` | [CI Quick Gate](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/actions/runs/30208730766/job/89811298032) | [Validation Gate](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/actions/runs/30208730766/job/89811404736) | 55 s | 108 s | 16 s | 879 s | Pass; 50.93% critical ratio; 98.18% runner reduction |
 
-Current qualifying sample count: **1 of 10**.
+Current qualifying sample count: **2 of 10**.
 
 ## Decision
 
