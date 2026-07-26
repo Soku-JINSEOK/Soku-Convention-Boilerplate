@@ -136,6 +136,7 @@ jobs:
             docs/issues/issue-124-task-report.md
             docs/issues/issue-125-task-report.md
             docs/audits/github-governance-2026-07-23.md
+            docs/audits/ci-quick-comparison.md
             docs/guides/USAGE_MANUAL.md
             LICENSE
             SECURITY.md
@@ -377,6 +378,7 @@ jobs:
         run: >-
           node --test
           scripts/detect-verification-scope.test.mjs
+          scripts/plan-ci-quick.test.mjs
           scripts/scan-diff-secrets.test.mjs
           scripts/verify.test.mjs
 

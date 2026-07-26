@@ -29,6 +29,8 @@ Options:
   --base <sha>        For fast/ci-quick, base commit SHA. Requires --head.
   --head <sha>        For fast/ci-quick, head commit SHA. Requires --base.
   --files-from <path|->  For fast, read changed paths from a file or stdin.
+  --group <id>        Run one planned ci-quick shard. Required for ci-quick
+                      and rejected by every other profile.
   --skip-infra        Skip Terraform checks under infra/.
   --skip-db           Skip the docker-compose-backed MySQL/PostgreSQL schema
                       checks.
@@ -48,6 +50,7 @@ INPUT_MODE="staged"
 BASE_SHA=""
 HEAD_SHA=""
 FILES_FROM=""
+GROUP=""
 EXPLICIT_INPUT=false
 
 while ((${#})); do
@@ -107,6 +110,14 @@ while ((${#})); do
       EXPLICIT_INPUT=true
       INPUT_MODE="files"
       FILES_FROM="$2"
+      shift 2
+      ;;
+    --group)
+      if [[ "${2-}" == "" || "$GROUP" != "" ]]; then
+        echo "Invalid or repeated --group" >&2
+        exit 2
+      fi
+      GROUP="$2"
       shift 2
       ;;
     --skip-infra)
@@ -243,10 +254,11 @@ run_full_profile() {
 
 run_changed_scope_profile() {
   local selected_profile="$1"
-  local temporary_dir scope_json diff_file
+  local temporary_dir scope_json diff_file group_config
   temporary_dir="$(mktemp -d)"
   scope_json="$temporary_dir/scope.json"
   diff_file="$temporary_dir/changes.diff"
+  group_config="$temporary_dir/group.txt"
   trap 'rm -rf "$temporary_dir"' RETURN
 
   local scope_arguments=(--workspace "$WORKSPACE" --json)
@@ -298,59 +310,122 @@ run_changed_scope_profile() {
     console.log(`All selected: ${result.allSelected}`);
   ' "$scope_json"
 
-  echo "::group::Diff whitespace"
-  case "$INPUT_MODE" in
-    staged)
-      git -C "$WORKSPACE" diff --cached --check --
-      git -C "$WORKSPACE" diff --cached --no-ext-diff --unified=0 -- >"$diff_file"
+  local group_runner=""
+  if [[ "$GROUP" != "" ]]; then
+    # shellcheck disable=SC2016 # JavaScript template literals expand in Node.
+    if ! node -e '
+      const {readFileSync} = require("node:fs");
+      const profiles = JSON.parse(readFileSync(process.argv[1], "utf8"));
+      const result = JSON.parse(readFileSync(process.argv[2], "utf8"));
+      const groupId = process.argv[3];
+      const quick = profiles.profiles["ci-quick"];
+      const group = quick.groups.find(({id}) => id === groupId);
+      if (!group) throw new Error(`unknown ci-quick group: ${groupId}`);
+      const known = new Set(quick.scopes);
+      const invalid = group.scopes.filter((scope) => !known.has(scope));
+      if (invalid.length > 0) {
+        throw new Error(`ci-quick group has unknown scopes: ${invalid.join(", ")}`);
+      }
+      const selected = group.scopes.filter((scope) => result.scopes.includes(scope));
+      if (group.always !== true && selected.length === 0) {
+        throw new Error(`ci-quick group was not selected by the detector: ${groupId}`);
+      }
+      console.log(group.runner);
+      console.log(selected.join(" "));
+    ' "$PROFILES_FILE" "$scope_json" "$GROUP" >"$group_config"; then
+      echo "::error::Invalid ci-quick group '$GROUP'" >&2
+      return 59
+    fi
+    group_runner="$(sed -n '1p' "$group_config")"
+    VERIFICATION_SCOPES="$(sed -n '2p' "$group_config")"
+    export VERIFICATION_SCOPES
+    echo "Selected group: $GROUP"
+  fi
+
+  if [[ "$GROUP" == "" || "$group_runner" == "always" ]]; then
+    echo "::group::Diff whitespace"
+    case "$INPUT_MODE" in
+      staged)
+        git -C "$WORKSPACE" diff --cached --check --
+        git -C "$WORKSPACE" diff --cached --no-ext-diff --unified=0 -- >"$diff_file"
+        ;;
+      range)
+        git -C "$WORKSPACE" diff --check "$BASE_SHA" "$HEAD_SHA" --
+        git -C "$WORKSPACE" diff --no-ext-diff --unified=0 \
+          "$BASE_SHA" "$HEAD_SHA" -- >"$diff_file"
+        ;;
+      files)
+        git -C "$WORKSPACE" diff --check HEAD --
+        git -C "$WORKSPACE" diff --no-ext-diff --unified=0 HEAD -- >"$diff_file"
+        ;;
+    esac
+    echo "::endgroup::"
+
+    echo "::group::Changed-line secret scan"
+    node "$SCRIPT_DIR/scan-diff-secrets.mjs" --diff-file "$diff_file"
+    echo "::endgroup::"
+
+    "$COMMANDS_DIR/fast-repository.sh"
+  fi
+
+  if [[ "$GROUP" == "" ]]; then
+    if scope_selected "soku"; then
+      "$COMMANDS_DIR/soku-fast.sh"
+    fi
+    if [[ " $VERIFICATION_SCOPES " == *" javascript-typescript-node "* ||
+          " $VERIFICATION_SCOPES " == *" python "* ||
+          " $VERIFICATION_SCOPES " == *" go "* ||
+          " $VERIFICATION_SCOPES " == *" java-spring "* ||
+          " $VERIFICATION_SCOPES " == *" gcloud "* ||
+          " $VERIFICATION_SCOPES " == *" cloud-config "* ]]; then
+      "$COMMANDS_DIR/templates.sh"
+    fi
+    if [[ " $VERIFICATION_SCOPES " == *" mysql "* ||
+          " $VERIFICATION_SCOPES " == *" postgresql "* ]]; then
+      if [[ "$SKIP_DB" == true ]]; then
+        echo "::notice::DB schema checks skipped via --skip-db"
+      else
+        "$COMMANDS_DIR/db-schema.sh"
+      fi
+    fi
+    if scope_selected "infra-gcp"; then
+      run_infra_checks true
+    fi
+    return
+  fi
+
+  case "$group_runner" in
+    always)
       ;;
-    range)
-      git -C "$WORKSPACE" diff --check "$BASE_SHA" "$HEAD_SHA" --
-      git -C "$WORKSPACE" diff --no-ext-diff --unified=0 \
-        "$BASE_SHA" "$HEAD_SHA" -- >"$diff_file"
+    soku-fast)
+      "$COMMANDS_DIR/soku-fast.sh"
       ;;
-    files)
-      git -C "$WORKSPACE" diff --check HEAD --
-      git -C "$WORKSPACE" diff --no-ext-diff --unified=0 HEAD -- >"$diff_file"
+    templates)
+      "$COMMANDS_DIR/templates.sh"
+      ;;
+    database-schema)
+      "$COMMANDS_DIR/db-schema.sh"
+      ;;
+    infrastructure)
+      run_infra_checks true
+      ;;
+    *)
+      echo "::error::Unknown runner '$group_runner' for ci-quick group '$GROUP'" >&2
+      return 59
       ;;
   esac
-  echo "::endgroup::"
+}
 
-  echo "::group::Changed-line secret scan"
-  node "$SCRIPT_DIR/scan-diff-secrets.mjs" --diff-file "$diff_file"
-  echo "::endgroup::"
-
-  "$COMMANDS_DIR/fast-repository.sh"
-
-  if scope_selected "soku"; then
-    "$COMMANDS_DIR/soku-fast.sh"
-  fi
-
-  if [[ " $VERIFICATION_SCOPES " == *" javascript-typescript-node "* ||
-        " $VERIFICATION_SCOPES " == *" python "* ||
-        " $VERIFICATION_SCOPES " == *" go "* ||
-        " $VERIFICATION_SCOPES " == *" java-spring "* ||
-        " $VERIFICATION_SCOPES " == *" gcloud "* ||
-        " $VERIFICATION_SCOPES " == *" cloud-config "* ]]; then
-    "$COMMANDS_DIR/templates.sh"
-  fi
-
-  if [[ " $VERIFICATION_SCOPES " == *" mysql "* ||
-        " $VERIFICATION_SCOPES " == *" postgresql "* ]]; then
-    if [[ "$SKIP_DB" == true ]]; then
-      echo "::notice::DB schema checks skipped via --skip-db"
-    else
-      "$COMMANDS_DIR/db-schema.sh"
-    fi
-  fi
-
-  if scope_selected "infra-gcp"; then
-    run_infra_checks true
+reject_group() {
+  if [[ "$GROUP" != "" ]]; then
+    echo "::error::--group is only valid with --profile ci-quick" >&2
+    exit 2
   fi
 }
 
 case "$PROFILE" in
   fast)
+    reject_group
     run_changed_scope_profile fast
     ;;
   ci-quick)
@@ -362,9 +437,14 @@ case "$PROFILE" in
       echo "::error::ci-quick does not allow --skip-db or --skip-infra" >&2
       exit 2
     fi
+    if [[ "$GROUP" == "" ]]; then
+      echo "::error::ci-quick requires --group <id>" >&2
+      exit 2
+    fi
     run_changed_scope_profile ci-quick
     ;;
   full)
+    reject_group
     if [[ "$EXPLICIT_INPUT" == true ]]; then
       echo "::error::changed-file inputs are only valid with --profile fast or ci-quick" >&2
       exit 2
@@ -372,6 +452,7 @@ case "$PROFILE" in
     run_full_profile
     ;;
   hosted-full | release | deploy)
+    reject_group
     echo "::error::profile '$PROFILE' is not yet implemented (see verification/CLASSIFICATION.md and issue #112's phased rollout)" >&2
     exit 3
     ;;

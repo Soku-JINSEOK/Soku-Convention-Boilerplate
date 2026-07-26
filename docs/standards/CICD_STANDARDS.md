@@ -95,9 +95,11 @@ source of truth for the tool versions and thresholds these hosted workflows
 and `scripts/verify.sh` profiles use for locally reproducible checks.
 `--profile fast` uses the fail-closed changed-path mapping in
 `verification/scopes.yml`; `--profile full` runs every locally reproducible
-group. `--profile ci-quick --base <sha> --head <sha>` is the hosted
-changed-scope entry point and feeds the stable `CI Quick Gate` aggregate while
-the required full gate remains unchanged during its comparison window.
+group. `--profile ci-quick --group <id> --base <sha> --head <sha>` is the
+CI-only changed-scope entry point. A tested planner reads detector output and
+the group, scope, and toolchain definitions in `verification/profiles.yml` to
+create the dynamic matrix feeding the stable `CI Quick Gate` aggregate. The
+required full gate remains unchanged during its comparison window.
 Repository hooks use fast at pre-commit and full at pre-push, but hooks
 and optional local reports remain bypassable developer feedback rather than a
 security boundary. See
