@@ -41,11 +41,16 @@ that allowlist.
 
 ## Implementation Status
 
-Implemented. Verification and pull request evidence remain pending.
+Implemented. Relevant local checks passed; hosted CI and final packed-artifact
+evidence remain pending.
 
 ## Verification
 
-Not run in this change session.
+- `cd soku/npm && npm test` (7/7 passing, including dry-run and actual
+  tarball inventory checks).
+- `npx --yes markdownlint-cli2@0.22.1 --config .markdownlint.jsonc
+  soku/npm/README.md docs/issues/issue-122-task-report.md` (0 errors).
+- `git diff --check origin/main...HEAD` (passing).
 
 ## Public Disclosure Review
 
