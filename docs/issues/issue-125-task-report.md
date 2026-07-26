@@ -41,11 +41,16 @@ without receiving the token.
 
 ## Implementation Status
 
-Implemented. Verification and pull request evidence remain pending.
+Implemented. Relevant local checks passed; hosted event-selection evidence
+remains pending.
 
 ## Verification
 
-Not run in this change session.
+- `node --test .github/validation-workflow.test.mjs` (8/8 passing).
+- `npx --yes yaml-lint@1.7.0 .github/workflows/ci.yml` (passing).
+- `npx --yes markdownlint-cli2@0.22.1 --config .markdownlint.jsonc
+  VERIFICATION_GUIDE.md docs/issues/issue-125-task-report.md` (0 errors).
+- `git diff --check origin/main...HEAD` (passing).
 
 ## Public Disclosure Review
 
