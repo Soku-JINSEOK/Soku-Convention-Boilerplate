@@ -39,11 +39,30 @@ All of the following must hold for the complete sample:
 - median Quick critical duration is at most 50% of Full critical duration
 - aggregate Quick runner-seconds are at least 40% lower than Full
 
+## Measurement Method
+
+Use the GitHub Actions Jobs API for the final successful Validation run on each
+merged head commit.
+
+- Quick jobs are successful jobs named `Quick validation / ...` plus
+  `CI Quick Gate`.
+- Full jobs are successful jobs named `Full repository validation / ...`,
+  `Full runtime-template validation / ...`, or `Security validation / ...`,
+  plus `Validation Gate`.
+- Critical duration is the interval from the earliest selected job start to
+  the latest selected job completion.
+- Runner-seconds are the sum of selected job durations.
+- Critical ratio is Quick critical duration divided by Full critical duration.
+- Runner reduction is one minus Quick runner-seconds divided by Full
+  runner-seconds.
+
 ## Samples
 
 | PR | Merge commit | Quick run | Full run | Quick critical duration | Full critical duration | Quick runner-seconds | Full runner-seconds | Result |
 | --- | --- | --- | --- | ---: | ---: | ---: | ---: | --- |
-| Pending | Pending | Pending | Pending | Pending | Pending | Pending | Pending | Pending |
+| [#142](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/pull/142) | `f483e56e9c10ebfb9caa4bf0b0c43ec595282aca` | [CI Quick Gate](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/actions/runs/30207657214/job/89808575715) | [Validation Gate](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/actions/runs/30207657214/job/89808585847) | 101 s | 109 s | 299 s | 894 s | Pass; 92.66% critical ratio; 66.55% runner reduction |
+
+Current qualifying sample count: **1 of 10**.
 
 ## Decision
 
