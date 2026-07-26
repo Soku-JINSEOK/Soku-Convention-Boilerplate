@@ -48,8 +48,10 @@ Deliver the Issue through individually reviewable supply-chain changes:
 
 ## Implementation Status
 
-Phase 1 implemented. The npm audit fix is ready for review; the remaining
-tool, image, update-coverage, and verifier phases are not complete.
+Phases 1 and 2 are implemented and hosted-verified. Phase 3 adds complete
+dependency-update coverage, immutable-reference and parity enforcement, and
+the reviewed update procedure. The Issue remains open until Phase 3 hosted
+evidence and final inventory are linked.
 
 ## Verification
 
@@ -64,6 +66,11 @@ tool, image, update-coverage, and verifier phases are not complete.
 - `npm run format:check` passed.
 - Targeted Markdown lint completed with zero errors.
 - `git diff --check origin/main...HEAD` passed.
+- Phase 2 MySQL, PostgreSQL, Alpine, Go tool, repository, security, CodeQL,
+  governance, and final validation gates passed in hosted CI.
+- Phase 3 verification covers the supply-chain verifier unit suite, repository
+  inventory scan, Dependabot configuration, YAML and Markdown lint, and
+  whitespace checks.
 
 ## Public Disclosure Review
 
