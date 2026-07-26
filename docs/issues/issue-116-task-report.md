@@ -49,9 +49,13 @@ infrastructure shards. `verification/profiles.yml` is the single source for
 group-to-scope and group-to-toolchain mapping, while
 `scripts/plan-ci-quick.mjs` converts detector output to the hosted matrix.
 
-The earlier comparison window beginning at `2026-07-26T12:09:01Z` is retained
-only as serial-implementation history. The authoritative window restarts when
-the sharded implementation merges, as recorded in
+The sharded implementation merged in
+[#149](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/pull/149)
+as commit `9539413a08e545a2e0d91383709cacc7b8a385de` at
+`2026-07-26T14:13:58Z`. The earlier comparison window beginning at
+`2026-07-26T12:09:01Z` is retained only as serial-implementation history. The
+authoritative 14-day and 10-PR window now runs from the merge timestamp, as
+recorded in
 [`docs/audits/ci-quick-comparison.md`](../audits/ci-quick-comparison.md).
 
 ## Verification
