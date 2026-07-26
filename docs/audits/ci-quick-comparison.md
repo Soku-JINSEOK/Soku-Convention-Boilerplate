@@ -10,9 +10,10 @@ weakening the existing required checks during observation.
 
 - **Implementation:** detector-driven dynamic matrix from
   `verification/profiles.yml`
-- **Activation commit:** pending merge of the sharded Quick implementation
-- **Activation time:** pending merge
-- **Earliest time-based completion:** activation time plus 14 days
+- **Activation pull request:** [#149](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/pull/149)
+- **Activation commit:** `9539413a08e545a2e0d91383709cacc7b8a385de`
+- **Activation time:** `2026-07-26T14:13:58Z`
+- **Earliest time-based completion:** `2026-08-09T14:13:58Z`
 - **Minimum sample:** 10 merged code pull requests after activation
 
 The earlier window that began at `2026-07-26T12:09:01Z` measured the serial
@@ -46,6 +47,6 @@ All of the following must hold for the complete sample:
 
 ## Decision
 
-**Pending.** The sharded implementation must merge before the new observation
-window can start. Issue #117 must not change required contexts until every
+**Observation active.** The sharded implementation merged in PR #149 at the
+activation time above. Issue #117 must not change required contexts until every
 criterion above is supported by linked Actions evidence.
