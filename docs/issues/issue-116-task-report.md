@@ -41,13 +41,19 @@ changes.
 
 ## Implementation Status
 
-Implementation in progress. The comparison window starts only after the
-implementation pull request is merged. Its result will be published separately
-under `docs/audits/`.
+The Quick Gate implementation merged in PR #146. The comparison window began
+at `2026-07-26T12:09:01Z` and remains open through at least
+`2026-08-09T12:09:01Z` and 10 post-activation code pull requests. Its result
+will be published separately under `docs/audits/`.
 
 ## Verification
 
 - Workflow/profile regression tests: 28/28 passing.
+- Current five-file and released three-file catalog shapes pass decoder
+  regression coverage; incomplete four-file shapes fail both schema and runtime
+  validation.
+- All three downstream workflows render for multi-stack selection, with quick
+  and full responsibilities separated and reviewed security tools retained.
 - Bash syntax, ShellCheck, YAML/Markdown lint, and actionlint: passing.
 - Supply-chain verification: passing for all protected workflow sources and
   immutable action/container references.
@@ -60,11 +66,11 @@ under `docs/audits/`.
 
 ## Compatibility Boundary
 
-The immutable `v1.0.5` catalog and released CLI behavior are not changed in the
-initial instrumentation pull request. The downstream quick/full/security
-catalog migration requires its own regression-backed compatibility change and
-will be included in the later #116 adjustment pull request before the Issue can
-close.
+The immutable `v1.0.5` catalog and released CLI behavior are not changed.
+Current catalog sources add quick, full, and security workflow outputs while
+the decoder continues to accept the released three-shared-file, single-workflow
+shape. Catalog schema version 1, profile-index version 2, and manifest version 1
+remain unchanged.
 
 ## Public Disclosure Review
 

@@ -15,7 +15,8 @@ an unreviewed moving reference is not allowed.
 | MySQL and PostgreSQL verification images | `verification/tools.env` | Digest and parity verifier |
 | Template base images | Template Dockerfile | Digest verifier |
 | Language dependencies | Ecosystem lock or manifest files | Dependabot and hosted audits |
-| Generated template CI | `templates/_shared/ci/downstream-ci.yml` and `.github/workflows/templates-ci.template.yml` | Renderer parity check |
+| Generated downstream CI | `templates/_shared/ci/downstream-ci-{quick,security}.yml`, `templates/_shared/ci/downstream-ci.yml`, and the Soku catalog | Catalog/rendering regression checks |
+| Boilerplate template CI | `.github/workflows/templates-ci.template.yml` | Renderer parity check |
 
 GitHub Actions resolves service images before workflow steps can source
 `verification/tools.env`. The template workflow therefore repeats the reviewed

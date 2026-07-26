@@ -15,7 +15,11 @@
     },
     {
       "id": "standard",
-      "shared_outputs": [".github/workflows/ci.yml"],
+      "shared_outputs": [
+        ".github/workflows/ci.yml",
+        ".github/workflows/full-validation.yml",
+        ".github/workflows/security.yml"
+      ],
       "stack_file_limit": -1,
       "files": []
     },

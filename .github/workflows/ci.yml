@@ -199,6 +199,8 @@ jobs:
             templates/aws/buildspec.yml
             templates/azure/azure-pipelines.yml
             templates/_shared/ci/downstream-ci.yml
+            templates/_shared/ci/downstream-ci-quick.yml
+            templates/_shared/ci/downstream-ci-security.yml
             templates/_shared/ci/contribution-title-check.yml
             templates/_shared/commitlint/commitlint.config.mjs
             templates/_shared/commitlint/contribution-title.mjs

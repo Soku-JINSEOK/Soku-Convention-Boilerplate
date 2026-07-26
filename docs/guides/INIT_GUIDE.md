@@ -62,7 +62,11 @@ Run these steps regardless of detected stack:
 - [ ] Copy `.editorconfig` and `.gitignore` from this boilerplate to the target repo root (do not overwrite if the target already customizes them — merge instead).
 - [ ] Copy `.gitmessage` to the target repo root, then instruct the user to run `git config commit.template .gitmessage` (or run it yourself if you have shell access to the target repo).
 - [ ] Copy the template directory (or directories) identified in Step 1 into the target repo, preserving their internal path structure (e.g. `templates/python/*` contents go to the target repo root, not into a `templates/` subfolder).
-- [ ] Copy `templates/_shared/ci/downstream-ci.yml` to `.github/workflows/ci.yml` in the target repo, then uncomment only the job(s) matching the detected stack(s) and delete the rest.
+- [ ] Prefer `soku init`, which renders the selected stack jobs into
+      `.github/workflows/ci.yml`, `.github/workflows/full-validation.yml`, and
+      `.github/workflows/security.yml`. For a manual setup, copy the three
+      sources in `templates/_shared/ci/` to those outputs, uncomment only the
+      matching job blocks, and delete the rest.
 - [ ] Do **not** copy this boilerplate's own `.github/workflows/ci.yml` (`repository-hygiene` job) — that job checks this boilerplate's own files, not the target repo's.
 - [ ] Copy `.github/labels.yml` and `scripts/sync-labels.sh` to the target repo, then run `scripts/sync-labels.sh --repo <owner>/<repo>` against it before creating any issues or PRs there.
 - [ ] Ask the user which collaboration language to use for commit messages, issues, and pull requests in the target repo (Korean-only, English-only, Japanese-only, or an explicit mix) — do not assume this boilerplate's English-language `.gitmessage` examples apply as-is. Record the decision in the target repo's `CONTRIBUTING.md`. See the Collaboration Language section in `docs/standards/GITHUB_STANDARDS.md` for the underlying rule.

@@ -4,7 +4,9 @@
   "files": [
     {"source": ".editorconfig", "output": ".editorconfig", "owner": "core", "class": "mergeable", "content_mode": "text", "strategy": "editorconfig-merge", "placeholders": []},
     {"source": ".gitignore", "output": ".gitignore", "owner": "core", "class": "mergeable", "content_mode": "text", "strategy": "gitignore-merge", "placeholders": []},
-    {"source": "templates/_shared/ci/downstream-ci.yml", "output": ".github/workflows/ci.yml", "owner": "core", "class": "core-managed", "content_mode": "text", "strategy": "render", "placeholders": []}
+    {"source": "templates/_shared/ci/downstream-ci-quick.yml", "output": ".github/workflows/ci.yml", "owner": "core", "class": "core-managed", "content_mode": "text", "strategy": "render", "placeholders": []},
+    {"source": "templates/_shared/ci/downstream-ci.yml", "output": ".github/workflows/full-validation.yml", "owner": "core", "class": "core-managed", "content_mode": "text", "strategy": "render", "placeholders": []},
+    {"source": "templates/_shared/ci/downstream-ci-security.yml", "output": ".github/workflows/security.yml", "owner": "core", "class": "core-managed", "content_mode": "text", "strategy": "render", "placeholders": []}
   ],
   "stacks": [
     {

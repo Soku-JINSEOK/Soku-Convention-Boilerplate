@@ -1,17 +1,22 @@
-name: CI
+name: Full Validation
 
-# Starter CI workflow for downstream repositories that adopt this boilerplate.
-# Uncomment the job(s) matching your stack and delete the rest.
+# Scheduled/manual full validation for downstream repositories.
+# The legacy filename is retained so released v1.0.5 catalogs remain readable.
+# New catalogs render this source to .github/workflows/full-validation.yml.
+# Uncomment the job(s) matching your stack and delete the rest when copying
+# manually.
 # This file does not check for this boilerplate's own files (see .github/workflows/ci.yml
 # in Soku-Convention-Boilerplate for that repository-hygiene check).
 # Each commented job mirrors a job actually run and verified in
 # Soku-Convention-Boilerplate's own .github/workflows/templates-ci.yml.
 
 on:
-  pull_request:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
+  schedule:
+    - cron: "0 18 * * *"
+
+permissions:
+  contents: read
 
 jobs:
   # The blocks below are the canonical source for soku's generated workflow.

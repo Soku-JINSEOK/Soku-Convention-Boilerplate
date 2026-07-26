@@ -106,6 +106,14 @@ the full local-capable/hosted-only/release-only/deployment-only breakdown.
 This local tooling does not change `Validation Gate` or `PR Metadata Gate`
 above.
 
+Soku-managed downstream repositories receive three responsibility-separated
+workflows: pull-request/main quick validation, scheduled/manual full
+validation, and weekly/manual security validation. Catalog v1 accepts both the
+released `v1.0.5` three-shared-file shape with its single CI workflow and the
+current five-shared-file shape with three workflow outputs. This additive
+compatibility does not change the catalog, profile-index, or manifest major
+versions.
+
 ## 🌍 Environment Strategy
 
 Projects should define environment expectations clearly, such as:
