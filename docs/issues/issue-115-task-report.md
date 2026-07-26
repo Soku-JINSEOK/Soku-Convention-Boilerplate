@@ -65,8 +65,11 @@ profile.
 
 ## Implementation Status
 
-Implemented locally. Hosted pull-request and merged-`main` evidence remain
-pending.
+Implemented in pull request
+[#141](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/pull/141).
+The first hosted pull-request run passed the full Validation Gate, PR Metadata
+Gate, CodeQL analysis, and the external Cloud Build check. The evidence update
+itself must pass the same required checks before merge.
 
 ## Verification
 
@@ -95,7 +98,20 @@ pending.
 - Full security group: passing after moving pinned `pip-audit` installation
   into an isolated temporary virtual environment.
 - Local Terraform and PowerShell execution: unavailable; the pull-request
-  workflow retains authoritative Terraform and PowerShell parsing/validation.
+  workflow provided the authoritative Windows PowerShell parsing and hosted
+  infrastructure validation.
+- Hosted full validation:
+  [Actions run 30200224278](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/actions/runs/30200224278)
+  passed the Linux, macOS, and Windows Soku matrix, all runtime templates,
+  MySQL/PostgreSQL schemas, security scans, repository hygiene, and the
+  aggregate `Validation Gate`.
+- Hosted CodeQL:
+  [Actions run 30200223609](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/actions/runs/30200223609)
+  passed the Actions, Go, Java/Kotlin, JavaScript/TypeScript, and Python
+  analyses.
+- External hosted validation: the Cloud Build pull-request check reported
+  success on PR #141; the public report intentionally omits cloud account and
+  build identifiers.
 
 ## Public Disclosure Review
 
