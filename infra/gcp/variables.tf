@@ -75,6 +75,12 @@ variable "enable_wif" {
   default     = true
 }
 
+variable "grant_deployer_artifact_writer" {
+  description = "Temporary compatibility grant. Disable only after the CI-built digest deployment path succeeds."
+  type        = bool
+  default     = true
+}
+
 variable "enable_cloud_build_validation" {
   description = "Whether to create validation-only Cloud Build triggers and their dedicated identity."
   type        = bool
@@ -131,6 +137,17 @@ variable "wif_provider_id" {
   validation {
     condition     = length(var.wif_provider_id) >= 4 && length(var.wif_provider_id) <= 32
     error_message = "wif_provider_id must contain between 4 and 32 characters."
+  }
+}
+
+variable "wif_ci_provider_id" {
+  description = "Workload Identity Provider ID for the main Validation image builder."
+  type        = string
+  default     = "github-ci"
+
+  validation {
+    condition     = length(var.wif_ci_provider_id) >= 4 && length(var.wif_ci_provider_id) <= 32
+    error_message = "wif_ci_provider_id must contain between 4 and 32 characters."
   }
 }
 

@@ -1,9 +1,10 @@
 # Verification Check Classification
 
-Phase 1 of [issue #112](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/issues/112):
-freeze every check currently run by CI and classify it before changing any
-required gate. No workflow, branch protection, or CD behavior changes yet —
-this is inventory only.
+This is the responsibility inventory for
+[issue #112](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/issues/112).
+It tracks the implemented fast, sharded Quick, Hosted Full, release, and
+digest-only deployment boundaries. Required-context migration remains gated by
+the Issue #116 observation audit.
 
 ## Categories
 
@@ -50,9 +51,18 @@ paths and unknown paths select every scope.
 Issue #116 adds `scripts/verify.sh --profile ci-quick` as the hosted,
 fail-closed counterpart to `fast`. It requires an explicit base/head range,
 does not allow DB or infrastructure skips, and runs on every event handled by
-`validation.yml`. Its `CI Quick Gate` aggregate remains non-required while the
-existing full gate runs in parallel for at least 14 days and 10 code-changing
-pull requests.
+`validation.yml`. A detector-driven planner schedules independent always-on,
+Soku, language-template, database, cloud, and infrastructure groups from
+`verification/profiles.yml`. Its `CI Quick Gate` aggregate remains non-required
+while the existing full gate runs in parallel for at least 14 days and 10
+code-changing pull requests.
+
+## `full-validation.yml` (Hosted Full)
+
+Repository, template, and security workflows receive one exact `source-sha`.
+Daily `02:41 UTC`, manual, and reusable invocations aggregate into
+`Hosted Full Gate`; failure, cancellation, or an unexpected skip in any
+component fails the aggregate.
 
 ## `ci.yml` (Repository CI)
 
@@ -104,7 +114,7 @@ pull requests.
 
 ## `release.yml`
 
-All jobs (`validation` re-run, tag/signature verification, GPG-signed notes
+All jobs (exact-tag Hosted Full, tag/signature verification, GPG-signed notes
 check, packaging + `gh release create`, `npm publish --provenance`) are
 **release-only** — they only run on a tag push or release dry-run dispatch.
 
@@ -113,7 +123,8 @@ check, packaging + `gh release create`, `npm publish --provenance`) are
 | Check | Operation | Category |
 | --- | --- | --- |
 | `bash -n` + `deploy-gcp.test.mjs` | `check` | local-capable |
-| WIF auth, image build+push+digest resolve, Cloud Run deploy, health check | `deploy` | **deployment-only** |
+| Successful canonical main Validation run + manifest verification | `deploy` | **deployment-only** |
+| Digest-only plan, Cloud Run deploy, traffic and health verification | `deploy` | **deployment-only** |
 | Rollback to previous revision | `rollback` | **deployment-only** |
 
 ## Known drift resolved by `verification/tools.env` (this phase)
@@ -128,9 +139,11 @@ check, packaging + `gh release create`, `npm publish --provenance`) are
   verifier enforces parity where GitHub Actions must repeat service-image
   values before workflow steps can source that file.
 
-## Explicitly out of scope for this phase
+## Pending operational transitions
 
-Per the issue's phased rollout, none of the following change yet: a `CI Quick
-Gate` workflow, branch protection required contexts, `hosted-full` scheduling,
-release gating on `hosted-full`, or CD restructuring. The local `fast` and
-`full` entry points do not remove or replace any existing required check.
+- Required contexts remain `Validation Gate` and `PR Metadata Gate` until the
+  complete Issue #116 comparison passes.
+- The deployer's temporary Artifact Registry writer grant remains until a real
+  CI-built digest deploy succeeds; only then may
+  `grant_deployer_artifact_writer` be disabled.
+- External `/gcbrun` evidence remains tracked separately by Issue #140.

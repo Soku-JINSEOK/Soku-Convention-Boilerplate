@@ -20,10 +20,14 @@ The bootstrap command registers exactly these GitHub Repository Variables:
 | `GCP_ARTIFACT_REPOSITORY` | Repository, default `cloud-run` |
 | `GCP_WIF_PROVIDER` | Full Terraform WIF provider resource name |
 | `GCP_WIF_SERVICE_ACCOUNT` | Terraform deployer service-account email |
+| `GCP_CI_WIF_PROVIDER` | Main Validation image-builder WIF provider |
+| `GCP_CI_WIF_SERVICE_ACCOUNT` | Artifact Registry-only CI builder identity |
 
 OIDC/WIF requires no long-lived service-account JSON secret. Its trust condition
 requires the immutable GitHub repository and owner IDs, the `main` ref, and the
-exact `.github/workflows/deploy-gcp.yml` workflow on `main`.
+exact workflow on `main`. The deployer provider accepts only
+`.github/workflows/deploy-gcp.yml`; the CI provider accepts only
+`.github/workflows/validation.yml`.
 
 ## From project ID to first infrastructure
 
@@ -61,11 +65,17 @@ The apply sequence is:
    destroyed on a repeated bootstrap.
 4. Build and push the bootstrap image, then resolve its immutable digest.
 5. Apply runtime Terraform with `deploy_runtime=true` and the digest URI.
-6. Upsert the six repository variables with `gh variable set`.
+6. Upsert the eight repository variables with `gh variable set`.
 
 Bucket lookup/creation, protection updates, legacy Viewer cleanup, and variable
 writes are safe to repeat. Terraform uses the same remote state for both stages;
 state and project-specific tfvars are never committed.
+
+To add only the CI image-builder identity to an existing foundation, use
+`--ci-builder-only` with the same apply confirmation. That path creates the
+provider, service account, repository-scoped Artifact Registry writer binding,
+and the two `GCP_CI_*` variables, then exits. It does not build or push an
+image, change Cloud Run, access secrets, or publish a package.
 
 ## Optional Cloud Build validation
 
@@ -146,19 +156,28 @@ and Cloud Run.
 
 Open **Actions → Deploy to GCP (Cloud Run) → Run workflow**. Select
 `operation=check` first; it is the default and has no OIDC permission or cloud
-commands. Then select `operation=deploy` and `environment=dev`. Only deploy and
-rollback jobs receive `id-token: write` and authenticate to GCP.
+commands. A canonical `main` Validation run first builds the `linux/amd64`
+image after Quick succeeds, checks `/health`, pushes the full-commit tag,
+resolves the registry digest, and uploads `verified-cloud-run-image`. Select
+`operation=deploy`, `environment=dev`, and that run's numeric `source_run_id`.
+The deploy workflow verifies the source repository, workflow, event, branch,
+conclusion, commit, and manifest before accepting its digest. It never builds,
+tests, installs dependencies, or pushes an image.
 
-The deployment builds and pushes a commit-tagged image, resolves the immutable
-digest, deploys it, checks `/health`, and stores evidence. Only `dev` is exposed
-by this workflow. Staging and production stay unavailable until separate GitHub
-Environments, approval rules, environment-scoped variables, and isolated GCP
-runtime targets are configured and reviewed.
+Only deploy and rollback jobs receive `id-token: write` and authenticate to
+GCP. Only `dev` is exposed by this workflow. Staging and production stay
+unavailable until separate GitHub Environments, approval rules,
+environment-scoped variables, and isolated GCP runtime targets are configured
+and reviewed.
 
 The deployer has project-level Cloud Run administration because service creation
-requires it, but Artifact Registry write access is limited to the configured
-repository and `iam.serviceAccountUser` is limited to the dedicated runtime
-service account. It has no project-level Token Creator role. The deployer can
+requires it, and `iam.serviceAccountUser` is limited to the dedicated runtime
+service account. The CI builder has only writer access to the configured
+Artifact Registry repository and no Cloud Run, Secret Manager, or package
+publication role. The deployer's temporary repository writer grant remains
+enabled only until a real CI-built digest deployment succeeds; then apply with
+`grant_deployer_artifact_writer=false` and reverify deploy and rollback. The
+deployer has no project-level Token Creator role. It can
 mint an ID token only for itself and has service-scoped Cloud Run Invoker access,
 which lets the deployment script authenticate its private `/health` request.
 The workflow passes that service-account email explicitly to `cd-deploy.sh`,

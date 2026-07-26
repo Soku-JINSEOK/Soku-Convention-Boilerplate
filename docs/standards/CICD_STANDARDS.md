@@ -108,6 +108,23 @@ the full local-capable/hosted-only/release-only/deployment-only breakdown.
 This local tooling does not change `Validation Gate` or `PR Metadata Gate`
 above.
 
+`full-validation.yml` runs repository, runtime-template, and security
+workflows against one explicit source SHA and aggregates them into
+`Hosted Full Gate`. It supports reusable calls, manual runs, and a daily
+`02:41 UTC` schedule. Release validation calls this workflow with the exact tag
+event SHA; no packaging or publication job may proceed from a failed,
+cancelled, or unexpectedly skipped Hosted Full component.
+
+On canonical `main` pushes, successful Quick validation authorizes a separate
+CI identity to build and smoke-test the Cloud Run image, push the commit tag,
+resolve the registry digest, and upload the versioned
+`verified-cloud-run-image` manifest. That identity has writer access only to
+the configured Artifact Registry repository. Deployment receives a source
+Validation run ID, verifies its repository, workflow, event, branch, result,
+source SHA, and digest manifest, and passes only the verified digest and source
+commit to `cd-plan.sh`. Deployment and rollback never rebuild or republish the
+image.
+
 Soku-managed downstream repositories receive three responsibility-separated
 workflows: pull-request/main quick validation, scheduled/manual full
 validation, and weekly/manual security validation. Catalog v1 accepts both the

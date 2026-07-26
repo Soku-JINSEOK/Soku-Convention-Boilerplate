@@ -2,6 +2,11 @@ name: Validation
 
 on:
   workflow_call:
+    inputs:
+      source-sha:
+        description: Exact source commit for reusable callers
+        required: false
+        type: string
   pull_request:
     types: [opened, synchronize, reopened, edited, labeled, unlabeled, assigned, unassigned, ready_for_review, converted_to_draft]
   push:
@@ -64,6 +69,57 @@ jobs:
           fi
           exit 1
 
+  verified-image:
+    name: Build verified Cloud Run image
+    if: >-
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main' &&
+      github.repository == 'Soku-JINSEOK/Soku-Convention-Boilerplate' &&
+      vars.GCP_CI_WIF_PROVIDER != '' &&
+      vars.GCP_CI_WIF_SERVICE_ACCOUNT != ''
+    needs:
+      - quick
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout exact main source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.sha }}
+
+      - name: Authenticate CI builder to Google Cloud
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
+        with:
+          workload_identity_provider: ${{ vars.GCP_CI_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_CI_WIF_SERVICE_ACCOUNT }}
+
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3.0.1
+
+      - name: Build, smoke, push, and resolve immutable digest
+        shell: bash
+        run: |
+          scripts/build-verified-image.sh \
+            --project-id "${{ vars.GCP_PROJECT_ID }}" \
+            --region "${{ vars.GCP_REGION }}" \
+            --artifact-repository "${{ vars.GCP_ARTIFACT_REPOSITORY }}" \
+            --image-repository "${{ vars.GCP_SERVICE_NAME }}" \
+            --source-sha "${{ github.sha }}" \
+            --source-ref "${{ github.ref }}" \
+            --repository "${{ github.repository }}" \
+            --workflow-run-id "${{ github.run_id }}" \
+            --manifest "${{ github.workspace }}/verified-cloud-run-image/manifest.json"
+
+      - name: Upload verified image manifest
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: verified-cloud-run-image
+          path: ${{ github.workspace }}/verified-cloud-run-image/manifest.json
+          if-no-files-found: error
+          retention-days: 30
+
   repository:
     name: Full repository validation
     if: >-
@@ -76,6 +132,8 @@ jobs:
       group: validation-full-repository-${{ github.event.pull_request.number || github.ref }}
       cancel-in-progress: true
     uses: ./.github/workflows/ci.yml
+    with:
+      source-sha: ${{ inputs.source-sha || github.sha }}
 
   templates:
     name: Full runtime-template validation
@@ -89,6 +147,8 @@ jobs:
       group: validation-full-templates-${{ github.event.pull_request.number || github.ref }}
       cancel-in-progress: true
     uses: ./.github/workflows/templates-ci.yml
+    with:
+      source-sha: ${{ inputs.source-sha || github.sha }}
 
   security:
     name: Security validation
@@ -102,6 +162,8 @@ jobs:
       group: validation-full-security-${{ github.event.pull_request.number || github.ref }}
       cancel-in-progress: true
     uses: ./.github/workflows/security.yml
+    with:
+      source-sha: ${{ inputs.source-sha || github.sha }}
 
   contribution-titles:
     name: Contribution Title Convention

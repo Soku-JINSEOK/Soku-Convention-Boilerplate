@@ -15,7 +15,8 @@ specific limitation and the follow-up needed to close it.
 ## Supported Release Baseline
 
 - Current published boilerplate convention package: `v1.0.5`
-- Current published CLI: `soku/v0.1.4`
+- Current published CLI: `soku/v0.2.1`
+- Current published npm launcher: `@soku-jinseok/soku@0.2.1`
 - Recommended full-verification baseline: boilerplate `v1.0.5` with
   `soku/v0.1.4`.
 - Superseded CLIs: `soku/v0.1.0` and `soku/v0.1.1`; use `soku/v0.1.2`, which
@@ -179,15 +180,14 @@ scripts/cd-plan.sh \
   --region <GCP_REGION> \
   --service-name <CLOUD_RUN_SERVICE> \
   --artifact-repository <ARTIFACT_REPOSITORY> \
-  --image-repository <IMAGE_REPOSITORY> \
-  --skip-infra \
-  --skip-image-push
+  --image-uri <VERIFIED_REPOSITORY@SHA256_DIGEST> \
+  --source-commit <FULL_COMMIT_SHA>
 ```
 
-Image-pushing plans require a registry digest and record the immutable digest URI
-as `CD_PLAN_IMAGE_URI`; the tag URI is retained as `CD_PLAN_IMAGE_TAG_URI` for audit.
-Use `--rollback-only` to create rollback metadata without Docker, local checks, or
-Terraform.
+Deployment plans accept only a previously verified registry digest and its full
+source commit. `cd-plan.sh` does not build, test, install dependencies, publish
+an image, or run Terraform. Use `--rollback-only` to create rollback metadata
+without an image.
 
 ```bash
 scripts/cd-deploy.sh \

@@ -53,6 +53,14 @@ resource "google_service_account" "github_actions_deployer" {
   depends_on = [google_project_service.required_apis]
 }
 
+resource "google_service_account" "github_actions_ci_builder" {
+  project      = var.project_id
+  account_id   = "${substr(var.service_name, 0, 16)}-gh-ci"
+  display_name = "GitHub Actions CI image builder for ${var.service_name}"
+
+  depends_on = [google_project_service.required_apis]
+}
+
 resource "google_service_account" "cloud_build_validation" {
   count = var.enable_cloud_build_validation ? 1 : 0
 
@@ -92,10 +100,18 @@ resource "google_service_account_iam_member" "deployer_self_token_creator" {
 }
 
 resource "google_artifact_registry_repository_iam_member" "deployer_repository_writer" {
+  count      = var.grant_deployer_artifact_writer ? 1 : 0
   location   = var.region
   repository = google_artifact_registry_repository.repository.repository_id
   role       = "roles/artifactregistry.writer"
   member     = "serviceAccount:${google_service_account.github_actions_deployer.email}"
+}
+
+resource "google_artifact_registry_repository_iam_member" "ci_builder_repository_writer" {
+  location   = var.region
+  repository = google_artifact_registry_repository.repository.repository_id
+  role       = "roles/artifactregistry.writer"
+  member     = "serviceAccount:${google_service_account.github_actions_ci_builder.email}"
 }
 
 resource "google_cloud_run_service" "service" {
@@ -216,10 +232,55 @@ resource "google_iam_workload_identity_pool_provider" "github" {
   }
 }
 
+resource "google_iam_workload_identity_pool_provider" "github_ci" {
+  count                              = var.enable_wif ? 1 : 0
+  workload_identity_pool_id          = google_iam_workload_identity_pool.github[0].workload_identity_pool_id
+  workload_identity_pool_provider_id = var.wif_ci_provider_id
+  display_name                       = "github-ci-${substr(var.service_name, 0, 17)}"
+  description                        = "OIDC provider for the canonical main Validation image build"
+  disabled                           = false
+  attribute_mapping = {
+    "google.subject"                = "assertion.sub"
+    "attribute.repository"          = "assertion.repository"
+    "attribute.repository_id"       = "assertion.repository_id"
+    "attribute.repository_owner_id" = "assertion.repository_owner_id"
+    "attribute.ref"                 = "assertion.ref"
+    "attribute.workflow_ref"        = "assertion.workflow_ref"
+  }
+  attribute_condition = join(" && ", [
+    "assertion.repository == \"${var.github_org}/${var.github_repo}\"",
+    "assertion.repository_id == \"${coalesce(var.github_repository_id, "missing")}\"",
+    "assertion.repository_owner_id == \"${coalesce(var.github_repository_owner_id, "missing")}\"",
+    "assertion.ref == \"refs/heads/main\"",
+    "assertion.workflow_ref == \"${var.github_org}/${var.github_repo}/.github/workflows/validation.yml@refs/heads/main\"",
+  ])
+  oidc {
+    issuer_uri = "https://token.actions.githubusercontent.com"
+  }
+
+  lifecycle {
+    precondition {
+      condition = (
+        var.github_repository_id != null &&
+        var.github_repository_owner_id != null
+      )
+      error_message = "github_repository_id and github_repository_owner_id are required when WIF is enabled."
+    }
+  }
+}
+
 resource "google_service_account_iam_member" "github_deployer_wi" {
   count = var.enable_wif ? 1 : 0
 
   service_account_id = google_service_account.github_actions_deployer.name
+  role               = "roles/iam.workloadIdentityUser"
+  member             = "principalSet://iam.googleapis.com/projects/${data.google_project.current.number}/locations/global/workloadIdentityPools/${google_iam_workload_identity_pool.github[0].workload_identity_pool_id}/attribute.repository/${var.github_org}/${var.github_repo}"
+}
+
+resource "google_service_account_iam_member" "github_ci_builder_wi" {
+  count = var.enable_wif ? 1 : 0
+
+  service_account_id = google_service_account.github_actions_ci_builder.name
   role               = "roles/iam.workloadIdentityUser"
   member             = "principalSet://iam.googleapis.com/projects/${data.google_project.current.number}/locations/global/workloadIdentityPools/${google_iam_workload_identity_pool.github[0].workload_identity_pool_id}/attribute.repository/${var.github_org}/${var.github_repo}"
 }

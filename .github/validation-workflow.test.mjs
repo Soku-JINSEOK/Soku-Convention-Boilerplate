@@ -14,6 +14,10 @@ const quickWorkflow = readFileSync(
   new URL('./workflows/ci-quick.yml', import.meta.url),
   'utf8',
 );
+const hostedFullWorkflow = readFileSync(
+  new URL('./workflows/full-validation.yml', import.meta.url),
+  'utf8',
+);
 const releaseWorkflow = readFileSync(
   new URL('./workflows/release.yml', import.meta.url),
   'utf8',
@@ -190,4 +194,60 @@ test('release preflight can call validation without enabling delivery', () => {
     releaseWorkflow,
     /github\.event_name == 'workflow_dispatch'[^\n]*deliver/,
   );
+});
+
+test('Hosted Full supports exact-source reusable, manual, and daily runs', () => {
+  assert.match(hostedFullWorkflow, /^\s{2}workflow_call:/m);
+  assert.match(hostedFullWorkflow, /^\s{2}workflow_dispatch:/m);
+  assert.match(hostedFullWorkflow, /^\s{2}schedule:/m);
+  assert.match(hostedFullWorkflow, /cron: '41 2 \* \* \*'/);
+  assert.match(hostedFullWorkflow, /source-sha:[\s\S]*required: true/);
+  assert.match(hostedFullWorkflow, /name: Hosted Full Gate/);
+  for (const dependency of ['repository', 'templates', 'security']) {
+    assert.match(
+      hostedFullWorkflow,
+      new RegExp(`${dependency}:[\\s\\S]*source-sha: \\$\\{\\{ inputs\\.source-sha \\|\\| github\\.sha \\}\\}`),
+    );
+  }
+  for (const result of [
+    'REPOSITORY_RESULT',
+    'TEMPLATES_RESULT',
+    'SECURITY_RESULT',
+  ]) {
+    assert.match(hostedFullWorkflow, new RegExp(`test "\\$${result}" = success`));
+  }
+});
+
+test('release gates publication on Hosted Full at the event source SHA', () => {
+  assert.match(
+    releaseWorkflow,
+    /uses: \.\/\.github\/workflows\/full-validation\.yml\n\s+with:\n\s+source-sha: \$\{\{ github\.sha \}\}/,
+  );
+  assert.match(
+    releaseWorkflow,
+    /deliver:[\s\S]*needs:\n\s+- validation\n\s+- release-metadata/,
+  );
+  assert.match(
+    releaseWorkflow,
+    /publish-npm:[\s\S]*needs:\n\s+- validation\n\s+- release-metadata\n\s+- deliver/,
+  );
+  assert.equal(
+    (releaseWorkflow.match(/ref: \$\{\{ github\.sha \}\}/g) ?? []).length,
+    3,
+  );
+});
+
+test('canonical main builds one verified digest artifact after Quick succeeds', () => {
+  assert.match(workflow, /verified-image:\n\s+name: Build verified Cloud Run image/);
+  assert.match(
+    workflow,
+    /github\.event_name == 'push' &&\n\s+github\.ref == 'refs\/heads\/main' &&\n\s+github\.repository == 'Soku-JINSEOK\/Soku-Convention-Boilerplate' &&\n\s+vars\.GCP_CI_WIF_PROVIDER != '' &&\n\s+vars\.GCP_CI_WIF_SERVICE_ACCOUNT != ''/,
+  );
+  assert.match(workflow, /verified-image:[\s\S]*needs:\n\s+- quick/);
+  assert.match(workflow, /verified-image:[\s\S]*id-token: write/);
+  assert.match(workflow, /vars\.GCP_CI_WIF_PROVIDER/);
+  assert.match(workflow, /vars\.GCP_CI_WIF_SERVICE_ACCOUNT/);
+  assert.match(workflow, /scripts\/build-verified-image\.sh/);
+  assert.match(workflow, /name: verified-cloud-run-image/);
+  assert.match(workflow, /path: \$\{\{ github\.workspace \}\}\/verified-cloud-run-image\/manifest\.json/);
 });

@@ -22,8 +22,10 @@ permissions:
 
 jobs:
   validation:
-    name: Full validation gate
-    uses: ./.github/workflows/validation.yml
+    name: Exact-source Hosted Full gate
+    uses: ./.github/workflows/full-validation.yml
+    with:
+      source-sha: ${{ github.sha }}
 
   release-metadata:
     name: Verify release identity and signed records
@@ -37,6 +39,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
+          ref: ${{ github.sha }}
 
       - name: Validate manual preflight records
         if: github.event_name == 'workflow_dispatch'
@@ -145,6 +148,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
+          ref: ${{ github.sha }}
 
       - name: Setup Go for CLI packaging
         if: needs.release-metadata.outputs.is-cli == 'true'
@@ -206,6 +210,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
+          ref: ${{ github.sha }}
       - name: Setup Node.js for npm publish
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:

@@ -1,0 +1,54 @@
+name: Hosted Full
+
+on:
+  workflow_call:
+    inputs:
+      source-sha:
+        description: Exact source commit to validate
+        required: true
+        type: string
+  workflow_dispatch:
+  schedule:
+    - cron: '41 2 * * *'
+
+permissions:
+  contents: read
+
+jobs:
+  repository:
+    name: Full repository validation
+    uses: ./.github/workflows/ci.yml
+    with:
+      source-sha: ${{ inputs.source-sha || github.sha }}
+
+  templates:
+    name: Full runtime-template validation
+    uses: ./.github/workflows/templates-ci.yml
+    with:
+      source-sha: ${{ inputs.source-sha || github.sha }}
+
+  security:
+    name: Full security validation
+    uses: ./.github/workflows/security.yml
+    with:
+      source-sha: ${{ inputs.source-sha || github.sha }}
+
+  hosted-full-gate:
+    name: Hosted Full Gate
+    if: always()
+    needs:
+      - repository
+      - templates
+      - security
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require every hosted validation group
+        env:
+          REPOSITORY_RESULT: ${{ needs.repository.result }}
+          TEMPLATES_RESULT: ${{ needs.templates.result }}
+          SECURITY_RESULT: ${{ needs.security.result }}
+        shell: bash
+        run: |
+          test "$REPOSITORY_RESULT" = success
+          test "$TEMPLATES_RESULT" = success
+          test "$SECURITY_RESULT" = success

@@ -282,7 +282,9 @@ permissions.
    boundaries.
 3. Apply only with `--apply --confirm-project-id <exact-project-id>`.
 4. Run **Deploy to GCP (Cloud Run)** with `operation=check`.
-5. Run `operation=deploy`, `environment=dev`.
+5. Select a successful canonical `main` Validation run that contains
+   `verified-cloud-run-image`, then run `operation=deploy`,
+   `environment=dev`, and its numeric `source_run_id`.
 6. Verify authenticated `/health`, the new ready revision at 100% traffic, and
    the `deploy-evidence-*` artifact with `final_status: success`.
 7. For recovery, run `operation=rollback` with an exact revision when known, or
