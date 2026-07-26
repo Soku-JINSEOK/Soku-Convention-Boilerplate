@@ -118,6 +118,7 @@ jobs:
             docs/issues/issue-110-task-report.md
             docs/issues/issue-114-task-report.md
             docs/issues/issue-120-task-report.md
+            docs/issues/issue-122-task-report.md
             docs/audits/github-governance-2026-07-23.md
             docs/guides/USAGE_MANUAL.md
             LICENSE
@@ -212,7 +213,9 @@ jobs:
             scripts/verify-sync-parity.sh
             soku/README.md
             soku/npm/README.md
+            soku/npm/LICENSE
             soku/npm/package.json
+            soku/npm/package-contents.test.mjs
             soku/npm/bin/soku.js
             soku/npm/lib/launcher.mjs
             soku/npm/lib/launcher.test.mjs

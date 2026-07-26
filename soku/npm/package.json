@@ -3,7 +3,7 @@
   "version": "0.2.1",
   "description": "Cross-platform launcher for the soku CLI",
   "type": "module",
-  "license": "Apache-2.0",
+  "license": "MIT",
   "homepage": "https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/tree/main/soku",
   "repository": {
     "type": "github",
@@ -22,10 +22,10 @@
     "test": "node --test *.test.mjs lib/*.test.mjs"
   },
   "files": [
-    "bin/",
-    "lib/",
+    "bin/soku.js",
+    "lib/launcher.mjs",
     "README.md",
-    "scripts/",
+    "LICENSE",
     "package.json"
   ],
   "soku": {
