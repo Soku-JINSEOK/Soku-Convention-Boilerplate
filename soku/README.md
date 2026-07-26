@@ -9,7 +9,8 @@ core upgrades.
 The recommended full-verification baseline is the published boilerplate
 `v1.0.5` with CLI `soku/v0.1.4`. Existing boilerplate and CLI tags, including
 `v1.0.4` and `soku/v0.1.3`, remain immutable historical compatibility
-baselines. Human adopters should start with the
+baselines. The current distribution release is `soku/v0.2.1`, which preserves
+that lifecycle compatibility contract. Human adopters should start with the
 [end-to-end usage manual](../docs/guides/USAGE_MANUAL.md).
 
 CLI distribution is available in two equivalent paths:
@@ -19,7 +20,7 @@ CLI distribution is available in two equivalent paths:
 - npm (`@soku-jinseok/soku`) from `soku/v0.2.0` onward:
 
   ```bash
-  npm install -g @soku-jinseok/soku@0.2.0
+  npm install -g @soku-jinseok/soku@0.2.1
   soku --version
   ```
 

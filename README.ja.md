@@ -65,7 +65,7 @@ make build
 
 ## 📦 現在公開中のベースライン
 
-現在公開中の release は boilerplate `v1.0.5` と CLI `soku/v0.1.4` です。
+現在公開中の release は boilerplate `v1.0.5` と CLI `soku/v0.2.1` です。
 署名済み `v1.0.5` corrective release は、immutable `v1.0.4` の公開 migration
 smoke で確認された境界を修正し、lifecycle-owned `.soku/` state を JavaScript
 および TypeScript formatting の対象外にします。既存 tag は不変のまま保持し、

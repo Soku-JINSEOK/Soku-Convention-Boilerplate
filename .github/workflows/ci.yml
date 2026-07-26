@@ -120,6 +120,7 @@ jobs:
             docs/issues/issue-114-task-report.md
             docs/issues/issue-120-task-report.md
             docs/issues/issue-122-task-report.md
+            docs/issues/issue-123-task-report.md
             docs/issues/issue-124-task-report.md
             docs/audits/github-governance-2026-07-23.md
             docs/guides/USAGE_MANUAL.md
@@ -206,6 +207,8 @@ jobs:
             scripts/create-release-tag.sh
             scripts/verify-release-tag.sh
             scripts/verify-release-tag_test.sh
+            scripts/verify-release-identity.mjs
+            scripts/verify-release-identity.test.mjs
             scripts/ci-local.sh
             scripts/verify.sh
             scripts/verify.test.mjs
@@ -220,6 +223,7 @@ jobs:
             soku/npm/LICENSE
             soku/npm/package.json
             soku/npm/package-contents.test.mjs
+            release-identity.json
             soku/npm/bin/soku.js
             soku/npm/lib/launcher.mjs
             soku/npm/lib/launcher.test.mjs
@@ -350,6 +354,11 @@ jobs:
         run: |
           node --test scripts/verify-supply-chain.test.mjs
           node scripts/verify-supply-chain.mjs
+
+      - name: Enforce reviewed release identity
+        run: |
+          node --test scripts/verify-release-identity.test.mjs
+          node scripts/verify-release-identity.mjs
 
       - name: Check Markdown formatting
         run: >-

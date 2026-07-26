@@ -8,6 +8,7 @@ const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const manual = read('docs/guides/USAGE_MANUAL.md');
 const cliReadme = read('soku/README.md');
 const releaseWorkflow = read('.github/workflows/release.yml');
+const releaseIdentity = JSON.parse(read('release-identity.json'));
 const commandSource = read('soku/internal/cli/command.go');
 const catalogIndex = JSON.parse(read('soku/catalog/index-v2.json'));
 const coreCatalog = JSON.parse(read('soku/catalog/core-v1.json'));
@@ -18,11 +19,20 @@ test('usage manual follows the published release workflow defaults', () => {
   )?.[1];
   const cli = releaseWorkflow.match(/cli-tag:[\s\S]*?default:\s*([^\s]+)/)?.[1];
 
-  assert.equal(boilerplate, 'v1.0.5');
-  assert.equal(cli, 'soku/v0.1.4');
+  assert.equal(boilerplate, releaseIdentity.boilerplate.tag);
+  assert.equal(cli, releaseIdentity.cli.tag);
   assert.match(manual, new RegExp('boilerplate `' + escapeRegExp(boilerplate) + '`'));
   assert.match(manual, new RegExp('CLI `' + escapeRegExp(cli) + '`'));
-  assert.match(cliReadme, /recommended full-verification baseline[\s\S]*`v1\.0\.5`[\s\S]*`soku\/v0\.1\.4`/);
+  assert.match(
+    cliReadme,
+    new RegExp(
+      'recommended full-verification baseline[\\s\\S]*' +
+        escapeRegExp(releaseIdentity.compatibility.boilerplateTag) +
+        '[\\s\\S]*' +
+        escapeRegExp(releaseIdentity.compatibility.cliTag),
+    ),
+  );
+  assert.match(cliReadme, new RegExp(escapeRegExp(releaseIdentity.cli.tag)));
   assert.match(manual, /checksums\.txt/);
   assert.match(manual, /sha256sum --check/);
 });
