@@ -35,10 +35,13 @@ const REQUIRED_BODY_SECTIONS = [
   '## 🤖 AI Assistance',
 ];
 const DEPENDABOT_ECOSYSTEMS = new Map([
+  ['docker', 'docker'],
   ['github_actions', 'github-actions'],
   ['go_modules', 'gomod'],
+  ['maven', 'maven'],
   ['npm_and_yarn', 'npm'],
   ['pip', 'pip'],
+  ['terraform', 'terraform'],
 ]);
 
 function followsRequiredSectionOrder(body) {
@@ -100,14 +103,20 @@ function matchesEcosystemPath(path, configuration) {
   const relative = relativeToDirectory(path, configuration.directory);
   if (relative === null) return false;
   switch (configuration.ecosystem) {
+    case 'docker':
+      return /^(?:Dockerfile|[^/]+\.Dockerfile)$/.test(relative);
     case 'github-actions':
       return /^\.github\/workflows\/.+\.ya?ml$/.test(relative);
     case 'gomod':
       return /^(?:go\.mod|go\.sum)$/.test(relative);
+    case 'maven':
+      return relative === 'pom.xml';
     case 'npm':
       return /^(?:package\.json|package-lock\.json|npm-shrinkwrap\.json|yarn\.lock|pnpm-lock\.yaml)$/.test(relative);
     case 'pip':
       return /^(?:requirements(?:[-_.][^/]*)?\.txt|pyproject\.toml|poetry\.lock|Pipfile(?:\.lock)?|setup\.py|setup\.cfg)$/.test(relative);
+    case 'terraform':
+      return /^(?:[^/]+\.tf|\.terraform\.lock\.hcl)$/.test(relative);
     default:
       return false;
   }

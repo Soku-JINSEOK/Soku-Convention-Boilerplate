@@ -111,6 +111,12 @@ updates:
     directory: /templates/javascript-typescript-node
   - package-ecosystem: pip
     directory: /templates/python
+  - package-ecosystem: docker
+    directory: /templates/gcloud
+  - package-ecosystem: maven
+    directory: /templates/java-spring
+  - package-ecosystem: terraform
+    directory: /infra/gcp
 `;
 const dependabotConfigurations = readDependabotConfigurations(dependabotSource);
 
@@ -153,6 +159,9 @@ test("reads configured Dependabot ecosystems and directories", () => {
     {ecosystem: "gomod", directory: "/soku"},
     {ecosystem: "npm", directory: "/templates/javascript-typescript-node"},
     {ecosystem: "pip", directory: "/templates/python"},
+    {ecosystem: "docker", directory: "/templates/gcloud"},
+    {ecosystem: "maven", directory: "/templates/java-spring"},
+    {ecosystem: "terraform", directory: "/infra/gcp"},
   ]);
 });
 
@@ -218,7 +227,7 @@ function dependabotPullRequest(overrides = {}) {
   });
 }
 
-test("accepts configured Dependabot npm, pip, gomod, and Actions paths", () => {
+test("accepts every configured Dependabot ecosystem path", () => {
   const scenarios = [
     [
       "dependabot/npm_and_yarn/templates/javascript-typescript-node/group",
@@ -232,6 +241,18 @@ test("accepts configured Dependabot npm, pip, gomod, and Actions paths", () => {
     [
       "dependabot/github_actions/actions/group",
       [".github/workflows/validation.yml"],
+    ],
+    [
+      "dependabot/docker/templates/gcloud/group",
+      ["templates/gcloud/Dockerfile"],
+    ],
+    [
+      "dependabot/maven/templates/java-spring/group",
+      ["templates/java-spring/pom.xml"],
+    ],
+    [
+      "dependabot/terraform/infra/gcp/group",
+      ["infra/gcp/versions.tf", "infra/gcp/.terraform.lock.hcl"],
     ],
   ];
   for (const [headRef, changedFiles] of scenarios) {
@@ -258,6 +279,29 @@ test("rejects Dependabot files outside its configured ecosystem scope", () => {
     dependabotPullRequest({changedFiles: ["scripts/pull-request-policy.mjs"]}),
   );
   assert.match(result.join(" "), /outside its configured/);
+
+  for (const [headRef, changedFiles] of [
+    [
+      "dependabot/docker/templates/gcloud/group",
+      ["templates/gcloud/nested/Dockerfile"],
+    ],
+    [
+      "dependabot/maven/templates/java-spring/group",
+      ["templates/java-spring/settings.xml"],
+    ],
+    [
+      "dependabot/terraform/infra/gcp/group",
+      ["infra/gcp/README.md"],
+    ],
+  ]) {
+    assert.match(
+      validatePullRequest(
+        dependabotPullRequest({headRef, changedFiles}),
+      ).join(" "),
+      /outside its configured/,
+    );
+  }
+
   assert.deepEqual(
     validateDependabotFiles({
       headRef: "dependabot/unsupported/example",
