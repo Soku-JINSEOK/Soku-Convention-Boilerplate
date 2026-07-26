@@ -36,6 +36,7 @@ run_or_fail "regression::pr-governance" 72 node --test \
   .github/issue-form-order.test.mjs \
   .github/validation-workflow.test.mjs \
   .github/deploy-gcp.test.mjs \
+  .github/cloudbuild-validation.test.mjs \
   .github/usage-manual.test.mjs \
   .github/github-governance-audit.test.mjs
 run_or_fail "regression::npm-wrapper-unit" 72 node --test soku/npm/lib/launcher.test.mjs
@@ -57,7 +58,7 @@ require_command npx "lint::npx" 73
 run_or_fail "lint::markdownlint" 73 npx --yes "markdownlint-cli2@${MARKDOWNLINT_CLI2_VERSION}" \
   --config .markdownlint.jsonc "**/*.md" "#**/node_modules/**"
 run_or_fail "lint::yaml" 73 npx --yes "yaml-lint@${YAML_LINT_VERSION}" \
-  .github/*.yml .github/**/*.yml docs/callers/*.yml \
+  .github/*.yml .github/**/*.yml cloudbuild/*.yaml docs/callers/*.yml \
   soku/actions/**/*.yml soku/providers/**/*.yml
 require_command go "lint::actionlint" 73
 run_or_fail "lint::actionlint" 73 go run "github.com/rhysd/actionlint/cmd/actionlint@${ACTIONLINT_VERSION}" \

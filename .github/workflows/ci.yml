@@ -78,6 +78,8 @@ jobs:
             infra/gcp/outputs.tf
             infra/gcp/README.md
             infra/gcp/.terraform.lock.hcl
+            infra/gcp/tests/cloud_build_validation.tftest.hcl
+            cloudbuild/validation.yaml
             docs/issues/TASK_REPORT_TEMPLATE.md
             docs/releases/v1.0.0.md
             docs/releases/v1.0.1.md
@@ -137,6 +139,7 @@ jobs:
             .github/issue-form-order.test.mjs
             .github/validation-workflow.test.mjs
             .github/deploy-gcp.test.mjs
+            .github/cloudbuild-validation.test.mjs
             .github/usage-manual.test.mjs
             .github/github-governance-audit.test.mjs
             .github/ISSUE_TEMPLATE/bug_report.yml
@@ -330,6 +333,7 @@ jobs:
           .github/issue-form-order.test.mjs
           .github/validation-workflow.test.mjs
           .github/deploy-gcp.test.mjs
+          .github/cloudbuild-validation.test.mjs
           .github/usage-manual.test.mjs
           .github/github-governance-audit.test.mjs
 
@@ -371,7 +375,8 @@ jobs:
       - name: Validate GitHub YAML
         run: >-
           npx --yes yaml-lint@1.7.0 .github/*.yml .github/**/*.yml
-          docs/callers/*.yml soku/actions/**/*.yml soku/providers/**/*.yml
+          cloudbuild/*.yaml docs/callers/*.yml soku/actions/**/*.yml
+          soku/providers/**/*.yml
 
       - name: Validate GitHub Actions semantics
         run: >-

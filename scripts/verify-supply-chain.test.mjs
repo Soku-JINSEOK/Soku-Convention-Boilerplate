@@ -45,6 +45,20 @@ test('rejects container images without a digest', () => {
   assert.ok(findings.some(({rule}) => rule === 'image-digest'));
 });
 
+test('enforces immutable Cloud Build builder images', () => {
+  const accepted = inspectContent(
+    'cloudbuild/validation.yaml',
+    'name: node:24.17.0@sha256:' + 'c'.repeat(64),
+  );
+  const rejected = inspectContent(
+    'cloudbuild/validation.yaml',
+    'name: node:24.17.0',
+  );
+
+  assert.deepEqual(accepted, []);
+  assert.ok(rejected.some(({rule}) => rule === 'image-digest'));
+});
+
 test('rejects unversioned executable tools', () => {
   const findings = inspectContent(
     'fixture.yml',

@@ -13,6 +13,7 @@ Options:
   --service <name>                   Default: soku-convention-boilerplate
   --artifact-repository <name>       Default: cloud-run
   --github-repository <owner/repo>   Default: current gh repository (apply only)
+  --enable-cloud-build-validation    Create validation-only PR/main triggers
   --apply                            Perform cloud and GitHub changes
   --confirm-project-id <id>          Required with --apply; must exactly match
   --help
@@ -26,6 +27,7 @@ REGION="${GCP_REGION:-asia-northeast1}"
 SERVICE="${GCP_SERVICE_NAME:-soku-convention-boilerplate}"
 ARTIFACT_REPOSITORY="${GCP_ARTIFACT_REPOSITORY:-cloud-run}"
 GITHUB_REPOSITORY=""
+ENABLE_CLOUD_BUILD_VALIDATION=false
 APPLY=false
 CONFIRM_PROJECT_ID=""
 
@@ -36,6 +38,7 @@ while (($#)); do
     --service) SERVICE="${2-}"; shift 2 ;;
     --artifact-repository) ARTIFACT_REPOSITORY="${2-}"; shift 2 ;;
     --github-repository) GITHUB_REPOSITORY="${2-}"; shift 2 ;;
+    --enable-cloud-build-validation) ENABLE_CLOUD_BUILD_VALIDATION=true; shift ;;
     --apply) APPLY=true; shift ;;
     --confirm-project-id) CONFIRM_PROJECT_ID="${2-}"; shift 2 ;;
     --help) usage; exit 0 ;;
@@ -54,21 +57,36 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 INFRA_DIR="$REPO_ROOT/infra/gcp"
 STATE_BUCKET="${PROJECT_ID}-tfstate"
+STATE_PREFIX="$([[ "$ENABLE_CLOUD_BUILD_VALIDATION" == true ]] && echo cloud-build-validation || echo cloud-run)"
 IMAGE_TAG="${REGION}-docker.pkg.dev/${PROJECT_ID}/${ARTIFACT_REPOSITORY}/${SERVICE}:bootstrap"
 
 print_summary() {
-  printf 'Mode: %s\nProject: %s\nRegion: %s\nService: %s\nArtifact repository: %s\nState bucket: gs://%s\n' \
-    "$([[ "$APPLY" == true ]] && echo apply || echo dry-run)" "$PROJECT_ID" "$REGION" "$SERVICE" "$ARTIFACT_REPOSITORY" "$STATE_BUCKET"
+  printf 'Mode: %s\nProject: %s\nRegion: %s\nService: %s\nArtifact repository: %s\nState bucket: gs://%s\nState prefix: %s\nCloud Build validation: %s\n' \
+    "$([[ "$APPLY" == true ]] && echo apply || echo dry-run)" "$PROJECT_ID" "$REGION" "$SERVICE" "$ARTIFACT_REPOSITORY" "$STATE_BUCKET" \
+    "$STATE_PREFIX" "$([[ "$ENABLE_CLOUD_BUILD_VALIDATION" == true ]] && echo enabled || echo disabled)"
 }
 
 print_commands() {
+  if [[ "$ENABLE_CLOUD_BUILD_VALIDATION" == true ]]; then
+    cat <<EOF
+gcloud storage buckets describe gs://${STATE_BUCKET} || gcloud storage buckets create gs://${STATE_BUCKET} --project=${PROJECT_ID} --location=${REGION} --uniform-bucket-level-access
+gcloud storage buckets update gs://${STATE_BUCKET} --uniform-bucket-level-access --public-access-prevention --versioning
+gh api repos/<owner>/<repo> --jq .id
+gh api repos/<owner>/<repo> --jq .owner.id
+terraform -chdir=infra/gcp init -backend-config=bucket=${STATE_BUCKET} -backend-config=prefix=${STATE_PREFIX}
+# API: cloudbuild.googleapis.com
+terraform -chdir=infra/gcp apply -target=google_project_service.cloud_build -target=google_service_account.cloud_build_validation -target=google_project_iam_member.cloud_build_validation_log_writer -target=google_cloudbuild_trigger.pull_request -target=google_cloudbuild_trigger.main -var=enable_cloud_build_validation=true
+# Trigger creation verifies the existing first-generation GitHub App connection and fails when it is unavailable; no second-generation connection is created.
+EOF
+    return
+  fi
   cat <<EOF
 gcloud storage buckets describe gs://${STATE_BUCKET} || gcloud storage buckets create gs://${STATE_BUCKET} --project=${PROJECT_ID} --location=${REGION} --uniform-bucket-level-access
 gcloud storage buckets update gs://${STATE_BUCKET} --uniform-bucket-level-access --public-access-prevention --versioning
 gcloud storage buckets remove-iam-policy-binding gs://${STATE_BUCKET} --member=projectViewer:${PROJECT_ID} --role=<legacy-reader-role>
 gh api repos/<owner>/<repo> --jq .id
 gh api repos/<owner>/<repo> --jq .owner.id
-terraform -chdir=infra/gcp init -backend-config=bucket=${STATE_BUCKET} -backend-config=prefix=cloud-run
+terraform -chdir=infra/gcp init -backend-config=bucket=${STATE_BUCKET} -backend-config=prefix=${STATE_PREFIX}
 terraform -chdir=infra/gcp apply <foundation-targets> -var=project_id=${PROJECT_ID} -var=region=${REGION} -var=service_name=${SERVICE} -var=artifact_repository=${ARTIFACT_REPOSITORY} -var=github_repository_id=<id> -var=github_repository_owner_id=<id> -var=deploy_runtime=false
 docker build --platform linux/amd64 -t ${IMAGE_TAG} templates/gcloud
 docker push ${IMAGE_TAG}
@@ -80,7 +98,10 @@ EOF
 print_summary
 if [[ "$APPLY" != true ]]; then print_commands; exit 0; fi
 
-for command in gcloud terraform docker gh jq; do command -v "$command" >/dev/null || { echo "Required command not found: $command" >&2; exit 3; }; done
+for command in gcloud terraform gh jq; do command -v "$command" >/dev/null || { echo "Required command not found: $command" >&2; exit 3; }; done
+if [[ "$ENABLE_CLOUD_BUILD_VALIDATION" != true ]]; then
+  command -v docker >/dev/null || { echo "Required command not found: docker" >&2; exit 3; }
+fi
 if [[ -z "$GITHUB_REPOSITORY" ]]; then GITHUB_REPOSITORY="$(gh repo view --json nameWithOwner --jq .nameWithOwner)"; fi
 if [[ ! "$GITHUB_REPOSITORY" =~ ^[^/]+/[^/]+$ ]]; then echo "Invalid GitHub repository: $GITHUB_REPOSITORY" >&2; exit 2; fi
 GITHUB_ORG="${GITHUB_REPOSITORY%%/*}"
@@ -106,7 +127,7 @@ for role in roles/storage.legacyBucketReader roles/storage.legacyObjectReader; d
       --member="projectViewer:$PROJECT_ID" --role="$role"
   fi
 done
-terraform -chdir="$INFRA_DIR" init -reconfigure -input=false -backend-config="bucket=$STATE_BUCKET" -backend-config="prefix=cloud-run"
+terraform -chdir="$INFRA_DIR" init -reconfigure -input=false -backend-config="bucket=$STATE_BUCKET" -backend-config="prefix=$STATE_PREFIX"
 COMMON_VARS=(
   -input=false
   -auto-approve
@@ -118,7 +139,22 @@ COMMON_VARS=(
   -var="github_repo=$GITHUB_REPO"
   -var="github_repository_id=$GITHUB_REPOSITORY_ID"
   -var="github_repository_owner_id=$GITHUB_REPOSITORY_OWNER_ID"
+  -var="enable_cloud_build_validation=$ENABLE_CLOUD_BUILD_VALIDATION"
 )
+if [[ "$ENABLE_CLOUD_BUILD_VALIDATION" == true ]]; then
+  VALIDATION_TARGETS=(
+    -target=google_project_service.cloud_build
+    -target=google_service_account.cloud_build_validation
+    -target=google_project_iam_member.cloud_build_validation_log_writer
+    -target=google_cloudbuild_trigger.pull_request
+    -target=google_cloudbuild_trigger.main
+  )
+  echo "Verifying the existing first-generation Cloud Build GitHub App connection while creating validation triggers."
+  terraform -chdir="$INFRA_DIR" apply "${COMMON_VARS[@]}" "${VALIDATION_TARGETS[@]}" -var="deploy_runtime=false"
+  echo "Cloud Build validation enabled without building, publishing, or deploying an image."
+  exit 0
+fi
+
 FOUNDATION_TARGETS=(
   -target=google_project_service.required_apis
   -target=google_artifact_registry_repository.repository

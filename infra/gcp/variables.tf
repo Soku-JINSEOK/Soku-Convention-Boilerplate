@@ -75,6 +75,12 @@ variable "enable_wif" {
   default     = true
 }
 
+variable "enable_cloud_build_validation" {
+  description = "Whether to create validation-only Cloud Build triggers and their dedicated identity."
+  type        = bool
+  default     = false
+}
+
 variable "github_org" {
   description = "GitHub organization or user hosting the repository."
   type        = string
