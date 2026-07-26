@@ -6,6 +6,10 @@ const workflow = readFileSync(
   new URL('./workflows/validation.yml', import.meta.url),
   'utf8',
 );
+const repositoryWorkflow = readFileSync(
+  new URL('./workflows/ci.yml', import.meta.url),
+  'utf8',
+);
 const releaseWorkflow = readFileSync(
   new URL('./workflows/release.yml', import.meta.url),
   'utf8',
@@ -76,6 +80,52 @@ test('does not subscribe to closed pull request events', () => {
     'converted_to_draft',
   ]) {
     assert.match(trigger[1], new RegExp(`\\b${action}\\b`));
+  }
+});
+
+test('isolates token-backed provider conformance from fork pull requests', () => {
+  assert.match(
+    repositoryWorkflow,
+    /name: Run hermetic lifecycle conformance gate\n\s+shell: bash\n\s+run:/,
+  );
+  assert.match(
+    repositoryWorkflow,
+    /name: Fetch pinned external provider conformance fixture\n\s+if: >-\n\s+github\.event_name != 'pull_request' \|\|\n\s+github\.event\.pull_request\.head\.repo\.full_name == github\.repository\n\s+env:\n\s+GITHUB_TOKEN:/,
+  );
+  assert.doesNotMatch(
+    `${workflow}\n${repositoryWorkflow}`,
+    /^\s{2}pull_request_target:/m,
+  );
+
+  const repository = 'Soku-JINSEOK/Soku-Convention-Boilerplate';
+  const shouldRunNetworkConformance = ({
+    eventName,
+    headRepository = '',
+  }) => eventName !== 'pull_request' || headRepository === repository;
+  const cases = [
+    {
+      name: 'fork pull request',
+      eventName: 'pull_request',
+      headRepository: 'external-contributor/Soku-Convention-Boilerplate',
+      expected: false,
+    },
+    {
+      name: 'same-repository pull request',
+      eventName: 'pull_request',
+      headRepository: repository,
+      expected: true,
+    },
+    {name: 'main push', eventName: 'push', expected: true},
+    {name: 'scheduled run', eventName: 'schedule', expected: true},
+    {name: 'manual run', eventName: 'workflow_dispatch', expected: true},
+  ];
+
+  for (const context of cases) {
+    assert.equal(
+      shouldRunNetworkConformance(context),
+      context.expected,
+      context.name,
+    );
   }
 });
 
