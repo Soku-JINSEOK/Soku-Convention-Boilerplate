@@ -10,6 +10,10 @@ const repositoryWorkflow = readFileSync(
   new URL('./workflows/ci.yml', import.meta.url),
   'utf8',
 );
+const quickWorkflow = readFileSync(
+  new URL('./workflows/ci-quick.yml', import.meta.url),
+  'utf8',
+);
 const releaseWorkflow = readFileSync(
   new URL('./workflows/release.yml', import.meta.url),
   'utf8',
@@ -27,11 +31,32 @@ const policyWorkflow = readFileSync(
 );
 
 test('separates full validation from current PR metadata validation', () => {
+  assert.match(workflow, /ci-quick-gate:\n\s+name: CI Quick Gate/);
+  assert.match(workflow, /uses: \.\/\.github\/workflows\/ci-quick\.yml/);
   assert.match(workflow, /validation-gate:[\s\S]*name: Validation Gate/);
   assert.match(workflow, /name: Full Validation Not Required/);
   assert.match(workflow, /name: PR Metadata Gate/);
   assert.match(workflow, /uses: \.\/\.github\/workflows\/contribution-title-check\.yml/);
   assert.match(workflow, /uses: \.\/\.github\/workflows\/pull-request-policy\.yml/);
+});
+
+test('runs CI Quick in parallel without replacing the full gate', () => {
+  assert.match(quickWorkflow, /^\s{2}workflow_call:/m);
+  assert.match(quickWorkflow, /fetch-depth: 0/);
+  assert.match(
+    quickWorkflow,
+    /\.\/scripts\/verify\.sh --profile ci-quick/,
+  );
+  assert.match(workflow, /name: CI Quick Gate/);
+  assert.match(workflow, /name: Validation Gate/);
+  assert.match(workflow, /group: validation-quick-/);
+  assert.match(workflow, /name: CI Quick Not Required/);
+  assert.match(workflow, /NOT_REQUIRED_RESULT:/);
+  assert.match(workflow, /QUICK_RESULT" = success/);
+  assert.match(workflow, /QUICK_RESULT" = skipped/);
+  assert.match(workflow, /exit 1/);
+  assert.match(workflow, /base-sha: \$\{\{ github\.event\.pull_request\.base\.sha \|\| github\.event\.before \}\}/);
+  assert.match(workflow, /head-sha: \$\{\{ github\.event\.pull_request\.head\.sha \|\| github\.sha \}\}/);
 });
 
 test('runs full validation only for code-bearing pull request events', () => {

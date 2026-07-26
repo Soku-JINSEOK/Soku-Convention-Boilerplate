@@ -13,18 +13,21 @@ Profiles:
   fast    Staged or explicitly supplied changed-file checks: whitespace,
           changed-line secrets, focused repository hygiene, and selected
           Soku/template/DB/config/infra smoke checks.
+  ci-quick
+          Hosted changed-file checks with the same fail-closed scope contract
+          as fast. Requires an explicit base/head range.
   full    Every locally-reproducible check: repo hygiene, soku, templates,
           db schema (via docker-compose.verify.yml), security, and infra.
 
-Planned, not yet implemented: ci-quick, hosted-full, release, deploy.
+Planned, not yet implemented: hosted-full, release, deploy.
 
 Options:
   --profile <name>    Verification profile to run. Required.
   --workspace <path>  Repository root path to run checks in. Defaults to the
                       repository containing this script.
   --staged            For fast, inspect staged changes (default).
-  --base <sha>        For fast, base commit SHA. Requires --head.
-  --head <sha>        For fast, head commit SHA. Requires --base.
+  --base <sha>        For fast/ci-quick, base commit SHA. Requires --head.
+  --head <sha>        For fast/ci-quick, head commit SHA. Requires --base.
   --files-from <path|->  For fast, read changed paths from a file or stdin.
   --skip-infra        Skip Terraform checks under infra/.
   --skip-db           Skip the docker-compose-backed MySQL/PostgreSQL schema
@@ -148,7 +151,7 @@ if [[ "$INPUT_MODE" == "range" && ( -z "$BASE_SHA" || -z "$HEAD_SHA" ) ]]; then
   exit 2
 fi
 
-if [[ "$PROFILE" == "fast" || "$PROFILE" == "full" ]]; then
+if [[ "$PROFILE" == "fast" || "$PROFILE" == "ci-quick" || "$PROFILE" == "full" ]]; then
   # shellcheck disable=SC2016 # JavaScript template literals expand in Node.
   node -e '
     const {readFileSync} = require("node:fs");
@@ -164,26 +167,40 @@ fi
 
 run_infra_checks() {
   local required="${1-false}"
+  local terraform_image="hashicorp/terraform:1.15.3@sha256:a12a7a9301bbab26589c0a353d5bdfc68bd1a52aa818cbdd698bf0dec094bd61"
   if [[ "$SKIP_INFRA" == true ]]; then
     echo "::notice::Terraform checks skipped via --skip-infra"
     return 0
   fi
   local dir="$WORKSPACE/infra/gcp"
   [[ ! -d "$dir" ]] && return 0
-  if ! command -v terraform >/dev/null 2>&1; then
-    if [[ "$required" == true ]]; then
-      echo "::error::Terraform is required for the selected infra-gcp scope" >&2
-      return 70
-    fi
-    echo "::notice::Terraform is unavailable — skipped, not a pass"
+  if command -v terraform >/dev/null 2>&1; then
+    echo "::group::Terraform checks"
+    terraform -chdir="$dir" fmt -check -recursive
+    terraform -chdir="$dir" init -backend=false -input=false
+    terraform -chdir="$dir" validate
+    echo "::endgroup::"
     return 0
   fi
-
-  echo "::group::Terraform checks"
-  terraform -chdir="$dir" fmt -check -recursive
-  terraform -chdir="$dir" init -backend=false -input=false
-  terraform -chdir="$dir" validate
-  echo "::endgroup::"
+  if command -v docker >/dev/null 2>&1; then
+    echo "::group::Terraform checks (pinned container)"
+    docker run --rm \
+      -e TF_DATA_DIR=/tmp/terraform-data \
+      -v "$dir:/workspace:ro" \
+      -w /workspace \
+      --entrypoint /bin/sh \
+      "$terraform_image" -ec \
+      'terraform fmt -check -recursive &&
+       terraform init -backend=false -input=false -lockfile=readonly &&
+       terraform validate'
+    echo "::endgroup::"
+    return 0
+  fi
+  if [[ "$required" == true ]]; then
+    echo "::error::Terraform or Docker is required for the selected infra-gcp scope" >&2
+    return 70
+  fi
+  echo "::notice::Terraform and Docker are unavailable — skipped, not a pass"
 }
 
 write_local_report() {
@@ -224,7 +241,8 @@ run_full_profile() {
   fi
 }
 
-run_fast_profile() {
+run_changed_scope_profile() {
+  local selected_profile="$1"
   local temporary_dir scope_json diff_file
   temporary_dir="$(mktemp -d)"
   scope_json="$temporary_dir/scope.json"
@@ -254,12 +272,13 @@ run_fast_profile() {
     const {readFileSync} = require("node:fs");
     const profiles = JSON.parse(readFileSync(process.argv[1], "utf8"));
     const result = JSON.parse(readFileSync(process.argv[2], "utf8"));
-    const allowed = new Set(profiles.profiles.fast.scopes);
+    const selectedProfile = process.argv[3];
+    const allowed = new Set(profiles.profiles[selectedProfile].scopes);
     const unexpected = result.scopes.filter((scope) => !allowed.has(scope));
     if (unexpected.length > 0) {
-      throw new Error(`detector selected scopes outside the fast profile: ${unexpected.join(", ")}`);
+      throw new Error(`detector selected scopes outside the ${selectedProfile} profile: ${unexpected.join(", ")}`);
     }
-  ' "$PROFILES_FILE" "$scope_json"
+  ' "$PROFILES_FILE" "$scope_json" "$selected_profile"
 
   VERIFICATION_SCOPES="$(node -e '
     const {readFileSync} = require("node:fs");
@@ -332,16 +351,27 @@ run_fast_profile() {
 
 case "$PROFILE" in
   fast)
-    run_fast_profile
+    run_changed_scope_profile fast
+    ;;
+  ci-quick)
+    if [[ "$INPUT_MODE" != "range" ]]; then
+      echo "::error::ci-quick requires an explicit --base/--head range" >&2
+      exit 2
+    fi
+    if [[ "$SKIP_DB" == true || "$SKIP_INFRA" == true ]]; then
+      echo "::error::ci-quick does not allow --skip-db or --skip-infra" >&2
+      exit 2
+    fi
+    run_changed_scope_profile ci-quick
     ;;
   full)
     if [[ "$EXPLICIT_INPUT" == true ]]; then
-      echo "::error::changed-file inputs are only valid with --profile fast" >&2
+      echo "::error::changed-file inputs are only valid with --profile fast or ci-quick" >&2
       exit 2
     fi
     run_full_profile
     ;;
-  ci-quick | hosted-full | release | deploy)
+  hosted-full | release | deploy)
     echo "::error::profile '$PROFILE' is not yet implemented (see verification/CLASSIFICATION.md and issue #112's phased rollout)" >&2
     exit 3
     ;;

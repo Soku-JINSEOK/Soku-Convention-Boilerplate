@@ -45,6 +45,15 @@ matrices, five-platform packaging, and the complete dependency/vulnerability
 bundle. Shared verification/generator/sync/workflow/lint/provider/catalog/schema
 paths and unknown paths select every scope.
 
+## CI Quick Profile
+
+Issue #116 adds `scripts/verify.sh --profile ci-quick` as the hosted,
+fail-closed counterpart to `fast`. It requires an explicit base/head range,
+does not allow DB or infrastructure skips, and runs on every event handled by
+`validation.yml`. Its `CI Quick Gate` aggregate remains non-required while the
+existing full gate runs in parallel for at least 14 days and 10 code-changing
+pull requests.
+
 ## `ci.yml` (Repository CI)
 
 | Check | Job | Command | Category |

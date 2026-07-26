@@ -42,13 +42,19 @@ test('verify.sh rejects unknown profiles', () => {
   assert.match(result.stderr, /unknown profile 'nonsense'/);
 });
 
-for (const profile of ['ci-quick', 'hosted-full', 'release', 'deploy']) {
+for (const profile of ['hosted-full', 'release', 'deploy']) {
   test(`verify.sh fails loudly for the not-yet-implemented '${profile}' profile`, () => {
     const result = run('verify.sh', ['--profile', profile]);
     assert.equal(result.status, 3);
     assert.match(result.stderr, /not yet implemented/);
   });
 }
+
+test('verify.sh ci-quick requires an explicit commit range', () => {
+  const result = run('verify.sh', ['--profile', 'ci-quick']);
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /requires an explicit --base\/--head range/);
+});
 
 test('verify.sh fast accepts an empty staged diff and runs always-on checks', () => {
   const workspace = mkdtempSync(`${tmpdir()}/verify-fast-`);

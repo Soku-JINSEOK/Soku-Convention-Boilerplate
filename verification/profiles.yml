@@ -28,6 +28,35 @@
         "full-vulnerability-scan"
       ]
     },
+    "ci-quick": {
+      "always": [
+        "diff-whitespace",
+        "scope-detection",
+        "changed-syntax",
+        "lockfile-consistency",
+        "diff-secret-scan",
+        "repository-hygiene"
+      ],
+      "scopes": [
+        "soku",
+        "javascript-typescript-node",
+        "python",
+        "go",
+        "java-spring",
+        "mysql",
+        "postgresql",
+        "gcloud",
+        "cloud-config",
+        "infra-gcp"
+      ],
+      "excluded": [
+        "race",
+        "full-lifecycle",
+        "cross-platform",
+        "full-packaging",
+        "full-vulnerability-scan"
+      ]
+    },
     "full": {
       "groups": [
         "repository-hygiene",
