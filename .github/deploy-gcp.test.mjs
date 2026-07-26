@@ -1,5 +1,11 @@
 import assert from 'node:assert/strict';
-import {chmodSync, mkdtempSync, readFileSync, writeFileSync} from 'node:fs';
+import {
+  chmodSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  writeFileSync,
+} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join, resolve} from 'node:path';
 import {spawnSync} from 'node:child_process';
@@ -21,12 +27,71 @@ function executable(path, body) {
   chmodSync(path, 0o755);
 }
 
+function jqFixture(path) {
+  writeFileSync(
+    path,
+    `#!/usr/bin/env node
+import {readFileSync} from 'node:fs';
+
+const args = process.argv.slice(2);
+const values = new Map();
+for (let index = 0; index < args.length; index += 1) {
+  if (args[index] === '--arg') {
+    values.set(args[index + 1], args[index + 2]);
+    index += 2;
+  }
+}
+
+if (args[0] === '-r') {
+  const input = JSON.parse(readFileSync(0, 'utf8'));
+  const revision = values.get('revision');
+  const percentages = (input.status?.traffic ?? [])
+    .filter((entry) => entry.revisionName === revision)
+    .map((entry) => entry.percent ?? 0);
+  if (percentages.length > 0) {
+    console.log(percentages.reduce((sum, percent) => sum + percent, 0));
+  }
+  process.exit(0);
+}
+
+if (args[0] === '-n') {
+  const verifiedTrafficPercent = values.get('verified_traffic_percent') ?? '';
+  console.log(JSON.stringify({
+    environment: values.get('environment') ?? '',
+    final_status: values.get('status') ?? '',
+    commit: values.get('commit') ?? '',
+    verified_traffic_percent:
+      verifiedTrafficPercent === '' ? null : Number(verifiedTrafficPercent),
+    error: values.get('error') ?? '',
+    run_id: values.get('run_id') ?? '',
+    run_attempt: values.get('run_attempt') ?? '',
+    timestamp: Date.now() / 1000,
+  }));
+  process.exit(0);
+}
+
+process.exit(1);
+`,
+  );
+  chmodSync(path, 0o755);
+}
+
 function run(script, args, env = {}) {
-  const summaryFile = join(mkdtempSync(join(tmpdir(), 'summary-')), 'step-summary.md');
+  const runtime = mkdtempSync(join(tmpdir(), 'deploy-test-runtime-'));
+  const bin = join(runtime, 'bin');
+  mkdirSync(bin);
+  jqFixture(join(bin, 'jq'));
+  const summaryFile = join(runtime, 'step-summary.md');
+  const inheritedPath = env.PATH ?? process.env.PATH ?? '';
   return spawnSync('bash', [join(root, 'scripts', script), ...args], {
     cwd: root,
     encoding: 'utf8',
-    env: {GITHUB_STEP_SUMMARY: summaryFile, ...process.env, ...env},
+    env: {
+      GITHUB_STEP_SUMMARY: summaryFile,
+      ...process.env,
+      ...env,
+      PATH: `${bin}:${inheritedPath}`,
+    },
   });
 }
 
