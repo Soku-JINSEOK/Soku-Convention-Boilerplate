@@ -356,10 +356,12 @@ jobs:
           node --test scripts/verify-supply-chain.test.mjs
           node scripts/verify-supply-chain.mjs
 
-      - name: Enforce reviewed release identity
+      - name: Enforce reviewed release identity and npm publishing
         run: |
           node --test scripts/verify-release-identity.test.mjs
           node scripts/verify-release-identity.mjs
+          node --test scripts/verify-npm-publishing.test.mjs
+          node scripts/verify-npm-publishing.mjs
 
       - name: Check Markdown formatting
         run: >-
