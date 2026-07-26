@@ -27,10 +27,21 @@ the current distribution version.
 - Align current-release examples without modifying any published tag, Release,
   npm version, or historical release note.
 
+## Phase 2 Implementation
+
+- Remove `NPM_TOKEN`, `NODE_AUTH_TOKEN`, and token-oriented registry
+  configuration from the npm publication job.
+- Grant the job only `contents: read` and `id-token: write`, and pin the
+  publishing runtime to Node.js 24 with npm `12.0.1`.
+- Add an executable contract verifier for OIDC permissions, token absence,
+  provenance publication, and the exact npm repository identity.
+- Document the trusted publisher identity and the evidence gate that must pass
+  before the previous credential is retired.
+
 ## Remaining Gates
 
-- Trusted Publishing/OIDC must succeed with provenance and without
-  `NPM_TOKEN`.
+- The next reviewed CLI release must prove Trusted Publishing/OIDC with
+  provenance and without `NPM_TOKEN`.
 - The previous long-lived npm token may be retired only after that success.
 - Tag verification must reject a valid signature outside the approved signer
   set.
