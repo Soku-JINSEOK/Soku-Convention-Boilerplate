@@ -40,13 +40,87 @@ delete, or reuse them, and must not publish a new release as a side effect.
 
 ## Local Repository Checks
 
-`scripts/verify.sh --profile full` (a thin `scripts/ci-local.sh` still works
-as an alias) now runs the repository, `soku`, template, DB-schema, and
-security checks below in one pass, sourcing tool versions from
-`verification/tools.env`. See [`verification/CLASSIFICATION.md`](./verification/CLASSIFICATION.md)
-for exactly which checks that covers and which remain `hosted-only` (they are
-never a silent pass locally — `verify.sh` prints a notice instead). The
-commands below remain useful for running an individual check by hand.
+`scripts/verify.sh` is the shared local entry point:
+
+```bash
+# Pre-commit default: staged paths, fail-closed scope selection.
+scripts/verify.sh --profile fast
+
+# Explicit range or automation-provided paths.
+scripts/verify.sh --profile fast --base <base-sha> --head <head-sha>
+scripts/verify.sh --profile fast --files-from changed-files.txt
+
+# Pre-push complete locally reproducible verification.
+scripts/verify.sh --profile full
+```
+
+`fast` always checks diff whitespace, changed-line secrets, the repository
+baseline, and focused syntax/lint. It then runs only the selected Soku,
+runtime-template, database/config, or infrastructure smoke checks. Shared
+verification, generator, synchronization, workflow/lint, provider, catalog, or
+schema changes select every scope. An unknown path also selects every scope;
+the detector never guesses that a new path is harmless.
+
+`full` (also available through the compatibility wrapper
+`scripts/ci-local.sh`) runs the repository, `soku`, template, DB-schema,
+security, and infrastructure checks in one pass, sourcing tool versions from
+`verification/tools.env`. See
+[`verification/CLASSIFICATION.md`](./verification/CLASSIFICATION.md) for
+exactly which checks it covers and which remain `hosted-only`. A skipped or
+unavailable hosted-only check is never reported as a local pass.
+
+`verification/profiles.yml` and `verification/scopes.yml` use a deliberately
+limited, dependency-free YAML 1.2 subset: the files must also be valid JSON and
+declare `format: json-compatible-yaml` with `schemaVersion: 1`. This keeps the
+same parser behavior on Node.js across macOS, Linux, and Windows.
+
+Inspect selection without running checks:
+
+```bash
+scripts/detect-verification-scope.mjs --staged --json
+scripts/detect-verification-scope.mjs \
+  --base <base-sha> --head <head-sha> --json
+printf '%s\n' templates/go/profile.go |
+  scripts/detect-verification-scope.mjs --files-from - --json
+```
+
+The JSON result contains `schemaVersion`, `changedFiles`, `scopes`, `reasons`,
+and `allSelected`. Rename and delete records are accepted in Git
+`--name-status` form, including through `--files-from`.
+
+Run `scripts/bootstrap-dev.sh` (or
+`pwsh ./scripts/bootstrap-dev.ps1`) once to configure the repository-owned
+hooks. `.githooks/pre-commit` runs `fast`; `.githooks/pre-push` runs `full`.
+The PowerShell entry point `scripts/verify.ps1` delegates to the same Bash
+engine through Git for Windows, WSL, or the dev container, so it does not fork
+the command contract. `.devcontainer/` provides Node.js, Go, Python, Maven,
+ShellCheck, and Docker CLI; Terraform and PowerShell remain explicit host/tool
+prerequisites.
+
+After a successful full run, `--write-local-report` may write
+`.soku/verification/local-full.json`. The path is ignored by Git and the record
+sets `authoritative: false`; CI and release workflows must never accept it as
+evidence.
+
+### Fast/full timing baseline
+
+Measured on 2026-07-26 on Darwin 15.5 arm64 with Node.js 26.5.0, npm 11.17.0,
+Go 1.26.5, Python 3.14.6, Docker 28.0.4, and ShellCheck 0.11.0. Both commands
+excluded DB and Terraform so the comparison isolates a single JavaScript
+template change; the full profile still ran repository hygiene, all runtime
+templates, the gcloud container build, Soku race/lifecycle/packaging, and the
+complete local security bundle.
+
+| Profile | Command input | Samples (seconds) | Median |
+| --- | --- | --- | ---: |
+| `fast` | `templates/javascript-typescript-node/src/profile.ts` | 10.75, 10.93, 11.64 | 10.93 |
+| `full` | `--skip-db --skip-infra` | 80.61, 82.45, 83.57 | 82.45 |
+
+The fast median is 13.26% of the full median, below issue #115's 25% limit.
+This is a regression baseline for the measured environment, not a universal
+performance guarantee.
+
+The commands below remain useful for running an individual check by hand.
 
 Run from the repository root unless a command changes directory explicitly.
 

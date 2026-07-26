@@ -13,6 +13,7 @@ WORKSPACE="${WORKSPACE:?WORKSPACE must be set}"
 source "$SCRIPT_DIR/_lib.sh"
 
 run_js_template() {
+  scope_selected "javascript-typescript-node" || return 0
   local dir="$WORKSPACE/templates/javascript-typescript-node"
   [[ ! -f "$dir/package.json" ]] && return 0
 
@@ -31,6 +32,7 @@ run_js_template() {
 }
 
 run_python_template() {
+  scope_selected "python" || return 0
   local dir="$WORKSPACE/templates/python"
   [[ ! -f "$dir/requirements-lock.txt" ]] && return 0
   [[ ! -f "$dir/pyproject.toml" ]] && return 0
@@ -57,6 +59,7 @@ run_python_template() {
 }
 
 run_go_template() {
+  scope_selected "go" || return 0
   local dir="$WORKSPACE/templates/go"
   [[ ! -f "$dir/go.mod" ]] && return 0
 
@@ -78,6 +81,7 @@ run_go_template() {
 }
 
 run_java_template() {
+  scope_selected "java-spring" || return 0
   local dir="$WORKSPACE/templates/java-spring"
   [[ ! -f "$dir/pom.xml" ]] && return 0
 
@@ -88,6 +92,7 @@ run_java_template() {
 }
 
 run_gcloud_template() {
+  scope_selected "gcloud" || return 0
   local dir="$WORKSPACE/templates/gcloud"
   [[ ! -f "$dir/Dockerfile" ]] && return 0
 
@@ -99,6 +104,7 @@ run_gcloud_template() {
 }
 
 run_aws_azure_config() {
+  scope_selected "cloud-config" || return 0
   local aws_file="$WORKSPACE/templates/aws/buildspec.yml"
   local azure_file="$WORKSPACE/templates/azure/azure-pipelines.yml"
   [[ ! -f "$aws_file" || ! -f "$azure_file" ]] && return 0

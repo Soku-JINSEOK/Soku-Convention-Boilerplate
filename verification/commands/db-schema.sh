@@ -16,7 +16,12 @@ MYSQL_SCHEMA="$WORKSPACE/templates/mysql/schema.sql"
 POSTGRES_SCHEMA="$WORKSPACE/templates/postgresql/schema.sql"
 COMPOSE_FILE="$WORKSPACE/docker-compose.verify.yml"
 
-if [[ ! -f "$MYSQL_SCHEMA" && ! -f "$POSTGRES_SCHEMA" ]]; then
+RUN_MYSQL=false
+RUN_POSTGRES=false
+scope_selected "mysql" && [[ -f "$MYSQL_SCHEMA" ]] && RUN_MYSQL=true
+scope_selected "postgresql" && [[ -f "$POSTGRES_SCHEMA" ]] && RUN_POSTGRES=true
+
+if [[ "$RUN_MYSQL" == false && "$RUN_POSTGRES" == false ]]; then
   echo "No DB schema files found — skipping"
   exit 0
 fi
@@ -32,10 +37,14 @@ cleanup() {
 trap cleanup EXIT
 
 print_step "Starting local MySQL/PostgreSQL services"
-run_or_fail "db-schema::up" 101 docker compose -f "$COMPOSE_FILE" up -d --wait
+services=()
+[[ "$RUN_MYSQL" == true ]] && services+=(mysql)
+[[ "$RUN_POSTGRES" == true ]] && services+=(postgres)
+run_or_fail "db-schema::up" 101 \
+  docker compose -f "$COMPOSE_FILE" up -d --wait "${services[@]}"
 print_step_end
 
-if [[ -f "$MYSQL_SCHEMA" ]]; then
+if [[ "$RUN_MYSQL" == true ]]; then
   print_step "Loading MySQL schema"
   # shellcheck disable=SC2016 # $1/$2 are expanded by the sub-shell, not here,
   # so paths are passed as arguments rather than interpolated into the string.
@@ -45,7 +54,7 @@ if [[ -f "$MYSQL_SCHEMA" ]]; then
   print_step_end
 fi
 
-if [[ -f "$POSTGRES_SCHEMA" ]]; then
+if [[ "$RUN_POSTGRES" == true ]]; then
   print_step "Loading PostgreSQL schema"
   # shellcheck disable=SC2016 # $1/$2 are expanded by the sub-shell, not here,
   # so paths are passed as arguments rather than interpolated into the string.

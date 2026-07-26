@@ -19,6 +19,32 @@ this is inventory only.
 `local-capable` row below. Rows marked `hosted-only` print an explicit
 "hosted-only — skipped, not a pass" notice instead of being silently omitted.
 
+## Fast Profile and Scope Selection
+
+Issue #115 adds `scripts/verify.sh --profile fast` without changing any hosted
+or required gate. The detector reads `verification/scopes.yml` and accepts
+staged changes, an explicit base/head SHA range, or file/name-status input.
+
+Always-on fast checks:
+
+- diff whitespace;
+- high-confidence secret patterns in added lines, with values redacted;
+- repository baseline and changed-file syntax/lint.
+
+Selected checks:
+
+- affected Soku package formatting, unit test, vet, native build, and smoke;
+- selected JavaScript/TypeScript, Python, Go, or Java template
+  lint/test/build;
+- selected MySQL/PostgreSQL schema load;
+- selected GCP container or AWS/Azure syntax;
+- selected GCP Terraform validation.
+
+Fast deliberately excludes race, the complete lifecycle gate, network and OS
+matrices, five-platform packaging, and the complete dependency/vulnerability
+bundle. Shared verification/generator/sync/workflow/lint/provider/catalog/schema
+paths and unknown paths select every scope.
+
 ## `ci.yml` (Repository CI)
 
 | Check | Job | Command | Category |
@@ -95,9 +121,7 @@ check, packaging + `gh release create`, `npm publish --provenance`) are
 
 ## Explicitly out of scope for this phase
 
-Per the issue's phased rollout, none of the following change yet: the `fast`
-profile or path-based scope detection, a `CI Quick Gate` workflow, branch
-protection required contexts, `hosted-full` scheduling, release gating on
-`hosted-full`, or CD restructuring. This document and the `verify.sh --profile
-full` entry point it backs only reproduce today's checks locally — they do not
-remove or replace any existing required check.
+Per the issue's phased rollout, none of the following change yet: a `CI Quick
+Gate` workflow, branch protection required contexts, `hosted-full` scheduling,
+release gating on `hosted-full`, or CD restructuring. The local `fast` and
+`full` entry points do not remove or replace any existing required check.

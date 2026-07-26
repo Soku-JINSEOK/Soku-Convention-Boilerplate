@@ -1,0 +1,22 @@
+{
+  "name": "Soku Convention Verification",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
+  "remoteUser": "root",
+  "mounts": [
+    "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"
+  ],
+  "postCreateCommand": "scripts/bootstrap-dev.sh",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "davidanson.vscode-markdownlint",
+        "golang.go",
+        "ms-python.python",
+        "redhat.vscode-yaml"
+      ]
+    }
+  }
+}

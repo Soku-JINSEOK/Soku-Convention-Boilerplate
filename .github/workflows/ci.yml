@@ -42,6 +42,10 @@ jobs:
             .markdownlint.jsonc
             .gitleaks.toml
             .gitignore
+            .githooks/pre-commit
+            .githooks/pre-push
+            .devcontainer/Dockerfile
+            .devcontainer/devcontainer.json
             BLUEPRINT.md
             CONTRIBUTING.md
             AGENTS.md
@@ -63,11 +67,15 @@ jobs:
             docs/guides/LANGUAGE_SELECTION.md
             VERIFICATION_GUIDE.md
             verification/CLASSIFICATION.md
+            verification/profiles.yml
+            verification/scopes.yml
             verification/tools.env
             docs/standards/SUPPLY_CHAIN.md
             verification/commands/_lib.sh
             verification/commands/repo-hygiene.sh
+            verification/commands/fast-repository.sh
             verification/commands/soku.sh
+            verification/commands/soku-fast.sh
             verification/commands/templates.sh
             verification/commands/db-schema.sh
             verification/commands/security.sh
@@ -214,7 +222,14 @@ jobs:
             scripts/verify-release-identity.mjs
             scripts/verify-release-identity.test.mjs
             scripts/ci-local.sh
+            scripts/bootstrap-dev.sh
+            scripts/bootstrap-dev.ps1
+            scripts/detect-verification-scope.mjs
+            scripts/detect-verification-scope.test.mjs
+            scripts/scan-diff-secrets.mjs
+            scripts/scan-diff-secrets.test.mjs
             scripts/verify.sh
+            scripts/verify.ps1
             scripts/verify.test.mjs
             scripts/verify-supply-chain.mjs
             scripts/verify-supply-chain.test.mjs
@@ -353,7 +368,11 @@ jobs:
         run: scripts/verify-release-tag_test.sh
 
       - name: Run verification entry point regression tests
-        run: node --test scripts/verify.test.mjs
+        run: >-
+          node --test
+          scripts/detect-verification-scope.test.mjs
+          scripts/scan-diff-secrets.test.mjs
+          scripts/verify.test.mjs
 
       - name: Enforce immutable supply-chain inputs
         run: |
@@ -376,7 +395,12 @@ jobs:
         run: >-
           npx --yes yaml-lint@1.7.0 .github/*.yml .github/**/*.yml
           cloudbuild/*.yaml docs/callers/*.yml soku/actions/**/*.yml
-          soku/providers/**/*.yml
+          soku/providers/**/*.yml verification/*.yml
+
+      - name: Validate dev container JSON
+        run: >-
+          node -e
+          'JSON.parse(require("node:fs").readFileSync(".devcontainer/devcontainer.json", "utf8"))'
 
       - name: Validate GitHub Actions semantics
         run: >-
@@ -386,8 +410,8 @@ jobs:
       - name: Validate shell scripts
         shell: bash
         run: |
-          bash -n scripts/*.sh soku/scripts/*.sh verification/commands/*.sh
-          shellcheck scripts/*.sh soku/scripts/*.sh verification/commands/*.sh
+          bash -n scripts/*.sh soku/scripts/*.sh verification/commands/*.sh .githooks/*
+          shellcheck scripts/*.sh soku/scripts/*.sh verification/commands/*.sh .githooks/*
 
   sync-parity:
     name: Sync Script Parity (sh vs ps1)
@@ -397,19 +421,25 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
-      - name: Parse PowerShell sync script
+      - name: Parse PowerShell scripts
         shell: pwsh
         run: |
-          $tokens = $null
-          $errors = $null
-          [System.Management.Automation.Language.Parser]::ParseFile(
+          foreach ($path in @(
+            "scripts/bootstrap-dev.ps1",
             "scripts/sync-boilerplate.ps1",
-            [ref]$tokens,
-            [ref]$errors
-          ) > $null
-          if ($errors.Count -gt 0) {
-            $errors | ForEach-Object { Write-Error $_ }
-            exit 1
+            "scripts/verify.ps1"
+          )) {
+            $tokens = $null
+            $errors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile(
+              $path,
+              [ref]$tokens,
+              [ref]$errors
+            ) > $null
+            if ($errors.Count -gt 0) {
+              $errors | ForEach-Object { Write-Error $_ }
+              exit 1
+            }
           }
 
       - name: Verify sync-boilerplate.sh and sync-boilerplate.ps1 produce identical output

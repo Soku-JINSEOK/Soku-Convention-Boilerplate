@@ -48,3 +48,22 @@ hosted_only() {
   local label="$1"
   echo "::notice::[$label] hosted-only — skipped, not a pass. See verification/CLASSIFICATION.md."
 }
+
+scope_selected() {
+  local requested="$1"
+  [[ "${VERIFICATION_SCOPES_SET-false}" != true ]] && return 0
+  case " ${VERIFICATION_SCOPES} " in
+    *" ${requested} "*) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+read_changed_files() {
+  : "${VERIFICATION_SCOPE_JSON:?VERIFICATION_SCOPE_JSON must be set}"
+  # shellcheck disable=SC2016 # JavaScript template literals expand in Node.
+  node -e '
+    const {readFileSync} = require("node:fs");
+    const result = JSON.parse(readFileSync(process.argv[1], "utf8"));
+    for (const path of result.changedFiles) process.stdout.write(`${path}\0`);
+  ' "$VERIFICATION_SCOPE_JSON"
+}
