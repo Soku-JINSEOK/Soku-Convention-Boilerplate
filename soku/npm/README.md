@@ -39,3 +39,9 @@ SOKU_LAUNCHER=1 soku status
   - Windows: `%USERPROFILE%\.cache\soku\...`
 
 No external runtime dependency is required beyond a supported Node.js runtime.
+
+## License
+
+The npm launcher is licensed under the [MIT License](./LICENSE), matching the
+repository-level license. Native CLI release archives retain their own bundled
+third-party notices.
