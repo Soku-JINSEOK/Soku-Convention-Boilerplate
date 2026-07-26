@@ -46,8 +46,8 @@ this is inventory only.
 | Python ruff/mypy/black/pytest | `python` | local-capable (in `ci-local.sh`) |
 | Go goimports/golangci-lint/fmt/lint/test/build | `go` | local-capable (in `ci-local.sh`) |
 | Java `mvn -B verify` | `java-spring` | local-capable (in `ci-local.sh`) |
-| MySQL schema load | `mysql` | **hosted-only today** — becomes local-capable once `docker-compose.verify.yml` (this phase) is used |
-| PostgreSQL schema load | `postgresql` | **hosted-only today** — same as above |
+| MySQL schema load | `mysql` | local-capable through `docker-compose.verify.yml` |
+| PostgreSQL schema load | `postgresql` | local-capable through `docker-compose.verify.yml` |
 | gcloud Dockerfile build | `gcloud` | local-capable (in `ci-local.sh`) |
 | AWS/Azure placeholder YAML lint | `aws-azure-config` | local-capable, trivial |
 
@@ -85,13 +85,13 @@ check, packaging + `gh release create`, `npm publish --provenance`) are
 
 - `npm audit --audit-level`: `ci-local.sh` used `high`, `security.yml` uses
   `low`. Unified to `low` (the stricter of the two) in `tools.env`.
-- `goimports` version: `ci-local.sh`'s Go template check pinned `v0.29.0`,
-  `ci.yml`'s `soku-quality` job pinned `v0.48.0`, and `templates-ci.yml`'s `go`
-  job used unpinned `@latest`. Unified to `v0.48.0` in `tools.env`.
-  `templates-ci.yml` itself still installs `@latest` — updating that
-  hosted-only-required workflow is out of scope for this phase (no CI
-  reduction/behavior change yet) and is left as explicit follow-up once
-  `verify.sh`/`tools.env` are wired into CI directly.
+- `goimports` version: local verification, `ci.yml`, and the generated
+  `templates-ci.yml` workflow now agree on reviewed version `v0.48.0`.
+- MySQL `8.4.10`, PostgreSQL `16.14`, and Alpine `3.21.7` image inputs use
+  reviewed multi-architecture manifest digests. `verification/tools.env`
+  remains authoritative for local database verification; the supply-chain
+  verifier enforces parity where GitHub Actions must repeat service-image
+  values before workflow steps can source that file.
 
 ## Explicitly out of scope for this phase
 
