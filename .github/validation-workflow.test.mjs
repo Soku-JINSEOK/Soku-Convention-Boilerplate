@@ -42,6 +42,14 @@ test('separates full validation from current PR metadata validation', () => {
 
 test('runs CI Quick in parallel without replacing the full gate', () => {
   assert.match(quickWorkflow, /^\s{2}workflow_call:/m);
+  assert.match(quickWorkflow, /plan:\n\s+name: Plan changed-scope shards/);
+  assert.match(quickWorkflow, /matrix: \$\{\{ fromJSON\(needs\.plan\.outputs\.matrix\) \}\}/);
+  assert.match(quickWorkflow, /node scripts\/plan-ci-quick\.mjs/);
+  assert.match(quickWorkflow, /--group '\$\{\{ matrix\.id \}\}'/);
+  assert.match(quickWorkflow, /if: contains\(matrix\.toolchains, 'node'\)/);
+  assert.match(quickWorkflow, /if: contains\(matrix\.toolchains, 'go'\)/);
+  assert.match(quickWorkflow, /if: contains\(matrix\.toolchains, 'python'\)/);
+  assert.match(quickWorkflow, /if: contains\(matrix\.toolchains, 'java'\)/);
   assert.match(quickWorkflow, /fetch-depth: 0/);
   assert.match(
     quickWorkflow,

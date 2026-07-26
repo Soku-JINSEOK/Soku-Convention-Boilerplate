@@ -56,6 +56,53 @@ test('verify.sh ci-quick requires an explicit commit range', () => {
   assert.match(result.stderr, /requires an explicit --base\/--head range/);
 });
 
+test('verify.sh ci-quick requires one planned group', () => {
+  const head = spawnSync('git', ['rev-parse', 'HEAD'], {
+    cwd: root,
+    encoding: 'utf8',
+  }).stdout.trim();
+  const result = run('verify.sh', [
+    '--profile',
+    'ci-quick',
+    '--base',
+    head,
+    '--head',
+    head,
+  ]);
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /requires --group <id>/);
+});
+
+test('verify.sh rejects groups for non-ci-quick profiles', () => {
+  const result = run('verify.sh', [
+    '--profile',
+    'fast',
+    '--group',
+    'always',
+  ]);
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /only valid with --profile ci-quick/);
+});
+
+test('verify.sh fails closed for an unknown ci-quick group', () => {
+  const head = spawnSync('git', ['rev-parse', 'HEAD'], {
+    cwd: root,
+    encoding: 'utf8',
+  }).stdout.trim();
+  const result = run('verify.sh', [
+    '--profile',
+    'ci-quick',
+    '--group',
+    'unknown',
+    '--base',
+    head,
+    '--head',
+    head,
+  ]);
+  assert.equal(result.status, 59);
+  assert.match(result.stderr, /unknown ci-quick group/);
+});
+
 test('verify.sh fast accepts an empty staged diff and runs always-on checks', () => {
   const workspace = mkdtempSync(`${tmpdir()}/verify-fast-`);
   try {

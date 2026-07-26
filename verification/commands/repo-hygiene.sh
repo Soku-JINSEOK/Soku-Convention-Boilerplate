@@ -31,6 +31,7 @@ run_or_fail "regression::contribution-title" 72 node --test \
   scripts/contribution-title.test.mjs \
   scripts/pull-request-policy.test.mjs \
   scripts/detect-verification-scope.test.mjs \
+  scripts/plan-ci-quick.test.mjs \
   scripts/scan-diff-secrets.test.mjs \
   scripts/verify.test.mjs
 run_or_fail "regression::pr-governance" 72 node --test \

@@ -55,6 +55,110 @@
         "cross-platform",
         "full-packaging",
         "full-vulnerability-scan"
+      ],
+      "groups": [
+        {
+          "id": "always",
+          "name": "Always-on repository checks",
+          "runner": "always",
+          "always": true,
+          "scopes": [],
+          "toolchains": [
+            "node",
+            "go"
+          ]
+        },
+        {
+          "id": "soku",
+          "name": "Soku",
+          "runner": "soku-fast",
+          "scopes": [
+            "soku"
+          ],
+          "toolchains": [
+            "go"
+          ]
+        },
+        {
+          "id": "javascript-typescript-node",
+          "name": "JavaScript and TypeScript template",
+          "runner": "templates",
+          "scopes": [
+            "javascript-typescript-node"
+          ],
+          "toolchains": [
+            "node"
+          ]
+        },
+        {
+          "id": "python",
+          "name": "Python template",
+          "runner": "templates",
+          "scopes": [
+            "python"
+          ],
+          "toolchains": [
+            "python"
+          ]
+        },
+        {
+          "id": "go",
+          "name": "Go template",
+          "runner": "templates",
+          "scopes": [
+            "go"
+          ],
+          "toolchains": [
+            "go"
+          ]
+        },
+        {
+          "id": "java-spring",
+          "name": "Java and Spring template",
+          "runner": "templates",
+          "scopes": [
+            "java-spring"
+          ],
+          "toolchains": [
+            "java"
+          ]
+        },
+        {
+          "id": "database",
+          "name": "Database schemas",
+          "runner": "database-schema",
+          "scopes": [
+            "mysql",
+            "postgresql"
+          ],
+          "toolchains": [
+            "docker"
+          ]
+        },
+        {
+          "id": "cloud",
+          "name": "Cloud templates",
+          "runner": "templates",
+          "scopes": [
+            "gcloud",
+            "cloud-config"
+          ],
+          "toolchains": [
+            "node",
+            "docker"
+          ]
+        },
+        {
+          "id": "infra-gcp",
+          "name": "GCP infrastructure",
+          "runner": "infrastructure",
+          "scopes": [
+            "infra-gcp"
+          ],
+          "toolchains": [
+            "docker"
+          ]
+        }
       ]
     },
     "full": {

@@ -41,14 +41,23 @@ changes.
 
 ## Implementation Status
 
-The Quick Gate implementation merged in PR #146. The comparison window began
-at `2026-07-26T12:09:01Z` and remains open through at least
-`2026-08-09T12:09:01Z` and 10 post-activation code pull requests. Its result
-will be published separately under `docs/audits/`.
+The first Quick Gate implementation merged in PR #146, but its single serial
+job did not provide the runner topology required by the approved completion
+plan. The follow-up implementation uses a detector-driven dynamic matrix for
+always-on, Soku, language-template, database, cloud-template, and GCP
+infrastructure shards. `verification/profiles.yml` is the single source for
+group-to-scope and group-to-toolchain mapping, while
+`scripts/plan-ci-quick.mjs` converts detector output to the hosted matrix.
+
+The earlier comparison window beginning at `2026-07-26T12:09:01Z` is retained
+only as serial-implementation history. The authoritative window restarts when
+the sharded implementation merges, as recorded in
+[`docs/audits/ci-quick-comparison.md`](../audits/ci-quick-comparison.md).
 
 ## Verification
 
-- Workflow/profile regression tests: 28/28 passing.
+- Workflow/profile regression tests cover planner fail-closed behavior,
+  matrix/toolchain propagation, known-group enforcement, and profile isolation.
 - Current five-file and released three-file catalog shapes pass decoder
   regression coverage; incomplete four-file shapes fail both schema and runtime
   validation.
