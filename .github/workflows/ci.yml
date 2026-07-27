@@ -2,6 +2,11 @@ name: Repository CI
 
 on:
   workflow_call:
+    inputs:
+      source-sha:
+        description: Exact source commit to validate
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -21,6 +26,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ inputs.source-sha || github.sha }}
 
       - name: Setup Node.js
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
@@ -130,6 +137,7 @@ jobs:
             docs/issues/issue-114-task-report.md
             docs/issues/issue-115-task-report.md
             docs/issues/issue-116-task-report.md
+            docs/issues/issue-117-task-report.md
             docs/issues/issue-120-task-report.md
             docs/issues/issue-122-task-report.md
             docs/issues/issue-123-task-report.md
@@ -162,6 +170,7 @@ jobs:
             .github/CODEOWNERS
             .github/workflows/ci.yml
             .github/workflows/ci-quick.yml
+            .github/workflows/full-validation.yml
             .github/workflows/release.yml
             .github/workflows/deploy-gcp.yml
             .github/workflows/security.yml
@@ -428,6 +437,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ inputs.source-sha || github.sha }}
 
       - name: Parse PowerShell scripts
         shell: pwsh
@@ -471,6 +482,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ inputs.source-sha || github.sha }}
 
       - name: Setup Go
         uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
@@ -514,6 +527,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ inputs.source-sha || github.sha }}
 
       - name: Setup Go
         uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
@@ -558,6 +573,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ inputs.source-sha || github.sha }}
 
       - name: Setup Go
         uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
@@ -597,6 +614,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ inputs.source-sha || github.sha }}
 
       - name: Setup Go
         uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6

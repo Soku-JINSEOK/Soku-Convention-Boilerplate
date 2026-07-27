@@ -14,6 +14,10 @@ const quickWorkflow = readFileSync(
   new URL('./workflows/ci-quick.yml', import.meta.url),
   'utf8',
 );
+const hostedFullWorkflow = readFileSync(
+  new URL('./workflows/full-validation.yml', import.meta.url),
+  'utf8',
+);
 const releaseWorkflow = readFileSync(
   new URL('./workflows/release.yml', import.meta.url),
   'utf8',
@@ -190,4 +194,28 @@ test('release preflight can call validation without enabling delivery', () => {
     releaseWorkflow,
     /github\.event_name == 'workflow_dispatch'[^\n]*deliver/,
   );
+});
+
+test('Hosted Full supports exact-source reusable, manual, and daily runs', () => {
+  assert.match(hostedFullWorkflow, /^\s{2}workflow_call:/m);
+  assert.match(hostedFullWorkflow, /^\s{2}workflow_dispatch:/m);
+  assert.match(hostedFullWorkflow, /^\s{2}schedule:/m);
+  assert.match(hostedFullWorkflow, /cron: '41 2 \* \* \*'/);
+  assert.match(hostedFullWorkflow, /source-sha:[\s\S]*required: true/);
+  assert.match(hostedFullWorkflow, /name: Hosted Full Gate/);
+  for (const dependency of ['repository', 'templates', 'security']) {
+    assert.match(
+      hostedFullWorkflow,
+      new RegExp(
+        `${dependency}:[\\s\\S]*source-sha: \\$\\{\\{ inputs\\.source-sha \\|\\| github\\.sha \\}\\}`,
+      ),
+    );
+  }
+  for (const result of [
+    'REPOSITORY_RESULT',
+    'TEMPLATES_RESULT',
+    'SECURITY_RESULT',
+  ]) {
+    assert.match(hostedFullWorkflow, new RegExp(`test "\\$${result}" = success`));
+  }
 });
