@@ -58,9 +58,11 @@ out of public evidence.
 
 ## Implementation Status
 
-Implementation is complete locally. Live GCP discovery and apply are blocked by
-expired authentication and remain intentionally unperformed. Cleanup activation
-also remains blocked on the required seven-day dry-run review.
+Implementation is published in Draft PR
+[#156](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/pull/156).
+Live GCP discovery and apply are blocked by expired authentication and remain
+intentionally unperformed. Cleanup activation also remains blocked on the
+required seven-day dry-run review.
 
 ## Verification
 
@@ -74,8 +76,9 @@ also remains blocked on the required seven-day dry-run review.
 - `git diff --check` (passing).
 - Full profile attempted with `--skip-db`; repository regression tests that
   invoke the scope detector from temporary workspaces fail under local Node
-  26.5.0 before this change's focused checks. Hosted Node 24 validation remains
-  required.
+  26.5.0 before this change's focused checks.
+- Draft PR #156 hosted Node 24 Quick, Full, runtime-template, security, CodeQL,
+  Terraform, metadata, and validation-only Cloud Build checks (passing).
 
 ## Public Disclosure Review
 
@@ -142,9 +145,10 @@ hosted validation, dry-run 관찰과 live apply 승인은 그대로 필요합니
 
 ## 구현 현황
 
-로컬 구현은 완료되었습니다. 실제 GCP 조회와 apply는 만료된 인증으로 차단되어
-의도적으로 수행하지 않았습니다. Cleanup 활성화도 필수 7일 dry-run 검토 전까지
-차단됩니다.
+구현은 Draft PR
+[#156](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/pull/156)에
+게시했습니다. 실제 GCP 조회와 apply는 만료된 인증으로 차단되어 의도적으로
+수행하지 않았습니다. Cleanup 활성화도 필수 7일 dry-run 검토 전까지 차단됩니다.
 
 ## 검증
 
@@ -158,7 +162,9 @@ hosted validation, dry-run 관찰과 live apply 승인은 그대로 필요합니
 - `git diff --check` 통과.
 - `--skip-db` full profile을 시도했으며 임시 workspace에서 scope detector를
   호출하는 기존 repository regression test가 로컬 Node 26.5.0에서 focused
-  check 전에 실패했습니다. Hosted Node 24 validation이 필요합니다.
+  check 전에 실패했습니다.
+- Draft PR #156 hosted Node 24 Quick, Full, runtime template, security, CodeQL,
+  Terraform, metadata, validation-only Cloud Build check 통과.
 
 ## 공개 적합성 검토
 
