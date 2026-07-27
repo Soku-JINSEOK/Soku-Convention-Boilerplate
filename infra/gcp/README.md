@@ -26,10 +26,42 @@ terraform -chdir=infra/gcp init \
   -backend-config="prefix=cloud-run"
 ```
 
+The bootstrap applies `state-lifecycle.json` to the versioned state bucket.
+Noncurrent objects are deleted only when they are at least 30 days old and have
+at least 10 newer versions. Current state objects are never lifecycle deletion
+candidates.
+
 Set `GCP_PROJECT_ID=<id>` and run `scripts/gcp-bootstrap.sh` to preview the full
 sequence. `--project-id` is also supported and takes precedence over the
 environment. Actual creation additionally requires
 `--apply --confirm-project-id <id>`.
+
+For the low-cost sandbox profile, also pass:
+
+```bash
+export TF_VAR_billing_account_id='<private-billing-account-id>'
+scripts/gcp-bootstrap.sh \
+  --project-id '<gcp-project-id>' \
+  --max-instances 1 \
+  --enable-budget-alerts \
+  --monthly-budget-amount 1500 \
+  --apply \
+  --confirm-project-id '<gcp-project-id>'
+```
+
+The billing account value is a sensitive Terraform input and must not be put in
+committed variable files, command output, Issues, or build artifacts. The
+default budget currency is JPY; set the private Terraform input
+`TF_VAR_budget_currency_code` to the billing account currency when it differs.
+Budget alerts fire at 50%, 80%, and 100% of current spend. A budget is an alert,
+not a spending cap, and this stack never disables billing automatically.
+
+Artifact Registry cleanup starts in dry-run mode. It reports untagged images
+older than 7 days and ordinary `sha-`/`commit-` images older than 30 days while
+retaining the five most recent versions and all `release-`/`protected-` tags.
+Review at least seven days of cleanup logs before passing
+`--activate-artifact-cleanup`; that flag enables deletion on apply. Keep the
+flag on later applies once activation has been approved.
 
 Add `--enable-cloud-build-validation` to the preview and apply commands to
 manage the opt-in validation resources. Retain the flag on later applies;
@@ -70,6 +102,7 @@ identity, store logs with `CLOUD_LOGGING_ONLY`, and return build status and log
 links to GitHub. The build runs Node 24 GCP regression tests, Terraform
 format/init/validate/tests, and an amd64 build of `templates/gcloud`. It has no
 artifact output, image push, secret access, or deployment step.
+The build uses the default worker machine and has a 15-minute overall timeout.
 
 The `github` block in each Terraform trigger is the first-generation GitHub App
 interface. Terraform trigger creation is also the connection check: apply fails

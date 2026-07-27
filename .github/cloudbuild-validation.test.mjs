@@ -47,6 +47,7 @@ test('Cloud Build performs validation only with immutable builders', () => {
   assert.match(config, /terraform validate/);
   assert.match(config, /terraform test/);
   assert.match(config, /build[\s\S]*--platform[\s\S]*linux\/amd64/);
+  assert.match(config, /^timeout: 900s$/m);
 
   assert.doesNotMatch(config, /^\s*images:/m);
   assert.doesNotMatch(config, /\bdocker\s+push\b|\bpush\s+--/);
@@ -167,6 +168,27 @@ test('bootstrap previews Cloud Build resources only when explicitly enabled', ()
   assert.match(enabled.stdout, /enable_cloud_build_validation=true/);
   assert.doesNotMatch(enabled.stdout, /docker (?:build|push)|deploy_runtime=true/);
   assert.equal(spawnSync('test', ['!', '-e', invoked]).status, 0);
+});
+
+test('bootstrap previews low-cost controls without exposing billing identity', () => {
+  const result = runBootstrap([
+    '--project-id',
+    'valid-project-123',
+    '--max-instances',
+    '1',
+    '--enable-budget-alerts',
+    '--monthly-budget-amount',
+    '1500',
+  ], {
+    TF_VAR_billing_account_id: 'ABCDEF-123456-ABCDEF',
+  });
+
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stdout, /Max instances: 1/);
+  assert.match(result.stdout, /Budget alerts: enabled/);
+  assert.match(result.stdout, /Artifact cleanup: dry-run/);
+  assert.doesNotMatch(result.stdout, /ABCDEF-123456-ABCDEF/);
+  assert.match(result.stdout, /state-lifecycle\.json/);
 });
 
 test('bootstrap stops before image work when first-generation trigger creation fails', () => {

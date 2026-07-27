@@ -261,11 +261,20 @@ Hosted Validation is the authoritative clean-run evidence across GitHub-hosted
 platforms. Push only after local checks pass, then inspect both aggregate gates.
 If a hosted job fails:
 
-1. open the first failed job and capture its exact command and error;
-2. reproduce the narrow command locally where possible;
-3. fix the cause rather than rerunning until green;
-4. push a focused correction; and
-5. require the newest `Validation Gate` and `PR Metadata Gate` results.
+1. record the current PR head SHA and inspect only checks attached to that SHA;
+2. classify the result as `governance` (title, body, labels, assignee, or
+   policy), `code/test` (a reproducible repository check), `external approval`
+   (for example a fork-only `/gcbrun` gate), or `stale/cancelled` (a superseded
+   SHA or concurrency cancellation);
+3. for governance failures, correct the PR metadata and wait for the current
+   metadata gate;
+4. for code/test failures, open the first failed job, capture its exact command
+   and error, reproduce the narrow command locally where possible, and push a
+   focused correction;
+5. for external approval, obtain the required trusted approval without exposing
+   credentials or weakening the contributor boundary; and
+6. ignore stale/cancelled results only after confirming a newer head SHA exists,
+   then require the newest aggregate code and metadata gates.
 
 Metadata-only edits intentionally skip full code validation while rechecking
 current PR metadata. A prior successful code run does not excuse a failing

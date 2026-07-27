@@ -32,6 +32,7 @@ steps:
       - templates/gcloud
 
 serviceAccount: ${_CLOUD_BUILD_SERVICE_ACCOUNT}
+timeout: 900s
 
 options:
   logging: CLOUD_LOGGING_ONLY
