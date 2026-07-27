@@ -62,8 +62,11 @@ merged head commit.
 | --- | --- | --- | --- | ---: | ---: | ---: | ---: | --- |
 | [#142](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/pull/142) | `f483e56e9c10ebfb9caa4bf0b0c43ec595282aca` | [CI Quick Gate](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/actions/runs/30207657214/job/89808575715) | [Validation Gate](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/actions/runs/30207657214/job/89808585847) | 101 s | 109 s | 299 s | 894 s | Pass; 92.66% critical ratio; 66.55% runner reduction |
 | [#152](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/pull/152) | `67cbaf5456fbf3c069be2ddda01566531ca59a25` | [CI Quick Gate](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/actions/runs/30208730766/job/89811298032) | [Validation Gate](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/actions/runs/30208730766/job/89811404736) | 55 s | 108 s | 16 s | 879 s | Pass; 50.93% critical ratio; 98.18% runner reduction |
+| [#143](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/pull/143) | `676257413f9abee68363ab782034dbd2092edaf0` | [CI Quick Gate](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/actions/runs/30236422620/job/89885082764) | [Validation Gate](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/actions/runs/30236422620/job/89885184954) | 59 s | 109 s | 50 s | 917 s | Pass; 54.13% critical ratio; 94.55% runner reduction |
+| [#144](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/pull/144) | `f551eb8ed6e81140d31676157d04c21e6313a90c` | [CI Quick Gate](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/actions/runs/30237198651/job/89887392129) | [Validation Gate](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/actions/runs/30237198651/job/89887375236) | 113 s | 109 s | 282 s | 934 s | Pass; 103.67% critical ratio; 69.81% runner reduction |
+| [#145](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/pull/145) | `1b38dd21b13fdd271d5b1e427cb8052e114ea33e` | [CI Quick Gate](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/actions/runs/30237433460/job/89887894749) | [Validation Gate](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/actions/runs/30237433460/job/89888003349) | 52 s | 106 s | 51 s | 883 s | Pass; 49.06% critical ratio; 94.22% runner reduction |
 
-Current qualifying sample count: **2 of 10**.
+Current qualifying sample count: **5 of 10**.
 
 ## Decision
 
