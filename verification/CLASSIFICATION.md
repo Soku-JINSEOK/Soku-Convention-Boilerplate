@@ -108,12 +108,22 @@ All jobs (`validation` re-run, tag/signature verification, GPG-signed notes
 check, packaging + `gh release create`, `npm publish --provenance`) are
 **release-only** — they only run on a tag push or release dry-run dispatch.
 
+## Verified image promotion
+
+Canonical `main` Validation may use the repository-scoped CI builder identity
+after Quick succeeds. It builds and smoke-tests the Cloud Run image, publishes
+the full-commit tag, resolves the immutable digest, and records the versioned
+manifest. Manual deploy and rollback dispatches fail closed outside `main` and
+use current protected `main` operational scripts to verify and promote that
+digest.
+
 ## `deploy-gcp.yml`
 
 | Check | Operation | Category |
 | --- | --- | --- |
 | `bash -n` + `deploy-gcp.test.mjs` | `check` | local-capable |
-| WIF auth, image build+push+digest resolve, Cloud Run deploy, health check | `deploy` | **deployment-only** |
+| Successful canonical main Validation run + manifest verification | `deploy` | **deployment-only** |
+| Digest-only plan, Cloud Run deploy, traffic and health verification | `deploy` | **deployment-only** |
 | Rollback to previous revision | `rollback` | **deployment-only** |
 
 ## Known drift resolved by `verification/tools.env` (this phase)

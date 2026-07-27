@@ -16,6 +16,10 @@ keeping both stages in one remote GCS state.
   Cloud Build API and creates a dedicated service account with only
   `roles/logging.logWriter`. It also creates two global, first-generation
   GitHub App triggers. Neither trigger reuses the GitHub Actions deployer.
+- CI image promotion uses a second WIF provider restricted to the immutable
+  repository/owner IDs, canonical `main`, and
+  `.github/workflows/validation.yml`. Its service account has only
+  repository-scoped Artifact Registry writer access.
 
 The GCS backend is partial configuration. Initialize it with the project-derived
 bucket rather than committing backend values or state:
@@ -86,7 +90,15 @@ no legacy project Viewer object access.
 
 The outputs `wif_provider_name` and `deployer_service_account_email` map directly
 to the GitHub repository variables `GCP_WIF_PROVIDER` and
-`GCP_WIF_SERVICE_ACCOUNT`.
+`GCP_WIF_SERVICE_ACCOUNT`. `wif_ci_provider_name` and
+`ci_builder_service_account_email` map to `GCP_CI_WIF_PROVIDER` and
+`GCP_CI_WIF_SERVICE_ACCOUNT`.
+
+Use `scripts/gcp-bootstrap.sh --ci-builder-only` to apply only the CI identity
+and its two repository variables to an existing foundation. After a real
+CI-built digest deploy and rollback path both succeed, set
+`grant_deployer_artifact_writer=false` to remove the deployer's transitional
+writer binding.
 
 ## Validation-only Cloud Build triggers
 

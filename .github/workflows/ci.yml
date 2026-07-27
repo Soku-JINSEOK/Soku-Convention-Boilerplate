@@ -130,6 +130,7 @@ jobs:
             docs/issues/issue-114-task-report.md
             docs/issues/issue-115-task-report.md
             docs/issues/issue-116-task-report.md
+            docs/issues/issue-119-task-report.md
             docs/issues/issue-120-task-report.md
             docs/issues/issue-122-task-report.md
             docs/issues/issue-123-task-report.md
@@ -233,6 +234,9 @@ jobs:
             scripts/bootstrap-dev.ps1
             scripts/detect-verification-scope.mjs
             scripts/detect-verification-scope.test.mjs
+            scripts/build-verified-image.sh
+            scripts/verify-image-promotion.mjs
+            scripts/verify-image-promotion.test.mjs
             scripts/scan-diff-secrets.mjs
             scripts/scan-diff-secrets.test.mjs
             scripts/verify.sh
@@ -380,6 +384,7 @@ jobs:
           scripts/detect-verification-scope.test.mjs
           scripts/plan-ci-quick.test.mjs
           scripts/scan-diff-secrets.test.mjs
+          scripts/verify-image-promotion.test.mjs
           scripts/verify.test.mjs
 
       - name: Enforce immutable supply-chain inputs

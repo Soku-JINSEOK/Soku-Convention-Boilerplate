@@ -108,6 +108,22 @@ the full local-capable/hosted-only/release-only/deployment-only breakdown.
 This local tooling does not change `Validation Gate` or `PR Metadata Gate`
 above.
 
+On canonical `main` pushes, successful Quick validation authorizes a dedicated
+CI identity to build and smoke-test the Cloud Run image, push the commit tag,
+resolve the registry digest, and upload the versioned
+`verified-cloud-run-image` manifest. That identity has writer access only to
+the configured Artifact Registry repository. Deployment receives a source
+Validation run ID, verifies its repository, workflow, event, branch, result,
+source SHA, and digest manifest, and passes only the verified digest and source
+commit to `cd-plan.sh`.
+
+Credential-bearing deploy and rollback operations are operator-bound. They run
+only when the workflow is dispatched from `refs/heads/main` and execute the
+current protected `main` deployment scripts. The verified source SHA identifies
+the promoted application image; historical source never supplies operational
+code after cloud authentication. Deployment and rollback never rebuild or
+republish the image.
+
 Soku-managed downstream repositories receive three responsibility-separated
 workflows: pull-request/main quick validation, scheduled/manual full
 validation, and weekly/manual security validation. Catalog v1 accepts both the
