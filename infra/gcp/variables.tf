@@ -55,6 +55,11 @@ variable "max_instances" {
   description = "Maximum Cloud Run instance count."
   type        = number
   default     = 3
+
+  validation {
+    condition     = var.max_instances >= 1
+    error_message = "max_instances must be at least 1."
+  }
 }
 
 variable "allow_unauthenticated" {
@@ -79,6 +84,89 @@ variable "enable_cloud_build_validation" {
   description = "Whether to create validation-only Cloud Build triggers and their dedicated identity."
   type        = bool
   default     = false
+}
+
+variable "enable_budget_alerts" {
+  description = "Whether to create a project-scoped Cloud Billing budget."
+  type        = bool
+  default     = false
+}
+
+variable "billing_account_id" {
+  description = "Cloud Billing account ID used for the optional budget."
+  type        = string
+  default     = null
+  nullable    = true
+  sensitive   = true
+
+  validation {
+    condition = (
+      var.billing_account_id == null ||
+      can(regex("^[0-9A-F]{6}-[0-9A-F]{6}-[0-9A-F]{6}$", var.billing_account_id))
+    )
+    error_message = "billing_account_id must use the XXXXXX-XXXXXX-XXXXXX form."
+  }
+}
+
+variable "monthly_budget_amount" {
+  description = "Monthly project budget amount in the billing account currency."
+  type        = number
+  default     = 1500
+
+  validation {
+    condition     = var.monthly_budget_amount > 0 && floor(var.monthly_budget_amount) == var.monthly_budget_amount
+    error_message = "monthly_budget_amount must be a positive whole number."
+  }
+}
+
+variable "budget_currency_code" {
+  description = "ISO 4217 currency code for the monthly budget."
+  type        = string
+  default     = "JPY"
+
+  validation {
+    condition     = can(regex("^[A-Z]{3}$", var.budget_currency_code))
+    error_message = "budget_currency_code must be an uppercase ISO 4217 code."
+  }
+}
+
+variable "artifact_cleanup_dry_run" {
+  description = "Whether Artifact Registry cleanup policies only report candidates."
+  type        = bool
+  default     = true
+}
+
+variable "artifact_untagged_retention_days" {
+  description = "Days to retain untagged Artifact Registry images."
+  type        = number
+  default     = 7
+
+  validation {
+    condition     = var.artifact_untagged_retention_days >= 1
+    error_message = "artifact_untagged_retention_days must be at least 1."
+  }
+}
+
+variable "artifact_commit_retention_days" {
+  description = "Days to retain ordinary commit-tagged Artifact Registry images."
+  type        = number
+  default     = 30
+
+  validation {
+    condition     = var.artifact_commit_retention_days >= 1
+    error_message = "artifact_commit_retention_days must be at least 1."
+  }
+}
+
+variable "artifact_keep_count" {
+  description = "Minimum number of recent image versions retained per package."
+  type        = number
+  default     = 5
+
+  validation {
+    condition     = var.artifact_keep_count >= 1
+    error_message = "artifact_keep_count must be at least 1."
+  }
 }
 
 variable "github_org" {

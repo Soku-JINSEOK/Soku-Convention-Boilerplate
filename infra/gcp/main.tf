@@ -28,13 +28,100 @@ resource "google_project_service" "cloud_build" {
   disable_on_destroy         = false
 }
 
+resource "google_project_service" "billing_budgets" {
+  count = var.enable_budget_alerts ? 1 : 0
+
+  project = var.project_id
+  service = "billingbudgets.googleapis.com"
+
+  disable_dependent_services = false
+  disable_on_destroy         = false
+}
+
 resource "google_artifact_registry_repository" "repository" {
-  location      = var.region
-  repository_id = var.artifact_repository
-  description   = "Container images for ${var.service_name}"
-  format        = "DOCKER"
+  location               = var.region
+  repository_id          = var.artifact_repository
+  description            = "Container images for ${var.service_name}"
+  format                 = "DOCKER"
+  cleanup_policy_dry_run = var.artifact_cleanup_dry_run
+
+  cleanup_policies {
+    id     = "delete-untagged"
+    action = "DELETE"
+
+    condition {
+      tag_state  = "UNTAGGED"
+      older_than = "${var.artifact_untagged_retention_days * 86400}s"
+    }
+  }
+
+  cleanup_policies {
+    id     = "delete-expired-commit-images"
+    action = "DELETE"
+
+    condition {
+      tag_state    = "TAGGED"
+      tag_prefixes = ["sha-", "commit-"]
+      older_than   = "${var.artifact_commit_retention_days * 86400}s"
+    }
+  }
+
+  cleanup_policies {
+    id     = "keep-protected-tags"
+    action = "KEEP"
+
+    condition {
+      tag_state    = "TAGGED"
+      tag_prefixes = ["release-", "protected-"]
+    }
+  }
+
+  cleanup_policies {
+    id     = "keep-recent"
+    action = "KEEP"
+
+    most_recent_versions {
+      keep_count = var.artifact_keep_count
+    }
+  }
 
   depends_on = [google_project_service.required_apis]
+}
+
+resource "google_billing_budget" "project" {
+  count = var.enable_budget_alerts ? 1 : 0
+
+  billing_account = var.billing_account_id
+  display_name    = "${var.service_name} monthly project budget"
+
+  budget_filter {
+    projects = ["projects/${data.google_project.current.number}"]
+  }
+
+  amount {
+    specified_amount {
+      currency_code = var.budget_currency_code
+      units         = tostring(var.monthly_budget_amount)
+    }
+  }
+
+  dynamic "threshold_rules" {
+    for_each = toset([0.5, 0.8, 1.0])
+
+    content {
+      threshold_percent = threshold_rules.value
+      spend_basis       = "CURRENT_SPEND"
+    }
+  }
+
+  lifecycle {
+    precondition {
+      condition     = var.billing_account_id != null
+      error_message = "billing_account_id is required when budget alerts are enabled."
+    }
+  }
+
+  depends_on = [google_project_service.billing_budgets]
 }
 
 resource "google_service_account" "cloud_run_runtime" {

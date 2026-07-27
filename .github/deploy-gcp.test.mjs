@@ -459,7 +459,10 @@ elif [[ "$*" == "api repos/owner/repository --jq .owner.id" ]]; then echo 7890; 
   assert.equal(result.status, 0, result.stderr);
   const commands = readFileSync(log, 'utf8');
   assert.match(commands, /gcloud storage buckets create gs:\/\/app-project-123-tfstate/);
-  assert.match(commands, /gcloud storage buckets update gs:\/\/app-project-123-tfstate --uniform-bucket-level-access --public-access-prevention --versioning/);
+  assert.match(
+    commands,
+    /gcloud storage buckets update gs:\/\/app-project-123-tfstate --project=app-project-123 --uniform-bucket-level-access --public-access-prevention --versioning --lifecycle-file=.*state-lifecycle\.json/,
+  );
   assert.match(commands, /gh api repos\/owner\/repository --jq \.id/);
   assert.match(commands, /github_repository_id=123456/);
   assert.match(commands, /github_repository_owner_id=7890/);
