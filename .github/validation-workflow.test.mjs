@@ -219,3 +219,30 @@ test('Hosted Full supports exact-source reusable, manual, and daily runs', () =>
     assert.match(hostedFullWorkflow, new RegExp(`test "\\$${result}" = success`));
   }
 });
+
+test('release uses exact-source Hosted Full and finalizes only after npm', () => {
+  assert.match(
+    releaseWorkflow,
+    /uses: \.\/\.github\/workflows\/full-validation\.yml\n\s+with:\n\s+source-sha: \$\{\{ github\.sha \}\}/,
+  );
+  assert.match(
+    releaseWorkflow,
+    /stage-release:[\s\S]*gh release create[\s\S]*--draft --latest=false/,
+  );
+  assert.match(
+    releaseWorkflow,
+    /publish-npm:[\s\S]*needs:[\s\S]*- stage-release/,
+  );
+  assert.match(
+    releaseWorkflow,
+    /finalize-release:[\s\S]*needs:[\s\S]*- publish-npm[\s\S]*needs\.publish-npm\.result == 'success'/,
+  );
+  assert.match(
+    releaseWorkflow,
+    /gh release edit "\$RELEASE_TAG" --draft=false --latest=false/,
+  );
+  assert.equal(
+    (releaseWorkflow.match(/ref: \$\{\{ github\.sha \}\}/g) ?? []).length,
+    3,
+  );
+});

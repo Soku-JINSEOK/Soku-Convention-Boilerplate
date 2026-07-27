@@ -107,6 +107,21 @@ For `soku/v0.2.0` and later, the Release workflow also runs a separate npm
 publish path for `@soku-jinseok/soku`, but only after the GitHub Release
 delivery succeeds and release metadata is complete.
 
+Release delivery is transactional across GitHub and npm as far as the two
+services permit. The workflow validates exact-tag Hosted Full, builds every
+release asset, and runs the npm pack preflight before it creates a draft GitHub
+Release. CLI tags then publish through npm Trusted Publishing with provenance.
+Only after npm succeeds does the workflow make the draft GitHub Release public.
+Boilerplate-only tags, which have no npm step, finalize after their draft and
+asset staging succeeds.
+
+- If npm publication fails, the GitHub Release remains draft and must not be
+  made public.
+- If npm succeeds but GitHub Release finalization fails, retry only release
+  finalization. Never publish the npm version again.
+- Never move, delete, reuse, or republish the existing tag or npm version while
+  recovering either partial state.
+
 Release tag helpers create and verify local tags but never push. When two axes
 are intentionally released from one reviewed commit, publish them with one
 atomic push. A public tag is immutable: never move, delete, or reuse it after a

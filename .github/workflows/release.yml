@@ -22,8 +22,10 @@ permissions:
 
 jobs:
   validation:
-    name: Full validation gate
-    uses: ./.github/workflows/validation.yml
+    name: Exact-source Hosted Full gate
+    uses: ./.github/workflows/full-validation.yml
+    with:
+      source-sha: ${{ github.sha }}
 
   release-metadata:
     name: Verify release identity and signed records
@@ -37,6 +39,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
+          ref: ${{ github.sha }}
 
       - name: Validate manual preflight records
         if: github.event_name == 'workflow_dispatch'
@@ -129,8 +132,8 @@ jobs:
             test "$verified" = true
           done
 
-  deliver:
-    name: Publish GitHub Release
+  stage-release:
+    name: Stage draft GitHub Release
     needs:
       - validation
       - release-metadata
@@ -145,6 +148,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
+          ref: ${{ github.sha }}
 
       - name: Setup Go for CLI packaging
         if: needs.release-metadata.outputs.is-cli == 'true'
@@ -169,30 +173,54 @@ jobs:
             --built-at "$built_at" \
             --output-dir soku/dist
 
-      - name: Publish CLI release and assets
+      - name: Setup Node.js for npm package preflight
+        if: needs.release-metadata.outputs.is-cli == 'true'
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: "24"
+          package-manager-cache: false
+
+      - name: Install reviewed npm CLI
+        if: needs.release-metadata.outputs.is-cli == 'true'
+        run: npm install --global npm@12.0.1
+
+      - name: Validate npm package before staging release
+        if: needs.release-metadata.outputs.is-cli == 'true'
+        env:
+          RELEASE_TAG: ${{ needs.release-metadata.outputs.tag }}
+        shell: bash
+        run: |
+          version="${RELEASE_TAG#soku/}"
+          version="${version#v}"
+          node soku/npm/scripts/prepare-package.mjs \
+            --version "$version" \
+            --repo-root "$GITHUB_WORKSPACE"
+          npm pack --dry-run --json --prefix soku/npm
+
+      - name: Stage CLI release and assets as draft
         if: needs.release-metadata.outputs.is-cli == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ needs.release-metadata.outputs.tag }}
         run: >-
           gh release create "$RELEASE_TAG" soku/dist/*
-          --verify-tag --notes-from-tag --latest=false
+          --verify-tag --notes-from-tag --draft --latest=false
 
-      - name: Publish boilerplate release
+      - name: Stage boilerplate release as draft
         if: needs.release-metadata.outputs.is-cli != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ needs.release-metadata.outputs.tag }}
         run: >-
           gh release create "$RELEASE_TAG"
-          --verify-tag --notes-from-tag --latest=false
+          --verify-tag --notes-from-tag --draft --latest=false
 
   publish-npm:
     name: Publish npm package
     needs:
       - validation
       - release-metadata
-      - deliver
+      - stage-release
     if: >-
       github.event_name == 'push' &&
       github.repository == 'Soku-JINSEOK/Soku-Convention-Boilerplate' &&
@@ -206,6 +234,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
+          ref: ${{ github.sha }}
       - name: Setup Node.js for npm publish
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
@@ -224,3 +253,28 @@ jobs:
         run: >-
           cd soku/npm &&
           npm publish --provenance --access public
+
+  finalize-release:
+    name: Finalize GitHub Release
+    needs:
+      - release-metadata
+      - stage-release
+      - publish-npm
+    if: >-
+      always() &&
+      github.event_name == 'push' &&
+      github.repository == 'Soku-JINSEOK/Soku-Convention-Boilerplate' &&
+      needs.stage-release.result == 'success' &&
+      (
+        needs.publish-npm.result == 'success' ||
+        needs.publish-npm.result == 'skipped'
+      )
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Publish the staged GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ needs.release-metadata.outputs.tag }}
+        run: gh release edit "$RELEASE_TAG" --draft=false --latest=false
