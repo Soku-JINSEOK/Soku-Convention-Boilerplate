@@ -65,8 +65,9 @@ merged head commit.
 | [#143](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/pull/143) | `676257413f9abee68363ab782034dbd2092edaf0` | [CI Quick Gate](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/actions/runs/30236422620/job/89885082764) | [Validation Gate](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/actions/runs/30236422620/job/89885184954) | 59 s | 109 s | 50 s | 917 s | Pass; 54.13% critical ratio; 94.55% runner reduction |
 | [#144](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/pull/144) | `f551eb8ed6e81140d31676157d04c21e6313a90c` | [CI Quick Gate](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/actions/runs/30237198651/job/89887392129) | [Validation Gate](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/actions/runs/30237198651/job/89887375236) | 113 s | 109 s | 282 s | 934 s | Pass; 103.67% critical ratio; 69.81% runner reduction |
 | [#145](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/pull/145) | `1b38dd21b13fdd271d5b1e427cb8052e114ea33e` | [CI Quick Gate](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/actions/runs/30237433460/job/89887894749) | [Validation Gate](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/actions/runs/30237433460/job/89888003349) | 52 s | 106 s | 51 s | 883 s | Pass; 49.06% critical ratio; 94.22% runner reduction |
+| [#161](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/pull/161) | `3a54d92b331a3e1f4e63ef6f95a5180a39464585` | [CI Quick Gate](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/actions/runs/30332114671/job/90189626062) | [Validation Gate](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/actions/runs/30332114671/job/90189609276) | 126 s | 117 s | 268 s | 867 s | Pass; 107.69% critical ratio; 69.09% runner reduction |
 
-Current qualifying sample count: **5 of 10**.
+Current qualifying sample count: **6 of 10**.
 
 ## Decision
 
