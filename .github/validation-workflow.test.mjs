@@ -63,8 +63,14 @@ test('runs CI Quick in parallel without replacing the full gate', () => {
   assert.match(workflow, /QUICK_RESULT" = success/);
   assert.match(workflow, /QUICK_RESULT" = skipped/);
   assert.match(workflow, /exit 1/);
-  assert.match(workflow, /base-sha: \$\{\{ github\.event\.pull_request\.base\.sha \|\| github\.event\.before \}\}/);
   assert.match(workflow, /head-sha: \$\{\{ github\.event\.pull_request\.head\.sha \|\| github\.sha \}\}/);
+});
+
+test('provides a valid Quick base for manual reusable validation', () => {
+  assert.match(
+    workflow,
+    /base-sha: \$\{\{ github\.event\.pull_request\.base\.sha \|\| github\.event\.before \|\| github\.sha \}\}/,
+  );
 });
 
 test('runs full validation only for code-bearing pull request events', () => {
