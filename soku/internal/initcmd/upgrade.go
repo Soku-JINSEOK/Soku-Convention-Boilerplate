@@ -436,6 +436,8 @@ func buildTransitionManifestWithIntegrations(version string, previous manifest.D
 	if err != nil {
 		return manifest.Document{}, err
 	}
+	document.SchemaVersion = previous.SchemaVersion
+	document.Components = append([]manifest.Component(nil), previous.Components...)
 	for _, file := range previous.Files {
 		if file.Class == "project-owned" {
 			document.Files = append(document.Files, file)

@@ -1,0 +1,202 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/soku/schema/manual-capture-report-v1.schema.json",
+  "title": "Soku credential-redacted capture report v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "report_integrity_sha256",
+    "authenticity",
+    "source",
+    "environment",
+    "adapters",
+    "map",
+    "egress",
+    "captures",
+    "generated_files"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "report_integrity_sha256": { "$ref": "#/$defs/sha256" },
+    "authenticity": {
+      "enum": ["runtime-authentic", "runtime-authentic-with-adapters"]
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["commit", "dirty", "files", "fixtures", "hooks"],
+      "properties": {
+        "commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "dirty": { "type": "boolean" },
+        "files": { "$ref": "#/$defs/hashes" },
+        "fixtures": { "$ref": "#/$defs/hashes" },
+        "hooks": { "$ref": "#/$defs/hashes" }
+      }
+    },
+    "environment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "browser",
+        "browser_version",
+        "viewport",
+        "locale",
+        "timezone",
+        "device_scale_factor",
+        "fonts_ready"
+      ],
+      "properties": {
+        "browser": { "const": "chromium" },
+        "browser_version": { "type": "string", "minLength": 1 },
+        "viewport": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["width", "height"],
+          "properties": {
+            "width": { "type": "integer", "minimum": 1 },
+            "height": { "type": "integer", "minimum": 1 }
+          }
+        },
+        "locale": { "type": "string", "minLength": 1 },
+        "timezone": { "type": "string", "minLength": 1 },
+        "device_scale_factor": { "type": "number", "minimum": 1 },
+        "fonts_ready": { "const": true }
+      }
+    },
+    "adapters": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "map": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "provider",
+        "source_relation",
+        "execution_mode",
+        "billing_owner_declared",
+        "restriction_reviewed",
+        "readiness",
+        "attribution_visible",
+        "map_load_count",
+        "request_count"
+      ],
+      "properties": {
+        "provider": {
+          "enum": ["none", "local-deterministic", "leaflet-osm", "google-maps-javascript"]
+        },
+        "source_relation": {
+          "enum": ["original-application", "declared-adapter", "not-applicable"]
+        },
+        "execution_mode": { "const": "local-manual" },
+        "api_key_env": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9_]*$"
+        },
+        "billing_owner_declared": { "type": "boolean" },
+        "restriction_reviewed": { "type": "boolean" },
+        "readiness": { "type": "string", "minLength": 1 },
+        "attribution_visible": { "type": "boolean" },
+        "map_load_count": { "type": "integer", "minimum": 0 },
+        "request_count": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "egress": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["method", "url", "host"],
+        "properties": {
+          "method": { "type": "string", "minLength": 1 },
+          "url": {
+            "type": "string",
+            "not": {
+              "pattern": "(?:key|KEY|token|TOKEN|signature|SIGNATURE|secret|SECRET|password|PASSWORD)=[A-Za-z0-9_-]{8,}"
+            }
+          },
+          "host": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "captures": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "capture_id",
+          "scenario_id",
+          "step_index",
+          "path",
+          "sha256",
+          "mode",
+          "caption"
+        ],
+        "properties": {
+          "capture_id": { "$ref": "#/$defs/id" },
+          "scenario_id": { "$ref": "#/$defs/id" },
+          "step_index": { "type": "integer", "minimum": 0 },
+          "path": { "$ref": "#/$defs/path" },
+          "sha256": { "$ref": "#/$defs/sha256" },
+          "mode": { "type": "string", "minLength": 1 },
+          "caption": { "type": "string", "minLength": 1 },
+          "clip": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["x", "y", "width", "height"],
+            "properties": {
+              "x": { "type": "number", "minimum": 0 },
+              "y": { "type": "number", "minimum": 0 },
+              "width": { "type": "number", "exclusiveMinimum": 0 },
+              "height": { "type": "number", "exclusiveMinimum": 0 }
+            }
+          },
+          "dialog_adapter": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "pdf": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256", "page_count", "raster_pages"],
+      "properties": {
+        "path": { "$ref": "#/$defs/path" },
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "page_count": { "type": "integer", "minimum": 1 },
+        "raster_pages": { "$ref": "#/$defs/hashes" }
+      }
+    },
+    "generated_files": { "$ref": "#/$defs/hashes" }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+    },
+    "path": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[^/\\\\][^\\\\]*$",
+      "not": { "pattern": "(^|/)\\.\\.(/|$)" }
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "hashes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "sha256"],
+        "properties": {
+          "path": { "$ref": "#/$defs/path" },
+          "sha256": { "$ref": "#/$defs/sha256" }
+        }
+      }
+    }
+  }
+}

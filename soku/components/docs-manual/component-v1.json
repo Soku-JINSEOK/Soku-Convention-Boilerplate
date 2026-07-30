@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "id": "docs-manual",
+  "catalog_version": "1",
+  "manifest_schema": 2,
+  "configuration_schema": "manual-capture-v1",
+  "report_schema": "manual-capture-report-v1",
+  "execution": "local-manual",
+  "core_managed_outputs": [
+    "docs/manual/MANUAL_TEMPLATE.md",
+    "docs/manual/capture.example.yml",
+    "docs/manual/capture.gas-leaflet.example.yml",
+    "docs/manual/capture.google-maps.example.yml",
+    "docs/manual/schema/manual-capture-report-v1.schema.json",
+    "docs/manual/schema/manual-capture-v1.schema.json",
+    "docs/manual/schema/provider-egress-profiles-v1.json",
+    "tools/manual-capture/package-lock.json",
+    "tools/manual-capture/package.json",
+    "tools/manual-capture/src/browser.test.ts",
+    "tools/manual-capture/src/capture.ts",
+    "tools/manual-capture/src/cli.ts",
+    "tools/manual-capture/src/config.ts",
+    "tools/manual-capture/src/gas-bridge.ts",
+    "tools/manual-capture/src/output.ts",
+    "tools/manual-capture/src/redaction.ts",
+    "tools/manual-capture/src/runner.test.ts",
+    "tools/manual-capture/src/server.ts",
+    "tools/manual-capture/src/types.ts",
+    "tools/manual-capture/tsconfig.json"
+  ],
+  "project_owned_patterns": [
+    "docs/manual/capture.yml",
+    "docs/manual/fixtures/**",
+    "docs/manual/hooks/**",
+    "docs/manual/scenarios/**",
+    "docs/manual/captures/**",
+    "docs/manual/capture-report.json",
+    "docs/manual/generated-index.md",
+    "docs/manual/USAGE*.md",
+    "docs/manual/**/*.pdf"
+  ]
+}
