@@ -5,6 +5,7 @@ import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { chromium, type BrowserContext, type Locator, type Page } from "playwright";
 import { loadConfiguration, validateCaptureReport } from "./config.js";
+import { runDialog } from "./dialogs.js";
 import { assertRedacted, redactText, redactURL } from "./redaction.js";
 import {
   replaceGeneratedFiles,
@@ -393,34 +394,6 @@ async function runWait(page: Page, step: StepConfig): Promise<void> {
         }),
       { name, value: expected },
     );
-  }
-}
-
-async function runDialog(page: Page, step: StepConfig): Promise<void> {
-  const dialog = step.dialog;
-  if (dialog === undefined) throw new Error("dialog configuration is absent");
-  if (dialog.mode === "native") {
-    page.once("dialog", async (nativeDialog) => {
-      if (dialog.message !== undefined && nativeDialog.message() !== dialog.message) {
-        throw new Error("native dialog message differed from the declared message");
-      }
-      if (dialog.action === "accept") await nativeDialog.accept();
-      else await nativeDialog.dismiss();
-    });
-    return;
-  }
-  if (dialog.mode === "documentation-overlay") {
-    await page.evaluate(
-      async ({ message, action }) => {
-        const overlay = (globalThis as unknown as {
-          __sokuDocumentationDialog?: (message: string, action: string) => Promise<boolean>;
-        }).__sokuDocumentationDialog;
-        if (overlay === undefined) throw new Error("documentation dialog overlay is unavailable");
-        void overlay(message, action);
-      },
-      { message: dialog.message ?? "", action: dialog.action },
-    );
-    await page.locator("[data-soku-dialog-overlay]").waitFor({ state: "visible" });
   }
 }
 
