@@ -21,6 +21,7 @@ Commands:
   status      Inspect lifecycle state without changes
   diff        Compare current and desired managed state
   upgrade     Upgrade managed convention state
+  docs        Manage opt-in documentation components
 
 Flags:
       --config string       explicit portable YAML configuration file
@@ -138,8 +139,117 @@ func newRootCommand(deps dependencies, out *output) *cobra.Command {
 		newLifecycleCommand("status", false, &opts, deps, out, deps.handlers.Status),
 		newLifecycleCommand("diff", false, &opts, deps, out, deps.handlers.Diff),
 		newLifecycleCommand("upgrade", true, &opts, deps, out, deps.handlers.Upgrade),
+		newDocsCommand(&opts, deps, out),
 	)
 	return root
+}
+
+func newDocsCommand(opts *options, deps dependencies, out *output) *cobra.Command {
+	var docs *cobra.Command
+	docs = &cobra.Command{
+		Use:   "docs",
+		Short: "Manage opt-in documentation components",
+		Args: func(_ *cobra.Command, args []string) error {
+			if len(args) > 0 {
+				return invocationError("docs does not accept arguments")
+			}
+			return nil
+		},
+		RunE: func(*cobra.Command, []string) error {
+			return out.help("docs", helpFor(docs))
+		},
+	}
+	var manualCommand *cobra.Command
+	manualCommand = &cobra.Command{
+		Use:   "manual",
+		Short: "Plan, diagnose, or install real-runtime manual capture",
+		Args: func(_ *cobra.Command, args []string) error {
+			if len(args) > 0 {
+				return invocationError("docs manual does not accept arguments")
+			}
+			return nil
+		},
+		RunE: func(*cobra.Command, []string) error {
+			return out.help("docs manual", helpFor(manualCommand))
+		},
+	}
+	manualCommand.AddCommand(
+		newManualLeaf("plan", false, opts, deps, out, deps.handlers.ManualPlan),
+		newManualLeaf("doctor", false, opts, deps, out, deps.handlers.ManualDoctor),
+	)
+	docs.AddCommand(manualCommand)
+	for _, command := range []*cobra.Command{docs, manualCommand} {
+		command.InitDefaultHelpFlag()
+		command.Flags().Lookup("help").Shorthand = ""
+	}
+	return docs
+}
+
+func newManualLeaf(
+	name string,
+	mutation bool,
+	opts *options,
+	deps dependencies,
+	out *output,
+	handler Handler,
+) *cobra.Command {
+	var dryRun, yes, probe bool
+	var command *cobra.Command
+	command = &cobra.Command{
+		Use:   name,
+		Short: manualDescription(name),
+		Args: func(_ *cobra.Command, args []string) error {
+			if len(args) > 0 {
+				return invocationError("docs manual %s does not accept arguments", name)
+			}
+			return nil
+		},
+		RunE: func(_ *cobra.Command, _ []string) error {
+			if opts.version {
+				return out.version(deps.metadata)
+			}
+			if opts.configPath == "" {
+				return invocationError("--config is required")
+			}
+			if name != "init" {
+				if err := validateConfig(deps.runtime, opts.configPath); err != nil {
+					return err
+				}
+			}
+			terminal := deps.runtime.IsTerminal()
+			interactive := !opts.nonInteractive && terminal
+			if mutation && dryRun == yes {
+				return invocationError("docs manual init requires exactly one of --dry-run or --yes")
+			}
+			request := Request{
+				Command: "docs manual " + name, ConfigPath: opts.configPath,
+				JSON: out.json, Quiet: opts.quiet, NonInteractive: opts.nonInteractive || !terminal,
+				DryRun: dryRun, Yes: yes, Interactive: interactive, Probe: probe,
+				Input: deps.stdin, PromptOutput: deps.stderr, SokuVersion: deps.metadata.Version,
+			}
+			result, err := invokeHandler(command.Context(), handler, request)
+			if err != nil {
+				return err
+			}
+			if err := out.result(request.Command, result, opts.quiet); err != nil {
+				return err
+			}
+			if result.Code != ExitSuccess {
+				return &resultExit{Code: result.Code}
+			}
+			return nil
+		},
+	}
+	if mutation {
+		command.Flags().BoolVar(&dryRun, "dry-run", false, "plan component installation without writing")
+		command.Flags().BoolVar(&yes, "yes", false, "approve the validated component installation")
+	}
+	if name == "doctor" {
+		command.Flags().BoolVar(&probe, "probe", false, "run the fixed installed browser/provider probe")
+	}
+	command.InitDefaultHelpFlag()
+	command.Flags().Lookup("help").Shorthand = ""
+	return command
 }
 
 func newLifecycleCommand(
@@ -357,6 +467,7 @@ func hasJSONFlag(args []string) bool {
 
 func commandFromArgs(args []string) string {
 	valueFlags := map[string]bool{"--config": true, "--boilerplate-source": true, "--boilerplate-release": true, "--stack": true, "--profile": true, "--project-name": true, "--module-path": true, "--java-group": true, "--service-name": true, "--integration-source": true, "--integration-ref": true, "--integration-config": true}
+	positionals := []string{}
 	for index := 0; index < len(args); index++ {
 		arg := args[index]
 		if valueFlags[arg] {
@@ -366,7 +477,16 @@ func commandFromArgs(args []string) string {
 		if strings.HasPrefix(arg, "-") {
 			continue
 		}
-		return arg
+		positionals = append(positionals, arg)
+	}
+	if len(positionals) >= 3 && positionals[0] == "docs" && positionals[1] == "manual" {
+		return strings.Join(positionals[:3], " ")
+	}
+	if len(positionals) >= 2 && positionals[0] == "docs" {
+		return strings.Join(positionals[:2], " ")
+	}
+	if len(positionals) > 0 {
+		return positionals[0]
 	}
 	return "soku"
 }
@@ -375,7 +495,7 @@ func commandName(command *cobra.Command) string {
 	if command == nil || command.Name() == "soku" {
 		return "help"
 	}
-	return command.Name()
+	return strings.TrimPrefix(command.CommandPath(), "soku ")
 }
 
 func lifecycleDescription(name string) string {
@@ -393,9 +513,50 @@ func lifecycleDescription(name string) string {
 	}
 }
 
+func manualDescription(name string) string {
+	switch name {
+	case "plan":
+		return "Render the deterministic real-runtime capture plan"
+	case "doctor":
+		return "Diagnose the local capture environment"
+	case "init":
+		return "Install the docs-manual component transactionally"
+	default:
+		return "Manage real-runtime manual capture"
+	}
+}
+
 func helpFor(command *cobra.Command) string {
 	if command == nil || command.Name() == "soku" {
 		return rootHelp
+	}
+	fullName := commandName(command)
+	if fullName == "docs" {
+		return "Manage opt-in documentation components.\n\nUsage:\n  soku docs manual <command> [flags]\n"
+	}
+	if fullName == "docs manual" {
+		return "Plan or diagnose real-runtime manual capture.\n\nUsage:\n  soku docs manual <plan|doctor> [flags]\n"
+	}
+	if strings.HasPrefix(fullName, "docs manual ") {
+		extra := ""
+		if command.Name() == "doctor" {
+			extra = "      --probe               run the fixed installed browser/provider probe\n"
+		}
+		if command.Name() == "init" {
+			extra = "      --dry-run             plan component installation without writing\n" +
+				"      --yes                 approve the validated component installation\n"
+		}
+		return fmt.Sprintf(`%s.
+
+Usage:
+  soku docs manual %s --config <path> [flags]
+
+Flags:
+      --config string       portable capture configuration path
+%s      --help                help for %s
+      --json                emit one machine-readable JSON envelope
+      --quiet               suppress non-essential human output
+`, manualDescription(command.Name()), command.Name(), extra, fullName)
 	}
 	mutationFlags := ""
 	if command.Name() == "init" || command.Name() == "upgrade" {

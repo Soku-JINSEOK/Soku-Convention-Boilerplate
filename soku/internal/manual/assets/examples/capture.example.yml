@@ -1,0 +1,60 @@
+schema_version: 1
+
+execution:
+  mode: local-manual
+  allow_hosts: []
+  request_budget: 0
+
+runtime:
+  adapter: static-build
+  static_directory: dist
+  serve:
+    origin: loopback-http
+
+browser:
+  engine: chromium
+  viewport:
+    width: 414
+    height: 896
+  device_scale_factor: 1
+  locale: ja-JP
+  timezone: Asia/Tokyo
+  fonts:
+    - Noto Sans JP
+    - Noto Color Emoji
+
+backend:
+  mode: none
+
+map:
+  provider: none
+  source_relation: not-applicable
+  execution_mode: local-manual
+  map_load_budget: 0
+  request_budget: 0
+  readiness:
+    type: deterministic
+    name: not-applicable
+  attribution:
+    required: false
+
+output:
+  directory: docs/manual/captures
+  report: docs/manual/capture-report.json
+  generated_index: docs/manual/generated-index.md
+
+scenarios:
+  - id: dashboard
+    route: /
+    steps:
+      - action: wait
+        wait:
+          state: fonts-ready
+      - action: capture
+        id: dashboard-ready
+        capture:
+          mode: viewport
+          caption: Dashboard ready state from the real frontend runtime.
+
+metadata:
+  manual_title: Product manual captures
