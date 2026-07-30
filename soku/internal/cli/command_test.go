@@ -160,6 +160,8 @@ func TestManualCommandSurfaceAndRequestContract(t *testing.T) {
 	}{
 		{name: "plan", args: []string{"docs", "manual", "plan", "--config", config}, field: "plan"},
 		{name: "doctor", args: []string{"docs", "manual", "doctor", "--config", config, "--probe"}, field: "doctor", wantProbe: true},
+		{name: "init dry run", args: []string{"docs", "manual", "init", "--config", "docs/manual/capture.yml", "--dry-run"}, field: "init", wantDry: true},
+		{name: "init apply", args: []string{"docs", "manual", "init", "--config", "docs/manual/capture.yml", "--yes"}, field: "init", wantYes: true},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			var got Request
@@ -173,6 +175,8 @@ func TestManualCommandSurfaceAndRequestContract(t *testing.T) {
 				handlers.ManualPlan = handler
 			case "doctor":
 				handlers.ManualDoctor = handler
+			case "init":
+				handlers.ManualInit = handler
 			}
 			result := execute(test.args, testRuntime{}, handlers)
 			if result.code != 0 {
@@ -186,6 +190,8 @@ func TestManualCommandSurfaceAndRequestContract(t *testing.T) {
 	}
 	for _, args := range [][]string{
 		{"docs", "manual", "plan"},
+		{"docs", "manual", "init", "--config", "docs/manual/capture.yml"},
+		{"docs", "manual", "init", "--config", "docs/manual/capture.yml", "--dry-run", "--yes"},
 	} {
 		result := execute(args, testRuntime{}, defaultHandlers())
 		if result.code != 2 {

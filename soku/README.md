@@ -2,7 +2,7 @@
 
 `soku` is the cross-platform command for the lifecycle contract in
 [`SOKU_LIFECYCLE.md`](../docs/standards/SOKU_LIFECYCLE.md). It provides stable
-parsing and output, transactional `init`, the portable manifest-v1 record, and
+parsing and output, transactional `init`, portable manifest-v1/v2 records, and
 read-only `status` diagnostics, immutable release comparison, and transactional
 core upgrades.
 
@@ -166,9 +166,12 @@ last. A clean upgrade to the already recorded release is a no-op.
 ## Manifest and Status
 
 The durable record is `.soku/manifest.json`. Its JSON Schema Draft 2020-12
-contract is [`schema/manifest-v1.schema.json`](./schema/manifest-v1.schema.json),
-with representative [valid](./testdata/manifest-v1/valid/complete.json) and
-[invalid](./testdata/manifest-v1/invalid/) fixtures. The record contains only
+contracts are [`schema/manifest-v1.schema.json`](./schema/manifest-v1.schema.json)
+and [`schema/manifest-v2.schema.json`](./schema/manifest-v2.schema.json), with
+representative fixtures under `testdata/manifest-v1/` and
+`testdata/manifest-v2/`. Base initialization emits v1. An explicit opt-in
+component installation migrates to v2 and adds only portable component ID,
+catalog version, and configuration-path metadata. The record contains only
 portable selections, immutable source identities, ownership metadata, and
 canonical hashes. Raw configuration, secrets, credential-bearing URLs, and
 machine-specific absolute paths are rejected.
@@ -196,6 +199,38 @@ An explicit `Store.Recover` or a future mutation entrypoint may discard a valid
 pending file beside a valid manifest, or promote a valid pending file when the
 manifest is absent. Malformed or ambiguous evidence is preserved and recovery
 stops with exit `2`.
+
+## Real-Runtime Manual Capture Component
+
+The source tree includes the unreleased opt-in `docs-manual` component governed
+by the
+[real-runtime capture standard](../docs/standards/REAL_RUNTIME_MANUAL_CAPTURE.md).
+It is not enabled by base initialization or CI.
+
+```bash
+soku docs manual plan --config docs/manual/capture.yml --json
+soku docs manual doctor --config docs/manual/capture.yml
+soku docs manual init --config docs/manual/capture.yml --dry-run
+soku docs manual init --config docs/manual/capture.yml --yes
+node tools/manual-capture/dist/cli.js capture \
+  --config docs/manual/capture.yml
+```
+
+Initialization installs only the locked Node.js 22+ TypeScript/Playwright
+runner, schemas, example configuration, and manual template. It does not create
+the actual `capture.yml`, fixtures, prose, PNGs, report, or PDF, and it does not
+run `npm ci` or install browsers, operating-system packages, or fonts.
+
+The runner supports existing static builds, reviewed argv dev servers,
+HTTP-route or sanitized-HAR replay, a GAS HTML Service harness with chainable
+asynchronous `google.script.run`, disclosed dialog overlays, deterministic
+maps, bounded local/manual Leaflet/OSM, and restricted/budgeted Google Maps
+JavaScript. External egress is allowlisted, attribution is required, and only
+the name `GOOGLE_MAPS_API_KEY` may enter configuration or reports.
+
+This source feature does not itself authorize a public CLI/npm/boilerplate
+release, live provider key use, recurring hosted capture, or manual/PDF
+publication.
 
 ## Build and Test
 

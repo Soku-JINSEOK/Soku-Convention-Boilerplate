@@ -188,6 +188,7 @@ TypeScript formatting 대상에서 제외합니다. 기존 tag는 불변으로 �
 - [GITHUB_STANDARDS.md](./docs/standards/GITHUB_STANDARDS.md): 이슈, PR, 리뷰, 레이블 및 템플릿 운영 기준
 - [RELEASE_AND_SYNC.md](./docs/standards/RELEASE_AND_SYNC.md): 버전 릴리즈 태그 배포 및 다운스트림 동기화 절차
 - [SOKU_LIFECYCLE.md](./docs/standards/SOKU_LIFECYCLE.md): `soku` CLI, 매니페스트, 소유권, 공급자 및 트랜잭션 라이프사이클 규범
+- [REAL_RUNTIME_MANUAL_CAPTURE.md](./docs/standards/REAL_RUNTIME_MANUAL_CAPTURE.md): 로컬 수동 실제 frontend 캡처, provenance, adapter 및 map provider 경계
 - [CICD_STANDARDS.md](./docs/standards/CICD_STANDARDS.md): 지속적 통합 및 배포(CI/CD) 수용 규칙
 
 ### 🛡️ `docs/policy/` — 영역별 기본 정책 선언서

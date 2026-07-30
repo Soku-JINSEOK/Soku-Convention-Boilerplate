@@ -84,6 +84,7 @@ type Handlers struct {
 	Upgrade      Handler
 	ManualPlan   Handler
 	ManualDoctor Handler
+	ManualInit   Handler
 }
 
 func defaultHandlers() Handlers {
@@ -94,6 +95,7 @@ func defaultHandlers() Handlers {
 		Upgrade:      transitionHandler(true),
 		ManualPlan:   manualPlanHandler(),
 		ManualDoctor: manualDoctorHandler(),
+		ManualInit:   manualInitHandler(),
 	}
 }
 
@@ -126,6 +128,23 @@ func manualDoctorHandler() Handler {
 			code = ExitChangesFound
 		}
 		return Result{Human: manual.HumanDoctor(report), Data: report, Code: code}, nil
+	})
+}
+
+func manualInitHandler() Handler {
+	return ResultHandlerFunc(func(_ context.Context, request Request) (Result, error) {
+		root, err := os.Getwd()
+		if err != nil {
+			return Result{}, err
+		}
+		report, err := manual.Init(manual.InitOptions{
+			Root: root, ConfigPath: request.ConfigPath, DryRun: request.DryRun,
+			Yes: request.Yes, SokuVersion: request.SokuVersion,
+		})
+		if err != nil {
+			return Result{}, manualExitError(err)
+		}
+		return Result{Human: manual.HumanInit(report), Data: report, Code: ExitSuccess}, nil
 	})
 }
 
