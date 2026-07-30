@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/soku/internal/initcmd"
+	"github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/soku/internal/manual"
 	lifecyclestatus "github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/soku/internal/status"
 )
 
@@ -34,6 +35,7 @@ type Request struct {
 	IntegrationRef     string
 	IntegrationConfig  string
 	Verify             bool
+	Probe              bool
 	SourceSet          bool
 	ReleaseSet         bool
 	StacksSet          bool
@@ -76,19 +78,85 @@ func (f ResultHandlerFunc) Handle(ctx context.Context, request Request) (Result,
 
 // Handlers contains one independently replaceable lifecycle boundary.
 type Handlers struct {
-	Init    Handler
-	Status  Handler
-	Diff    Handler
-	Upgrade Handler
+	Init         Handler
+	Status       Handler
+	Diff         Handler
+	Upgrade      Handler
+	ManualPlan   Handler
+	ManualDoctor Handler
+	ManualInit   Handler
 }
 
 func defaultHandlers() Handlers {
 	return Handlers{
-		Init:    initHandler(),
-		Status:  statusHandler(),
-		Diff:    transitionHandler(false),
-		Upgrade: transitionHandler(true),
+		Init:         initHandler(),
+		Status:       statusHandler(),
+		Diff:         transitionHandler(false),
+		Upgrade:      transitionHandler(true),
+		ManualPlan:   manualPlanHandler(),
+		ManualDoctor: manualDoctorHandler(),
+		ManualInit:   manualInitHandler(),
 	}
+}
+
+func manualPlanHandler() Handler {
+	return ResultHandlerFunc(func(_ context.Context, request Request) (Result, error) {
+		root, err := os.Getwd()
+		if err != nil {
+			return Result{}, err
+		}
+		report, err := manual.BuildPlan(root, request.ConfigPath)
+		if err != nil {
+			return Result{}, manualExitError(err)
+		}
+		return Result{Human: manual.HumanPlan(report), Data: report, Code: ExitSuccess}, nil
+	})
+}
+
+func manualDoctorHandler() Handler {
+	return ResultHandlerFunc(func(ctx context.Context, request Request) (Result, error) {
+		root, err := os.Getwd()
+		if err != nil {
+			return Result{}, err
+		}
+		report, err := manual.Doctor(ctx, root, request.ConfigPath, request.Probe)
+		if err != nil {
+			return Result{}, manualExitError(err)
+		}
+		code := ExitSuccess
+		if report.State != "ready" {
+			code = ExitChangesFound
+		}
+		return Result{Human: manual.HumanDoctor(report), Data: report, Code: code}, nil
+	})
+}
+
+func manualInitHandler() Handler {
+	return ResultHandlerFunc(func(_ context.Context, request Request) (Result, error) {
+		root, err := os.Getwd()
+		if err != nil {
+			return Result{}, err
+		}
+		report, err := manual.Init(manual.InitOptions{
+			Root: root, ConfigPath: request.ConfigPath, DryRun: request.DryRun,
+			Yes: request.Yes, SokuVersion: request.SokuVersion,
+		})
+		if err != nil {
+			return Result{}, manualExitError(err)
+		}
+		return Result{Human: manual.HumanInit(report), Data: report, Code: ExitSuccess}, nil
+	})
+}
+
+func manualExitError(err error) error {
+	var manualError *manual.Error
+	if errors.As(err, &manualError) {
+		return &ExitError{
+			Code: ExitCode(manualError.Code), Key: manualError.Key,
+			Message: manualError.Message, Cause: manualError,
+		}
+	}
+	return err
 }
 
 func initHandler() Handler {

@@ -1,0 +1,78 @@
+schema_version: 1
+
+execution:
+  mode: local-manual
+  allow_hosts:
+    - maps.googleapis.com
+    - maps.gstatic.com
+  request_budget: 16
+
+runtime:
+  adapter: dev-server
+  command:
+    - npm
+    - run
+    - dev
+    - "--"
+    - "--host"
+    - 127.0.0.1
+  health_url: http://127.0.0.1:4173/
+  source_files:
+    - src/App.tsx
+    - src/map.ts
+  serve:
+    origin: loopback-http
+
+browser:
+  engine: chromium
+  viewport:
+    width: 1280
+    height: 800
+  device_scale_factor: 1
+  locale: ja-JP
+  timezone: Asia/Tokyo
+  fonts:
+    - Noto Sans JP
+    - Noto Color Emoji
+
+backend:
+  mode: http-route
+  routes:
+    - method: GET
+      url: /api/dashboard
+      status: 200
+      fixture: docs/manual/fixtures/dashboard.synthetic.json
+
+map:
+  provider: google-maps-javascript
+  source_relation: original-application
+  api_key_env: GOOGLE_MAPS_API_KEY
+  billing_owner: documentation-owner
+  restriction_reviewed: true
+  execution_mode: local-manual
+  map_load_budget: 1
+  request_budget: 16
+  readiness:
+    type: hook
+    name: __manualMapReady
+  attribution:
+    required: true
+    locator: .gm-style-cc
+
+output:
+  directory: docs/manual/captures
+  report: docs/manual/capture-report.json
+  generated_index: docs/manual/generated-index.md
+
+scenarios:
+  - id: google-map
+    route: /
+    steps:
+      - action: capture
+        id: google-map-ready
+        capture:
+          mode: locator
+          locator:
+            by: css
+            value: "#map"
+          caption: Original Google Maps JavaScript integration with provider attribution visible.

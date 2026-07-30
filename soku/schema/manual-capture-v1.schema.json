@@ -1,0 +1,5 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Soku real-runtime manual capture configuration v1",
+  "$ref": "../internal/manual/assets/schemas/manual-capture-v1.schema.json"
+}

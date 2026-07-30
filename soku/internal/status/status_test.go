@@ -104,11 +104,33 @@ func TestInspectCleanPendingDriftAndCompatibility(t *testing.T) {
 
 func TestInspectUnsupportedSchemaIsDiagnostic(t *testing.T) {
 	root := t.TempDir()
-	data := []byte(`{"schema_version":2}`)
+	data := []byte(`{"schema_version":3}`)
 	writeStateFile(t, root, "manifest.json", data)
 	result, err := Inspect(root)
-	if err != nil || result.Code != 5 || result.Report.State != "incompatible" || result.Report.Manifest.SchemaVersion != 2 {
+	if err != nil || result.Code != 5 || result.Report.State != "incompatible" || result.Report.Manifest.SchemaVersion != 3 {
 		t.Fatalf("Inspect() = %#v, %v", result, err)
+	}
+}
+
+func TestInspectManifestV2ComponentStateIsReadOnly(t *testing.T) {
+	root := t.TempDir()
+	document := statusDocument()
+	document.SchemaVersion = manifest.SchemaVersionV2
+	document.Components = []manifest.Component{{
+		ID: "docs-manual", CatalogVersion: "1", ConfigurationPath: "docs/manual/capture.yml",
+	}}
+	writeManifest(t, root, document)
+	before, err := os.ReadFile(filepath.Join(root, ".soku", "manifest.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	result, err := Inspect(root)
+	if err != nil || result.Code != 0 || result.Report.Manifest.SchemaVersion != 2 {
+		t.Fatalf("Inspect()=%#v err=%v", result, err)
+	}
+	after, _ := os.ReadFile(filepath.Join(root, ".soku", "manifest.json"))
+	if !bytes.Equal(before, after) {
+		t.Fatal("status changed manifest v2")
 	}
 }
 

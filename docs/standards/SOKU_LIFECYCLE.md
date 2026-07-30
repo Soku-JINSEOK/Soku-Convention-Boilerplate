@@ -64,6 +64,7 @@ transaction with the manifest replaced last.
 | Baseline | The normalized content hash of a managed file immediately after the last successful transaction. |
 | Local customization | A managed file whose current normalized hash differs from its recorded baseline. |
 | Integration | A declarative, executable-free provider bundle pinned to an immutable source revision. |
+| Component | An opt-in, core-catalogued capability installed into an already initialized repository without adding a new ownership class. |
 | Lifecycle state | The status derived from the manifest, current files, selected source, and integration compatibility. |
 
 ## Command Contract
@@ -76,6 +77,9 @@ transaction with the manifest replaced last.
 | `status` | Diagnose manifest compatibility, integration state, local customization, pending work, and drift without changing the repository. | No |
 | `diff` | Render and compare the desired state with the current managed state without applying it. | No |
 | `upgrade` | Require an explicit new boilerplate version or integration revision, plan the compatible transition, and apply it transactionally. | Yes |
+| `docs manual plan` | Validate a versioned capture configuration and render a deterministic, read-only real-runtime capture plan. | No |
+| `docs manual doctor` | Diagnose the local runner, browser, font, output, provider, and credential-environment prerequisites. `--probe` alone may run the installed fixed runner. | No |
+| `docs manual init` | Install the reviewed `docs-manual` component into initialized state and explicitly migrate manifest v1 to v2. | Yes |
 | `--help` | Describe the supported command and option surface. | No |
 | `--version` | Print the CLI version. | No |
 
@@ -168,6 +172,10 @@ A dry-run that successfully produces a plan exits `0`, including when the plan
 contains changes. `diff` uses `3` for a non-empty comparison so it can act as a
 read-only automation gate.
 
+`docs manual init` is intentionally stricter than the generic interactive
+mutation surface: it requires exactly one of `--dry-run` or `--yes`. It never
+creates the project-owned capture configuration or manual prose.
+
 ## Independent Compatibility Axes
 
 The following versions are independent and must not be treated as one shared
@@ -225,6 +233,22 @@ At minimum, integration state must preserve these meanings:
 
 Manifest v1 must not merge or remove these four semantic states.
 
+Manifest v2 is published at
+[`soku/schema/manifest-v2.schema.json`](../../soku/schema/manifest-v2.schema.json).
+It preserves every v1 field and semantic rule and adds a sorted `components`
+array. Each component records only its portable ID, catalog version, and
+repository-relative project-owned configuration path. Raw component
+configuration, environment values, credentials, output reports, and generated
+assets never enter lifecycle state.
+
+Readers must accept both v1 and v2. `status` and `diff` are read-only for both
+versions and must not migrate v1 as a side effect. Base `init` continues to emit
+v1. The first approved component installation performs an explicit v1-to-v2
+transition, includes that transition in its plan, and restores the exact prior
+v1 manifest bytes if apply fails. Later lifecycle transitions preserve v2
+component records unchanged unless a separately approved component operation
+changes them.
+
 The manifest must never contain:
 
 - a token, password, credential, or other secret
@@ -244,7 +268,9 @@ change whitespace, a BOM, or the final newline. Binary baselines hash bytes
 without normalization.
 
 Manifest serialization sorts stacks, file paths, integration IDs, and managed
-file references. It rejects absolute or traversing paths, backslash bypasses,
+file references. Manifest v2 additionally sorts component IDs and rejects
+duplicate or case-colliding component configuration paths. It rejects absolute
+or traversing paths, backslash bypasses,
 `.git` and `.soku` paths, Windows-incompatible components, case-insensitive
 collisions, ambiguous owners, inconsistent integration references, secrets,
 credential-bearing URLs, raw configuration, and environment-specific paths.
@@ -355,6 +381,14 @@ failure exits `8` and may leave a recovery-required record with bounded manual
 recovery instructions. A normal conflict or validation failure must never
 create recovery state.
 
+Component installation follows the same outer boundary. It validates the whole
+catalog and all output collisions before writing, backs up the prior manifest,
+writes only catalogued core-managed files, verifies their hashes, and replaces
+the manifest last. A v1-to-v2 component migration that fails must remove every
+new component file and restore the exact v1 manifest. Component initialization
+does not take ownership of a same-path user file, even when its bytes happen to
+match a catalog asset.
+
 ## Executable-Free Provider Contract
 
 A provider bundle is declarative data. It may contain only declared manifests,
@@ -464,6 +498,7 @@ The control-plane follow-up may coordinate only these provider-owned details:
 | #18 and #20 | Implement complete planning, confirmation, mutation, conflict handling, the outer transaction, and rollback. |
 | #21 | Test the supported operating-system, release, manifest, and provider compatibility matrix. |
 | #22 | Implement the generic executable-free provider loader and API wire format without consumer-specific branching. |
+| #164 | Add manifest v2 component selection and the local/manual `docs-manual` planner, doctor, installer, and fixed Node runner boundary. |
 
 ## Conformance Scenarios
 

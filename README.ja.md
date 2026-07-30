@@ -188,6 +188,7 @@ smoke で確認された境界を修正し、lifecycle-owned `.soku/` state を 
 - [GITHUB_STANDARDS.md](./docs/standards/GITHUB_STANDARDS.md): イシュー、PR、レビュー、およびテンプレート運用基準
 - [RELEASE_AND_SYNC.md](./docs/standards/RELEASE_AND_SYNC.md): リリースタグ配備と同期手順
 - [SOKU_LIFECYCLE.md](./docs/standards/SOKU_LIFECYCLE.md): `soku` CLI、マニフェスト、所有権、プロバイダ、およびトランザクションライフサイクルの規範
+- [REAL_RUNTIME_MANUAL_CAPTURE.md](./docs/standards/REAL_RUNTIME_MANUAL_CAPTURE.md): local/manual の実 frontend capture、provenance、adapter、map provider の境界
 - [CICD_STANDARDS.md](./docs/standards/CICD_STANDARDS.md): 継続的インテグレーションおよびデリバリー（CI/CD）の運用基準
 
 ### 🛡️ `docs/policy/` — 領域別基本ポリシー宣言書

@@ -1,0 +1,64 @@
+schema_version: 1
+
+execution:
+  mode: local-manual
+  allow_hosts:
+    - tile.openstreetmap.org
+  request_budget: 16
+
+runtime:
+  adapter: gas-html-service
+  source_fragments:
+    - gas/Style.html
+    - gas/Index.html
+    - gas/MapScript.html
+  serve:
+    origin: loopback-http
+
+browser:
+  engine: chromium
+  viewport:
+    width: 414
+    height: 896
+  device_scale_factor: 1
+  locale: ja-JP
+  timezone: Asia/Tokyo
+  fonts:
+    - Noto Sans JP
+    - Noto Color Emoji
+
+backend:
+  mode: browser-bridge
+  adapter: google-script-run
+  fixture: docs/manual/fixtures/dashboard.synthetic.json
+
+map:
+  provider: leaflet-osm
+  source_relation: original-application
+  execution_mode: local-manual
+  map_load_budget: 1
+  request_budget: 16
+  readiness:
+    type: leaflet-load
+    name: .leaflet-ready
+  attribution:
+    required: true
+    locator: .leaflet-control-attribution
+
+output:
+  directory: docs/manual/captures
+  report: docs/manual/capture-report.json
+  generated_index: docs/manual/generated-index.md
+
+scenarios:
+  - id: gas-map
+    route: /
+    steps:
+      - action: capture
+        id: gas-map-ready
+        capture:
+          mode: locator
+          locator:
+            by: css
+            value: "#map"
+          caption: Original Leaflet map after visible OSM tiles and attribution are ready.

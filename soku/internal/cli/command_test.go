@@ -125,7 +125,7 @@ func TestExitCodeContract(t *testing.T) {
 
 func TestPublicCommandSurface(t *testing.T) {
 	result := execute([]string{"--help"}, testRuntime{}, defaultHandlers())
-	for _, command := range []string{"init", "status", "diff", "upgrade"} {
+	for _, command := range []string{"init", "status", "diff", "upgrade", "docs"} {
 		if !strings.Contains(result.stdout, "  "+command+" ") {
 			t.Errorf("help does not list %q", command)
 		}
@@ -141,6 +141,83 @@ func TestPublicCommandSurface(t *testing.T) {
 	}
 	if result := execute([]string{"-v"}, testRuntime{}, defaultHandlers()); result.code != 2 {
 		t.Errorf("-v exit code = %d, want 2", result.code)
+	}
+}
+
+func TestManualCommandSurfaceAndRequestContract(t *testing.T) {
+	temp := t.TempDir()
+	config := filepath.Join(temp, "capture.yml")
+	if err := os.WriteFile(config, []byte("schema_version: 1\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	for _, test := range []struct {
+		name      string
+		args      []string
+		field     string
+		wantProbe bool
+		wantDry   bool
+		wantYes   bool
+	}{
+		{name: "plan", args: []string{"docs", "manual", "plan", "--config", config}, field: "plan"},
+		{name: "doctor", args: []string{"docs", "manual", "doctor", "--config", config, "--probe"}, field: "doctor", wantProbe: true},
+		{name: "init dry run", args: []string{"docs", "manual", "init", "--config", "docs/manual/capture.yml", "--dry-run"}, field: "init", wantDry: true},
+		{name: "init apply", args: []string{"docs", "manual", "init", "--config", "docs/manual/capture.yml", "--yes"}, field: "init", wantYes: true},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			var got Request
+			handler := HandlerFunc(func(_ context.Context, request Request) error {
+				got = request
+				return nil
+			})
+			handlers := defaultHandlers()
+			switch test.field {
+			case "plan":
+				handlers.ManualPlan = handler
+			case "doctor":
+				handlers.ManualDoctor = handler
+			case "init":
+				handlers.ManualInit = handler
+			}
+			result := execute(test.args, testRuntime{}, handlers)
+			if result.code != 0 {
+				t.Fatalf("result=%#v", result)
+			}
+			if got.Command != "docs manual "+test.field || got.Probe != test.wantProbe ||
+				got.DryRun != test.wantDry || got.Yes != test.wantYes {
+				t.Fatalf("request=%#v", got)
+			}
+		})
+	}
+	for _, args := range [][]string{
+		{"docs", "manual", "plan"},
+		{"docs", "manual", "init", "--config", "docs/manual/capture.yml"},
+		{"docs", "manual", "init", "--config", "docs/manual/capture.yml", "--dry-run", "--yes"},
+	} {
+		result := execute(args, testRuntime{}, defaultHandlers())
+		if result.code != 2 {
+			t.Fatalf("args=%v result=%#v", args, result)
+		}
+	}
+}
+
+func TestManualJSONEnvelopeUsesNestedCommand(t *testing.T) {
+	temp := t.TempDir()
+	config := filepath.Join(temp, "capture.yml")
+	if err := os.WriteFile(config, []byte("schema_version: 1\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	handler := ResultHandlerFunc(func(context.Context, Request) (Result, error) {
+		return Result{Data: map[string]string{"state": "planned"}, Code: ExitSuccess}, nil
+	})
+	handlers := defaultHandlers()
+	handlers.ManualPlan = handler
+	result := execute([]string{"docs", "manual", "plan", "--config", config, "--json"}, testRuntime{}, handlers)
+	if result.code != 0 || result.stderr != "" {
+		t.Fatalf("result=%#v", result)
+	}
+	assertSingleJSONEnvelope(t, result.stdout)
+	if !strings.Contains(result.stdout, `"command":"docs manual plan"`) {
+		t.Fatalf("unexpected envelope: %s", result.stdout)
 	}
 }
 
