@@ -13,6 +13,11 @@ import {
   sha256File,
   stableAssetName,
 } from "./output.js";
+import {
+  assertAttributionInClip,
+  verifyAttribution,
+  waitForMap,
+} from "./providers.js";
 import { startRuntime } from "./server.js";
 import type {
   CaptureAsset,
@@ -499,48 +504,6 @@ async function waitForFonts(page: Page, fonts: string[]): Promise<void> {
     });
   }, fonts);
   if (!ready) throw new Error("configured Japanese/emoji font readiness check failed");
-}
-
-async function waitForMap(page: Page, config: CaptureConfiguration): Promise<void> {
-  const readiness = config.map.readiness;
-  if (readiness.type === "hook") {
-    await page.waitForFunction((name) => Boolean((globalThis as Record<string, unknown>)[name]), readiness.name);
-  } else if (readiness.type === "event") {
-    await page.evaluate(
-      (name) => new Promise<void>((resolve) => globalThis.addEventListener(name, () => resolve(), { once: true })),
-      readiness.name,
-    );
-  } else {
-    await page.locator(readiness.name).waitFor({ state: "visible" });
-  }
-}
-
-async function verifyAttribution(page: Page, config: CaptureConfiguration): Promise<boolean> {
-  if (!config.map.attribution.required) return true;
-  const selector = config.map.attribution.locator;
-  if (selector === undefined) return false;
-  const attribution = page.locator(selector);
-  await attribution.waitFor({ state: "visible" });
-  return attribution.isVisible();
-}
-
-async function assertAttributionInClip(
-  page: Page,
-  config: CaptureConfiguration,
-  clip: { x: number; y: number; width: number; height: number },
-): Promise<void> {
-  const selector = config.map.attribution.locator;
-  if (selector === undefined) throw new Error("map attribution locator is absent");
-  const box = await page.locator(selector).boundingBox();
-  if (
-    box === null ||
-    box.x < clip.x ||
-    box.y < clip.y ||
-    box.x + box.width > clip.x + clip.width ||
-    box.y + box.height > clip.y + clip.height
-  ) {
-    throw new Error("capture clip would crop or obscure required map attribution");
-  }
 }
 
 async function gitIdentity(root: string): Promise<{ commit: string; dirty: boolean }> {

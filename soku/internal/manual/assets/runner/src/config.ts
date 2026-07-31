@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { Ajv2020, type ErrorObject } from "ajv/dist/2020.js";
 import addFormatsModule from "ajv-formats";
 import { parseDocument } from "yaml";
+import { validateProviderConfiguration } from "./providers.js";
 import type { CaptureConfiguration, CaptureReport } from "./types.js";
 
 const credentialLiteral =
@@ -165,28 +166,5 @@ function validateSemantics(config: CaptureConfiguration): void {
   ) {
     throw new Error("backend fixture filenames must disclose synthetic data");
   }
-  if (
-    config.map.provider === "google-maps-javascript" &&
-    (config.map.api_key_env !== "GOOGLE_MAPS_API_KEY" ||
-      !config.map.billing_owner ||
-      config.map.restriction_reviewed !== true ||
-      config.map.map_load_budget !== 1 ||
-      config.execution.allow_hosts.join("\0") !==
-        ["maps.googleapis.com", "maps.gstatic.com"].join("\0"))
-  ) {
-    throw new Error("Google Maps live capture declarations are incomplete");
-  }
-  if (
-    config.map.provider === "leaflet-osm" &&
-    config.execution.allow_hosts.join("\0") !== "tile.openstreetmap.org"
-  ) {
-    throw new Error("Leaflet/OSM requires its reviewed provider host");
-  }
-  if (
-    (config.map.provider === "none" ||
-      config.map.provider === "local-deterministic") &&
-    config.execution.allow_hosts.length !== 0
-  ) {
-    throw new Error("offline providers require an empty egress allowlist");
-  }
+  validateProviderConfiguration(config);
 }
