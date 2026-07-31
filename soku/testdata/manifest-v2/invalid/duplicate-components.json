@@ -1,0 +1,28 @@
+{
+  "schema_version": 2,
+  "soku_version": "v0.3.0",
+  "boilerplate": {
+    "source": "https://github.com/example/boilerplate",
+    "release": "v1.0.0",
+    "resolved_commit": "0123456789abcdef0123456789abcdef01234567"
+  },
+  "selection": {
+    "profile": "standard",
+    "stacks": [],
+    "configuration_hash": "83e984ff0d8b700c746f96f7a89d29fba7cd4d014af9d643dc79a596c5cc7b62"
+  },
+  "files": [],
+  "integrations": [],
+  "components": [
+    {
+      "id": "docs-manual",
+      "catalog_version": "1",
+      "configuration_path": "docs/manual/capture.yml"
+    },
+    {
+      "id": "docs-manual",
+      "catalog_version": "1",
+      "configuration_path": "docs/manual/other.yml"
+    }
+  ]
+}

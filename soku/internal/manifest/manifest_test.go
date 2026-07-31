@@ -80,6 +80,45 @@ func TestPublishedFixturesMatchManifestContract(t *testing.T) {
 	}
 }
 
+func TestPublishedV2FixturesMatchManifestContract(t *testing.T) {
+	schemaPath := filepath.Join("..", "..", "schema", "manifest-v2.schema.json")
+	compiler := jsonschema.NewCompiler()
+	compiled, err := compiler.Compile(schemaPath)
+	if err != nil {
+		t.Fatalf("compile schema: %v", err)
+	}
+	for _, group := range []struct {
+		name      string
+		wantValid bool
+	}{
+		{name: "valid", wantValid: true},
+		{name: "invalid", wantValid: false},
+	} {
+		files, err := filepath.Glob(filepath.Join("..", "..", "testdata", "manifest-v2", group.name, "*.json"))
+		if err != nil || len(files) == 0 {
+			t.Fatalf("%s fixtures: files=%v err=%v", group.name, files, err)
+		}
+		for _, name := range files {
+			data, readErr := os.ReadFile(name)
+			if readErr != nil {
+				t.Fatal(readErr)
+			}
+			_, decodeErr := Decode(data)
+			instance, unmarshalErr := jsonschema.UnmarshalJSON(bytes.NewReader(data))
+			if unmarshalErr != nil {
+				t.Fatal(unmarshalErr)
+			}
+			schemaErr := compiled.Validate(instance)
+			if group.wantValid && (decodeErr != nil || schemaErr != nil) {
+				t.Errorf("valid fixture %s: decode=%v schema=%v", name, decodeErr, schemaErr)
+			}
+			if !group.wantValid && decodeErr == nil {
+				t.Errorf("invalid fixture %s was accepted: decode=%v schema=%v", name, decodeErr, schemaErr)
+			}
+		}
+	}
+}
+
 func TestSelectionHashIsReproducibleAndDetectsTampering(t *testing.T) {
 	selection := Selection{Profile: "standard", Stacks: []string{"go"}, ModulePath: "github.com/example/project"}
 	selection.ConfigurationHash, _ = HashSelection(selection)
@@ -227,13 +266,35 @@ func TestDecodeDistinguishesMalformedAndUnsupportedSchema(t *testing.T) {
 			t.Fatalf("missing schema_version was treated as compatibility: %v", err)
 		}
 	}
-	if _, err := Decode([]byte(`{"schema_version":2}`)); err == nil {
+	if _, err := Decode([]byte(`{"schema_version":3}`)); err == nil {
 		t.Fatal("unsupported schema was accepted")
 	} else {
 		var unsupported *UnsupportedSchemaError
-		if !errors.As(err, &unsupported) || unsupported.Version != 2 {
+		if !errors.As(err, &unsupported) || unsupported.Version != 3 {
 			t.Fatalf("error = %T %v", err, err)
 		}
+	}
+}
+
+func TestV1AndV2ComponentBoundary(t *testing.T) {
+	document := validDocument()
+	document.Components = []Component{{
+		ID: "docs-manual", CatalogVersion: "1", ConfigurationPath: "docs/manual/capture.yml",
+	}}
+	if err := Validate(document); err == nil {
+		t.Fatal("manifest v1 accepted component metadata")
+	}
+	document.SchemaVersion = SchemaVersionV2
+	if err := Validate(document); err != nil {
+		t.Fatalf("manifest v2 rejected component metadata: %v", err)
+	}
+	data, err := MarshalCanonical(document)
+	if err != nil {
+		t.Fatal(err)
+	}
+	decoded, err := Decode(data)
+	if err != nil || !reflect.DeepEqual(decoded.Components, document.Components) {
+		t.Fatalf("v2 round trip: document=%#v err=%v", decoded, err)
 	}
 }
 

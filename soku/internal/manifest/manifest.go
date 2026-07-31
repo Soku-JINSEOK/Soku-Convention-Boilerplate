@@ -1,4 +1,4 @@
-// Package manifest defines and validates the portable Soku manifest v1 wire format.
+// Package manifest defines and validates the portable Soku manifest wire format.
 package manifest
 
 import (
@@ -18,8 +18,12 @@ import (
 )
 
 const (
-	// SchemaVersion is the only manifest schema understood by this release.
+	// SchemaVersion remains the default emitted by the base lifecycle. Component
+	// installation performs the explicit migration to SchemaVersionV2.
 	SchemaVersion = 1
+	// SchemaVersionV2 adds opt-in component selections without changing file
+	// ownership classes.
+	SchemaVersionV2 = 2
 	// ManifestPath is the repository-relative location of durable lifecycle state.
 	ManifestPath = ".soku/manifest.json"
 	// PendingPath is the repository-relative interrupted-write marker.
@@ -39,6 +43,7 @@ type Document struct {
 	Selection     Selection     `json:"selection"`
 	Files         []File        `json:"files"`
 	Integrations  []Integration `json:"integrations"`
+	Components    []Component   `json:"components,omitempty"`
 }
 
 // Boilerplate pins the immutable convention source last applied.
@@ -81,6 +86,14 @@ type Integration struct {
 	ManagedFiles          []string `json:"managed_files"`
 }
 
+// Component records one opt-in core component and the portable project-owned
+// configuration path selected for it.
+type Component struct {
+	ID                string `json:"id"`
+	CatalogVersion    string `json:"catalog_version"`
+	ConfigurationPath string `json:"configuration_path"`
+}
+
 // UnsupportedSchemaError distinguishes a valid JSON record from a version this
 // binary cannot interpret.
 type UnsupportedSchemaError struct {
@@ -102,7 +115,7 @@ func Decode(data []byte) (Document, error) {
 	if header.SchemaVersion == nil || *header.SchemaVersion <= 0 {
 		return Document{}, errors.New("schema_version must be a positive integer")
 	}
-	if *header.SchemaVersion != SchemaVersion {
+	if *header.SchemaVersion != SchemaVersion && *header.SchemaVersion != SchemaVersionV2 {
 		return Document{}, &UnsupportedSchemaError{Version: *header.SchemaVersion}
 	}
 
@@ -126,9 +139,11 @@ func MarshalCanonical(document Document) ([]byte, error) {
 	document.Selection.Stacks = append([]string{}, document.Selection.Stacks...)
 	document.Files = append([]File(nil), document.Files...)
 	document.Integrations = append([]Integration(nil), document.Integrations...)
+	document.Components = append([]Component(nil), document.Components...)
 	sort.Strings(document.Selection.Stacks)
 	sort.Slice(document.Files, func(i, j int) bool { return document.Files[i].Path < document.Files[j].Path })
 	sort.Slice(document.Integrations, func(i, j int) bool { return document.Integrations[i].ID < document.Integrations[j].ID })
+	sort.Slice(document.Components, func(i, j int) bool { return document.Components[i].ID < document.Components[j].ID })
 	for index := range document.Integrations {
 		document.Integrations[index].ManagedFiles = append([]string(nil), document.Integrations[index].ManagedFiles...)
 		sort.Strings(document.Integrations[index].ManagedFiles)
@@ -145,8 +160,11 @@ func MarshalCanonical(document Document) ([]byte, error) {
 
 // Validate enforces the semantic rules that JSON Schema cannot express alone.
 func Validate(document Document) error {
-	if document.SchemaVersion != SchemaVersion {
+	if document.SchemaVersion != SchemaVersion && document.SchemaVersion != SchemaVersionV2 {
 		return &UnsupportedSchemaError{Version: document.SchemaVersion}
+	}
+	if document.SchemaVersion == SchemaVersion && len(document.Components) != 0 {
+		return errors.New("manifest schema v1 must not contain components")
 	}
 	if strings.TrimSpace(document.SokuVersion) == "" {
 		return errors.New("soku_version is required")
@@ -283,6 +301,29 @@ func Validate(document Document) error {
 			}
 		}
 		paths[folded] = file
+	}
+
+	previousComponentID := ""
+	componentPaths := map[string]string{}
+	for _, component := range document.Components {
+		if !integrationIDPattern.MatchString(component.ID) {
+			return fmt.Errorf("component id %q is not portable", component.ID)
+		}
+		if component.ID <= previousComponentID {
+			return errors.New("components must be sorted by unique id")
+		}
+		previousComponentID = component.ID
+		if strings.TrimSpace(component.CatalogVersion) == "" {
+			return fmt.Errorf("component %q catalog_version is required", component.ID)
+		}
+		if err := ValidatePath(component.ConfigurationPath); err != nil {
+			return fmt.Errorf("component %q configuration_path: %w", component.ID, err)
+		}
+		folded := strings.ToLower(component.ConfigurationPath)
+		if prior, exists := componentPaths[folded]; exists {
+			return fmt.Errorf("components %q and %q use colliding configuration paths", prior, component.ID)
+		}
+		componentPaths[folded] = component.ID
 	}
 
 	referenced := make(map[string]string)

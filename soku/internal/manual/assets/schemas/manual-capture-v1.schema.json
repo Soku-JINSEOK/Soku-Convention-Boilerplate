@@ -1,0 +1,437 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/soku/schema/manual-capture-v1.schema.json",
+  "title": "Soku real-runtime manual capture configuration v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "execution",
+    "runtime",
+    "browser",
+    "backend",
+    "map",
+    "output",
+    "scenarios"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "execution": { "$ref": "#/$defs/execution" },
+    "runtime": { "$ref": "#/$defs/runtime" },
+    "browser": { "$ref": "#/$defs/browser" },
+    "backend": { "$ref": "#/$defs/backend" },
+    "map": { "$ref": "#/$defs/map" },
+    "output": { "$ref": "#/$defs/output" },
+    "scenarios": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/scenario" }
+    },
+    "pdf": { "$ref": "#/$defs/pdf" },
+    "hooks": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/hook" }
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["manual_title"],
+      "properties": {
+        "manual_title": { "type": "string", "minLength": 1 }
+      }
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+    },
+    "path": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[^/\\\\][^\\\\]*$",
+      "allOf": [
+        { "not": { "pattern": "(^|/)\\.\\.(/|$)" } },
+        { "not": { "pattern": "(^|/)\\.(?:git|soku)(/|$)" } },
+        { "not": { "pattern": "^[A-Za-z]:" } }
+      ]
+    },
+    "execution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "allow_hosts", "request_budget"],
+      "properties": {
+        "mode": { "const": "local-manual" },
+        "allow_hosts": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.)*[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$"
+          }
+        },
+        "request_budget": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        }
+      }
+    },
+    "runtime": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["adapter", "serve"],
+      "properties": {
+        "adapter": {
+          "enum": ["dev-server", "static-build", "gas-html-service"]
+        },
+        "command": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "health_url": {
+          "type": "string",
+          "pattern": "^http://(?:localhost|127\\.0\\.0\\.1|\\[::1\\])(?::[0-9]+)?(?:/[^?#]*)?$"
+        },
+        "static_directory": { "$ref": "#/$defs/path" },
+        "source_files": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/path" }
+        },
+        "source_fragments": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/path" }
+        },
+        "serve": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["origin"],
+          "properties": {
+            "origin": { "const": "loopback-http" }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "adapter": { "const": "dev-server" } } },
+          "then": { "required": ["command", "health_url", "source_files"] }
+        },
+        {
+          "if": { "properties": { "adapter": { "const": "static-build" } } },
+          "then": { "required": ["static_directory"] }
+        },
+        {
+          "if": { "properties": { "adapter": { "const": "gas-html-service" } } },
+          "then": { "required": ["source_fragments"] }
+        }
+      ]
+    },
+    "browser": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "engine",
+        "viewport",
+        "device_scale_factor",
+        "locale",
+        "timezone",
+        "fonts"
+      ],
+      "properties": {
+        "engine": { "const": "chromium" },
+        "viewport": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["width", "height"],
+          "properties": {
+            "width": { "type": "integer", "minimum": 320, "maximum": 3840 },
+            "height": { "type": "integer", "minimum": 320, "maximum": 2160 }
+          }
+        },
+        "device_scale_factor": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 3
+        },
+        "locale": { "type": "string", "minLength": 2 },
+        "timezone": { "type": "string", "minLength": 1 },
+        "fonts": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "backend": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode"],
+      "properties": {
+        "mode": {
+          "enum": ["real-local", "http-route", "har-replay", "browser-bridge", "none"]
+        },
+        "adapter": { "type": "string", "minLength": 1 },
+        "fixture": { "$ref": "#/$defs/path" },
+        "har": {
+          "allOf": [
+            { "$ref": "#/$defs/path" },
+            { "type": "string", "pattern": "\\.sanitized\\.har$" }
+          ]
+        },
+        "routes": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/route" }
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "mode": { "const": "har-replay" } } },
+          "then": { "required": ["har"] }
+        },
+        {
+          "if": { "properties": { "mode": { "const": "browser-bridge" } } },
+          "then": { "required": ["adapter", "fixture"] }
+        },
+        {
+          "if": { "properties": { "mode": { "const": "http-route" } } },
+          "then": { "required": ["routes"] }
+        }
+      ]
+    },
+    "route": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["method", "url", "status"],
+      "properties": {
+        "method": { "enum": ["GET", "POST", "PUT", "PATCH", "DELETE"] },
+        "url": { "type": "string", "pattern": "^/" },
+        "status": { "type": "integer", "minimum": 100, "maximum": 599 },
+        "fixture": { "$ref": "#/$defs/path" },
+        "body": { "type": "string" }
+      },
+      "not": { "required": ["fixture", "body"] }
+    },
+    "map": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "provider",
+        "source_relation",
+        "execution_mode",
+        "map_load_budget",
+        "request_budget",
+        "readiness",
+        "attribution"
+      ],
+      "properties": {
+        "provider": {
+          "enum": ["none", "local-deterministic", "leaflet-osm", "google-maps-javascript"]
+        },
+        "source_relation": {
+          "enum": ["original-application", "declared-adapter", "not-applicable"]
+        },
+        "api_key_env": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9_]*$"
+        },
+        "billing_owner": { "type": "string", "minLength": 1 },
+        "restriction_reviewed": { "type": "boolean" },
+        "execution_mode": { "const": "local-manual" },
+        "map_load_budget": { "type": "integer", "minimum": 0, "maximum": 1 },
+        "request_budget": { "type": "integer", "minimum": 0, "maximum": 32 },
+        "readiness": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "name"],
+          "properties": {
+            "type": {
+              "enum": ["hook", "event", "leaflet-load", "google-idle", "deterministic"]
+            },
+            "name": { "type": "string", "minLength": 1 }
+          }
+        },
+        "attribution": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["required"],
+          "properties": {
+            "required": { "type": "boolean" },
+            "locator": { "type": "string", "minLength": 1 }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "provider": { "const": "none" } } },
+          "then": {
+            "properties": {
+              "source_relation": { "const": "not-applicable" },
+              "map_load_budget": { "const": 0 },
+              "request_budget": { "const": 0 }
+            }
+          },
+          "else": {
+            "properties": {
+              "map_load_budget": { "const": 1 },
+              "attribution": {
+                "type": "object",
+                "required": ["required", "locator"],
+                "properties": { "required": { "const": true } }
+              }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "provider": { "const": "google-maps-javascript" } } },
+          "then": {
+            "required": ["api_key_env", "billing_owner", "restriction_reviewed"],
+            "properties": {
+              "api_key_env": { "const": "GOOGLE_MAPS_API_KEY" },
+              "restriction_reviewed": { "const": true },
+              "request_budget": { "type": "integer", "minimum": 1 }
+            }
+          }
+        }
+      ]
+    },
+    "output": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["directory", "report", "generated_index"],
+      "properties": {
+        "directory": { "$ref": "#/$defs/path" },
+        "report": { "$ref": "#/$defs/path" },
+        "generated_index": { "$ref": "#/$defs/path" }
+      }
+    },
+    "scenario": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "route", "steps"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "route": { "type": "string", "pattern": "^/" },
+        "steps": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/step" }
+        }
+      }
+    },
+    "step": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["action"],
+      "properties": {
+        "action": {
+          "enum": ["goto", "click", "fill", "select", "wait", "capture", "dialog"]
+        },
+        "id": { "$ref": "#/$defs/id" },
+        "locator": { "$ref": "#/$defs/locator" },
+        "value": { "type": "string" },
+        "wait": { "$ref": "#/$defs/wait" },
+        "capture": { "$ref": "#/$defs/capture" },
+        "dialog": { "$ref": "#/$defs/dialog" },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "action": { "enum": ["click", "fill", "select"] } } },
+          "then": { "required": ["locator"] }
+        },
+        {
+          "if": { "properties": { "action": { "const": "wait" } } },
+          "then": { "required": ["wait"] }
+        },
+        {
+          "if": { "properties": { "action": { "const": "capture" } } },
+          "then": { "required": ["id", "capture"] }
+        },
+        {
+          "if": { "properties": { "action": { "const": "dialog" } } },
+          "then": { "required": ["dialog"] }
+        }
+      ]
+    },
+    "locator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["by", "value"],
+      "properties": {
+        "by": { "enum": ["role", "label", "test-id", "text", "css"] },
+        "value": { "type": "string", "minLength": 1 }
+      }
+    },
+    "wait": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state"],
+      "properties": {
+        "state": {
+          "enum": ["visible", "hidden", "enabled", "text", "attribute", "event", "hook", "fonts-ready"]
+        },
+        "value": { "type": "string" },
+        "hold_ms": { "type": "integer", "minimum": 0, "maximum": 5000 }
+      }
+    },
+    "capture": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "caption"],
+      "properties": {
+        "mode": { "enum": ["viewport", "full-page", "locator", "region", "sequence"] },
+        "locator": { "$ref": "#/$defs/locator" },
+        "region": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["x", "y", "width", "height"],
+          "properties": {
+            "x": { "type": "integer", "minimum": 0 },
+            "y": { "type": "integer", "minimum": 0 },
+            "width": { "type": "integer", "minimum": 1 },
+            "height": { "type": "integer", "minimum": 1 }
+          }
+        },
+        "padding": { "type": "integer", "minimum": 0, "maximum": 256 },
+        "full_page": { "type": "boolean" },
+        "caption": { "type": "string", "minLength": 1 }
+      }
+    },
+    "dialog": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "action"],
+      "properties": {
+        "mode": { "enum": ["native", "app-owned", "documentation-overlay"] },
+        "action": { "enum": ["accept", "dismiss"] },
+        "message": { "type": "string" }
+      }
+    },
+    "pdf": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "expected_pages", "raster_output"],
+      "properties": {
+        "path": { "$ref": "#/$defs/path" },
+        "expected_pages": { "type": "integer", "minimum": 1 },
+        "raster_output": { "$ref": "#/$defs/path" }
+      }
+    },
+    "hook": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "path"],
+      "properties": {
+        "name": { "$ref": "#/$defs/id" },
+        "path": { "$ref": "#/$defs/path" }
+      }
+    }
+  }
+}

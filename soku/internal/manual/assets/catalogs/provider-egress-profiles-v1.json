@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "profiles": [
+    {
+      "provider": "none",
+      "hosts": [],
+      "csp": []
+    },
+    {
+      "provider": "local-deterministic",
+      "hosts": [],
+      "csp": []
+    },
+    {
+      "provider": "leaflet-osm",
+      "hosts": ["tile.openstreetmap.org"],
+      "csp": [
+        "img-src https://tile.openstreetmap.org"
+      ],
+      "execution": "local-manual-single-viewport",
+      "prefetch": false
+    },
+    {
+      "provider": "google-maps-javascript",
+      "hosts": [
+        "maps.googleapis.com",
+        "maps.gstatic.com"
+      ],
+      "csp": [
+        "script-src https://maps.googleapis.com",
+        "img-src https://maps.gstatic.com data:",
+        "connect-src https://maps.googleapis.com"
+      ],
+      "execution": "local-manual-budgeted",
+      "credential_environment": "GOOGLE_MAPS_API_KEY"
+    }
+  ]
+}

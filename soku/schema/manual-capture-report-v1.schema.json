@@ -1,0 +1,5 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Soku credential-redacted capture report v1",
+  "$ref": "../internal/manual/assets/schemas/manual-capture-report-v1.schema.json"
+}

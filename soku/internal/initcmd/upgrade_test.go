@@ -114,6 +114,52 @@ func TestTransitionSameReleaseIsImmediateNoOp(t *testing.T) {
 	}
 }
 
+func TestTransitionPreservesManifestV2Components(t *testing.T) {
+	base := repositorySnapshot(t)
+	target := cloneSnapshot(base)
+	target.Release = "v1.1.0"
+	target.ResolvedCommit = targetCommit
+	root := initializeRelease(t, base)
+	document, err := manifest.NewStore(root).Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	document.SchemaVersion = manifest.SchemaVersionV2
+	document.Components = []manifest.Component{{
+		ID: "docs-manual", CatalogVersion: "1", ConfigurationPath: "docs/manual/capture.yml",
+	}}
+	if err := manifest.NewStore(root).Write(document); err != nil {
+		t.Fatal(err)
+	}
+	before, err := os.ReadFile(filepath.Join(root, ".soku", "manifest.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	fetcher := releaseFetcher{"v1.0.0": base, "v1.1.0": target}
+	if _, err := RunTransition(context.Background(), TransitionOptions{
+		Root: root, TargetRelease: "v1.1.0", DryRun: true,
+	}, fetcher, true); err != nil {
+		t.Fatal(err)
+	}
+	afterDryRun, _ := os.ReadFile(filepath.Join(root, ".soku", "manifest.json"))
+	if !reflect.DeepEqual(before, afterDryRun) {
+		t.Fatal("v2 dry-run changed manifest state")
+	}
+	if _, err := RunTransition(context.Background(), TransitionOptions{
+		Root: root, TargetRelease: "v1.1.0", Yes: true, SokuVersion: "test",
+	}, fetcher, true); err != nil {
+		t.Fatal(err)
+	}
+	applied, err := manifest.NewStore(root).Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if applied.SchemaVersion != manifest.SchemaVersionV2 ||
+		!reflect.DeepEqual(applied.Components, document.Components) {
+		t.Fatalf("component metadata was not preserved: %#v", applied.Components)
+	}
+}
+
 func TestTransitionAddsNewlyDeclaredOutput(t *testing.T) {
 	target := repositorySnapshot(t)
 	target.Release = "v1.1.0"
