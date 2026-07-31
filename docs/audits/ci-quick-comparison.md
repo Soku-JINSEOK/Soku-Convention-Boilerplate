@@ -9,17 +9,19 @@ weakening the existing required checks during observation.
 ## Activation
 
 - **Implementation:** detector-driven dynamic matrix from
-  `verification/profiles.yml`
-- **Activation pull request:** [#149](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/pull/149)
-- **Activation commit:** `9539413a08e545a2e0d91383709cacc7b8a385de`
-- **Activation time:** `2026-07-26T14:13:58Z`
-- **Earliest time-based completion:** `2026-08-09T14:13:58Z`
+  `verification/profiles.yml`, with explicit Go cache dependency paths
+- **Activation pull request:** [#176](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/pull/176)
+- **Activation commit:** `db50c14781067d74ce05e689d13f951239d92f34`
+- **Activation time:** `2026-07-31T02:47:21Z`
+- **Earliest time-based completion:** `2026-08-14T02:47:21Z`
 - **Minimum sample:** 10 merged code pull requests after activation
 
-The earlier window that began at `2026-07-26T12:09:01Z` measured the serial
-Quick implementation and is retained only as historical context. It does not
-count toward this audit. Any later change to Quick behavior or coverage resets
-both the time and pull-request counters.
+The previous sharded window began at `2026-07-26T14:13:58Z` and ended when
+PR #176 changed Quick cache behavior. Its 13 samples are retained below as
+historical evidence and do not count toward the active window. The still earlier
+window beginning at `2026-07-26T12:09:01Z` measured the serial implementation
+and also remains historical. Any later change to Quick behavior or coverage
+resets both the time and pull-request counters.
 
 ## Inclusion Rules
 
@@ -56,7 +58,7 @@ merged head commit.
 - Runner reduction is one minus Quick runner-seconds divided by Full
   runner-seconds.
 
-## Samples
+## Previous Window Samples (Historical)
 
 | PR                                                                           | Merge commit                               | Quick run                                                                                                             | Full run                                                                                                                | Quick critical duration | Full critical duration | Quick runner-seconds | Full runner-seconds | Result                                                |
 | ---------------------------------------------------------------------------- | ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | ----------------------: | ---------------------: | -------------------: | ------------------: | ----------------------------------------------------- |
@@ -74,15 +76,27 @@ merged head commit.
 | [#169](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/pull/169) | `9c90b384eb7ec10bec1b80e4be07c67f0ff3752a` | [CI Quick Gate](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/actions/runs/30598030207/job/91054739375) | [Validation Gate](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/actions/runs/30598030207/job/91054830937) |                    69 s |                  126 s |                 63 s |               870 s | Pass; 54.76% critical ratio; 92.76% runner reduction  |
 | [#170](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/pull/170) | `64cd62bfc1f8fb762fa72435985fbd0ced1b2eb5` | [CI Quick Gate](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/actions/runs/30598309382/job/91055565611) | [Validation Gate](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/actions/runs/30598309382/job/91055611274) |                    69 s |                   93 s |                 60 s |               870 s | Pass; 74.19% critical ratio; 93.10% runner reduction  |
 
-Current qualifying sample count: **13**.
+Historical qualifying sample count: **13**.
 
-Current median critical-duration ratio: **68.85%**.
+Historical median critical-duration ratio: **68.85%**.
 
-Current aggregate runner reduction: **86.34%** (1,580 Quick runner-seconds
+Historical aggregate runner reduction: **86.34%** (1,580 Quick runner-seconds
 compared with 11,568 Full runner-seconds).
+
+## Active Window Samples
+
+No qualifying natural samples have merged after the current activation.
+
+Current qualifying sample count: **0**.
+
+Current median critical-duration ratio: **Not available**.
+
+Current aggregate runner reduction: **Not available**.
 
 ## Decision
 
-**Observation active.** The sharded implementation merged in PR #149 at the
-activation time above. Issue #117 must not change required contexts until every
-criterion above is supported by linked Actions evidence.
+**Observation reset and active.** PR #176 restored deterministic Go caching and
+therefore changed Quick behavior. The 14-day and qualifying-sample counters
+restart at the activation commit and time above. Issue #117 must not change
+required contexts until every criterion is supported by linked Actions evidence
+from this active window.
