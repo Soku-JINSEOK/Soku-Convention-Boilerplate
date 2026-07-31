@@ -108,6 +108,13 @@ the full local-capable/hosted-only/release-only/deployment-only breakdown.
 This local tooling does not change `Validation Gate` or `PR Metadata Gate`
 above.
 
+`full-validation.yml` adds an independent Hosted Full path without removing the
+existing per-PR Full gate. It runs repository, runtime-template, and security
+workflows against one explicit source SHA and aggregates them into
+`Hosted Full Gate`. It supports reusable calls, manual runs, and a daily
+`02:41 UTC` schedule. Required contexts remain unchanged until Issue #116
+passes every observation criterion and the ruleset transition is recorded.
+
 Soku-managed downstream repositories receive three responsibility-separated
 workflows: pull-request/main quick validation, scheduled/manual full
 validation, and weekly/manual security validation. Catalog v1 accepts both the
