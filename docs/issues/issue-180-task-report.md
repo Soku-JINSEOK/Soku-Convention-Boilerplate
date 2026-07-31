@@ -50,8 +50,10 @@ checks with immutable scanner images.
 
 ## Implementation Status
 
-Implementation is complete on the working branch. Local verification is in
-progress; hosted and live-plan stages remain approval-gated.
+Implementation is complete on Draft PR #181. Local verification, the
+event-driven Security workflow, authenticated Pull Request Policy, and global
+Cloud Build validation passed. Ready-for-review and live-plan stages remain
+approval-gated.
 
 ## Verification
 
@@ -62,6 +64,11 @@ progress; hosted and live-plan stages remain approval-gated.
 - Terraform 1.15.3 format/init/validate for both roots: passed.
 - Existing Terraform test suite: passed, 4 tests.
 - `git diff --check`: passed.
+- Draft hosted Security: all history, dependency, Go vulnerability, and OSV
+  jobs passed.
+- Global Cloud Build validation: passed on commit `b503b30`.
+- Controlled invalid PR relation: policy run `30627794387` failed; the body was
+  immediately restored and run `30627838025` passed.
 
 ## Public Disclosure Review
 
@@ -111,13 +118,14 @@ logging 3개 리소스 전용 Terraform root/backend prefix와 allowlist 기반 
 
 ## 구현 현황
 
-working branch 구현은 완료되었습니다. hosted 검증, live plan, merge는 후속
-승인 경계로 남아 있습니다.
+Draft PR #181 구현과 hosted Security/Policy/global Cloud Build 검증이
+완료되었습니다. Ready 전환과 live plan, merge는 후속 승인 경계입니다.
 
 ## 검증
 
-Node 43개, Python 6개, Terraform 4개 테스트와 두 root init/validate,
-supply-chain 및 diff 검사가 통과했습니다.
+Node 95개, Python 6개, Terraform 4개 테스트와 두 root init/validate,
+supply-chain, hosted Security/Policy/global Cloud Build 및 통제된 정책
+실패·복구 검사가 통과했습니다.
 
 ## 공개 적합성 검토
 
