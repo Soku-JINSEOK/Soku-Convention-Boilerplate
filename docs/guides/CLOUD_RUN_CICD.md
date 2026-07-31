@@ -104,11 +104,21 @@ plans keep using `cloud-run`, so their default `false` value cannot remove the
 validation triggers.
 
 The PR trigger, `soku-convention-boilerplate-pr`, validates pull requests whose
-target is `main`. External contributors require a repository writer to comment
-`/gcbrun`. The `soku-convention-boilerplate-main` trigger validates pushes to
-`main`. Both use a dedicated service account with only
+target is `main`, but only after a repository writer comments `/gcbrun`.
+Do not place the command in the PR body. Keep work in Draft, freeze the head,
+mark it Ready, and approve it once. If the head changes, cancel obsolete work
+and approve the latest SHA again. The `soku-convention-boilerplate-main`
+trigger automatically validates GCP-related pushes to `main`. Both run in
+`asia-northeast1` and use a dedicated service account with only
 `roles/logging.logWriter`, Cloud Logging-only output, and
 `cloudbuild/validation.yaml`.
+
+The PR trigger retains its all-path scope while it supplies a required GitHub
+Check context. Issue #117 governs the required-check migration; apply the
+main trigger's GCP-only path filter to PRs only after that migration is
+approved. The `main` filter covers `infra/gcp/**`, `cloudbuild/**`,
+`templates/gcloud/**`, `scripts/gcp-bootstrap.sh`, and the two GCP regression
+test files.
 
 The build runs the existing GCP deployment regression tests and the Cloud Build
 policy tests under Node 24, checks Terraform formatting and validity, executes
@@ -125,17 +135,20 @@ not a GCP incident. Classify it as a CI defect only when the current,
 metadata-complete head commit still fails. Cancelled duplicate runs are not
 Cloud Build failures.
 
-Treat both checks as informational at first. With a controlled PR and its merged
-`main` commit, verify the repository and commit SHA, all build steps, the
-dedicated service account, successful status, and GitHub log links. Also compare
-Artifact Registry images and Cloud Run revision, image digest, and traffic
-before and after, then confirm the authenticated `/health` response remains
-`ok`.
+When migrating existing global triggers, first export their complete JSON and
+identities for rollback. Gate the global PR trigger with `COMMENTS_ENABLED`,
+create the identically named Tokyo triggers in a quiet window, and manually run
+each at an exact SHA. Verify `locations/asia-northeast1`, the unchanged GitHub
+Check names and service account, and complete regional logs before deleting the
+global copies. A controlled `/gcbrun` PR and the next matching `main` merge are
+the final integration checks.
 
-After both builds have successful evidence, add only the exact PR check context
-shown by GitHub to `main` branch protection. Do not make the main push trigger a
-required check. Verify the required flow again with an external pull request and
-writer-issued `/gcbrun` approval.
+The shared `ci-cd-control-plane` infrastructure, not this repository stack,
+owns the `cloud-build-logs` Tokyo bucket, `cloud-build-to-tokyo` sink, and
+global `_Default` exclusion. Its rollout must verify dual delivery before
+excluding the global copy and must leave `_Required` unchanged. Do not delete
+completed builds, old logs, or current Artifact Registry images during the
+migration.
 
 Rollback is an apply with `enable_cloud_build_validation=false`. It removes only
 the validation triggers, dedicated identity, and IAM binding. It preserves the

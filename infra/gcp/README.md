@@ -14,8 +14,9 @@ keeping both stages in one remote GCS state.
   `repository@sha256:<digest>` value in `image_uri`.
 - Cloud Build validation (`enable_cloud_build_validation=true`) enables the
   Cloud Build API and creates a dedicated service account with only
-  `roles/logging.logWriter`. It also creates two global, first-generation
-  GitHub App triggers. Neither trigger reuses the GitHub Actions deployer.
+  `roles/logging.logWriter`. It also creates two `asia-northeast1`,
+  first-generation GitHub App triggers. Neither trigger reuses the GitHub
+  Actions deployer.
 
 The GCS backend is partial configuration. Initialize it with the project-derived
 bucket rather than committing backend values or state:
@@ -98,29 +99,61 @@ to the GitHub repository variables `GCP_WIF_PROVIDER` and
 
 The opt-in creates these triggers:
 
-| Trigger | Event | Branch | External contributor control |
+| Trigger | Event | Branch | Execution control |
 | --- | --- | --- | --- |
 | `soku-convention-boilerplate-pr` | Pull request | `^main$` | A writer must comment `/gcbrun` |
 | `soku-convention-boilerplate-main` | Push | `^main$` | Not applicable |
 
 Both triggers use `cloudbuild/validation.yaml`, run as the dedicated validation
 identity, store logs with `CLOUD_LOGGING_ONLY`, and return build status and log
-links to GitHub. The build runs Node 24 GCP regression tests, Terraform
+links to GitHub. Both run in `asia-northeast1`; their existing names remain
+unchanged so the GitHub Check contexts remain stable. The build runs Node 24 GCP regression tests, Terraform
 format/init/validate/tests, and an amd64 build of `templates/gcloud`. It has no
 artifact output, image push, secret access, or deployment step.
 The build uses the default worker machine and has a 15-minute overall timeout.
+
+Do not put `/gcbrun` in the pull-request body. Keep the PR in Draft while its
+head is changing, mark it Ready only after the head is stable, and then have a
+repository writer add one `/gcbrun` comment. A new head commit invalidates that
+evidence: cancel an obsolete running build and approve the latest head again.
+The PR trigger intentionally has no path filter while its check is a required
+context. Add the same GCP-only filter as the main trigger only after the
+required-check migration tracked in issue #117 is approved.
+
+The main trigger remains automatic but runs only when a push changes
+`infra/gcp/**`, `cloudbuild/**`, `templates/gcloud/**`,
+`scripts/gcp-bootstrap.sh`, or the two GCP regression test files. Its squash
+merge SHA is distinct verification and is not considered a duplicate of the PR
+head build.
 
 The `github` block in each Terraform trigger is the first-generation GitHub App
 interface. Terraform trigger creation is also the connection check: apply fails
 if the repository is not already connected to the selected GCP project. This
 stack does not create a second-generation Cloud Build connection or repository.
 
-Keep the PR trigger informational until a controlled PR build and the
-post-merge main build both succeed. Confirm their repository, commit SHA, steps,
-service account, and log links, then verify that Artifact Registry and Cloud Run
-did not change. Only after that evidence exists should the exact PR check context
-observed on GitHub be added to `main` branch protection. Do not require the main
-push trigger.
+### Regional trigger migration
+
+Changing a trigger location replaces it. Before applying this stack, export the
+complete JSON, ID, service account, substitutions, and filters of both global
+triggers as rollback evidence. First change the global PR trigger to
+`COMMENTS_ENABLED` so new pushes stop creating builds. In a quiet window, create
+the identically named Tokyo triggers, then run each at an exact commit SHA and
+verify its source, service account, regional resource name, and logs.
+
+Delete the two global triggers only after both Tokyo builds succeed. Then verify
+one controlled Ready PR with `/gcbrun` and the next matching `main` merge. The
+acceptance state is no active global trigger and two active
+`asia-northeast1` triggers. Do not delete completed build history, existing
+Artifact Registry images, or old logs; let the existing 30-day log retention
+expire naturally.
+
+Cloud Build log routing is intentionally not owned by this per-repository
+stack. The shared `ci-cd-control-plane` Terraform root owns the Tokyo log bucket,
+sink, and `_Default` exclusion for all three repositories. Create the bucket
+and sink and verify duplicate delivery before enabling the exclusion. Never
+modify the immutable `_Required` audit-log sink. If regional validation fails,
+disable the `_Default` exclusion first and restore the saved global trigger
+JSON.
 
 To roll back only the Cloud Build integration, plan and apply with
 `enable_cloud_build_validation=false`. This removes its triggers and dedicated

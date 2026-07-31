@@ -75,7 +75,7 @@ test('Cloud Build uses the trigger service account and Cloud Logging only', () =
   assert.match(config, /^\s+logging: CLOUD_LOGGING_ONLY$/m);
 });
 
-test('Terraform opt-in creates two global first-generation GitHub triggers', () => {
+test('Terraform creates two Tokyo first-generation GitHub triggers', () => {
   const main = readFileSync(join(root, 'infra/gcp/main.tf'), 'utf8');
   const variables = readFileSync(join(root, 'infra/gcp/variables.tf'), 'utf8');
 
@@ -118,7 +118,14 @@ test('Terraform opt-in creates two global first-generation GitHub triggers', () 
       []).length,
     5,
   );
-  assert.equal((main.match(/location\s+= "global"/g) ?? []).length, 2);
+  for (const triggerName of ['pull_request', 'main']) {
+    assert.match(
+      main,
+      new RegExp(
+        `resource "google_cloudbuild_trigger" "${triggerName}" \\{[\\s\\S]*?location\\s+= "asia-northeast1"`,
+      ),
+    );
+  }
   assert.equal(
     (main.match(/filename\s+= "cloudbuild\/validation\.yaml"/g) ?? []).length,
     2,
@@ -131,8 +138,21 @@ test('Terraform opt-in creates two global first-generation GitHub triggers', () 
   assert.equal((main.match(/branch\s+= "\^main\$"/g) ?? []).length, 2);
   assert.match(
     main,
-    /comment_control\s+= "COMMENTS_ENABLED_FOR_EXTERNAL_CONTRIBUTORS_ONLY"/,
+    /comment_control\s+= "COMMENTS_ENABLED"/,
   );
+  const mainTrigger = main.match(
+    /resource "google_cloudbuild_trigger" "main" \{([\s\S]*?)\n\}/,
+  )?.[1] ?? '';
+  for (const includedFile of [
+    '.github/cloudbuild-validation.test.mjs',
+    '.github/deploy-gcp.test.mjs',
+    'cloudbuild/**',
+    'infra/gcp/**',
+    'scripts/gcp-bootstrap.sh',
+    'templates/gcloud/**',
+  ]) {
+    assert.match(mainTrigger, new RegExp(includedFile.replaceAll('*', '\\*')));
+  }
   assert.match(main, /owner\s+= var\.github_org/);
   assert.match(main, /name\s+= var\.github_repo/);
   assert.doesNotMatch(main, /google_cloudbuildv2_|repository_event_config/);
