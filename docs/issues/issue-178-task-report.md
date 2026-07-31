@@ -10,16 +10,18 @@ and least-privilege execution.
 
 Declare both triggers in `asia-northeast1`, gate every pull-request build with
 writer `/gcbrun` approval, and apply the reviewed GCP path filter only to the
-main trigger. Document the staged trigger and Terraform state migration without
-executing any live mutation in this change.
+main trigger. Because trigger names are unique across the project regardless of
+location, document a short direct cutover rather than attempting to pre-create
+same-name Tokyo triggers. No live mutation is executed in this change.
 
 ## Planned Implementation
 
 - Update the Terraform trigger locations and pull-request comment control.
 - Add the main-only GCP path filter.
 - Lock the contract in Node and Terraform tests.
-- Document exact-SHA regional validation, rollback evidence, state
-  remove/import, and the required clean plan.
+- Document the state backup, canonical-address removal, global deletion, Tokyo
+  creation, exact-SHA validation, canonical import, clean plan, and reverse
+  rollback order.
 
 ## Acceptance Criteria
 
@@ -27,6 +29,8 @@ executing any live mutation in this change.
 - The PR trigger uses `COMMENTS_ENABLED` and retains all-path validation.
 - The main trigger covers only the reviewed GCP paths.
 - Validation permissions remain logging-only, with no publishing or delivery.
+- Migration documentation never claims same-name global and Tokyo triggers can
+  coexist.
 - Live trigger and state operations remain separately approved.
 
 ## Approval
@@ -44,10 +48,10 @@ Implemented locally. Live migration evidence remains pending.
 
 ## Verification
 
-- Passed: `terraform fmt -check infra/gcp`.
-- Passed: Terraform 1.15.0 backend-disabled validation and four mock tests in
-  an isolated copy with a synthetic backend bucket value.
-- Passed: `node --test .github/cloudbuild-validation.test.mjs` (6 tests).
+- Passed: Terraform 1.15.3 recursive format check, validation, and four mock
+  tests.
+- Passed: `node --test .github/cloudbuild-validation.test.mjs` (7 tests).
+- Passed: combined Cloud Build and GCP deployment Node suite (22 tests).
 - Passed: `git diff --check`.
 
 ## Public Disclosure Review

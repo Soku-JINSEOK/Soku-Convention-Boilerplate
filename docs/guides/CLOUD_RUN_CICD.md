@@ -136,12 +136,23 @@ metadata-complete head commit still fails. Cancelled duplicate runs are not
 Cloud Build failures.
 
 When migrating existing global triggers, first export their complete JSON and
-identities for rollback. Gate the global PR trigger with `COMMENTS_ENABLED`,
-create the identically named Tokyo triggers in a quiet window, and manually run
-each at an exact SHA. Verify `locations/asia-northeast1`, the unchanged GitHub
-Check names and service account, and complete regional logs before deleting the
-global copies. A controlled `/gcbrun` PR and the next matching `main` merge are
-the final integration checks.
+identities for rollback and back up the `cloud-build-validation` remote state.
+Trigger names are unique across the project regardless of location, so the
+canonical global and Tokyo triggers cannot coexist. Gate the global PR trigger
+with `COMMENTS_ENABLED`. In a separately approved quiet window, remove only the
+two trigger addresses from Terraform state, delete the global pair, and
+immediately create the Tokyo pair with the same canonical names and saved
+configuration. Do not use a temporary alias.
+
+Manually run each Tokyo trigger at an exact SHA. Verify
+`locations/asia-northeast1`, the unchanged GitHub Check names and
+validation-only service account, and complete regional logs. Import the verified
+Tokyo IDs into the original canonical Terraform addresses and require a clean
+full plan. A controlled Ready PR with one writer-issued `/gcbrun` and the next
+matching `main` merge are the final integration checks. If the cutover fails,
+delete the failed Tokyo pair, restore the global pair from the private exports,
+import their IDs at the canonical addresses, and check a plan against the
+previous global code.
 
 The shared `ci-cd-control-plane` infrastructure, not this repository stack,
 owns the `cloud-build-logs` Tokyo bucket, `cloud-build-to-tokyo` sink, and

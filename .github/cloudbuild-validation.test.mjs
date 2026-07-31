@@ -158,6 +158,34 @@ test('Terraform creates two Tokyo first-generation GitHub triggers', () => {
   assert.doesNotMatch(main, /google_cloudbuildv2_|repository_event_config/);
 });
 
+test('regional migration uses direct cutover and preserves canonical state addresses', () => {
+  const readme = readFileSync(join(root, 'infra/gcp/README.md'), 'utf8');
+  const globalDelete = readme.indexOf('Delete the two global trigger resources');
+  const tokyoCreate = readme.indexOf('create the Tokyo');
+
+  assert.match(
+    readme,
+    /trigger names are unique across the project, not per location/i,
+  );
+  assert.match(
+    readme,
+    /google_cloudbuild_trigger\.pull_request\[0\]/,
+  );
+  assert.match(readme, /google_cloudbuild_trigger\.main\[0\]/);
+  assert.ok(globalDelete >= 0, 'global trigger deletion is undocumented');
+  assert.ok(tokyoCreate >= 0, 'Tokyo trigger creation is undocumented');
+  assert.ok(
+    globalDelete < tokyoCreate,
+    'same-name Tokyo triggers must be created only after global deletion',
+  );
+  assert.match(readme, /Import each verified Tokyo trigger ID/);
+  assert.match(readme, /clean full plan/);
+  assert.doesNotMatch(
+    readme,
+    /create the identically named Tokyo triggers[\s\S]*Delete the two global triggers/,
+  );
+});
+
 test('bootstrap previews Cloud Build resources only when explicitly enabled', () => {
   const temp = mkdtempSync(join(tmpdir(), 'cloud-build-bootstrap-'));
   const bin = join(temp, 'bin');

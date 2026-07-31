@@ -133,27 +133,53 @@ stack does not create a second-generation Cloud Build connection or repository.
 
 ### Regional trigger migration
 
-Changing a trigger location replaces it. Before applying this stack, export the
-complete JSON, ID, service account, substitutions, and filters of both global
-triggers as rollback evidence. First change the global PR trigger to
-`COMMENTS_ENABLED` so new pushes stop creating builds. In a quiet window, create
-the identically named Tokyo triggers, then run each at an exact commit SHA and
-verify its source, service account, regional resource name, and logs.
+Cloud Build trigger names are unique across the project, not per location.
+Consequently, Terraform cannot create a Tokyo trigger with a canonical name
+while the global trigger with that name still exists. Do not apply the location
+replacement directly and do not use a temporary alias.
 
-Delete the two global triggers only after both Tokyo builds succeed. Then verify
-one controlled Ready PR with `/gcbrun` and the next matching `main` merge. The
-acceptance state is no active global trigger and two active
-`asia-northeast1` triggers. Do not delete completed build history, existing
-Artifact Registry images, or old logs; let the existing 30-day log retention
-expire naturally.
+Before the approved cutover window:
+
+1. Export the complete JSON, ID, service account, substitutions, branch and path
+   filters, and comment control of both global triggers as private rollback
+   evidence.
+2. Pull a separate backup of the `cloud-build-validation` remote state and
+   verify that it contains the two canonical addresses
+   `google_cloudbuild_trigger.pull_request[0]` and
+   `google_cloudbuild_trigger.main[0]`.
+3. Change the global PR trigger to `COMMENTS_ENABLED` so new pushes do not
+   create PR builds.
+
+During the separately approved cutover, keep each mutation explicit:
+
+1. Remove only the two canonical trigger addresses from Terraform state. This
+   must not destroy the live global triggers.
+2. Delete the two global trigger resources, then immediately create the Tokyo
+   triggers with the same canonical names and saved configuration.
+3. Run the PR and main triggers at an exact commit SHA and verify their source,
+   validation-only service account, unchanged GitHub Check names, complete logs,
+   and `locations/asia-northeast1` resource names.
+4. Import each verified Tokyo trigger ID into its original canonical Terraform
+   address, then require a clean full plan with
+   `enable_cloud_build_validation=true`.
+
+The create step must follow the global delete because both locations cannot own
+the same trigger name concurrently. Then verify one controlled Ready PR with
+one writer-issued `/gcbrun` and the next matching `main` merge. The acceptance
+state is no active global trigger and two active `asia-northeast1` triggers. Do
+not delete completed build history, existing Artifact Registry images, or old
+logs; let the existing 30-day log retention expire naturally.
 
 Cloud Build log routing is intentionally not owned by this per-repository
 stack. The shared `ci-cd-control-plane` Terraform root owns the Tokyo log bucket,
 sink, and `_Default` exclusion for all three repositories. Create the bucket
 and sink and verify duplicate delivery before enabling the exclusion. Never
 modify the immutable `_Required` audit-log sink. If regional validation fails,
-disable the `_Default` exclusion first and restore the saved global trigger
-JSON.
+disable the `_Default` exclusion first. Delete the failed Tokyo pair, restore
+the global pair from the saved JSON, import the restored global IDs at the two
+canonical state addresses, and check a plan against the previous global code.
+Restore the remote-state backup only if the targeted state recovery cannot be
+completed safely.
 
 To roll back only the Cloud Build integration, plan and apply with
 `enable_cloud_build_validation=false`. This removes its triggers and dedicated
