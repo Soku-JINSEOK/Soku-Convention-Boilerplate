@@ -69,6 +69,9 @@ jobs:
         uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
         with:
           go-version: "1.26.x"
+          cache-dependency-path: |
+            soku/go.sum
+            templates/go/go.mod
 
       - name: Setup Python
         if: contains(matrix.toolchains, 'python')

@@ -48,6 +48,10 @@ test('runs CI Quick in parallel without replacing the full gate', () => {
   assert.match(quickWorkflow, /--group '\$\{\{ matrix\.id \}\}'/);
   assert.match(quickWorkflow, /if: contains\(matrix\.toolchains, 'node'\)/);
   assert.match(quickWorkflow, /if: contains\(matrix\.toolchains, 'go'\)/);
+  assert.match(
+    quickWorkflow,
+    /cache-dependency-path: \|\n\s+soku\/go\.sum\n\s+templates\/go\/go\.mod/,
+  );
   assert.match(quickWorkflow, /if: contains\(matrix\.toolchains, 'python'\)/);
   assert.match(quickWorkflow, /if: contains\(matrix\.toolchains, 'java'\)/);
   assert.match(quickWorkflow, /fetch-depth: 0/);
