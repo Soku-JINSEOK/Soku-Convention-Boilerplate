@@ -50,10 +50,9 @@ checks with immutable scanner images.
 
 ## Implementation Status
 
-Implementation is complete on Draft PR #181. Local verification, the
-event-driven Security workflow, authenticated Pull Request Policy, and global
-Cloud Build validation passed. Ready-for-review and live-plan stages remain
-approval-gated.
+Implementation is complete on Ready PR #181. Local verification, authenticated
+Pull Request Policy, event-driven Security, CodeQL, and global Cloud Build
+validation passed. Live Terraform plan, apply, and merge remain out of scope.
 
 ## Verification
 
@@ -69,6 +68,10 @@ approval-gated.
 - Global Cloud Build validation: passed on commit `b503b30`.
 - Controlled invalid PR relation: policy run `30627794387` failed; the body was
   immediately restored and run `30627838025` passed.
+- Latest Draft SHA `0e871ec`: Policy, Security, CodeQL, and global Cloud Build
+  passed before the Ready transition.
+- Ready event: Policy run `30630685703` and all jobs in Security run
+  `30630685730` passed.
 
 ## Public Disclosure Review
 
@@ -118,14 +121,15 @@ logging 3개 리소스 전용 Terraform root/backend prefix와 allowlist 기반 
 
 ## 구현 현황
 
-Draft PR #181 구현과 hosted Security/Policy/global Cloud Build 검증이
-완료되었습니다. Ready 전환과 live plan, merge는 후속 승인 경계입니다.
+Ready PR #181 구현과 hosted Security/Policy/CodeQL/global Cloud Build 검증이
+완료되었습니다. live Terraform plan, apply, merge는 범위 밖입니다.
 
 ## 검증
 
 Node 95개, Python 6개, Terraform 4개 테스트와 두 root init/validate,
 supply-chain, hosted Security/Policy/global Cloud Build 및 통제된 정책
-실패·복구 검사가 통과했습니다.
+실패·복구 검사가 통과했습니다. Ready 이벤트가 생성한 Policy run
+`30630685703`과 Security run `30630685730`의 모든 job도 통과했습니다.
 
 ## 공개 적합성 검토
 
