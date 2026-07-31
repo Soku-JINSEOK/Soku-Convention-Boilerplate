@@ -18,6 +18,10 @@ const releaseWorkflow = readFileSync(
   new URL('./workflows/release.yml', import.meta.url),
   'utf8',
 );
+const deployWorkflow = readFileSync(
+  new URL('./workflows/deploy-gcp.yml', import.meta.url),
+  'utf8',
+);
 const releaseIdentity = JSON.parse(
   readFileSync(new URL('../release-identity.json', import.meta.url), 'utf8'),
 );
@@ -102,6 +106,19 @@ test('only policy and Security subscribe to repository events', () => {
   assert.match(securityWorkflow, /^\s{2}pull_request:/m);
   assert.match(securityWorkflow, /^\s{2}push:/m);
   assert.match(securityWorkflow, /^\s{2}schedule:/m);
+
+  const securityPullRequestTrigger =
+    /pull_request:\n\s+types:\n((?:\s+- .+\n)+)/.exec(securityWorkflow);
+  assert.ok(securityPullRequestTrigger, 'Security PR event list must be explicit');
+  assert.match(securityPullRequestTrigger[1], /\bready_for_review\b/);
+  assert.doesNotMatch(securityPullRequestTrigger[1], /\bclosed\b/);
+});
+
+test('preserves release tag and manual deployment trigger exceptions', () => {
+  assert.match(releaseWorkflow, /^\s{2}push:\n\s+tags:/m);
+  assert.match(releaseWorkflow, /^\s{2}workflow_dispatch:/m);
+  assert.match(deployWorkflow, /^\s{2}workflow_dispatch:/m);
+  assert.doesNotMatch(deployWorkflow, /^\s{2}(?:pull_request|push|schedule):/m);
 });
 
 test('does not subscribe to closed pull request events', () => {
