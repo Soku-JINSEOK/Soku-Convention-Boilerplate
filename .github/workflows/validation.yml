@@ -2,11 +2,7 @@ name: Validation
 
 on:
   workflow_call:
-  pull_request:
-    types: [opened, synchronize, reopened, edited, labeled, unlabeled, assigned, unassigned, ready_for_review, converted_to_draft]
-  push:
-    branches:
-      - main
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -90,35 +86,6 @@ jobs:
       cancel-in-progress: true
     uses: ./.github/workflows/templates-ci.yml
 
-  security:
-    name: Security validation
-    if: >-
-      github.event_name != 'pull_request' ||
-      github.event.action == 'opened' ||
-      github.event.action == 'synchronize' ||
-      github.event.action == 'reopened' ||
-      (github.event.action == 'edited' && github.event.changes.base != null)
-    concurrency:
-      group: validation-full-security-${{ github.event.pull_request.number || github.ref }}
-      cancel-in-progress: true
-    uses: ./.github/workflows/security.yml
-
-  contribution-titles:
-    name: Contribution Title Convention
-    if: github.event_name == 'pull_request'
-    concurrency:
-      group: validation-metadata-titles-${{ github.event.pull_request.number }}
-      cancel-in-progress: true
-    uses: ./.github/workflows/contribution-title-check.yml
-
-  governance-policy:
-    name: PR Governance Policy
-    if: github.event_name == 'pull_request'
-    concurrency:
-      group: validation-metadata-governance-${{ github.event.pull_request.number }}
-      cancel-in-progress: true
-    uses: ./.github/workflows/pull-request-policy.yml
-
   validation-gate:
     name: Validation Gate
     if: >-
@@ -131,7 +98,6 @@ jobs:
     needs:
       - repository
       - templates
-      - security
     runs-on: ubuntu-latest
     concurrency:
       group: validation-full-gate-${{ github.event.pull_request.number || github.ref }}
@@ -141,12 +107,10 @@ jobs:
         env:
           REPOSITORY_RESULT: ${{ needs.repository.result }}
           TEMPLATES_RESULT: ${{ needs.templates.result }}
-          SECURITY_RESULT: ${{ needs.security.result }}
         shell: bash
         run: |
           test "$REPOSITORY_RESULT" = success
           test "$TEMPLATES_RESULT" = success
-          test "$SECURITY_RESULT" = success
 
   full-validation-not-required:
     name: Full Validation Not Required
@@ -162,22 +126,3 @@ jobs:
       cancel-in-progress: true
     steps:
       - run: echo "Metadata-only event preserves the existing Validation Gate."
-
-  pr-metadata-gate:
-    name: PR Metadata Gate
-    if: always() && github.event_name == 'pull_request'
-    needs:
-      - contribution-titles
-      - governance-policy
-    runs-on: ubuntu-latest
-    concurrency:
-      group: validation-metadata-gate-${{ github.event.pull_request.number }}
-      cancel-in-progress: true
-    steps:
-      - name: Require current pull request metadata validation
-        env:
-          TITLES_RESULT: ${{ needs.contribution-titles.result }}
-          POLICY_RESULT: ${{ needs.governance-policy.result }}
-        run: |
-          test "$TITLES_RESULT" = success
-          test "$POLICY_RESULT" = success

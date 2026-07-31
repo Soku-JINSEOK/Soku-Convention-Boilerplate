@@ -183,13 +183,19 @@ run_infra_checks() {
     echo "::notice::Terraform checks skipped via --skip-infra"
     return 0
   fi
-  local dir="$WORKSPACE/infra/gcp"
-  [[ ! -d "$dir" ]] && return 0
+  local roots=(
+    "$WORKSPACE/infra/gcp"
+    "$WORKSPACE/infra/gcp/cloud-build-logging"
+  )
+  [[ ! -d "${roots[0]}" ]] && return 0
   if command -v terraform >/dev/null 2>&1; then
     echo "::group::Terraform checks"
-    terraform -chdir="$dir" fmt -check -recursive
-    terraform -chdir="$dir" init -backend=false -input=false
-    terraform -chdir="$dir" validate
+    terraform -chdir="${roots[0]}" fmt -check -recursive
+    for root in "${roots[@]}"; do
+      [[ ! -d "$root" ]] && continue
+      terraform -chdir="$root" init -backend=false -input=false -lockfile=readonly
+      terraform -chdir="$root" validate
+    done
     echo "::endgroup::"
     return 0
   fi
@@ -197,13 +203,15 @@ run_infra_checks() {
     echo "::group::Terraform checks (pinned container)"
     docker run --rm \
       -e TF_DATA_DIR=/tmp/terraform-data \
-      -v "$dir:/workspace:ro" \
+      -v "$WORKSPACE:/workspace:ro" \
       -w /workspace \
       --entrypoint /bin/sh \
       "$terraform_image" -ec \
-      'terraform fmt -check -recursive &&
-       terraform init -backend=false -input=false -lockfile=readonly &&
-       terraform validate'
+      'terraform -chdir=infra/gcp fmt -check -recursive &&
+       for root in infra/gcp infra/gcp/cloud-build-logging; do
+         terraform -chdir="$root" init -backend=false -input=false -lockfile=readonly
+         terraform -chdir="$root" validate
+       done'
     echo "::endgroup::"
     return 0
   fi

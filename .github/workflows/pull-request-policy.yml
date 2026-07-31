@@ -1,7 +1,18 @@
 name: Pull Request Policy
 
 on:
-  workflow_call:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - edited
+      - labeled
+      - unlabeled
+      - assigned
+      - unassigned
+      - ready_for_review
+      - converted_to_draft
 
 permissions:
   contents: read
@@ -12,33 +23,92 @@ jobs:
     name: Pull Request Governance
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout authenticated pull request head
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Setup Node.js
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
           node-version: "24"
 
-      - name: Read current pull request metadata and changed files
+      - name: Read and authenticate current pull request metadata
+        id: metadata
         env:
           GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_HEAD_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        shell: bash
         run: |
+          set -euo pipefail
+          metadata_dir="$(mktemp -d)"
+          chmod 700 "$metadata_dir"
+          cleanup() {
+            rm -f \
+              "$metadata_dir/current.json" \
+              "$metadata_dir/files.json" \
+              "$metadata_dir/event.json"
+            rmdir "$metadata_dir"
+          }
+          trap cleanup EXIT
+          install -m 600 /dev/null "$metadata_dir/current.json"
+          install -m 600 /dev/null "$metadata_dir/files.json"
+          install -m 600 /dev/null "$metadata_dir/event.json"
           gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}" \
-            > /tmp/current-pr.json
+            > "$metadata_dir/current.json"
           gh api --paginate \
             "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}/files?per_page=100" \
             --jq '.[].filename' \
             | jq -R -s 'split("\n") | map(select(length > 0))' \
-            > /tmp/current-pr-files.json
-          jq --slurpfile files /tmp/current-pr-files.json \
-            '{pull_request: (. + {changed_files_list: $files[0]})}' \
-            /tmp/current-pr.json > /tmp/current-pr-event.json
+            > "$metadata_dir/files.json"
+          node scripts/authenticated-pr-metadata.mjs \
+            --event "$GITHUB_EVENT_PATH" \
+            --current "$metadata_dir/current.json" \
+            --files "$metadata_dir/files.json" \
+            --output "$metadata_dir/event.json"
+          CURRENT_PR_EVENT_PATH="$metadata_dir/event.json" \
+            node scripts/pull-request-policy.mjs
 
-      - name: Validate pull request contract
+      - name: Validate pull request and commit titles
         env:
-          CURRENT_PR_EVENT_PATH: /tmp/current-pr-event.json
-        run: node scripts/pull-request-policy.mjs
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          PR_HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        shell: bash
+        run: |
+          node --test \
+            scripts/contribution-title.test.mjs \
+            templates/_shared/commitlint/contribution-title.test.mjs
+          node --input-type=module - <<'NODE'
+          import {execFileSync} from 'node:child_process';
+          import {
+            contributionTitleOptionsForPullRequest,
+            validateContributionTitle,
+          } from './scripts/contribution-title.mjs';
+          const mergeBase = execFileSync(
+            'git', ['merge-base', process.env.BASE_SHA, process.env.HEAD_SHA],
+            {encoding: 'utf8'},
+          ).trim();
+          const titles = execFileSync(
+            'git',
+            ['log', '--no-merges', '--format=%s', `${mergeBase}..${process.env.HEAD_SHA}`],
+            {encoding: 'utf8'},
+          ).trim().split('\n').filter(Boolean);
+          const options = contributionTitleOptionsForPullRequest(
+            process.env.PR_AUTHOR ?? '', process.env.PR_HEAD_REF ?? '',
+          );
+          const checks = [['PR title', process.env.PR_TITLE ?? '']]
+            .concat(titles.map((title) => ['commit title', title]));
+          const failures = checks.filter(([source, title]) => {
+            const result = validateContributionTitle(title, options);
+            if (!result.valid) console.error(`✗ [${source}] ${result.message}`);
+            return !result.valid;
+          });
+          if (failures.length > 0) process.exit(1);
+          NODE

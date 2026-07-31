@@ -35,7 +35,7 @@ Dependabot must cover these tracked locations:
 | Python | `/templates/python` |
 | Maven | `/templates/java-spring` |
 | Docker | `/`, `/.devcontainer`, `/templates/gcloud` |
-| Terraform | `/infra/gcp` |
+| Terraform | `/infra/gcp`, `/infra/gcp/cloud-build-logging` |
 
 The verifier treats a missing entry as a regression.
 

@@ -43,6 +43,7 @@ export const REQUIRED_UPDATE_TARGETS = [
   ['docker', '/.devcontainer'],
   ['docker', '/templates/gcloud'],
   ['terraform', '/infra/gcp'],
+  ['terraform', '/infra/gcp/cloud-build-logging'],
 ];
 
 function collectFiles(path) {
@@ -242,13 +243,13 @@ function parityChecks(root, tools) {
     ['MARKDOWNLINT_CLI2_VERSION', '.github/workflows/ci.yml', 'markdownlint-cli2@'],
     ['YAML_LINT_VERSION', '.github/workflows/ci.yml', 'yaml-lint@'],
     ['ACTIONLINT_VERSION', '.github/workflows/ci.yml', 'actionlint@'],
-    ['GITLEAKS_VERSION', '.github/workflows/security.yml', 'gitleaks/v8@'],
+    ['GITLEAKS_VERSION', '.github/workflows/security.yml', 'gitleaks:'],
     ['GITLEAKS_VERSION', 'templates/_shared/ci/downstream-ci-security.yml', 'gitleaks/v8@'],
     ['PIP_AUDIT_VERSION', '.github/workflows/security.yml', 'pip-audit=='],
     ['PIP_AUDIT_VERSION', 'templates/_shared/ci/downstream-ci-security.yml', 'pip-audit=='],
     ['GOVULNCHECK_VERSION', '.github/workflows/security.yml', 'govulncheck@'],
     ['GOVULNCHECK_VERSION', 'templates/_shared/ci/downstream-ci-security.yml', 'govulncheck@'],
-    ['OSV_SCANNER_VERSION', '.github/workflows/security.yml', 'osv-scanner@'],
+    ['OSV_SCANNER_VERSION', '.github/workflows/security.yml', 'osv-scanner:'],
     ['NPM_AUDIT_LEVEL', '.github/workflows/security.yml', 'audit-level='],
     ['NPM_AUDIT_LEVEL', 'templates/_shared/ci/downstream-ci-security.yml', 'audit-level='],
     ['MYSQL_IMAGE', '.github/workflows/templates-ci.template.yml', 'image: '],

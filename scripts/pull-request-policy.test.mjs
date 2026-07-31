@@ -117,6 +117,8 @@ updates:
     directory: /templates/java-spring
   - package-ecosystem: terraform
     directory: /infra/gcp
+  - package-ecosystem: terraform
+    directory: /infra/gcp/cloud-build-logging
 `;
 const dependabotConfigurations = readDependabotConfigurations(dependabotSource);
 
@@ -162,6 +164,10 @@ test("reads configured Dependabot ecosystems and directories", () => {
     {ecosystem: "docker", directory: "/templates/gcloud"},
     {ecosystem: "maven", directory: "/templates/java-spring"},
     {ecosystem: "terraform", directory: "/infra/gcp"},
+    {
+      ecosystem: "terraform",
+      directory: "/infra/gcp/cloud-build-logging",
+    },
   ]);
 });
 
@@ -254,6 +260,13 @@ test("accepts every configured Dependabot ecosystem path", () => {
       "dependabot/terraform/infra/gcp/group",
       ["infra/gcp/versions.tf", "infra/gcp/.terraform.lock.hcl"],
     ],
+    [
+      "dependabot/terraform/infra/gcp/cloud-build-logging/group",
+      [
+        "infra/gcp/cloud-build-logging/versions.tf",
+        "infra/gcp/cloud-build-logging/.terraform.lock.hcl",
+      ],
+    ],
   ];
   for (const [headRef, changedFiles] of scenarios) {
     assert.deepEqual(
@@ -330,9 +343,14 @@ test("workflow reruns on metadata changes and reads the current PR", () => {
     new URL("../.github/workflows/pull-request-policy.yml", import.meta.url),
     "utf8",
   );
-  assert.match(workflow, /workflow_call/);
-  assert.doesNotMatch(workflow, /^\s{2}pull_request:/m);
+  assert.match(workflow, /^\s{2}pull_request:/m);
+  assert.match(workflow, /ready_for_review/);
+  assert.match(workflow, /converted_to_draft/);
   assert.match(workflow, /gh api "repos\/\$\{GITHUB_REPOSITORY\}\/pulls\/\$\{PR_NUMBER\}"/);
   assert.match(workflow, /files\?per_page=100/);
-  assert.match(workflow, /CURRENT_PR_EVENT_PATH:\s*\/tmp\/current-pr-event\.json/);
+  assert.match(workflow, /persist-credentials: false/);
+  assert.match(workflow, /install -m 600/);
+  assert.match(workflow, /trap cleanup EXIT/);
+  assert.match(workflow, /scripts\/authenticated-pr-metadata\.mjs/);
+  assert.match(workflow, /CURRENT_PR_EVENT_PATH="\$metadata_dir\/event\.json"/);
 });
