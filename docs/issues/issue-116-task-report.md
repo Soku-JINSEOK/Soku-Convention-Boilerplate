@@ -54,8 +54,16 @@ The sharded implementation merged in
 as commit `9539413a08e545a2e0d91383709cacc7b8a385de` at
 `2026-07-26T14:13:58Z`. The earlier comparison window beginning at
 `2026-07-26T12:09:01Z` is retained only as serial-implementation history. The
-authoritative 14-day and 10-PR window now runs from the merge timestamp, as
-recorded in
+13-sample sharded window missed the critical-duration median target at 68.85%.
+
+Issue #175 identified that CI Quick's shared Go setup could not discover a root
+dependency file. PR
+[#176](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/pull/176)
+added explicit cache dependency paths and merged as commit
+`db50c14781067d74ce05e689d13f951239d92f34` at `2026-07-31T02:47:21Z`.
+Because this changes Quick behavior, the previous 13 samples remain historical
+and the authoritative 14-day and 10-PR window restarts from that merge
+timestamp, as recorded in
 [`docs/audits/ci-quick-comparison.md`](../audits/ci-quick-comparison.md).
 
 ## Verification
