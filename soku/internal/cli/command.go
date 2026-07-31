@@ -176,6 +176,7 @@ func newDocsCommand(opts *options, deps dependencies, out *output) *cobra.Comman
 	manualCommand.AddCommand(
 		newManualLeaf("plan", false, opts, deps, out, deps.handlers.ManualPlan),
 		newManualLeaf("doctor", false, opts, deps, out, deps.handlers.ManualDoctor),
+		newManualLeaf("init", true, opts, deps, out, deps.handlers.ManualInit),
 	)
 	docs.AddCommand(manualCommand)
 	for _, command := range []*cobra.Command{docs, manualCommand} {
@@ -535,7 +536,7 @@ func helpFor(command *cobra.Command) string {
 		return "Manage opt-in documentation components.\n\nUsage:\n  soku docs manual <command> [flags]\n"
 	}
 	if fullName == "docs manual" {
-		return "Plan or diagnose real-runtime manual capture.\n\nUsage:\n  soku docs manual <plan|doctor> [flags]\n"
+		return "Plan, diagnose, or install real-runtime manual capture.\n\nUsage:\n  soku docs manual <plan|doctor|init> [flags]\n"
 	}
 	if strings.HasPrefix(fullName, "docs manual ") {
 		extra := ""
