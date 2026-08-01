@@ -20,7 +20,7 @@ permissions:
 
 jobs:
   policy:
-    name: Pull Request Governance
+    name: PR Metadata Gate
     runs-on: ubuntu-latest
     steps:
       - name: Checkout trusted policy source
@@ -74,14 +74,50 @@ jobs:
             --jq '.[].filename' \
             | jq -R -s 'split("\n") | map(select(length > 0))' \
             > "$metadata_dir/files.json"
-          node trusted-policy/scripts/authenticated-pr-metadata.mjs \
-            --event "$GITHUB_EVENT_PATH" \
-            --current "$metadata_dir/current.json" \
-            --files "$metadata_dir/files.json" \
-            --output "$metadata_dir/event.json"
-          CURRENT_PR_EVENT_PATH="$metadata_dir/event.json" \
+          CURRENT_METADATA_PATH="$metadata_dir/current.json" \
+          FILES_METADATA_PATH="$metadata_dir/files.json" \
+          AUTHENTICATED_EVENT_PATH="$metadata_dir/event.json" \
           PR_HEAD_WORKSPACE="$GITHUB_WORKSPACE/pr-head" \
-            node trusted-policy/scripts/pull-request-policy.mjs
+            node --input-type=module - <<'NODE'
+          import {readFileSync, writeFileSync} from 'node:fs';
+          import {runPullRequestPolicy} from './trusted-policy/scripts/pull-request-policy.mjs';
+
+          const readJson = (path) => JSON.parse(readFileSync(path, 'utf8'));
+          const event = readJson(process.env.GITHUB_EVENT_PATH);
+          const current = readJson(process.env.CURRENT_METADATA_PATH);
+          const files = readJson(process.env.FILES_METADATA_PATH);
+          const expectedNumber = Number(process.env.PR_NUMBER);
+          const checks = [
+            ['event repository', event.repository?.full_name, process.env.GITHUB_REPOSITORY],
+            ['API base repository', current.base?.repo?.full_name, process.env.GITHUB_REPOSITORY],
+            ['event pull request number', event.pull_request?.number, expectedNumber],
+            ['API pull request number', current.number, expectedNumber],
+            ['event head repository', event.pull_request?.head?.repo?.full_name, process.env.PR_HEAD_REPOSITORY],
+            ['API head repository', current.head?.repo?.full_name, process.env.PR_HEAD_REPOSITORY],
+            ['event head SHA', event.pull_request?.head?.sha, process.env.PR_HEAD_SHA],
+            ['API head SHA', current.head?.sha, process.env.PR_HEAD_SHA],
+          ];
+          const mismatches = checks.filter(([, actual, expected]) => (
+            !expected || actual !== expected
+          ));
+          if (mismatches.length > 0) {
+            throw new Error(mismatches.map(([label]) => (
+              `${label} does not match the trusted event value`
+            )).join('\n'));
+          }
+          if (!Array.isArray(files) || files.some((file) => typeof file !== 'string')) {
+            throw new Error('changed files must be an array of strings');
+          }
+          writeFileSync(
+            process.env.AUTHENTICATED_EVENT_PATH,
+            `${JSON.stringify({pull_request: {...current, changed_files_list: files}})}\n`,
+            {mode: 0o600},
+          );
+          process.exitCode = runPullRequestPolicy({
+            eventPath: process.env.AUTHENTICATED_EVENT_PATH,
+            repositoryRoot: `${process.env.PR_HEAD_WORKSPACE}/`,
+          });
+          NODE
 
       - name: Validate pull request and commit titles
         env:
@@ -121,3 +157,16 @@ jobs:
           });
           if (failures.length > 0) process.exit(1);
           NODE
+
+  validation-gate:
+    name: Validation Gate
+    if: always()
+    needs:
+      - policy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Preserve the required validation result contract
+        env:
+          POLICY_RESULT: ${{ needs.policy.result }}
+        shell: bash
+        run: test "$POLICY_RESULT" = success

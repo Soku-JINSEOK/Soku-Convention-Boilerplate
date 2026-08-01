@@ -103,6 +103,9 @@ test('keeps full validation cancellation domains independent', () => {
 test('only policy and Security subscribe to repository events', () => {
   assert.match(policyWorkflow, /^\s{2}pull_request:/m);
   assert.doesNotMatch(policyWorkflow, /^\s{2}push:/m);
+  assert.match(policyWorkflow, /policy:\n\s+name: PR Metadata Gate/);
+  assert.match(policyWorkflow, /validation-gate:\n\s+name: Validation Gate/);
+  assert.match(policyWorkflow, /POLICY_RESULT: \$\{\{ needs\.policy\.result \}\}/);
   assert.match(securityWorkflow, /^\s{2}pull_request:/m);
   assert.match(securityWorkflow, /^\s{2}push:/m);
   assert.match(securityWorkflow, /^\s{2}schedule:/m);
@@ -119,18 +122,27 @@ test('executes policy and history controls from the trusted base checkout', () =
   assert.match(policyWorkflow, /path: trusted-policy/);
   assert.match(policyWorkflow, /ref: \$\{\{ github\.event\.pull_request\.base\.sha \}\}/);
   assert.match(policyWorkflow, /path: pr-head/);
-  assert.match(policyWorkflow, /node trusted-policy\/scripts\/authenticated-pr-metadata\.mjs/);
-  assert.match(policyWorkflow, /node trusted-policy\/scripts\/pull-request-policy\.mjs/);
+  assert.match(
+    policyWorkflow,
+    /import \{runPullRequestPolicy\} from '\.\/trusted-policy\/scripts\/pull-request-policy\.mjs'/,
+  );
+  assert.match(policyWorkflow, /event head SHA/);
+  assert.match(policyWorkflow, /API head SHA/);
+  assert.match(policyWorkflow, /repositoryRoot: `\$\{process\.env\.PR_HEAD_WORKSPACE\}\//);
   assert.match(policyWorkflow, /PR_HEAD_WORKSPACE:/);
+  assert.doesNotMatch(policyWorkflow, /pr-head\/scripts\//);
 
   assert.match(securityWorkflow, /name: Checkout trusted security policy/);
   assert.match(securityWorkflow, /path: trusted-security/);
   assert.match(securityWorkflow, /path: repository/);
   assert.match(
     securityWorkflow,
-    /python trusted-security\/scripts\/verify_historical_baseline\.py/,
+    /HISTORICAL_BASELINE_COMMIT: 2be9df2421e5661ea5d978fa7832a0ae32936e9d/,
   );
+  assert.match(securityWorkflow, /historical \.gitleaks\.toml raw-byte hash mismatch/);
   assert.match(securityWorkflow, /--config \/trusted\/\.gitleaks\.toml/);
+  assert.match(securityWorkflow, /--log-opts HEAD/);
+  assert.doesNotMatch(securityWorkflow, /repository\/scripts\//);
 });
 
 test('preserves release tag and manual deployment trigger exceptions', () => {

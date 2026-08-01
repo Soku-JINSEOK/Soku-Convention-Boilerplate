@@ -351,6 +351,12 @@ test("workflow reruns on metadata changes and reads the current PR", () => {
   assert.match(workflow, /persist-credentials: false/);
   assert.match(workflow, /install -m 600/);
   assert.match(workflow, /trap cleanup EXIT/);
-  assert.match(workflow, /scripts\/authenticated-pr-metadata\.mjs/);
-  assert.match(workflow, /CURRENT_PR_EVENT_PATH="\$metadata_dir\/event\.json"/);
+  assert.match(workflow, /event head SHA/);
+  assert.match(workflow, /API head SHA/);
+  assert.match(workflow, /AUTHENTICATED_EVENT_PATH="\$metadata_dir\/event\.json"/);
+  assert.match(
+    workflow,
+    /import \{runPullRequestPolicy\} from '\.\/trusted-policy\/scripts\/pull-request-policy\.mjs'/,
+  );
+  assert.doesNotMatch(workflow, /pr-head\/scripts\//);
 });

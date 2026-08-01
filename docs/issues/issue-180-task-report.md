@@ -25,9 +25,12 @@ checks with immutable scanner images.
 - Add exact-plan and historical-baseline verifiers with adversarial tests.
 - Integrate contribution-title enforcement into Pull Request Policy and remove
   its duplicate repository workflow.
-- Execute PR policy and historical scan controls from a base-SHA trusted
-  checkout while inspecting the authenticated PR head in a separate checkout.
+- Execute the existing PR policy and Gitleaks configuration from a base-SHA
+  trusted checkout. Keep the new identity and historical-baseline bootstrap
+  checks fixed in the workflow while inspecting the PR head separately.
 - Make general CI manual/reusable and keep delivery reusable-only.
+- Preserve the required `PR Metadata Gate` and `Validation Gate` status
+  contracts as policy-workflow results while general CI remains reusable-only.
 - Update Cloud Build, local verification, Dependabot, supply-chain, and
   operational documentation for the second Terraform root.
 
@@ -54,11 +57,11 @@ checks with immutable scanner images.
 
 ## Implementation Status
 
-Implementation is in review on Ready PR #181. Review hardening is prepared
-locally to execute policy and historical security controls from the trusted
-base SHA while inspecting the PR head separately. The updated head must be
-pushed and its hosted Policy and Security checks must pass before merge. Live
-Terraform plan, apply, and merge remain out of scope.
+Implementation is in review on Ready PR #181. Review hardening executes the
+existing policy code and Gitleaks configuration from the trusted base SHA while
+keeping new bootstrap checks fixed in workflow code and inspecting the PR head
+separately. The updated head must pass hosted Policy and Security checks before
+merge. Live Terraform plan and apply remain out of scope.
 
 ## Verification
 
@@ -71,9 +74,11 @@ Terraform plan, apply, and merge remain out of scope.
   boundary.
 - YAML lint, actionlint, shell syntax, supply-chain verification, historical
   baseline verification, and `git diff --check` passed after review hardening.
-- The trusted-checkout workflow regression test proves that policy code,
-  baseline verification, and Gitleaks configuration resolve from the base SHA,
-  not from the PR head being evaluated.
+- The trusted-checkout workflow regression test proves that policy code and
+  Gitleaks configuration resolve from the base SHA, new bootstrap checks do not
+  execute PR-head scripts, and the evaluated repository is the PR head.
+- Gitleaks scans the complete ancestry reachable from authenticated `HEAD` and
+  excludes unrelated remote branch refs from the PR result.
 - The pre-review remote-head evidence below remains historical until the
   review-hardened head is pushed and rerun.
 - Node PR identity, policy, supply-chain, workflow, Dependabot, and Cloud Build
@@ -141,10 +146,10 @@ logging 3개 리소스 전용 Terraform root/backend prefix와 allowlist 기반 
 
 ## 구현 현황
 
-Ready PR #181은 review 중입니다. PR 자체가 검증 script와 Gitleaks 설정을
-교체할 수 없도록 base SHA trusted checkout과 PR head checkout을 분리하는
-보강을 로컬에서 준비했습니다. 보강된 head의 push 및 hosted 재검증 전에는
-merge하지 않습니다. live Terraform plan, apply, merge는 범위 밖입니다.
+Ready PR #181은 review 중입니다. 기존 policy code와 Gitleaks 설정은 base SHA
+trusted checkout에서 실행하고, 새 bootstrap 검사는 workflow 안에 고정하며,
+검사 대상 PR head는 별도로 checkout합니다. 보강된 head의 hosted 재검증 전에는
+merge하지 않습니다. live Terraform plan과 apply는 범위 밖입니다.
 
 ## 검증
 
