@@ -18,11 +18,15 @@ const releaseWorkflow = readFileSync(
   new URL('./workflows/release.yml', import.meta.url),
   'utf8',
 );
+const deployWorkflow = readFileSync(
+  new URL('./workflows/deploy-gcp.yml', import.meta.url),
+  'utf8',
+);
 const releaseIdentity = JSON.parse(
   readFileSync(new URL('../release-identity.json', import.meta.url), 'utf8'),
 );
-const contributionWorkflow = readFileSync(
-  new URL('./workflows/contribution-title-check.yml', import.meta.url),
+const securityWorkflow = readFileSync(
+  new URL('./workflows/security.yml', import.meta.url),
   'utf8',
 );
 const policyWorkflow = readFileSync(
@@ -30,14 +34,15 @@ const policyWorkflow = readFileSync(
   'utf8',
 );
 
-test('separates full validation from current PR metadata validation', () => {
+test('keeps general validation manual and reusable', () => {
+  assert.match(workflow, /^\s{2}workflow_call:/m);
+  assert.match(workflow, /^\s{2}workflow_dispatch:/m);
+  assert.doesNotMatch(workflow, /^\s{2}pull_request:/m);
+  assert.doesNotMatch(workflow, /^\s{2}push:/m);
   assert.match(workflow, /ci-quick-gate:\n\s+name: CI Quick Gate/);
   assert.match(workflow, /uses: \.\/\.github\/workflows\/ci-quick\.yml/);
   assert.match(workflow, /validation-gate:[\s\S]*name: Validation Gate/);
-  assert.match(workflow, /name: Full Validation Not Required/);
-  assert.match(workflow, /name: PR Metadata Gate/);
-  assert.match(workflow, /uses: \.\/\.github\/workflows\/contribution-title-check\.yml/);
-  assert.match(workflow, /uses: \.\/\.github\/workflows\/pull-request-policy\.yml/);
+  assert.doesNotMatch(workflow, /PR Metadata Gate/);
 });
 
 test('runs CI Quick in parallel without replacing the full gate', () => {
@@ -77,11 +82,7 @@ test('provides a valid Quick base for manual reusable validation', () => {
   );
 });
 
-test('runs full validation only for code-bearing pull request events', () => {
-  for (const action of ['opened', 'synchronize', 'reopened']) {
-    assert.match(workflow, new RegExp(`github\\.event\\.action == '${action}'`));
-  }
-  assert.match(workflow, /github\.event\.changes\.base != null/);
+test('retains the full validation result contract', () => {
   assert.match(workflow, /REPOSITORY_RESULT:/);
 });
 
@@ -92,28 +93,67 @@ test('metadata-only events preserve the required Validation Gate context', () =>
   assert.match(workflow, /validation-metadata-not-required-/);
 });
 
-test('keeps full and metadata cancellation domains independent', () => {
+test('keeps full validation cancellation domains independent', () => {
   assert.match(workflow, /group: validation-full-repository-/);
   assert.match(workflow, /group: validation-full-templates-/);
-  assert.match(workflow, /group: validation-full-security-/);
-  assert.match(workflow, /group: validation-metadata-titles-/);
-  assert.match(workflow, /group: validation-metadata-governance-/);
   assert.match(workflow, /group: validation-full-gate-/);
   assert.doesNotMatch(workflow, /^concurrency:/m);
 });
 
-test('only Validation directly subscribes to pull request and main push events', () => {
-  assert.match(workflow, /^\s{2}pull_request:/m);
-  assert.match(workflow, /^\s{2}push:/m);
-  for (const component of [contributionWorkflow, policyWorkflow]) {
-    assert.match(component, /^\s{2}workflow_call:/m);
-    assert.doesNotMatch(component, /^\s{2}pull_request:/m);
-    assert.doesNotMatch(component, /^\s{2}push:/m);
-  }
+test('only policy and Security subscribe to repository events', () => {
+  assert.match(policyWorkflow, /^\s{2}pull_request:/m);
+  assert.doesNotMatch(policyWorkflow, /^\s{2}push:/m);
+  assert.match(policyWorkflow, /policy:\n\s+name: PR Metadata Gate/);
+  assert.match(policyWorkflow, /validation-gate:\n\s+name: Validation Gate/);
+  assert.match(policyWorkflow, /POLICY_RESULT: \$\{\{ needs\.policy\.result \}\}/);
+  assert.match(securityWorkflow, /^\s{2}pull_request:/m);
+  assert.match(securityWorkflow, /^\s{2}push:/m);
+  assert.match(securityWorkflow, /^\s{2}schedule:/m);
+
+  const securityPullRequestTrigger =
+    /pull_request:\n\s+types:\n((?:\s+- .+\n)+)/.exec(securityWorkflow);
+  assert.ok(securityPullRequestTrigger, 'Security PR event list must be explicit');
+  assert.match(securityPullRequestTrigger[1], /\bready_for_review\b/);
+  assert.doesNotMatch(securityPullRequestTrigger[1], /\bclosed\b/);
+});
+
+test('executes policy and history controls from the trusted base checkout', () => {
+  assert.match(policyWorkflow, /name: Checkout trusted policy source/);
+  assert.match(policyWorkflow, /path: trusted-policy/);
+  assert.match(policyWorkflow, /ref: \$\{\{ github\.event\.pull_request\.base\.sha \}\}/);
+  assert.match(policyWorkflow, /path: pr-head/);
+  assert.match(
+    policyWorkflow,
+    /import \{runPullRequestPolicy\} from '\.\/trusted-policy\/scripts\/pull-request-policy\.mjs'/,
+  );
+  assert.match(policyWorkflow, /event head SHA/);
+  assert.match(policyWorkflow, /API head SHA/);
+  assert.match(policyWorkflow, /repositoryRoot: `\$\{process\.env\.PR_HEAD_WORKSPACE\}\//);
+  assert.match(policyWorkflow, /PR_HEAD_WORKSPACE:/);
+  assert.doesNotMatch(policyWorkflow, /pr-head\/scripts\//);
+
+  assert.match(securityWorkflow, /name: Checkout trusted security policy/);
+  assert.match(securityWorkflow, /path: trusted-security/);
+  assert.match(securityWorkflow, /path: repository/);
+  assert.match(
+    securityWorkflow,
+    /HISTORICAL_BASELINE_COMMIT: 2be9df2421e5661ea5d978fa7832a0ae32936e9d/,
+  );
+  assert.match(securityWorkflow, /historical \.gitleaks\.toml raw-byte hash mismatch/);
+  assert.match(securityWorkflow, /--config \/trusted\/\.gitleaks\.toml/);
+  assert.match(securityWorkflow, /--log-opts HEAD/);
+  assert.doesNotMatch(securityWorkflow, /repository\/scripts\//);
+});
+
+test('preserves release tag and manual deployment trigger exceptions', () => {
+  assert.match(releaseWorkflow, /^\s{2}push:\n\s+tags:/m);
+  assert.match(releaseWorkflow, /^\s{2}workflow_dispatch:/m);
+  assert.match(deployWorkflow, /^\s{2}workflow_dispatch:/m);
+  assert.doesNotMatch(deployWorkflow, /^\s{2}(?:pull_request|push|schedule):/m);
 });
 
 test('does not subscribe to closed pull request events', () => {
-  const trigger = /pull_request:\n\s+types: \[([^\]]+)\]/.exec(workflow);
+  const trigger = /pull_request:\n\s+types:\n((?:\s+- .+\n)+)/.exec(policyWorkflow);
   assert.ok(trigger, 'pull_request event list must be explicit');
   assert.doesNotMatch(trigger[1], /closed/);
   for (const action of [

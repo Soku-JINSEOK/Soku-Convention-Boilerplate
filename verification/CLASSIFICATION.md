@@ -91,11 +91,14 @@ pull requests.
 | Check | Job | Category |
 | --- | --- | --- |
 | Gitleaks full-history secret scan | `secrets` | local-capable in principle (`gitleaks detect --source .`); treated as **hosted-only** for the weekly/scheduled full-history guarantee — local runs are a best-effort supplement, not a replacement |
-| npm audit / pip-audit / license file checks | `dependencies` | local-capable — **drift**: `ci-local.sh` used `--audit-level=high`, this workflow uses `--audit-level=low` (resolved in this phase, see `tools.env`) |
+| npm audit / pip-audit / license file checks | `dependencies` | local-capable — npm uses the shared `high` threshold from `tools.env`; hosted and local checks must remain aligned. |
 | `govulncheck` (soku, templates/go) | `go-vulnerabilities` | local-capable — not yet in `ci-local.sh` |
 | OSV scanner | `osv` | local-capable — not yet in `ci-local.sh` |
 
-## `contribution-title-check.yml` / `pull-request-policy.yml`
+## Pull Request Policy
+
+Contribution-title enforcement is integrated into `pull-request-policy.yml`;
+there is no second event-driven repository workflow for the same metadata.
 
 | Check | Category |
 | --- | --- |

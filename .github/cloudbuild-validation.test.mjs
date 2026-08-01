@@ -43,9 +43,13 @@ test('Cloud Build performs validation only with immutable builders', () => {
   assert.match(config, /node --test[\s\S]*deploy-gcp\.test\.mjs/);
   assert.match(config, /node --test[\s\S]*cloudbuild-validation\.test\.mjs/);
   assert.match(config, /terraform fmt -check -recursive/);
-  assert.match(config, /terraform init -backend=false -input=false/);
-  assert.match(config, /terraform validate/);
-  assert.match(config, /terraform test/);
+  assert.match(
+    config,
+    /for root in infra\/gcp infra\/gcp\/cloud-build-logging/,
+  );
+  assert.match(config, /init -backend=false -input=false -lockfile=readonly/);
+  assert.match(config, /terraform -chdir="\$root" validate/);
+  assert.match(config, /terraform -chdir=infra\/gcp test/);
   assert.match(config, /build[\s\S]*--platform[\s\S]*linux\/amd64/);
   assert.match(config, /^timeout: 900s$/m);
 

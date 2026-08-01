@@ -2,6 +2,7 @@ name: Repository CI
 
 on:
   workflow_call:
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -87,6 +88,19 @@ jobs:
             infra/gcp/README.md
             infra/gcp/.terraform.lock.hcl
             infra/gcp/tests/cloud_build_validation.tftest.hcl
+            infra/gcp/cloud-build-logging/main.tf
+            infra/gcp/cloud-build-logging/variables.tf
+            infra/gcp/cloud-build-logging/versions.tf
+            infra/gcp/cloud-build-logging/.terraform.lock.hcl
+            infra/gcp/cloud-build-logging/README.md
+            scripts/verify-cloud-build-logging-plan.py
+            scripts/verify_cloud_build_logging_plan_test.py
+            scripts/authenticated-pr-metadata.mjs
+            scripts/authenticated-pr-metadata.test.mjs
+            scripts/verify_historical_baseline.py
+            scripts/verify_historical_baseline_test.py
+            security/historical-baseline.json
+            security/requirements-historical.txt
             cloudbuild/validation.yaml
             docs/issues/TASK_REPORT_TEMPLATE.md
             docs/releases/v1.0.0.md
@@ -167,7 +181,6 @@ jobs:
             .github/workflows/security.yml
             .github/workflows/templates-ci.yml
             .github/workflows/validation.yml
-            .github/workflows/contribution-title-check.yml
             .github/workflows/pull-request-policy.yml
             .github/labels.yml
             .github/dependabot.yml
@@ -345,6 +358,7 @@ jobs:
         run: >-
           node --test templates/_shared/commitlint/*.test.mjs
           scripts/contribution-title.test.mjs
+          scripts/authenticated-pr-metadata.test.mjs
           scripts/pull-request-policy.test.mjs
 
       - name: Run pull-request governance regression tests
@@ -370,6 +384,13 @@ jobs:
 
       - name: Run public provider action regression tests
         run: python3 soku/actions/ci-cd-control-plane-v1/test_validate_config.py
+
+      - name: Run Terraform plan and historical baseline regression tests
+        run: |
+          python3 -m unittest \
+            scripts/verify_cloud_build_logging_plan_test.py \
+            scripts/verify_historical_baseline_test.py
+          python3 scripts/verify_historical_baseline.py
 
       - name: Run release tag gate regression tests
         run: scripts/verify-release-tag_test.sh

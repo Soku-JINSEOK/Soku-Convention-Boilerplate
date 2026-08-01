@@ -1,0 +1,7 @@
+{
+  "schema_version": 1,
+  "commit": "2be9df2421e5661ea5d978fa7832a0ae32936e9d",
+  "files": {
+    ".gitleaks.toml": "32f6c40a5c4ec7beb027ee1e41193bd31d78f4c49e37aa43d28c35de113c5697"
+  }
+}

@@ -78,6 +78,12 @@ Validation resources use the same state bucket with the isolated
 remain under `cloud-run`, so later deployment plans cannot remove validation
 triggers through the variable's default `false` value.
 
+Validation log routing is a separate lifecycle boundary. The three logging
+resources live in [`cloud-build-logging`](./cloud-build-logging/README.md) and
+use the matching `cloud-build-logging` backend prefix. This root does not
+manage, import, or delete foundation, trigger, IAM, WIF, billing, or
+`shared-artifacts` state.
+
 During apply, the bootstrap resolves immutable GitHub repository and owner IDs.
 The WIF provider accepts only the configured repository IDs, `refs/heads/main`,
 and `.github/workflows/deploy-gcp.yml` from `main`. The state bucket is hardened

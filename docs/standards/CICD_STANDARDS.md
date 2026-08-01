@@ -61,34 +61,30 @@ Pipelines should be:
 
 Avoid building opaque pipelines that only one person can maintain.
 
-For this boilerplate, one top-level Validation workflow must run on every pull
-request and every push to `main`. It calls the complete repository and
-runtime-template workflows, enforces the pull-request title and every in-scope
-commit title. Code-bearing events aggregate repository, template, and security
-results into `Validation Gate`; every pull request event validates current
-title, body, labels, assignee, and Draft state through `PR Metadata Gate`.
-Metadata-only events create `Full Validation Not Required` instead of a new
-`Validation Gate`, so they preserve the successful full-validation check on the
-unchanged head commit. Full and metadata validation use independent concurrency
-groups, and closed pull request events do not start this workflow.
-Required branch protection targets `Validation Gate` and `PR Metadata Gate`.
-Component workflows are
-reusable implementation details and must not also trigger independently, which
-would duplicate execution.
+For this boilerplate, only Pull Request Policy and Security subscribe directly
+to pull request or `main` branch events. Pull Request Policy authenticates the
+current API metadata against the trusted event identity and enforces the PR and
+commit-title contract. Security runs its complete history, dependency, Go
+vulnerability, and OSV checks for pull request code events, when a Draft becomes
+ready for review, and on pushes to `main`. Closed pull requests do not start
+either workflow.
 
-The reusable contribution-title and pull-request-policy workflows fetch current
-PR metadata when called; they do not trust a possibly stale metadata event
-payload. Their caller retains separate full-validation and metadata concurrency
-domains. Only `Validation Gate` and `PR Metadata Gate` are required branch
-protection contexts; `Full Validation Not Required` is informational and never
-replaces a missing code-bearing validation result.
+Repository CI, runtime-template validation, and their Validation aggregate are
+manual or reusable workflows. They do not independently subscribe to pull
+request or `main` events. This keeps the event-driven validation surface limited
+to the two policy and security responsibilities above.
 
-Cancel older in-progress validation within the same full or metadata domain.
-Keep default workflow
-permissions at `contents: read`; only the release delivery job may request
-`contents: write`, after the shared validation and signed release-record checks
-succeed. Pin every external action to a verified full commit SHA and retain a
-nearby version comment so maintainers can audit upgrades.
+Two operating-contract exceptions are intentional. Release may subscribe to
+signed `v*` and `soku/v*` tag pushes, and Deploy remains manual through
+`workflow_dispatch`. A tag event does not authorize another release axis, and a
+manual deployment still requires its documented environment and operation
+gates.
+
+Keep default workflow permissions at `contents: read`; only the release
+delivery job may request `contents: write`, after the shared validation and
+signed release-record checks succeed. Pin every external action to a verified
+full commit SHA and retain a nearby version comment so maintainers can audit
+upgrades.
 
 `verification/tools.env` and `verification/commands/*.sh` are the single
 source of truth for the tool versions and thresholds these hosted workflows

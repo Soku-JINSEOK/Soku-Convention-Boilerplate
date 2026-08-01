@@ -35,7 +35,7 @@ jobs:
   #     - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
   #       with:
   #         node-version: '22'
-  #     - run: npm audit --audit-level=low
+  #     - run: npm audit --audit-level=high
 # soku:job-end javascript-typescript-node
 
 # soku:job-begin python

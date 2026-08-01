@@ -1,0 +1,3 @@
+# The historical-baseline verifier intentionally uses only Python's standard
+# library. Keep --require-hashes enabled in CI so adding a dependency without
+# an exact artifact hash fails closed.
