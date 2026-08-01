@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import {existsSync, readFileSync} from 'node:fs';
+import {resolve, sep} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {
   contributionTitleOptionsForPullRequest,
@@ -265,8 +266,9 @@ export function runPullRequestPolicy({eventPath, repositoryRoot} = {}) {
     console.error('CURRENT_PR_EVENT_PATH or GITHUB_EVENT_PATH is required.');
     return 1;
   }
-  const root =
-    repositoryRoot ?? fileURLToPath(new URL('../', import.meta.url));
+  const root = repositoryRoot
+    ? `${resolve(repositoryRoot)}${sep}`
+    : fileURLToPath(new URL('../', import.meta.url));
   const event = JSON.parse(readFileSync(resolvedEventPath, 'utf8'));
   const pullRequest = event.pullRequest ?? event.pull_request;
   if (!pullRequest) {
@@ -312,5 +314,7 @@ export function runPullRequestPolicy({eventPath, repositoryRoot} = {}) {
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
-  process.exitCode = runPullRequestPolicy();
+  process.exitCode = runPullRequestPolicy({
+    repositoryRoot: process.env.PR_HEAD_WORKSPACE,
+  });
 }

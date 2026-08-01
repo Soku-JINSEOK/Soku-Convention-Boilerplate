@@ -23,11 +23,20 @@ jobs:
     name: Pull Request Governance
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout trusted policy source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+          path: trusted-policy
+          ref: ${{ github.event.pull_request.base.sha }}
+
       - name: Checkout authenticated pull request head
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
           persist-credentials: false
+          path: pr-head
           ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Setup Node.js
@@ -65,13 +74,14 @@ jobs:
             --jq '.[].filename' \
             | jq -R -s 'split("\n") | map(select(length > 0))' \
             > "$metadata_dir/files.json"
-          node scripts/authenticated-pr-metadata.mjs \
+          node trusted-policy/scripts/authenticated-pr-metadata.mjs \
             --event "$GITHUB_EVENT_PATH" \
             --current "$metadata_dir/current.json" \
             --files "$metadata_dir/files.json" \
             --output "$metadata_dir/event.json"
           CURRENT_PR_EVENT_PATH="$metadata_dir/event.json" \
-            node scripts/pull-request-policy.mjs
+          PR_HEAD_WORKSPACE="$GITHUB_WORKSPACE/pr-head" \
+            node trusted-policy/scripts/pull-request-policy.mjs
 
       - name: Validate pull request and commit titles
         env:
@@ -80,26 +90,25 @@ jobs:
           PR_HEAD_REF: ${{ github.event.pull_request.head.ref }}
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_HEAD_WORKSPACE: ${{ github.workspace }}/pr-head
         shell: bash
         run: |
           node --test \
-            scripts/contribution-title.test.mjs \
-            templates/_shared/commitlint/contribution-title.test.mjs
+            trusted-policy/scripts/contribution-title.test.mjs \
+            trusted-policy/templates/_shared/commitlint/contribution-title.test.mjs
           node --input-type=module - <<'NODE'
           import {execFileSync} from 'node:child_process';
           import {
             contributionTitleOptionsForPullRequest,
             validateContributionTitle,
-          } from './scripts/contribution-title.mjs';
-          const mergeBase = execFileSync(
-            'git', ['merge-base', process.env.BASE_SHA, process.env.HEAD_SHA],
-            {encoding: 'utf8'},
+          } from './trusted-policy/scripts/contribution-title.mjs';
+          const git = (...args) => execFileSync(
+            'git', args, {cwd: process.env.PR_HEAD_WORKSPACE, encoding: 'utf8'},
           ).trim();
-          const titles = execFileSync(
-            'git',
-            ['log', '--no-merges', '--format=%s', `${mergeBase}..${process.env.HEAD_SHA}`],
-            {encoding: 'utf8'},
-          ).trim().split('\n').filter(Boolean);
+          const mergeBase = git('merge-base', process.env.BASE_SHA, process.env.HEAD_SHA);
+          const titles = git(
+            'log', '--no-merges', '--format=%s', `${mergeBase}..${process.env.HEAD_SHA}`,
+          ).split('\n').filter(Boolean);
           const options = contributionTitleOptionsForPullRequest(
             process.env.PR_AUTHOR ?? '', process.env.PR_HEAD_REF ?? '',
           );

@@ -25,6 +25,8 @@ checks with immutable scanner images.
 - Add exact-plan and historical-baseline verifiers with adversarial tests.
 - Integrate contribution-title enforcement into Pull Request Policy and remove
   its duplicate repository workflow.
+- Execute PR policy and historical scan controls from a base-SHA trusted
+  checkout while inspecting the authenticated PR head in a separate checkout.
 - Make general CI manual/reusable and keep delivery reusable-only.
 - Update Cloud Build, local verification, Dependabot, supply-chain, and
   operational documentation for the second Terraform root.
@@ -40,6 +42,8 @@ checks with immutable scanner images.
   persisted.
 - Full-history Gitleaks and OSV scanners are digest-pinned; historical baseline
   ancestry and raw bytes are verified.
+- A PR cannot replace the policy scripts, historical baseline verifier, or
+  Gitleaks configuration that evaluates its own head.
 - No apply, import, trigger cutover, IAM, delivery, or merge is performed
   without a later explicit approval.
 
@@ -50,12 +54,28 @@ checks with immutable scanner images.
 
 ## Implementation Status
 
-Implementation is complete on Ready PR #181. Local verification, authenticated
-Pull Request Policy, event-driven Security, CodeQL, and global Cloud Build
-validation passed. Live Terraform plan, apply, and merge remain out of scope.
+Implementation is in review on Ready PR #181. Review hardening is prepared
+locally to execute policy and historical security controls from the trusted
+base SHA while inspecting the PR head separately. The updated head must be
+pushed and its hosted Policy and Security checks must pass before merge. Live
+Terraform plan, apply, and merge remain out of scope.
 
 ## Verification
 
+- Review-hardened local tree: Node policy, workflow, verification, and
+  supply-chain suites passed, 126 tests.
+- Review-hardened local tree: Python Terraform-plan and historical-baseline
+  suites passed, 7 tests.
+- The plan verifier now rejects cross-project sinks, redirected destinations,
+  and altered build-log filters in addition to the existing action/resource
+  boundary.
+- YAML lint, actionlint, shell syntax, supply-chain verification, historical
+  baseline verification, and `git diff --check` passed after review hardening.
+- The trusted-checkout workflow regression test proves that policy code,
+  baseline verification, and Gitleaks configuration resolve from the base SHA,
+  not from the PR head being evaluated.
+- The pre-review remote-head evidence below remains historical until the
+  review-hardened head is pushed and rerun.
 - Node PR identity, policy, supply-chain, workflow, Dependabot, and Cloud Build
   suites: passed, 43 tests.
 - Python Terraform-plan and historical-baseline suites: passed, 6 tests.
@@ -121,15 +141,18 @@ logging 3개 리소스 전용 Terraform root/backend prefix와 allowlist 기반 
 
 ## 구현 현황
 
-Ready PR #181 구현과 hosted Security/Policy/CodeQL/global Cloud Build 검증이
-완료되었습니다. live Terraform plan, apply, merge는 범위 밖입니다.
+Ready PR #181은 review 중입니다. PR 자체가 검증 script와 Gitleaks 설정을
+교체할 수 없도록 base SHA trusted checkout과 PR head checkout을 분리하는
+보강을 로컬에서 준비했습니다. 보강된 head의 push 및 hosted 재검증 전에는
+merge하지 않습니다. live Terraform plan, apply, merge는 범위 밖입니다.
 
 ## 검증
 
-Node 95개, Python 6개, Terraform 4개 테스트와 두 root init/validate,
-supply-chain, hosted Security/Policy/global Cloud Build 및 통제된 정책
-실패·복구 검사가 통과했습니다. Ready 이벤트가 생성한 Policy run
-`30630685703`과 Security run `30630685730`의 모든 job도 통과했습니다.
+review 보강 tree에서 Node 126개와 Python 7개 테스트, YAML/actionlint,
+supply-chain, historical baseline 및 diff 검사가 통과했습니다. 기존 remote
+head의 Terraform 4개 테스트와 두 root init/validate, hosted
+Security/Policy/global Cloud Build 증거는 보강 head가 push되어 hosted checks를
+다시 통과할 때까지 역사적 증거로만 유지합니다.
 
 ## 공개 적합성 검토
 

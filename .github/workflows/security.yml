@@ -23,11 +23,21 @@ jobs:
     name: Authenticated history and secret scan
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout trusted security policy
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+          path: trusted-security
+          ref: ${{ github.event.pull_request.base.sha || github.sha }}
+
       - name: Checkout complete repository history
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
           persist-credentials: false
+          path: repository
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
       - name: Setup Python
         uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
@@ -39,15 +49,18 @@ jobs:
           python -m pip install \
             --disable-pip-version-check \
             --require-hashes \
-            -r security/requirements-historical.txt
-          python scripts/verify_historical_baseline.py
+            -r trusted-security/security/requirements-historical.txt
+          python trusted-security/scripts/verify_historical_baseline.py \
+            repository trusted-security/security/historical-baseline.json
 
       - name: Scan complete history with Gitleaks
         run: >-
           docker run --rm
-          --volume "${PWD}:/repository:ro"
+          --volume "${PWD}/repository:/repository:ro"
+          --volume "${PWD}/trusted-security:/trusted:ro"
           ghcr.io/gitleaks/gitleaks:v8.24.2@sha256:b5918eb91b8d2473cec722f066abb4352e4ffdc4ec9f4283ec143aba9ec9ebc4
-          detect --source /repository --redact --no-banner
+          detect --source /repository --config /trusted/.gitleaks.toml
+          --redact --no-banner
 
   dependencies:
     name: Dependency and license audits

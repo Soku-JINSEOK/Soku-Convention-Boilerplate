@@ -114,6 +114,25 @@ test('only policy and Security subscribe to repository events', () => {
   assert.doesNotMatch(securityPullRequestTrigger[1], /\bclosed\b/);
 });
 
+test('executes policy and history controls from the trusted base checkout', () => {
+  assert.match(policyWorkflow, /name: Checkout trusted policy source/);
+  assert.match(policyWorkflow, /path: trusted-policy/);
+  assert.match(policyWorkflow, /ref: \$\{\{ github\.event\.pull_request\.base\.sha \}\}/);
+  assert.match(policyWorkflow, /path: pr-head/);
+  assert.match(policyWorkflow, /node trusted-policy\/scripts\/authenticated-pr-metadata\.mjs/);
+  assert.match(policyWorkflow, /node trusted-policy\/scripts\/pull-request-policy\.mjs/);
+  assert.match(policyWorkflow, /PR_HEAD_WORKSPACE:/);
+
+  assert.match(securityWorkflow, /name: Checkout trusted security policy/);
+  assert.match(securityWorkflow, /path: trusted-security/);
+  assert.match(securityWorkflow, /path: repository/);
+  assert.match(
+    securityWorkflow,
+    /python trusted-security\/scripts\/verify_historical_baseline\.py/,
+  );
+  assert.match(securityWorkflow, /--config \/trusted\/\.gitleaks\.toml/);
+});
+
 test('preserves release tag and manual deployment trigger exceptions', () => {
   assert.match(releaseWorkflow, /^\s{2}push:\n\s+tags:/m);
   assert.match(releaseWorkflow, /^\s{2}workflow_dispatch:/m);

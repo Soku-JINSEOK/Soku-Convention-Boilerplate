@@ -13,15 +13,26 @@ def valid_plan():
     resources = []
     after_values = {
         "google_logging_project_bucket_config.cloud_build_validation": {
+            "bucket_id": "cloud-build-validation",
             "location": "asia-northeast1",
+            "project": "example-project",
             "retention_days": 30,
         },
         "google_logging_project_sink.cloud_build_validation": {
+            "destination": (
+                "logging.googleapis.com/projects/example-project/locations/"
+                "asia-northeast1/buckets/cloud-build-validation"
+            ),
+            "filter": 'resource.type="build"',
+            "name": "cloud-build-validation",
+            "project": "example-project",
             "unique_writer_identity": False,
         },
         "google_logging_project_exclusion.default_disabled": {
-            "name": "_Default",
             "disabled": True,
+            "filter": 'resource.type="build"',
+            "name": "_Default",
+            "project": "example-project",
         },
     }
     for address, expected in MODULE.EXPECTED.items():
@@ -73,6 +84,24 @@ class PlanVerifierTest(unittest.TestCase):
         mutations.append(plan)
         plan = valid_plan()
         plan["resource_changes"][2]["change"]["after"]["disabled"] = False
+        mutations.append(plan)
+        for mutation in mutations:
+            with self.subTest(mutation=mutation):
+                self.assertTrue(MODULE.verify_plan(copy.deepcopy(mutation)))
+
+    def test_rejects_cross_project_or_redirected_logging(self):
+        mutations = []
+        plan = valid_plan()
+        plan["resource_changes"][1]["change"]["after"]["project"] = "other"
+        mutations.append(plan)
+        plan = valid_plan()
+        plan["resource_changes"][1]["change"]["after"]["destination"] = (
+            "logging.googleapis.com/projects/example-project/locations/global/"
+            "buckets/_Default"
+        )
+        mutations.append(plan)
+        plan = valid_plan()
+        plan["resource_changes"][2]["change"]["after"]["filter"] = ""
         mutations.append(plan)
         for mutation in mutations:
             with self.subTest(mutation=mutation):

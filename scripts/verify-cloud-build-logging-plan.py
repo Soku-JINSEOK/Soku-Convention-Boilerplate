@@ -8,15 +8,27 @@ import sys
 EXPECTED = {
     "google_logging_project_bucket_config.cloud_build_validation": {
         "type": "google_logging_project_bucket_config",
-        "checks": {"location": "asia-northeast1", "retention_days": 30},
+        "checks": {
+            "bucket_id": "cloud-build-validation",
+            "location": "asia-northeast1",
+            "retention_days": 30,
+        },
     },
     "google_logging_project_sink.cloud_build_validation": {
         "type": "google_logging_project_sink",
-        "checks": {"unique_writer_identity": False},
+        "checks": {
+            "filter": 'resource.type="build"',
+            "name": "cloud-build-validation",
+            "unique_writer_identity": False,
+        },
     },
     "google_logging_project_exclusion.default_disabled": {
         "type": "google_logging_project_exclusion",
-        "checks": {"name": "_Default", "disabled": True},
+        "checks": {
+            "disabled": True,
+            "filter": 'resource.type="build"',
+            "name": "_Default",
+        },
     },
 }
 
@@ -60,6 +72,26 @@ def verify_plan(plan):
             errors.append(f"{address}: IAM is forbidden")
         if after.get("name") == "_Required" or "_Required" in rendered:
             errors.append(f"{address}: _Required is forbidden")
+
+    bucket = observed.get("google_logging_project_bucket_config.cloud_build_validation", {})
+    sink = observed.get("google_logging_project_sink.cloud_build_validation", {})
+    exclusion = observed.get("google_logging_project_exclusion.default_disabled", {})
+    bucket_after = bucket.get("change", {}).get("after") or {}
+    sink_after = sink.get("change", {}).get("after") or {}
+    exclusion_after = exclusion.get("change", {}).get("after") or {}
+    project = bucket_after.get("project")
+    if not isinstance(project, str) or not project:
+        errors.append("logging resources require a known non-empty project")
+    else:
+        for address, after in (("sink", sink_after), ("exclusion", exclusion_after)):
+            if after.get("project") != project:
+                errors.append(f"{address}: project must match the bucket project")
+        expected_destination = (
+            "logging.googleapis.com/projects/"
+            f"{project}/locations/asia-northeast1/buckets/cloud-build-validation"
+        )
+        if sink_after.get("destination") != expected_destination:
+            errors.append("sink: destination must be the dedicated regional bucket")
 
     return errors
 
