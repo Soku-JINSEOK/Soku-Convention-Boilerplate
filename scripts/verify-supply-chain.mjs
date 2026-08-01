@@ -39,7 +39,6 @@ export const REQUIRED_UPDATE_TARGETS = [
   ['npm', '/templates/javascript-typescript-node'],
   ['pip', '/templates/python'],
   ['maven', '/templates/java-spring'],
-  ['docker', '/'],
   ['docker', '/.devcontainer'],
   ['docker', '/templates/gcloud'],
   ['terraform', '/infra/gcp'],
