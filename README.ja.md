@@ -179,6 +179,7 @@ smoke で確認された境界を修正し、lifecycle-owned `.soku/` state を 
 - [LICENSE](./LICENSE): ボイラープレート基本ライセンスドキュメント（MIT）
 - [SECURITY.md](./SECURITY.md): セキュリティ欠陥の報告窓口
 - [`soku` CLI](./soku/README.md): ビルド、インストール、検証、パッケージ、およびリリース運用
+- [Soku ターミナルおよび completion ガイド](./docs/guides/SOKU_TERMINAL_GUIDE.ja.md): 色、日常フロー、自動化、4 shell の設定
 - [VERIFICATION_GUIDE.md](./VERIFICATION_GUIDE.md): ローカル、hosted、governance、artifact、security、cost の完全な検証
 
 ### 📏 `docs/standards/` — 構造とプロセスの規範ドキュメント

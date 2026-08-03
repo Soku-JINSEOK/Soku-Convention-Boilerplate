@@ -181,6 +181,7 @@ This boilerplate is intended to serve as:
 - [LICENSE](./LICENSE): default boilerplate license
 - [SECURITY.md](./SECURITY.md): security reporting entrypoint
 - [`soku` CLI](./soku/README.md): build, install, verification, packaging, and release operation
+- [Soku terminal and completion guide](./docs/guides/SOKU_TERMINAL_GUIDE.md): color, daily workflow, automation, and four-shell setup
 - [VERIFICATION_GUIDE.md](./VERIFICATION_GUIDE.md): complete local, hosted, governance, artifact, security, and cost checks
 
 ### 📏 `docs/standards/` — normative structural and process rules

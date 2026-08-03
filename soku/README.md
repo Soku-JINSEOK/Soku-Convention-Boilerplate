@@ -1,5 +1,9 @@
 # `soku` CLI
 
+[Terminal guide: English](../docs/guides/SOKU_TERMINAL_GUIDE.md) |
+[한국어](../docs/guides/SOKU_TERMINAL_GUIDE.ko.md) |
+[日本語](../docs/guides/SOKU_TERMINAL_GUIDE.ja.md)
+
 `soku` is the cross-platform command for the lifecycle contract in
 [`SOKU_LIFECYCLE.md`](../docs/standards/SOKU_LIFECYCLE.md). It provides stable
 parsing and output, transactional `init`, portable manifest-v1/v2 records, and
@@ -26,6 +30,57 @@ CLI distribution is available in two equivalent paths:
 
 The npm wrapper verifies `checksums.txt` for the selected native release and caches
 the binary for your platform in your user cache.
+
+## Terminal Output and Shell Completion
+
+Human reports use the same titles, status words, fields, lists, and next-action
+lines in every environment. On a TTY, `--color=auto` adds restrained color;
+pipes remain stable plain text. `NO_COLOR` and `TERM=dumb` disable automatic
+color. Use `--color=always` or `--color=never` for an explicit override. JSON,
+quiet output, prompts, and generated completion scripts never depend on color.
+
+Load completion for only the current session:
+
+```bash
+# bash
+source <(soku completion bash)
+
+# zsh
+source <(soku completion zsh)
+
+# fish
+soku completion fish | source
+```
+
+```powershell
+# PowerShell
+soku completion powershell | Out-String | Invoke-Expression
+```
+
+To keep a generated script in a user-owned location, generate it explicitly:
+
+```bash
+# bash
+mkdir -p ~/.local/share/bash-completion/completions
+soku completion bash > ~/.local/share/bash-completion/completions/soku
+
+# zsh (add ~/.zfunc to fpath in your own shell configuration)
+mkdir -p ~/.zfunc
+soku completion zsh > ~/.zfunc/_soku
+
+# fish
+mkdir -p ~/.config/fish/completions
+soku completion fish > ~/.config/fish/completions/soku.fish
+```
+
+```powershell
+$completionDirectory = Join-Path $HOME ".config/soku/completions"
+New-Item -ItemType Directory -Force $completionDirectory | Out-Null
+soku completion powershell | Set-Content (Join-Path $completionDirectory "soku.ps1")
+```
+
+Soku does not edit shell profiles or invoke a shell plugin manager. Source the
+saved file from your own profile only if you choose to make it persistent.
 
 ## Transactional Init
 

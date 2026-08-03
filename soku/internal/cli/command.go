@@ -8,6 +8,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/soku/internal/presentation"
 	"github.com/spf13/cobra"
 )
 
@@ -22,9 +23,11 @@ Commands:
   diff        Compare current and desired managed state
   upgrade     Upgrade managed convention state
   docs        Manage opt-in documentation components
+  completion  Generate a shell completion script
 
 Flags:
       --config string       explicit portable YAML configuration file
+      --color string        colorize human output: auto, always, or never (default auto)
       --help                help for soku
       --json                emit one machine-readable JSON envelope
       --non-interactive     forbid interactive prompts
@@ -38,6 +41,7 @@ type options struct {
 	quiet          bool
 	nonInteractive bool
 	version        bool
+	color          string
 }
 
 type dependencies struct {
@@ -51,8 +55,9 @@ type dependencies struct {
 // Run connects the process streams to the injectable command implementation.
 func Run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 	file, _ := stdin.(*os.File)
+	outputFile, _ := stdout.(*os.File)
 	return runWith(args, stdout, stderr, dependencies{
-		runtime:  osRuntime{stdin: file},
+		runtime:  osRuntime{stdin: file, stdout: outputFile},
 		handlers: defaultHandlers(),
 		metadata: resolveBuildMetadata(),
 		stdin:    stdin,
@@ -64,14 +69,9 @@ func runWith(args []string, stdout, stderr io.Writer, deps dependencies) int {
 	jsonMode := hasJSONFlag(args)
 	out := &output{stdout: stdout, stderr: stderr, json: jsonMode}
 	invokedCommand := commandFromArgs(args)
-	if invokedCommand == cobra.ShellCompRequestCmd || invokedCommand == cobra.ShellCompNoDescRequestCmd {
-		exitError := invocationError("shell completion is not available")
-		out.failure(invokedCommand, exitError)
-		return int(exitError.Code)
-	}
 	root := newRootCommand(deps, out)
 	root.SetArgs(args)
-	root.SetOut(io.Discard)
+	root.SetOut(stdout)
 	root.SetErr(io.Discard)
 
 	_, err := root.ExecuteC()
@@ -129,10 +129,12 @@ func newRootCommand(deps dependencies, out *output) *cobra.Command {
 
 	flags := root.PersistentFlags()
 	flags.StringVar(&opts.configPath, "config", "", "explicit portable YAML configuration file")
+	flags.StringVar(&opts.color, "color", "auto", "colorize human output: auto, always, or never")
 	flags.BoolVar(&opts.json, "json", false, "emit one machine-readable JSON envelope")
 	flags.BoolVar(&opts.quiet, "quiet", false, "suppress non-essential human output")
 	flags.BoolVar(&opts.nonInteractive, "non-interactive", false, "forbid interactive prompts")
 	flags.BoolVar(&opts.version, "version", false, "print version information")
+	_ = root.RegisterFlagCompletionFunc("color", fixedCompletions("auto", "always", "never"))
 
 	root.AddCommand(
 		newLifecycleCommand("init", true, &opts, deps, out, deps.handlers.Init),
@@ -140,7 +142,16 @@ func newRootCommand(deps dependencies, out *output) *cobra.Command {
 		newLifecycleCommand("diff", false, &opts, deps, out, deps.handlers.Diff),
 		newLifecycleCommand("upgrade", true, &opts, deps, out, deps.handlers.Upgrade),
 		newDocsCommand(&opts, deps, out),
+		newCompletionCommand(&opts, out),
 	)
+	root.PersistentPreRunE = func(*cobra.Command, []string) error {
+		mode := presentation.ColorMode(opts.color)
+		if mode != presentation.ColorAuto && mode != presentation.ColorAlways && mode != presentation.ColorNever {
+			return invocationError("--color must be one of auto, always, or never")
+		}
+		out.color = !out.json && presentation.Enabled(mode, deps.runtime.IsOutputTerminal(), deps.runtime.Getenv("TERM"), deps.runtime.Getenv("NO_COLOR") != "")
+		return nil
+	}
 	return root
 }
 
@@ -364,10 +375,12 @@ func newLifecycleCommand(
 		flags.StringVar(&javaGroup, "java-group", "", "Java group/package prefix")
 		flags.StringVar(&serviceName, "service-name", "", "service name")
 		flags.BoolVar(&verify, "verify", false, "verify the complete staging tree before applying")
+		_ = command.RegisterFlagCompletionFunc("profile", fixedCompletions("bootstrap", "standard", "scaled"))
 	case "diff", "upgrade":
 		flags := command.Flags()
 		flags.StringVar(&release, "boilerplate-release", "", "exact target boilerplate vMAJOR.MINOR.PATCH release")
 		flags.StringVar(&profile, "profile", "", "target profile (bootstrap, standard, or scaled)")
+		_ = command.RegisterFlagCompletionFunc("profile", fixedCompletions("bootstrap", "standard", "scaled"))
 	}
 	if name == "init" || name == "diff" || name == "upgrade" {
 		flags := command.Flags()
@@ -467,7 +480,7 @@ func hasJSONFlag(args []string) bool {
 }
 
 func commandFromArgs(args []string) string {
-	valueFlags := map[string]bool{"--config": true, "--boilerplate-source": true, "--boilerplate-release": true, "--stack": true, "--profile": true, "--project-name": true, "--module-path": true, "--java-group": true, "--service-name": true, "--integration-source": true, "--integration-ref": true, "--integration-config": true}
+	valueFlags := map[string]bool{"--config": true, "--color": true, "--boilerplate-source": true, "--boilerplate-release": true, "--stack": true, "--profile": true, "--project-name": true, "--module-path": true, "--java-group": true, "--service-name": true, "--integration-source": true, "--integration-ref": true, "--integration-config": true}
 	positionals := []string{}
 	for index := 0; index < len(args); index++ {
 		arg := args[index]
@@ -484,6 +497,9 @@ func commandFromArgs(args []string) string {
 		return strings.Join(positionals[:3], " ")
 	}
 	if len(positionals) >= 2 && positionals[0] == "docs" {
+		return strings.Join(positionals[:2], " ")
+	}
+	if len(positionals) >= 2 && positionals[0] == "completion" {
 		return strings.Join(positionals[:2], " ")
 	}
 	if len(positionals) > 0 {
@@ -537,6 +553,9 @@ func helpFor(command *cobra.Command) string {
 	}
 	if fullName == "docs manual" {
 		return "Plan, diagnose, or install real-runtime manual capture.\n\nUsage:\n  soku docs manual <plan|doctor|init> [flags]\n"
+	}
+	if fullName == "completion" {
+		return "Generate a shell completion script.\n\nUsage:\n  soku completion <bash|zsh|fish|powershell> [flags]\n"
 	}
 	if strings.HasPrefix(fullName, "docs manual ") {
 		extra := ""
@@ -592,6 +611,7 @@ Usage:
 
 Flags:
       --config string       explicit portable YAML configuration file
+      --color string        colorize human output: auto, always, or never (default auto)
 %s%s      --help                help for %s
       --json                emit one machine-readable JSON envelope
       --non-interactive     forbid interactive prompts
