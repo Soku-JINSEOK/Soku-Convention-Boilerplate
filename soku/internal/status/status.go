@@ -20,6 +20,7 @@ type Report struct {
 	Counts       Counts                  `json:"counts"`
 	Files        []FileDiagnostic        `json:"files"`
 	Integrations []IntegrationDiagnostic `json:"integrations"`
+	Components   []manifest.Component    `json:"components,omitempty"`
 	Guidance     []string                `json:"guidance"`
 }
 
@@ -107,6 +108,7 @@ func Inspect(root string) (Result, error) {
 		},
 		Files:        make([]FileDiagnostic, 0, len(document.Files)),
 		Integrations: make([]IntegrationDiagnostic, 0, len(document.Integrations)),
+		Components:   append([]manifest.Component(nil), document.Components...),
 		Guidance:     []string{},
 	}
 
@@ -155,7 +157,7 @@ func Inspect(root string) (Result, error) {
 func inspectLoadError(err error) (Result, error) {
 	base := Report{
 		Manifest: ManifestDiagnostic{Path: manifest.ManifestPath},
-		Files:    []FileDiagnostic{}, Integrations: []IntegrationDiagnostic{}, Guidance: []string{},
+		Files:    []FileDiagnostic{}, Integrations: []IntegrationDiagnostic{}, Components: []manifest.Component{}, Guidance: []string{},
 	}
 	if errors.Is(err, manifest.ErrNotInitialized) {
 		base.State = "uninitialized"
@@ -323,6 +325,9 @@ func renderHuman(report Report) string {
 	if len(report.Files) > 0 || len(report.Integrations) > 0 {
 		fmt.Fprintf(&builder, "Summary: %d clean, %d missing, %d changed, %d obsolete, %d unmanaged expected\n",
 			report.Counts.Clean, report.Counts.Missing, report.Counts.Changed, report.Counts.Obsolete, report.Counts.UnmanagedExpected)
+	}
+	for _, component := range report.Components {
+		fmt.Fprintf(&builder, "- component %s catalog v%s: config %s\n", component.ID, component.CatalogVersion, component.ConfigurationPath)
 	}
 	for _, file := range report.Files {
 		if file.State != "clean" {

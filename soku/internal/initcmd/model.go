@@ -141,21 +141,25 @@ type Report struct {
 	Verification      []Verification         `json:"verification"`
 	Recovery          Recovery               `json:"recovery"`
 	Integrations      []manifest.Integration `json:"integrations"`
+	Components        []manifest.Component   `json:"components,omitempty"`
 }
 
 type Options struct {
-	Root                  string
-	ConfigPath            string
-	Explicit              Explicit
-	DryRun                bool
-	Yes                   bool
-	Interactive           bool
-	Confirm               func(Report) (bool, error)
-	SokuVersion           string
-	IntegrationSource     string
-	IntegrationRef        string
-	IntegrationConfigPath string
-	IntegrationFetcher    IntegrationFetcher
+	Root                     string
+	ConfigPath               string
+	Explicit                 Explicit
+	DryRun                   bool
+	Yes                      bool
+	Interactive              bool
+	Confirm                  func(Report) (bool, error)
+	SokuVersion              string
+	IntegrationSource        string
+	IntegrationRef           string
+	IntegrationConfigPath    string
+	IntegrationFetcher       IntegrationFetcher
+	ProjectSync              bool
+	ProjectSyncProjectNumber int
+	ApplyHook                ApplyHook
 }
 
 func canonicalHash(value any) (string, error) {

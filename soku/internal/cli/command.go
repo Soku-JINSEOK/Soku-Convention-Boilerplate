@@ -275,6 +275,8 @@ func newLifecycleCommand(
 	var dryRun bool
 	var yes bool
 	var source, release, profile, projectName, modulePath, javaGroup, serviceName string
+	var projectSync bool
+	var projectSyncProjectNumber int
 	var integrationSource, integrationRef, integrationConfig string
 	var stacks []string
 	var verify bool
@@ -307,6 +309,9 @@ func newLifecycleCommand(
 			if mutation && out.json && !dryRun && !yes {
 				return invocationError("--json mutation requires --yes; use --json --dry-run for a plan")
 			}
+			if name == "init" && projectSyncProjectNumber != 0 && !projectSync {
+				return invocationError("--project-sync-project-number requires --project-sync")
+			}
 
 			request := Request{
 				Command:        name,
@@ -325,6 +330,7 @@ func newLifecycleCommand(
 			case "init":
 				request.BoilerplateSource, request.BoilerplateRelease, request.Stacks, request.Profile = source, release, append([]string(nil), stacks...), profile
 				request.ProjectName, request.ModulePath, request.JavaGroup, request.ServiceName, request.Verify = projectName, modulePath, javaGroup, serviceName, verify
+				request.ProjectSync, request.ProjectSyncProjectNumber = projectSync, projectSyncProjectNumber
 				flags := command.Flags()
 				request.SourceSet = flags.Changed("boilerplate-source")
 				request.ReleaseSet = flags.Changed("boilerplate-release")
@@ -375,6 +381,8 @@ func newLifecycleCommand(
 		flags.StringVar(&javaGroup, "java-group", "", "Java group/package prefix")
 		flags.StringVar(&serviceName, "service-name", "", "service name")
 		flags.BoolVar(&verify, "verify", false, "verify the complete staging tree before applying")
+		flags.BoolVar(&projectSync, "project-sync", false, "install the opt-in GitHub Project Sync component")
+		flags.IntVar(&projectSyncProjectNumber, "project-sync-project-number", 0, "positive user-owned GitHub Project number")
 		_ = command.RegisterFlagCompletionFunc("profile", fixedCompletions("bootstrap", "standard", "scaled"))
 	case "diff", "upgrade":
 		flags := command.Flags()
@@ -480,7 +488,7 @@ func hasJSONFlag(args []string) bool {
 }
 
 func commandFromArgs(args []string) string {
-	valueFlags := map[string]bool{"--config": true, "--color": true, "--boilerplate-source": true, "--boilerplate-release": true, "--stack": true, "--profile": true, "--project-name": true, "--module-path": true, "--java-group": true, "--service-name": true, "--integration-source": true, "--integration-ref": true, "--integration-config": true}
+	valueFlags := map[string]bool{"--config": true, "--color": true, "--boilerplate-source": true, "--boilerplate-release": true, "--stack": true, "--profile": true, "--project-name": true, "--module-path": true, "--java-group": true, "--service-name": true, "--project-sync-project-number": true, "--integration-source": true, "--integration-ref": true, "--integration-config": true}
 	positionals := []string{}
 	for index := 0; index < len(args); index++ {
 		arg := args[index]
@@ -593,6 +601,8 @@ Flags:
 			"      --module-path string         Go module path\n" +
 			"      --java-group string          Java group/package prefix\n" +
 			"      --service-name string        service name\n" +
+			"      --project-sync               install the opt-in GitHub Project Sync component\n" +
+			"      --project-sync-project-number int positive user-owned GitHub Project number\n" +
 			"      --verify                     verify the staging tree before applying\n"
 	}
 	if command.Name() == "diff" || command.Name() == "upgrade" {

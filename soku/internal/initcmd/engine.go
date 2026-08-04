@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/soku/internal/manifest"
+	"github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/soku/internal/projectsync"
 )
 
 type Fetcher interface {
@@ -23,6 +24,21 @@ func Run(ctx context.Context, options Options, fetcher Fetcher) (Report, error) 
 	}
 	if err := ensureNoState(options.Root); err != nil {
 		return Report{}, err
+	}
+	if options.ProjectSync {
+		if options.ProjectSyncProjectNumber < 1 {
+			return Report{}, fail(2, "project-sync.project-number.required", "--project-sync-project-number must be a positive integer for non-interactive installation")
+		}
+		existing, loadErr := manifest.NewStore(options.Root).Load()
+		if loadErr == nil {
+			return installProjectSync(options, existing)
+		}
+		if !errors.Is(loadErr, manifest.ErrNotInitialized) {
+			if errors.Is(loadErr, manifest.ErrRecoveryRequired) {
+				return Report{}, fail(8, "recovery.required", "manifest recovery is required; run soku status and preserve .soku state")
+			}
+			return Report{}, fail(4, "manifest.conflict", "existing manifest is invalid or incompatible: %v", loadErr)
+		}
 	}
 	fileConfig, err := LoadConfig(options.ConfigPath)
 	if err != nil {
@@ -70,7 +86,7 @@ func Run(ctx context.Context, options Options, fetcher Fetcher) (Report, error) 
 	if err != nil {
 		return Report{}, err
 	}
-	report := Report{State: "planned", Source: snapshot.Source, Release: snapshot.Release, ResolvedCommit: snapshot.ResolvedCommit, Profile: config.Profile, Stacks: append([]string(nil), config.Stacks...), SelectionHash: selectionHash, ConfigurationHash: configurationHash, Changes: []Change{}, Verification: []Verification{}, Recovery: Recovery{Instructions: []string{}}}
+	report := Report{State: "planned", Source: snapshot.Source, Release: snapshot.Release, ResolvedCommit: snapshot.ResolvedCommit, Profile: config.Profile, Stacks: append([]string(nil), config.Stacks...), SelectionHash: selectionHash, ConfigurationHash: configurationHash, Changes: []Change{}, Verification: []Verification{}, Recovery: Recovery{Instructions: []string{}}, Components: []manifest.Component{}}
 	if existing, loadErr := manifest.NewStore(options.Root).Load(); loadErr == nil {
 		state, rerunErr := checkRerun(options.Root, existing, snapshot, config, configurationHash)
 		if rerunErr != nil {
@@ -99,6 +115,15 @@ func Run(ctx context.Context, options Options, fetcher Fetcher) (Report, error) 
 		changes = append(changes, integration.Changes...)
 		integrations = append(integrations, integration.Integration)
 	}
+	components := []manifest.Component{}
+	if options.ProjectSync {
+		componentChanges, componentErr := projectSyncChanges(options.Root, options.ProjectSyncProjectNumber, nil)
+		if componentErr != nil {
+			return Report{}, componentErr
+		}
+		changes = append(changes, componentChanges...)
+		components = append(components, manifest.Component{ID: projectsync.ComponentID, CatalogVersion: projectsync.CatalogVersion, ConfigurationPath: projectsync.ConfigPath})
+	}
 	if err := validateChangeOwnership(changes); err != nil {
 		return Report{}, err
 	}
@@ -108,6 +133,7 @@ func Run(ctx context.Context, options Options, fetcher Fetcher) (Report, error) 
 	}
 	report.Changes = changes
 	report.Integrations = integrations
+	report.Components = components
 	if config.Verify {
 		report.Verification, err = verifyPlan(ctx, options.Root, changes, config.Stacks, nil)
 		if err != nil {
@@ -131,11 +157,11 @@ func Run(ctx context.Context, options Options, fetcher Fetcher) (Report, error) 
 			return report, nil
 		}
 	}
-	document, err := buildManifestWithIntegrations(options.SokuVersion, snapshot, config, configurationHash, changes, integrations)
+	document, err := buildManifestWithComponents(options.SokuVersion, snapshot, config, configurationHash, changes, integrations, components)
 	if err != nil {
 		return Report{}, err
 	}
-	transactionID, err := applyTransaction(options.Root, changes, document, nil)
+	transactionID, err := applyTransaction(options.Root, changes, document, options.ApplyHook)
 	if err != nil {
 		if failure, ok := err.(*Failure); ok {
 			switch failure.Code {
@@ -175,16 +201,20 @@ func checkRerun(root string, document manifest.Document, snapshot SourceSnapshot
 }
 
 func buildManifest(version string, snapshot SourceSnapshot, config Config, configurationHash string, changes []Change) (manifest.Document, error) {
-	return buildManifestWithIntegrations(version, snapshot, config, configurationHash, changes, nil)
+	return buildManifestWithComponents(version, snapshot, config, configurationHash, changes, nil, nil)
 }
 
 func buildManifestWithIntegrations(version string, snapshot SourceSnapshot, config Config, configurationHash string, changes []Change, integrations []manifest.Integration) (manifest.Document, error) {
+	return buildManifestWithComponents(version, snapshot, config, configurationHash, changes, integrations, nil)
+}
+
+func buildManifestWithComponents(version string, snapshot SourceSnapshot, config Config, configurationHash string, changes []Change, integrations []manifest.Integration, components []manifest.Component) (manifest.Document, error) {
 	if strings.TrimSpace(version) == "" {
 		version = "dev"
 	}
 	files := make([]manifest.File, 0, len(changes))
 	for _, change := range changes {
-		files = append(files, manifest.File{Path: change.Path, Owner: change.Owner, Class: change.Class, ContentMode: change.ContentMode, BaselineSHA256: change.BaselineSHA256, LifecycleState: "current"})
+		files = append(files, manifestFileForChange(change))
 	}
 	sort.Slice(files, func(i, j int) bool { return files[i].Path < files[j].Path })
 	selection := selectionFromConfig(config)
@@ -193,7 +223,12 @@ func buildManifestWithIntegrations(version string, snapshot SourceSnapshot, conf
 		integrations = []manifest.Integration{}
 	}
 	sort.Slice(integrations, func(i, j int) bool { return integrations[i].ID < integrations[j].ID })
-	document := manifest.Document{SchemaVersion: manifest.SchemaVersion, SokuVersion: version, Boilerplate: manifest.Boilerplate{Source: snapshot.Source, Release: snapshot.Release, ResolvedCommit: snapshot.ResolvedCommit}, Selection: selection, Files: files, Integrations: integrations}
+	schemaVersion := manifest.SchemaVersion
+	if len(components) > 0 {
+		schemaVersion = manifest.SchemaVersionV2
+	}
+	document := manifest.Document{SchemaVersion: schemaVersion, SokuVersion: version, Boilerplate: manifest.Boilerplate{Source: snapshot.Source, Release: snapshot.Release, ResolvedCommit: snapshot.ResolvedCommit}, Selection: selection, Files: files, Integrations: integrations, Components: append([]manifest.Component(nil), components...)}
+	sort.Slice(document.Components, func(i, j int) bool { return document.Components[i].ID < document.Components[j].ID })
 	if err := manifest.Validate(document); err != nil {
 		return manifest.Document{}, fail(2, "manifest.invalid", "construct manifest: %v", err)
 	}
@@ -203,6 +238,9 @@ func buildManifestWithIntegrations(version string, snapshot SourceSnapshot, conf
 func Human(report Report) string {
 	var b strings.Builder
 	fmt.Fprintf(&b, "Soku init: %s\nSource: %s@%s (%s)\nProfile: %s\nStacks: %s\n", report.State, report.Source, report.Release, report.ResolvedCommit, report.Profile, strings.Join(report.Stacks, ", "))
+	for _, component := range report.Components {
+		fmt.Fprintf(&b, "Component: %s catalog v%s (config %s)\n", component.ID, component.CatalogVersion, component.ConfigurationPath)
+	}
 	if len(report.Changes) > 0 {
 		b.WriteString("Changes:\n")
 		for _, change := range report.Changes {

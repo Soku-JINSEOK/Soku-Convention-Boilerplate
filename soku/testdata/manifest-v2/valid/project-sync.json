@@ -1,0 +1,38 @@
+{
+  "schema_version": 2,
+  "soku_version": "v0.2.0",
+  "boilerplate": {
+    "source": "https://github.com/example/boilerplate",
+    "release": "v1.0.0",
+    "resolved_commit": "0123456789abcdef0123456789abcdef01234567"
+  },
+  "selection": {
+    "profile": "team",
+    "stacks": [],
+    "configuration_hash": "2227e66565f6382f55dd95387c8fe6ae94a85aecb389b47aca3fce177a6c2ca5"
+  },
+  "files": [
+    {
+      "path": ".github/project-sync.yml",
+      "owner": "project",
+      "class": "project-owned",
+      "lifecycle_state": "unmanaged-expected"
+    },
+    {
+      "path": ".github/workflows/project-sync.yml",
+      "owner": "core",
+      "class": "core-managed",
+      "content_mode": "text",
+      "baseline_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "lifecycle_state": "current"
+    }
+  ],
+  "integrations": [],
+  "components": [
+    {
+      "id": "github-project-sync",
+      "catalog_version": "1",
+      "configuration_path": ".github/project-sync.yml"
+    }
+  ]
+}

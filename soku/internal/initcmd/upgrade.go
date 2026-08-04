@@ -48,6 +48,7 @@ type TransitionReport struct {
 	Recovery       Recovery               `json:"recovery"`
 	HasChanges     bool                   `json:"has_changes"`
 	Integrations   []manifest.Integration `json:"integrations"`
+	Components     []manifest.Component   `json:"components,omitempty"`
 }
 
 // RunTransition plans a diff or applies an upgrade using only manifest state and
@@ -140,6 +141,12 @@ func RunTransition(ctx context.Context, options TransitionOptions, fetcher Fetch
 	}
 	baseTree = append(baseTree, providerBase...)
 	targetTree = append(targetTree, providerBase...)
+	componentBase, componentTarget, componentErr := componentBaselineChanges(options.Root, document)
+	if componentErr != nil {
+		return TransitionReport{}, componentErr
+	}
+	baseTree = append(baseTree, componentBase...)
+	targetTree = append(targetTree, componentTarget...)
 	targetIntegrations := append([]manifest.Integration(nil), document.Integrations...)
 	if options.IntegrationSource != "" || options.IntegrationRef != "" || options.IntegrationConfigPath != "" {
 		integration, integrationErr := planIntegration(ctx, options.IntegrationSource, options.IntegrationRef, options.IntegrationConfigPath, targetConfig.Profile, options.IntegrationFetcher)
@@ -179,6 +186,7 @@ func RunTransition(ctx context.Context, options TransitionOptions, fetcher Fetch
 		Recovery:     Recovery{Instructions: []string{}},
 		HasChanges:   document.Boilerplate.Release != options.TargetRelease || document.Boilerplate.ResolvedCommit != target.ResolvedCommit || baseConfig.Profile != targetConfig.Profile,
 		Integrations: targetIntegrations,
+		Components:   append([]manifest.Component(nil), document.Components...),
 	}
 	report.Changes, err = planTransition(options.Root, document, baseTree, targetTree)
 	if err != nil {
@@ -532,6 +540,9 @@ func HumanTransition(command string, report TransitionReport) string {
 		for _, integration := range report.Integrations {
 			fmt.Fprintf(&builder, "  %s %s\n", integration.LifecycleState, integration.ID)
 		}
+	}
+	for _, component := range report.Components {
+		fmt.Fprintf(&builder, "  component %s catalog v%s (config %s)\n", component.ID, component.CatalogVersion, component.ConfigurationPath)
 	}
 	return builder.String()
 }

@@ -12,6 +12,41 @@ an Issue or pull request title, changes commits or reviews, reopens or closes
 work, or replaces custom labels. It reads bodies in memory to derive metadata,
 but reports store body hashes and never store body text.
 
+## Install the optional Soku component downstream
+
+The Soku CLI can install the reviewed automation into another initialized
+repository without copying this boilerplate repository's configuration. Plain
+`soku init` remains unchanged:
+
+```bash
+soku init --project-sync --project-sync-project-number 2 --dry-run
+soku init --project-sync --project-sync-project-number 2 --yes
+```
+
+For a fresh repository, add the option to the normal boilerplate selection
+flags. For an initialized repository, the second command installs only the
+Project Sync component. Non-interactive use requires a positive Project number;
+interactive use can provide it at the prompt. Repeated installation is a
+no-op. Existing repository-specific Project Sync files cause a collision and
+are not adopted.
+
+The generated files are portable: the workflow passes `GITHUB_REPOSITORY` at
+runtime, the configuration uses `owner: "@me"` and the selected Project number,
+and no historical Issue/PR mappings, credentials, secrets, or raw bodies are
+copied. `.github/project-sync.yml` is project-owned after installation so its
+Project-specific customization is preserved; the workflow, runtime, and test
+asset remain component-managed. The manifest migrates from v1 to v2 and
+`status`, `diff`, and `upgrade` retain the component record.
+
+After installation, setup is manual: create or select the user-owned Project,
+add the dedicated `PROJECT_SYNC_TOKEN` Actions secret with only Metadata read,
+Issues read/write, Pull Requests read/write, and authenticated-user Projects
+read/write permission, then set `PROJECT_SYNC_ENABLED=true`. Run an audit first
+and review the redacted report before selecting apply mode with
+`PROJECT_SYNC_MODE=apply` or manual dispatch. The CLI itself performs no
+GitHub API calls and creates no GitHub credentials, Projects, or cloud
+resources. Organization-owned Projects are outside v1.
+
 ## Local commands
 
 Use Node.js 24 or later and an authenticated GitHub token with the permissions

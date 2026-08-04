@@ -265,6 +265,14 @@ v1 manifest bytes if apply fails. Later lifecycle transitions preserve v2
 component records unchanged unless a separately approved component operation
 changes them.
 
+The first core component using this contract is `github-project-sync` catalog
+version `1`. It records only `.github/project-sync.yml` as project-owned
+configuration; its workflow, runtime, and focused test asset are core-managed.
+The component is opt-in, inactive until `PROJECT_SYNC_ENABLED=true`, and audit
+by default. Its CLI installation supports only authenticated user-owned
+Projects through `owner: "@me"`; it never creates credentials, GitHub Projects,
+Issues, labels, or cloud resources.
+
 The manifest must never contain:
 
 - a token, password, credential, or other secret

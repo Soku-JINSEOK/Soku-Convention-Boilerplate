@@ -1,0 +1,103 @@
+name: GitHub Project and Metadata Sync
+
+on:
+  issues:
+    types:
+      - opened
+      - edited
+      - labeled
+      - unlabeled
+      - reopened
+      - closed
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - edited
+      - closed
+  schedule:
+    - cron: '17 2 * * *'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Audit by default; apply only after the secret and manifest are reviewed
+        required: true
+        default: audit
+        type: choice
+        options:
+          - audit
+          - apply
+      issue_number:
+        description: Optional Issue number to limit the run
+        required: false
+        type: string
+      pr_number:
+        description: Optional pull request number to limit the run
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+concurrency:
+  group: project-sync-${{ github.event.issue.number || github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    name: Audit and synchronize GitHub metadata
+    if: >-
+      vars.PROJECT_SYNC_ENABLED == 'true' &&
+      (github.event_name != 'pull_request' ||
+      github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout trusted repository policy
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.event.pull_request.base.sha || github.sha }}
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: '24'
+
+      - name: Run guarded project synchronization
+        env:
+          GH_TOKEN: ${{ secrets.PROJECT_SYNC_TOKEN }}
+          ISSUE_NUMBER: ${{ github.event.issue.number || inputs.issue_number || '' }}
+          PR_NUMBER: ${{ github.event.pull_request.number || inputs.pr_number || '' }}
+          DISPATCH_MODE: ${{ inputs.mode || '' }}
+          PROJECT_SYNC_MODE: ${{ vars.PROJECT_SYNC_MODE || '' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mode="${DISPATCH_MODE:-${PROJECT_SYNC_MODE:-audit}}"
+          case "$mode" in
+            audit|apply) ;;
+            *) echo 'PROJECT_SYNC_MODE must be audit or apply.' >&2; exit 2 ;;
+          esac
+          args=(
+            --mode "$mode"
+            --repo "$GITHUB_REPOSITORY"
+            --config .github/project-sync.yml
+            --output "$RUNNER_TEMP/project-sync.json"
+          )
+          if [[ -n "$ISSUE_NUMBER" && -n "$PR_NUMBER" ]]; then
+            echo 'Issue and PR selectors cannot both be supplied.' >&2
+            exit 2
+          fi
+          if [[ -n "$ISSUE_NUMBER" ]]; then
+            args+=(--issue-number "$ISSUE_NUMBER")
+          elif [[ -n "$PR_NUMBER" ]]; then
+            args+=(--pr-number "$PR_NUMBER")
+          fi
+          if [[ ! -f scripts/github-project-sync.mjs ]]; then
+            echo '::error::Project Sync runtime is missing.'
+            exit 1
+          fi
+          node scripts/github-project-sync.mjs "${args[@]}"
