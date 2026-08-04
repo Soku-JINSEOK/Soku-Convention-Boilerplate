@@ -66,6 +66,7 @@ jobs:
             docs/guides/CLOUD_RUN_CICD.md
             docs/guides/APPLICABILITY.md
             docs/guides/LANGUAGE_SELECTION.md
+            docs/guides/GITHUB_PROJECT_SYNC.md
             VERIFICATION_GUIDE.md
             verification/CLASSIFICATION.md
             verification/profiles.yml
@@ -182,6 +183,7 @@ jobs:
             .github/workflows/templates-ci.yml
             .github/workflows/validation.yml
             .github/workflows/pull-request-policy.yml
+            .github/workflows/project-sync.yml
             .github/labels.yml
             .github/dependabot.yml
             templates/javascript-typescript-node/package.json
@@ -234,6 +236,9 @@ jobs:
             scripts/pull-request-policy.mjs
             scripts/pull-request-policy.test.mjs
             scripts/github-governance-audit.mjs
+            scripts/github-project-sync.mjs
+            scripts/github-project-sync.test.mjs
+            .github/project-sync.yml
             scripts/setup-git-signing.sh
             scripts/create-release-tag.sh
             scripts/verify-release-tag.sh
@@ -360,6 +365,7 @@ jobs:
           scripts/contribution-title.test.mjs
           scripts/authenticated-pr-metadata.test.mjs
           scripts/pull-request-policy.test.mjs
+          scripts/github-project-sync.test.mjs
 
       - name: Run pull-request governance regression tests
         run: >-

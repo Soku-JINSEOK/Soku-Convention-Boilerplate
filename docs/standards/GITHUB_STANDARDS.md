@@ -77,6 +77,13 @@ active status such as `status:in-progress` with `status:done`. Closed work that
 was not completed must use an accurate close reason and must not claim done
 status.
 
+Every new pull request, including an exact Dependabot pull request, must record
+exactly one local `Closes #N` or `Related to #N` relation. Dependabot may retain
+its generated body and omit the human-authored task report and multilingual
+sections, but it is not exempt from the Issue relation, canonical labels,
+assignee, or changed-file scope checks. Draft pull requests may use only
+`Related to #N`.
+
 ## 📝 Task Reports
 
 For work that benefits from a documented plan before implementation starts, use [`docs/issues/TASK_REPORT_TEMPLATE.md`](../issues/TASK_REPORT_TEMPLATE.md):
@@ -225,6 +232,22 @@ Commit syntax without a gitmoji be accepted. The PR still requires
 Validation run. Similar usernames, other ref prefixes, unsupported ecosystems,
 or files outside that scope receive no exception. Dependency review and merge
 approval remain separate from this metadata exception.
+
+## 🗂️ Project and metadata synchronization
+
+This repository's user-owned Project #2 is maintained by
+[`scripts/github-project-sync.mjs`](../../scripts/github-project-sync.mjs) and
+the `GitHub Project and Metadata Sync` workflow. The tool reads the current
+repository Issues and pull requests, preserves existing Project items and
+custom labels, and records only hashes and sanitized before/after values in
+reports. It does not add pull requests as Project duplicates.
+
+Use `--mode audit` before an approved `--mode apply` run. Apply mode rereads
+each target and skips only the target whose state no longer matches its audit
+hash. A closed Issue with `not_planned` or `duplicate` close reason is an audit
+warning, not an automatic `Done` transition. Field derivation and the
+`PROJECT_SYNC_TOKEN` permissions, setup, and rotation procedure are defined in
+the [Project synchronization guide](../guides/GITHUB_PROJECT_SYNC.md).
 
 **Rule: never create an issue or PR unlabeled.** When opening an issue or PR (via `gh issue create`, `gh pr create`, or the GitHub UI), attach at least a `type:` label in the same action — check `gh label list` (or this catalog) first if unsure what exists, rather than creating it bare and labeling as a follow-up step. An unlabeled issue/PR is harder to triage and defeats the point of having a catalog at all.
 

@@ -220,7 +220,7 @@ test("rejects heading, placeholder, verification, and AI errors", () => {
 function dependabotPullRequest(overrides = {}) {
   return validPullRequest({
     title: "build(deps): bump package group to the latest minor versions with extended release notes",
-    body: "Dependabot-generated release notes without the human template.",
+    body: "Dependabot-generated release notes without the human template.\n\nRelated to #69\n",
     labels: ["type:chore", "area:tooling"],
     assignees: ["Soku-JINSEOK"],
     author: "dependabot[bot]",
@@ -336,6 +336,13 @@ test("keeps Dependabot labels and assignment mandatory", () => {
     validatePullRequest(dependabotPullRequest({assignees: []})).join(" "),
     /assigned to Soku-JINSEOK/,
   );
+});
+
+test("requires Dependabot pull requests to record exactly one Issue relation", () => {
+  const result = validatePullRequest(
+    dependabotPullRequest({body: "Dependabot-generated release notes."}),
+  );
+  assert.match(result.join(" "), /exactly one/);
 });
 
 test("workflow reruns on metadata changes and reads the current PR", () => {

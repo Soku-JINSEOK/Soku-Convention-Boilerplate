@@ -33,6 +33,10 @@ const policyWorkflow = readFileSync(
   new URL('./workflows/pull-request-policy.yml', import.meta.url),
   'utf8',
 );
+const projectSyncWorkflow = readFileSync(
+  new URL('./workflows/project-sync.yml', import.meta.url),
+  'utf8',
+);
 
 test('keeps general validation manual and reusable', () => {
   assert.match(workflow, /^\s{2}workflow_call:/m);
@@ -100,7 +104,7 @@ test('keeps full validation cancellation domains independent', () => {
   assert.doesNotMatch(workflow, /^concurrency:/m);
 });
 
-test('only policy and Security subscribe to repository events', () => {
+test('keeps event-driven policy, Security, and Project synchronization explicit', () => {
   assert.match(policyWorkflow, /^\s{2}pull_request:/m);
   assert.doesNotMatch(policyWorkflow, /^\s{2}push:/m);
   assert.match(policyWorkflow, /policy:\n\s+name: PR Metadata Gate/);
@@ -109,6 +113,16 @@ test('only policy and Security subscribe to repository events', () => {
   assert.match(securityWorkflow, /^\s{2}pull_request:/m);
   assert.match(securityWorkflow, /^\s{2}push:/m);
   assert.match(securityWorkflow, /^\s{2}schedule:/m);
+  assert.match(projectSyncWorkflow, /^\s{2}issues:/m);
+  assert.match(projectSyncWorkflow, /^\s{2}pull_request:/m);
+  assert.match(projectSyncWorkflow, /^\s{2}schedule:/m);
+  assert.match(projectSyncWorkflow, /^\s{2}workflow_dispatch:/m);
+  assert.match(projectSyncWorkflow, /GH_TOKEN: \$\{\{ secrets\.PROJECT_SYNC_TOKEN \}\}/);
+  assert.match(projectSyncWorkflow, /contents: read/);
+  assert.match(projectSyncWorkflow, /! -f scripts\/github-project-sync\.mjs/);
+  assert.match(projectSyncWorkflow, /pre-merge event skipped/);
+  assert.doesNotMatch(projectSyncWorkflow, /contents: write/);
+  assert.doesNotMatch(projectSyncWorkflow, /pull_request_target/);
 
   const securityPullRequestTrigger =
     /pull_request:\n\s+types:\n((?:\s+- .+\n)+)/.exec(securityWorkflow);

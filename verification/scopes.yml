@@ -69,6 +69,16 @@
       "reason": "provider, catalog, or schema contracts can affect every generated stack"
     },
     {
+      "id": "github-project-synchronization",
+      "paths": [
+        "scripts/github-project-sync.mjs",
+        "scripts/github-project-sync.test.mjs",
+        ".github/project-sync.yml"
+      ],
+      "scopes": "all",
+      "reason": "GitHub metadata and Project synchronization changes can affect every governance surface"
+    },
+    {
       "id": "soku",
       "paths": [
         "soku/**"

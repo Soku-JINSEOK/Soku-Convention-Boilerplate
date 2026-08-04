@@ -232,10 +232,13 @@ Before opening work to contributors:
    `docs/issues/issue-<n>-task-report.md`;
 5. require type and area labels plus an accountable assignee on PRs; and
 6. protect `main` with `Validation Gate` and `PR Metadata Gate` as required
-   status checks.
+   status checks; and
+7. if the repository uses Project #2 synchronization, configure the
+   `PROJECT_SYNC_TOKEN` secret and review the
+   [Project synchronization guide](./GITHUB_PROJECT_SYNC.md).
 
 The complete human contract, limited Dependabot exception, review expectations,
-and completion-label rules live in
+completion-label rules, and relation requirement live in
 [GitHub Standards](../standards/GITHUB_STANDARDS.md). Keep branch protection and
 review rules proportional to Personal, Team, or Scaled adoption, but never
 weaken secret scanning or required validation to make a PR green.
@@ -351,6 +354,7 @@ Never:
 | CLI installation, configuration, provider, or packaging detail | [`soku` CLI guide](../../soku/README.md) |
 | Manual downstream synchronization | [Release and Sync](../standards/RELEASE_AND_SYNC.md) |
 | Issue, PR, label, review, or Dependabot policy | [GitHub Standards](../standards/GITHUB_STANDARDS.md) |
+| Project #2 synchronization, token setup, or conflict recovery | [GitHub Project and Metadata Sync](./GITHUB_PROJECT_SYNC.md) |
 | Local versus hosted check failure | [Verification Guide](../../VERIFICATION_GUIDE.md) |
 | Cloud Run bootstrap, deploy, evidence, or rollback | [Cloud Run CI/CD guide](./CLOUD_RUN_CICD.md) |
 | Personal versus team applicability | [Applicability](./APPLICABILITY.md) |
