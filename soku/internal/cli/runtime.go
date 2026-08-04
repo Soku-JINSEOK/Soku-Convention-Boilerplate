@@ -13,11 +13,20 @@ type Runtime interface {
 	Stat(name string) (fs.FileInfo, error)
 	Open(name string) (io.ReadCloser, error)
 	IsTerminal() bool
+	IsOutputTerminal() bool
+	Getenv(string) string
 }
 
 type osRuntime struct {
-	stdin *os.File
+	stdin  *os.File
+	stdout *os.File
 }
+
+func (r osRuntime) IsOutputTerminal() bool {
+	return r.stdout != nil && term.IsTerminal(int(r.stdout.Fd()))
+}
+
+func (r osRuntime) Getenv(name string) string { return os.Getenv(name) }
 
 func (r osRuntime) Stat(name string) (fs.FileInfo, error) {
 	return os.Stat(name)

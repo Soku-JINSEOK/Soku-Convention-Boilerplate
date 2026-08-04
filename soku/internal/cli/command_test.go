@@ -14,9 +14,11 @@ import (
 )
 
 type testRuntime struct {
-	terminal bool
-	stat     func(string) (fs.FileInfo, error)
-	open     func(string) (io.ReadCloser, error)
+	terminal       bool
+	outputTerminal bool
+	environment    map[string]string
+	stat           func(string) (fs.FileInfo, error)
+	open           func(string) (io.ReadCloser, error)
 }
 
 func (r testRuntime) Stat(name string) (fs.FileInfo, error) {
@@ -36,6 +38,10 @@ func (r testRuntime) Open(name string) (io.ReadCloser, error) {
 func (r testRuntime) IsTerminal() bool {
 	return r.terminal
 }
+
+func (r testRuntime) IsOutputTerminal() bool { return r.outputTerminal }
+
+func (r testRuntime) Getenv(name string) string { return r.environment[name] }
 
 type runResult struct {
 	code   int
@@ -125,15 +131,15 @@ func TestExitCodeContract(t *testing.T) {
 
 func TestPublicCommandSurface(t *testing.T) {
 	result := execute([]string{"--help"}, testRuntime{}, defaultHandlers())
-	for _, command := range []string{"init", "status", "diff", "upgrade", "docs"} {
+	for _, command := range []string{"init", "status", "diff", "upgrade", "docs", "completion"} {
 		if !strings.Contains(result.stdout, "  "+command+" ") {
 			t.Errorf("help does not list %q", command)
 		}
 	}
-	if strings.Contains(result.stdout, "completion") || strings.Contains(result.stdout, "\n  help ") {
+	if strings.Contains(result.stdout, "\n  help ") {
 		t.Fatalf("help exposes a non-public command:\n%s", result.stdout)
 	}
-	for _, command := range []string{"completion", "help", "_help_disabled", "__complete", "__completeNoDesc"} {
+	for _, command := range []string{"help", "_help_disabled"} {
 		result := execute([]string{command}, testRuntime{}, defaultHandlers())
 		if result.code != 2 {
 			t.Errorf("%s exit code = %d, want 2", command, result.code)
@@ -141,6 +147,96 @@ func TestPublicCommandSurface(t *testing.T) {
 	}
 	if result := execute([]string{"-v"}, testRuntime{}, defaultHandlers()); result.code != 2 {
 		t.Errorf("-v exit code = %d, want 2", result.code)
+	}
+}
+
+func TestColorContract(t *testing.T) {
+	handler := ResultHandlerFunc(func(context.Context, Request) (Result, error) {
+		return Result{Human: "Soku status: drifted\nNext: Review it.\n", Data: struct{}{}, Code: ExitChangesFound}, nil
+	})
+	handlers := successHandlers(handler)
+	tests := []struct {
+		name     string
+		args     []string
+		runtime  testRuntime
+		wantANSI bool
+	}{
+		{name: "auto tty", args: []string{"status"}, runtime: testRuntime{outputTerminal: true, environment: map[string]string{"TERM": "xterm-256color"}}, wantANSI: true},
+		{name: "auto pipe", args: []string{"status"}, runtime: testRuntime{environment: map[string]string{"TERM": "xterm-256color"}}},
+		{name: "always", args: []string{"status", "--color=always"}, runtime: testRuntime{environment: map[string]string{"NO_COLOR": "1", "TERM": "dumb"}}, wantANSI: true},
+		{name: "never", args: []string{"status", "--color=never"}, runtime: testRuntime{outputTerminal: true, environment: map[string]string{"TERM": "xterm"}}},
+		{name: "no color", args: []string{"status"}, runtime: testRuntime{outputTerminal: true, environment: map[string]string{"NO_COLOR": "1", "TERM": "xterm"}}},
+		{name: "dumb", args: []string{"status"}, runtime: testRuntime{outputTerminal: true, environment: map[string]string{"TERM": "dumb"}}},
+		{name: "json always", args: []string{"status", "--json", "--color=always"}, runtime: testRuntime{outputTerminal: true}, wantANSI: false},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			result := execute(test.args, test.runtime, handlers)
+			if got := strings.Contains(result.stdout, "\x1b["); got != test.wantANSI {
+				t.Fatalf("ANSI present = %t, want %t; output=%q", got, test.wantANSI, result.stdout)
+			}
+			if result.stderr != "" {
+				t.Fatalf("stderr=%q", result.stderr)
+			}
+		})
+	}
+	invalid := execute([]string{"status", "--color=rainbow"}, testRuntime{}, handlers)
+	if invalid.code != 2 || !strings.Contains(invalid.stderr, "--color must be one of") {
+		t.Fatalf("invalid color result=%#v", invalid)
+	}
+	quiet := execute([]string{"status", "--quiet", "--color=always"}, testRuntime{outputTerminal: true}, handlers)
+	if quiet.stdout != "" || quiet.stderr != "" {
+		t.Fatalf("quiet color result=%#v", quiet)
+	}
+	failure := execute([]string{"status", "--invalid", "--color=always"}, testRuntime{outputTerminal: true}, handlers)
+	if failure.code != 2 || strings.Contains(failure.stderr, "\x1b[") {
+		t.Fatalf("error leaked ANSI: %#v", failure)
+	}
+}
+
+func TestCompletionScripts(t *testing.T) {
+	for _, shell := range completionShells {
+		t.Run(shell, func(t *testing.T) {
+			args := []string{"completion", shell, "--color=always"}
+			first := execute(args, testRuntime{outputTerminal: true}, defaultHandlers())
+			second := execute(args, testRuntime{outputTerminal: true}, defaultHandlers())
+			if first.code != 0 || first.stderr != "" || first.stdout == "" || first.stdout != second.stdout {
+				t.Fatalf("completion is not successful and deterministic: first=%#v second=%#v", first, second)
+			}
+			if strings.Contains(first.stdout, "\x1b[") {
+				t.Fatal("completion script contains ANSI")
+			}
+
+			jsonResult := execute([]string{"completion", shell, "--json", "--color=always"}, testRuntime{outputTerminal: true}, defaultHandlers())
+			if jsonResult.code != 0 || jsonResult.stderr != "" {
+				t.Fatalf("JSON completion result=%#v", jsonResult)
+			}
+			assertSingleJSONEnvelope(t, jsonResult.stdout)
+			if !strings.Contains(jsonResult.stdout, `"shell":"`+shell+`"`) || strings.Contains(jsonResult.stdout, "\x1b[") {
+				t.Fatalf("unexpected completion envelope: %s", jsonResult.stdout)
+			}
+		})
+	}
+
+	for _, test := range []struct {
+		args []string
+		want []string
+	}{
+		{args: []string{"__complete", ""}, want: []string{"docs", "completion"}},
+		{args: []string{"__complete", "--"}, want: []string{"--color"}},
+		{args: []string{"__complete", "docs", ""}, want: []string{"manual"}},
+		{args: []string{"__complete", "init", "--profile", ""}, want: []string{"bootstrap", "standard", "scaled"}},
+		{args: []string{"__complete", "--color", ""}, want: []string{"auto", "always", "never"}},
+	} {
+		result := execute(test.args, testRuntime{outputTerminal: true}, defaultHandlers())
+		if result.code != 0 || result.stderr != "" || strings.Contains(result.stdout, "\x1b[") {
+			t.Fatalf("completion request result=%#v", result)
+		}
+		for _, value := range test.want {
+			if !strings.Contains(result.stdout, value) {
+				t.Errorf("completion %v does not contain %q: %q", test.args, value, result.stdout)
+			}
+		}
 	}
 }
 

@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+
+	"github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/soku/internal/presentation"
 )
 
 type errorPayload struct {
@@ -23,6 +25,7 @@ type output struct {
 	stderr io.Writer
 	json   bool
 	wrote  bool
+	color  bool
 }
 
 func (o *output) help(command, help string) error {
@@ -61,6 +64,22 @@ func (o *output) version(metadata BuildMetadata) error {
 	return err
 }
 
+func (o *output) completion(shell, script string, jsonMode bool) error {
+	if jsonMode {
+		return o.writeEnvelope(envelope{
+			OK:      true,
+			Command: "completion " + shell,
+			Data: struct {
+				Shell  string `json:"shell"`
+				Script string `json:"script"`
+			}{Shell: shell, Script: script},
+		})
+	}
+	_, err := fmt.Fprint(o.stdout, script)
+	o.wrote = true
+	return err
+}
+
 func (o *output) result(command string, result Result, quiet bool) error {
 	if o.json {
 		data := result.Data
@@ -72,7 +91,11 @@ func (o *output) result(command string, result Result, quiet bool) error {
 	if quiet || result.Human == "" {
 		return nil
 	}
-	_, err := fmt.Fprint(o.stdout, result.Human)
+	human := result.Human
+	if o.color {
+		human = presentation.Style(human)
+	}
+	_, err := fmt.Fprint(o.stdout, human)
 	o.wrote = true
 	return err
 }

@@ -80,6 +80,7 @@ transaction with the manifest replaced last.
 | `docs manual plan` | Validate a versioned capture configuration and render a deterministic, read-only real-runtime capture plan. | No |
 | `docs manual doctor` | Diagnose the local runner, browser, font, output, provider, and credential-environment prerequisites. `--probe` alone may run the installed fixed runner. | No |
 | `docs manual init` | Install the reviewed `docs-manual` component into initialized state and explicitly migrate manifest v1 to v2. | Yes |
+| `completion <shell>` | Generate a deterministic completion script for `bash`, `zsh`, `fish`, or `powershell` without inspecting a repository or using the network. | No |
 | `--help` | Describe the supported command and option surface. | No |
 | `--version` | Print the CLI version. | No |
 
@@ -99,6 +100,7 @@ All commands use the following common option names where applicable:
 | Option | Contract |
 | --- | --- |
 | `--config <yaml-path>` | Load an explicit portable YAML configuration file. |
+| `--color <auto\|always\|never>` | Control ANSI styling for human output. `auto` is the default and requires a TTY output stream and a non-`dumb` terminal. |
 | `--json` | Emit machine-readable output. Issue #17 defines the output schema. |
 | `--quiet` | Suppress non-essential human-readable output. |
 | `--non-interactive` | Forbid prompts. Missing required decisions are validation failures. |
@@ -109,6 +111,20 @@ Without `--yes`, a real mutation requires an interactive confirmation. In
 non-interactive mode, a real mutation without `--yes` fails validation and does
 not write. `--dry-run` never requires confirmation because it cannot mutate
 managed files, the manifest, backups, or a transaction journal.
+
+`NO_COLOR` disables styling in `auto` mode. An explicit `--color=always`
+overrides `NO_COLOR`; `--color=never` always disables styling. JSON envelopes,
+completion scripts, prompts, and non-TTY output never receive automatic ANSI
+sequences. Styling is supplemental: status words and ASCII list markers remain
+present, and removing ANSI sequences from styled report output yields the
+stable plain-text report byte for byte.
+
+`completion` writes the raw script by default. With `--json`, it emits the
+normal single envelope with `shell` and `script` data fields. The generated
+tree includes nested `docs manual` commands, public flags, and fixed candidates
+such as color modes and profile IDs. Generation does not install a script,
+modify a shell profile, invoke a plugin manager, inspect repository state, or
+perform network access.
 
 ### Explicit Selection
 

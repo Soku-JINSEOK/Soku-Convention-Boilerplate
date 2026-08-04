@@ -179,6 +179,7 @@ TypeScript formatting 대상에서 제외합니다. 기존 tag는 불변으로 �
 - [LICENSE](./LICENSE): 보일러플레이트 기본 라이선스 문서 (MIT)
 - [SECURITY.md](./SECURITY.md): 보안 결함 제보 창구
 - [`soku` CLI](./soku/README.md): 빌드, 설치, 검증, 패키징 및 릴리즈 운영 안내
+- [Soku 터미널 및 completion 가이드](./docs/guides/SOKU_TERMINAL_GUIDE.ko.md): 색상, 일상 흐름, 자동화 및 네 shell 설정
 - [VERIFICATION_GUIDE.md](./VERIFICATION_GUIDE.md): 로컬, hosted, 거버넌스, 아티팩트, 보안 및 비용 전체 검증
 
 ### 📏 `docs/standards/` — 구조 및 프로세스 규범 지침서
