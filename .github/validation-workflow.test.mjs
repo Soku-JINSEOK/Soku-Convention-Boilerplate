@@ -119,6 +119,8 @@ test('keeps event-driven policy, Security, and Project synchronization explicit'
   assert.match(projectSyncWorkflow, /^\s{2}workflow_dispatch:/m);
   assert.match(projectSyncWorkflow, /GH_TOKEN: \$\{\{ secrets\.PROJECT_SYNC_TOKEN \}\}/);
   assert.match(projectSyncWorkflow, /contents: read/);
+  assert.match(projectSyncWorkflow, /! -f scripts\/github-project-sync\.mjs/);
+  assert.match(projectSyncWorkflow, /pre-merge event skipped/);
   assert.doesNotMatch(projectSyncWorkflow, /contents: write/);
   assert.doesNotMatch(projectSyncWorkflow, /pull_request_target/);
 

@@ -92,4 +92,8 @@ jobs:
           elif [[ -n "$PR_NUMBER" ]]; then
             args+=(--pr-number "$PR_NUMBER")
           fi
+          if [[ ! -f scripts/github-project-sync.mjs ]]; then
+            echo '::notice::Trusted base does not yet contain the Project synchronizer; pre-merge event skipped.'
+            exit 0
+          fi
           node scripts/github-project-sync.mjs "${args[@]}"
