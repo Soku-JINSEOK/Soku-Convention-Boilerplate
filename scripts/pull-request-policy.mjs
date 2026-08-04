@@ -189,7 +189,21 @@ export function validatePullRequest({
     errors.push('PR must be assigned to Soku-JINSEOK.');
   }
 
+  const metadata = extractCommonMetadata(body);
+  const issueMatch = /^- \*\*Issue:\*\* (Closes|Related to) #([1-9]\d*)\s*$/m.exec(
+    metadata,
+  );
+  const relations = body.match(RELATION_PATTERN) ?? [];
+
   if (dependabot) {
+    if (relations.length !== 1) {
+      errors.push(
+        'Common Metadata Issue must be exactly one Closes #N or Related to #N relation.',
+      );
+    }
+    if (isDraft && CLOSING_PATTERN.test(body)) {
+      errors.push('Draft PRs must use Related to #N, not a closing relation.');
+    }
     if (!labels.includes('type:chore')) {
       errors.push('Dependabot PR requires the `type:chore` label.');
     }
@@ -206,11 +220,6 @@ export function validatePullRequest({
     return errors;
   }
 
-  const metadata = extractCommonMetadata(body);
-  const issueMatch = /^- \*\*Issue:\*\* (Closes|Related to) #([1-9]\d*)\s*$/m.exec(
-    metadata,
-  );
-  const relations = body.match(RELATION_PATTERN) ?? [];
   if (!issueMatch || relations.length !== 1) {
     errors.push(
       'Common Metadata Issue must be exactly one Closes #N or Related to #N relation.',

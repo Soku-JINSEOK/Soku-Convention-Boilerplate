@@ -61,13 +61,21 @@ Pipelines should be:
 
 Avoid building opaque pipelines that only one person can maintain.
 
-For this boilerplate, only Pull Request Policy and Security subscribe directly
-to pull request or `main` branch events. Pull Request Policy authenticates the
+For this boilerplate, Pull Request Policy, Security, and the explicitly scoped
+Project synchronization workflow subscribe directly to repository events.
+Pull Request Policy authenticates the
 current API metadata against the trusted event identity and enforces the PR and
 commit-title contract. Security runs its complete history, dependency, Go
 vulnerability, and OSV checks for pull request code events, when a Draft becomes
 ready for review, and on pushes to `main`. Closed pull requests do not start
-either workflow.
+Pull Request Policy or Security; Project synchronization intentionally handles
+closed and merged events for completion metadata.
+
+Project synchronization is a metadata-only exception: it checks out the
+trusted base revision, never executes pull request head code, uses the narrow
+`PROJECT_SYNC_TOKEN` secret for GitHub Issue/Project writes, and grants no
+Contents write permission. Its audit/apply and conflict behavior is documented
+in [`GITHUB_PROJECT_SYNC.md`](../guides/GITHUB_PROJECT_SYNC.md).
 
 Repository CI, runtime-template validation, and their Validation aggregate are
 manual or reusable workflows. They do not independently subscribe to pull

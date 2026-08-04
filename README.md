@@ -208,6 +208,7 @@ This boilerplate is intended to serve as:
 - [README_GUIDE.md](./docs/guides/README_GUIDE.md): how repository README files should be written and maintained
 - [INIT_GUIDE.md](./docs/guides/INIT_GUIDE.md): stack-detection and setup checklist for AI agents bootstrapping a downstream repository
 - [CLOUD_RUN_CICD.md](./docs/guides/CLOUD_RUN_CICD.md): local parity and Cloud Run CD pipeline guide (OIDC/WIF, plan/deploy, rollback, evidence)
+- [GITHUB_PROJECT_SYNC.md](./docs/guides/GITHUB_PROJECT_SYNC.md): guarded Issue, pull request, and user-owned Project #2 metadata synchronization
 - [APPLICABILITY.md](./docs/guides/APPLICABILITY.md): which parts of this boilerplate apply to personal projects vs. teams
 - [LANGUAGE_SELECTION.md](./docs/guides/LANGUAGE_SELECTION.md): how to choose a programming language for a new project or feature
 

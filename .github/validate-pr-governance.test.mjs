@@ -24,7 +24,7 @@ test('shared adapter policy accepts only a file-scoped Dependabot PR', () => {
 `);
   const base = {
     title: 'build(deps): bump Go module dependencies with detailed release notes',
-    body: 'Dependabot release notes',
+    body: 'Dependabot release notes\n\nRelated to #21\n',
     labels: ['type:chore', 'area:tooling'],
     assignees: ['Soku-JINSEOK'],
     author: 'dependabot[bot]',

@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "repository": "Soku-JINSEOK/Soku-Convention-Boilerplate",
+  "project": {
+    "owner": "@me",
+    "number": 2,
+    "fields": {
+      "status": "Status",
+      "priority": "Priority",
+      "size": "Size",
+      "workstream": "Workstream",
+      "targetDate": "Target date"
+    }
+  },
+  "backfill": {
+    "relationMappings": {
+      "89": 69,
+      "90": 69,
+      "142": 69,
+      "144": 69,
+      "145": 69,
+      "182": "dependency-tracking",
+      "183": "dependency-tracking"
+    },
+    "dependencyTrackingIssue": {
+      "title": "August 2026 dependency updates",
+      "variable": "DEPENDENCY_TRACKING_ISSUE",
+      "labels": [
+        "type:chore",
+        "area:tooling",
+        "priority:p2-normal",
+        "status:in-progress"
+      ],
+      "assignees": ["Soku-JINSEOK"]
+    }
+  }
+}
