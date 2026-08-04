@@ -4,7 +4,7 @@
   "packageManager": "npm@11.12.1",
   "type": "module",
   "devDependencies": {
-    "@types/node": "26.1.1",
+    "@types/node": "26.1.2",
     "@vitest/coverage-v8": "4.1.10",
     "eslint": "9.39.5",
     "gts": "7.0.0",
