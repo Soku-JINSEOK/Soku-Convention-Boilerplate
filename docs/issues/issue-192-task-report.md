@@ -70,9 +70,18 @@ record was available when this report was prepared.
 
 ## Verification
 
-Verification results will be recorded after the local feature and repository
-policy checks are rerun. Hosted Cloud Build results will be reported as
-external evidence only; this task does not change cloud configuration.
+- Project Sync Node tests: 13 passed.
+- Soku Go tests: `GOCACHE=/tmp/soku-go-cache go test ./...` passed.
+- Full local Node regression set: 105 passed, 0 failed.
+- Repository policy and governance regression selection: 102 passed, 0 failed.
+- NPM wrapper tests: 7 passed with an isolated cache.
+- `soku/scripts/package_test.sh`: all five archives and checksums are valid and
+  reproducible.
+- `go mod verify`: all modules verified.
+- `git diff --check`: passed.
+
+Hosted Cloud Build results are reported as external evidence only; this task
+does not change cloud configuration.
 
 ## Public Disclosure Review
 
@@ -159,8 +168,17 @@ pending으로 유지합니다.
 
 ## 검증
 
-로컬 feature 및 repository policy 검사를 다시 실행한 뒤 검증 결과를 기록합니다.
-Hosted Cloud Build 결과는 외부 증거로만 보고하며, cloud 설정은 변경하지 않습니다.
+- Project Sync Node test 13건 통과
+- `GOCACHE=/tmp/soku-go-cache go test ./...` 통과
+- 전체 로컬 Node regression 105건 통과, 실패 0건
+- repository policy 및 governance regression 102건 통과, 실패 0건
+- NPM wrapper test 7건 통과(격리 cache 사용)
+- `soku/scripts/package_test.sh`의 5개 archive 및 checksum 재현성 통과
+- `go mod verify` 전체 module 검증 통과
+- `git diff --check` 통과
+
+Hosted Cloud Build 결과는 외부 증거로만 보고하며, cloud 설정은 변경하지
+않습니다.
 
 ## 공개 적합성 검토
 
@@ -243,8 +261,17 @@ pendingのまま維持します。
 
 ## 検証
 
-ローカルfeatureおよびrepository policy検査を再実行した後、結果を記録します。
-Hosted Cloud Buildの結果は外部証拠としてのみ報告し、cloud設定は変更しません。
+- Project Sync Node test 13件成功
+- `GOCACHE=/tmp/soku-go-cache go test ./...` 成功
+- 全ローカルNode regression 105件成功、失敗0件
+- repository policyおよびgovernance regression 102件成功、失敗0件
+- NPM wrapper test 7件成功（隔離cacheを使用）
+- `soku/scripts/package_test.sh` の5 archiveとchecksumの再現性を確認
+- `go mod verify` の全module検証成功
+- `git diff --check` 成功
+
+Hosted Cloud Buildの結果は外部証拠としてのみ報告し、cloud設定は変更
+しません。
 
 ## 公開適合性レビュー
 
