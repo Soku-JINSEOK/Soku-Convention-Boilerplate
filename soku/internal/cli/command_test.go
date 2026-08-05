@@ -405,6 +405,33 @@ func TestInitPublicOptionsArePassedToHandler(t *testing.T) {
 	}
 }
 
+func TestProjectSyncOptionsArePassedToInitHandler(t *testing.T) {
+	var got Request
+	handler := HandlerFunc(func(_ context.Context, request Request) error {
+		got = request
+		return nil
+	})
+	handlers := defaultHandlers()
+	handlers.Init = handler
+	result := execute([]string{
+		"init", "--dry-run", "--project-sync", "--project-sync-project-number", "17",
+	}, testRuntime{}, handlers)
+	if result.code != 0 {
+		t.Fatalf("result = %#v", result)
+	}
+	if !got.ProjectSync || got.ProjectSyncProjectNumber != 17 || !got.DryRun {
+		t.Fatalf("request = %#v", got)
+	}
+	invalid := execute([]string{"init", "--dry-run", "--project-sync-project-number", "17"}, testRuntime{}, handlers)
+	if invalid.code != 2 || !strings.Contains(invalid.stderr, "requires --project-sync") {
+		t.Fatalf("invalid component flag result = %#v", invalid)
+	}
+	missingNumber := execute([]string{"init", "--yes", "--project-sync"}, testRuntime{terminal: true}, defaultHandlers())
+	if missingNumber.code != 2 || !strings.Contains(missingNumber.stderr, "project-sync-project-number") {
+		t.Fatalf("missing Project number with --yes result = %#v", missingNumber)
+	}
+}
+
 func TestJSONMutationRequiresYes(t *testing.T) {
 	result := execute([]string{"init", "--json"}, testRuntime{terminal: true}, successHandlers(HandlerFunc(func(context.Context, Request) error { return nil })))
 	if result.code != 2 || !strings.Contains(result.stdout, "--json mutation requires --yes") {

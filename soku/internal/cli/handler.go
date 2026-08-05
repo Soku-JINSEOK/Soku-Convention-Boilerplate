@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/soku/internal/initcmd"
@@ -15,39 +16,41 @@ import (
 
 // Request contains the stable invocation state passed to lifecycle behavior.
 type Request struct {
-	Command            string
-	ConfigPath         string
-	JSON               bool
-	Quiet              bool
-	NonInteractive     bool
-	DryRun             bool
-	Yes                bool
-	Interactive        bool
-	BoilerplateSource  string
-	BoilerplateRelease string
-	Stacks             []string
-	Profile            string
-	ProjectName        string
-	ModulePath         string
-	JavaGroup          string
-	ServiceName        string
-	IntegrationSource  string
-	IntegrationRef     string
-	IntegrationConfig  string
-	Verify             bool
-	Probe              bool
-	SourceSet          bool
-	ReleaseSet         bool
-	StacksSet          bool
-	ProfileSet         bool
-	ProjectNameSet     bool
-	ModulePathSet      bool
-	JavaGroupSet       bool
-	ServiceNameSet     bool
-	VerifySet          bool
-	Input              io.Reader
-	PromptOutput       io.Writer
-	SokuVersion        string
+	Command                  string
+	ConfigPath               string
+	JSON                     bool
+	Quiet                    bool
+	NonInteractive           bool
+	DryRun                   bool
+	Yes                      bool
+	Interactive              bool
+	BoilerplateSource        string
+	BoilerplateRelease       string
+	Stacks                   []string
+	Profile                  string
+	ProjectName              string
+	ModulePath               string
+	JavaGroup                string
+	ServiceName              string
+	IntegrationSource        string
+	IntegrationRef           string
+	IntegrationConfig        string
+	Verify                   bool
+	ProjectSync              bool
+	ProjectSyncProjectNumber int
+	Probe                    bool
+	SourceSet                bool
+	ReleaseSet               bool
+	StacksSet                bool
+	ProfileSet               bool
+	ProjectNameSet           bool
+	ModulePathSet            bool
+	JavaGroupSet             bool
+	ServiceNameSet           bool
+	VerifySet                bool
+	Input                    io.Reader
+	PromptOutput             io.Writer
+	SokuVersion              string
 }
 
 // Result contains successful command output, including diagnostic non-zero exits.
@@ -180,7 +183,25 @@ func initHandler() Handler {
 			answer = strings.ToLower(strings.TrimSpace(answer))
 			return answer == "y" || answer == "yes", nil
 		}
-		report, err := initcmd.Run(ctx, initcmd.Options{Root: root, ConfigPath: request.ConfigPath, Explicit: initcmd.Explicit{Source: request.BoilerplateSource, Release: request.BoilerplateRelease, Stacks: request.Stacks, Profile: request.Profile, ProjectName: request.ProjectName, ModulePath: request.ModulePath, JavaGroup: request.JavaGroup, ServiceName: request.ServiceName, Verify: request.Verify, SourceSet: request.SourceSet, ReleaseSet: request.ReleaseSet, StacksSet: request.StacksSet, ProfileSet: request.ProfileSet, ProjectNameSet: request.ProjectNameSet, ModulePathSet: request.ModulePathSet, JavaGroupSet: request.JavaGroupSet, ServiceNameSet: request.ServiceNameSet, VerifySet: request.VerifySet}, DryRun: request.DryRun, Yes: request.Yes, Interactive: request.Interactive, Confirm: confirm, SokuVersion: request.SokuVersion, IntegrationSource: request.IntegrationSource, IntegrationRef: request.IntegrationRef, IntegrationConfigPath: request.IntegrationConfig, IntegrationFetcher: initcmd.NewSourceClient()}, nil)
+		projectNumber := request.ProjectSyncProjectNumber
+		if request.ProjectSync && projectNumber < 1 && request.Interactive && !request.Yes && !request.NonInteractive {
+			if request.PromptOutput == nil || request.Input == nil {
+				return Result{}, &ExitError{Code: ExitValidationFailure, Key: "project-sync.project-number.required", Message: "--project-sync-project-number is required when interactive input is unavailable"}
+			}
+			if _, err := fmt.Fprint(request.PromptOutput, "GitHub Project number (positive integer): "); err != nil {
+				return Result{}, err
+			}
+			var raw string
+			if _, err := fmt.Fscanln(request.Input, &raw); err != nil && err != io.EOF {
+				return Result{}, &ExitError{Code: ExitValidationFailure, Key: "project-sync.project-number.invalid", Message: "read Project number: " + err.Error(), Cause: err}
+			}
+			parsed, parseErr := strconv.Atoi(strings.TrimSpace(raw))
+			if parseErr != nil || parsed < 1 {
+				return Result{}, &ExitError{Code: ExitValidationFailure, Key: "project-sync.project-number.invalid", Message: "GitHub Project number must be a positive integer", Cause: parseErr}
+			}
+			projectNumber = parsed
+		}
+		report, err := initcmd.Run(ctx, initcmd.Options{Root: root, ConfigPath: request.ConfigPath, Explicit: initcmd.Explicit{Source: request.BoilerplateSource, Release: request.BoilerplateRelease, Stacks: request.Stacks, Profile: request.Profile, ProjectName: request.ProjectName, ModulePath: request.ModulePath, JavaGroup: request.JavaGroup, ServiceName: request.ServiceName, Verify: request.Verify, SourceSet: request.SourceSet, ReleaseSet: request.ReleaseSet, StacksSet: request.StacksSet, ProfileSet: request.ProfileSet, ProjectNameSet: request.ProjectNameSet, ModulePathSet: request.ModulePathSet, JavaGroupSet: request.JavaGroupSet, ServiceNameSet: request.ServiceNameSet, VerifySet: request.VerifySet}, DryRun: request.DryRun, Yes: request.Yes, Interactive: request.Interactive, Confirm: confirm, SokuVersion: request.SokuVersion, IntegrationSource: request.IntegrationSource, IntegrationRef: request.IntegrationRef, IntegrationConfigPath: request.IntegrationConfig, IntegrationFetcher: initcmd.NewSourceClient(), ProjectSync: request.ProjectSync, ProjectSyncProjectNumber: projectNumber}, nil)
 		if err != nil {
 			var failure *initcmd.Failure
 			if errors.As(err, &failure) {

@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "id": "github-project-sync",
+  "catalog_version": "1",
+  "manifest_schema": 2,
+  "configuration_schema": "github-project-sync-v1",
+  "execution": "github-actions",
+  "core_managed_outputs": [
+    ".github/workflows/project-sync.yml",
+    "scripts/github-project-sync.mjs",
+    "scripts/github-project-sync.test.mjs"
+  ],
+  "project_owned_outputs": [
+    ".github/project-sync.yml"
+  ],
+  "security": {
+    "default_enabled": false,
+    "default_mode": "audit",
+    "project_owner": "@me",
+    "organization_projects": false,
+    "creates_credentials": false,
+    "creates_github_resources": false
+  }
+}

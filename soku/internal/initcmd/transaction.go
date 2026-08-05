@@ -112,13 +112,15 @@ func applyTransaction(root string, changes []Change, document manifest.Document,
 			_ = os.Remove(temporary)
 			return rollbackResult(root, directory, record, err, hook)
 		}
-		data, err := os.ReadFile(target)
-		if err != nil {
-			return rollbackResult(root, directory, record, err, hook)
-		}
-		hash, err := manifest.HashContent(data, change.ContentMode)
-		if err != nil || hash != change.BaselineSHA256 {
-			return rollbackResult(root, directory, record, errors.New("applied content hash mismatch"), hook)
+		if change.Class != "project-owned" {
+			data, err := os.ReadFile(target)
+			if err != nil {
+				return rollbackResult(root, directory, record, err, hook)
+			}
+			hash, err := manifest.HashContent(data, change.ContentMode)
+			if err != nil || hash != change.BaselineSHA256 {
+				return rollbackResult(root, directory, record, errors.New("applied content hash mismatch"), hook)
+			}
 		}
 	}
 	if hook != nil {

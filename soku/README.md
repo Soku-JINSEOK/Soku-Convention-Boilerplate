@@ -192,6 +192,49 @@ exit `4` before a journal, backup, managed file, or manifest is written. Optiona
 Apply failure with complete rollback exits `7`; incomplete rollback retains the
 mode-restricted journal and exits `8` with recovery data.
 
+## Optional GitHub Project Sync Component
+
+Project synchronization is an opt-in first-party component. Plain `soku init`
+does not install any Project Sync file. On a fresh repository, include the
+component in the same complete plan:
+
+```bash
+soku init \
+  --boilerplate-source https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate \
+  --boilerplate-release v1.0.5 \
+  --stack javascript-typescript-node \
+  --project-name example-service \
+  --project-sync \
+  --project-sync-project-number 2 \
+  --dry-run
+```
+
+On an already initialized repository, `--project-sync` installs only the
+component and does not fetch or re-render the boilerplate:
+
+```bash
+soku init --project-sync --project-sync-project-number 2 --yes
+```
+
+Non-interactive use requires a positive Project number; interactive use may
+enter it at the prompt. The component installs the guarded workflow, the
+runtime and its focused test under core ownership, plus
+`.github/project-sync.yml` as project-owned configuration. Its generated
+configuration uses `owner: "@me"`, the selected number, canonical field names,
+and no repository name, historical mappings, token, or Issue body. Existing
+Project Sync files are reported as collisions and are never silently adopted.
+
+The workflow is inactive until the repository variable
+`PROJECT_SYNC_ENABLED=true` is set. Audit is the default runtime mode; apply
+requires `PROJECT_SYNC_MODE=apply` or the explicit manual-dispatch choice.
+Create `PROJECT_SYNC_TOKEN` manually with only repository Metadata read,
+Issues read/write, Pull Requests read/write, and authenticated-user Projects
+read/write permission. The CLI makes no GitHub API calls, creates no
+credentials or Projects, and creates no cloud resources. Version 1 supports
+authenticated user-owned Projects only; organization-owned Projects are a
+follow-up scope. `status`, `diff`, and `upgrade` preserve the component while
+leaving the project-owned configuration untouched.
+
 ## Diff and Upgrade
 
 Run release transitions from an initialized project with the manifest's

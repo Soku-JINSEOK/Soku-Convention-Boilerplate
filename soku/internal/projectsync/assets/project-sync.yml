@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "project": {
+    "owner": "@me",
+    "number": __PROJECT_NUMBER__,
+    "fields": {
+      "status": "Status",
+      "priority": "Priority",
+      "size": "Size",
+      "workstream": "Workstream",
+      "targetDate": "Target date"
+    }
+  },
+  "backfill": {
+    "relationMappings": {},
+    "dependencyTrackingIssue": null
+  }
+}

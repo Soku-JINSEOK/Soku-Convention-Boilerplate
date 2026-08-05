@@ -197,6 +197,38 @@ test('does not reuse an initial tracking Issue for unrelated Dependabot PRs', as
   assert.ok(audit.warnings.some((item) => item.target === 'PR #143'));
 });
 
+test('generated configuration disables dependency tracking by default', async () => {
+  const dependabot = {
+    number: 182,
+    body: 'Dependabot release notes',
+    state: 'open',
+    merged_at: null,
+    labels: [],
+    user: {login: 'dependabot[bot]'},
+    head: {ref: 'dependabot/npm_and_yarn/example-182'},
+    changed_files: 1,
+  };
+  const fake = new FakeClient({
+    issues: [],
+    pullRequests: [dependabot],
+    project: {...fakeProject(), items: []},
+  });
+  const audit = await auditRepository({
+    client: fake,
+    repo: 'owner/repo',
+    projectOwner: '@me',
+    projectNumber: 17,
+    config: {
+      ...config,
+      project: {owner: '@me', number: 17, fields: config.project.fields},
+      backfill: {relationMappings: {}, dependencyTrackingIssue: null},
+    },
+  });
+  assert.equal(audit.operations.some((item) => item.kind === 'create-dependency-issue'), false);
+  assert.equal(audit.operations.some((item) => item.kind === 'pr-relation'), false);
+  assert.ok(audit.warnings.some((item) => item.conflict === 'dependency-tracking-disabled'));
+});
+
 test('configuration does not contain raw issue or pull request bodies', () => {
   const source = readFileSync(new URL('../.github/project-sync.yml', import.meta.url), 'utf8');
   assert.doesNotMatch(source, /Dependabot release notes|## 🎯 Goal/);
