@@ -64,9 +64,10 @@ task verifies the CLI contract and the generated component assets.
 
 ## Implementation Status
 
-The implementation is present in PR #193 and is undergoing contract and
-governance verification. Approval remains pending because no explicit approval
-record was available when this report was prepared.
+The implementation was completed and merged into `main` through PR #193.
+Local, policy, security, Project Sync, CodeQL, and Cloud Build verification
+succeeded. Approval remains pending because no explicit approval record was
+available.
 
 ## Verification
 
@@ -79,9 +80,12 @@ record was available when this report was prepared.
   reproducible.
 - `go mod verify`: all modules verified.
 - `git diff --check`: passed.
+- PR #193: merged into `main`.
+- PR Cloud Build validation: passed.
+- `main` Cloud Build validation: passed.
 
-Hosted Cloud Build results are reported as external evidence only; this task
-does not change cloud configuration.
+Hosted Cloud Build results are external evidence only; this task does not
+change cloud configuration or enable delivery.
 
 ## Public Disclosure Review
 
@@ -162,9 +166,9 @@ GCP 또는 Cloud Build 실행은 이번 변경의 mutation 범위 밖이며, CLI
 
 ## 구현 현황
 
-구현은 PR #193에 포함되어 있으며 contract 및 governance 검증을 진행 중입니다.
-이 보고서 작성 시점에 명시적인 승인 기록을 확인하지 못했으므로 승인은 계속
-pending으로 유지합니다.
+구현은 PR #193을 통해 완료되어 `main`에 병합되었습니다. local, policy,
+security, Project Sync, CodeQL 및 Cloud Build 검증이 성공했습니다. 명시적인
+승인 기록이 없으므로 승인은 계속 pending으로 유지합니다.
 
 ## 검증
 
@@ -176,9 +180,12 @@ pending으로 유지합니다.
 - `soku/scripts/package_test.sh`의 5개 archive 및 checksum 재현성 통과
 - `go mod verify` 전체 module 검증 통과
 - `git diff --check` 통과
+- PR #193: `main` 병합 완료
+- PR Cloud Build 검증: 성공
+- `main` Cloud Build 검증: 성공
 
-Hosted Cloud Build 결과는 외부 증거로만 보고하며, cloud 설정은 변경하지
-않습니다.
+Hosted Cloud Build 결과는 외부 증거로만 보고하며, cloud 설정을 변경하거나
+delivery를 활성화하지 않습니다.
 
 ## 공개 적합성 검토
 
@@ -255,9 +262,9 @@ assetを検証します。
 
 ## 実装状況
 
-実装はPR #193に含まれており、contractおよびgovernance検証を進めています。
-この報告書の作成時点で明示的な承認記録を確認できなかったため、承認は
-pendingのまま維持します。
+実装はPR #193で完了し、`main`へマージされました。local、policy、security、
+Project Sync、CodeQL、およびCloud Buildの検証は成功しました。明示的な
+承認記録がないため、承認はpendingのまま維持します。
 
 ## 検証
 
@@ -269,9 +276,12 @@ pendingのまま維持します。
 - `soku/scripts/package_test.sh` の5 archiveとchecksumの再現性を確認
 - `go mod verify` の全module検証成功
 - `git diff --check` 成功
+- PR #193: `main`へマージ済み
+- PR Cloud Build検証: 成功
+- `main` Cloud Build検証: 成功
 
-Hosted Cloud Buildの結果は外部証拠としてのみ報告し、cloud設定は変更
-しません。
+Hosted Cloud Buildの結果は外部証拠としてのみ報告し、cloud設定の変更や
+deliveryの有効化は行いません。
 
 ## 公開適合性レビュー
 
