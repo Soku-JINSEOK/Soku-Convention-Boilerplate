@@ -157,16 +157,3 @@ jobs:
           });
           if (failures.length > 0) process.exit(1);
           NODE
-
-  validation-gate:
-    name: Validation Gate
-    if: always()
-    needs:
-      - policy
-    runs-on: ubuntu-latest
-    steps:
-      - name: Preserve the required validation result contract
-        env:
-          POLICY_RESULT: ${{ needs.policy.result }}
-        shell: bash
-        run: test "$POLICY_RESULT" = success

@@ -66,7 +66,37 @@ and the authoritative 14-day and 10-PR window restarts from that merge
 timestamp, as recorded in
 [`docs/audits/ci-quick-comparison.md`](../audits/ci-quick-comparison.md).
 
+PR #181 later removed automatic Quick and Full validation from pull request and
+`main` events while restoring trusted policy and security checks. The previous
+activation is therefore invalid for closeout and the authoritative sample is
+reset to 0/10. The 2026-08-08 recovery restores Validation as the single
+automatic caller for Quick, Full repository, runtime templates, and trusted
+Security. Security accepts explicit base/head commit inputs, while its schedule
+and manual entrypoints remain independent. Pull Request Policy retains only the
+trusted `PR Metadata Gate`; its temporary compatibility `Validation Gate` is
+removed.
+
+The recovery pull request does not activate the measurement window by itself.
+After it merges, a separate activation-record pull request will record the
+recovery merge commit and timestamp. Neither pull request counts as a natural
+sample.
+
 ## Verification
+
+### 2026-08-08 Recovery Verification
+
+- Validation workflow contract and supply-chain regression tests pass.
+- YAML lint and actionlint pass for Validation, Security, and Pull Request
+  Policy.
+- The Node 24 full profile passed the repository regression suites (75 tests),
+  GitHub/workflow suites (53 tests), release-tag and historical-baseline tests,
+  npm wrapper package tests, Markdown/YAML/actionlint checks, and Soku build,
+  vet, and unit tests.
+- The local full profile then stopped at `go test -race ./...` because this
+  environment has `CGO_ENABLED=0` and no C compiler. Docker is also unavailable,
+  so service/container stages remain for hosted validation. Neither missing
+  local capability is represented as a passing full run.
+- `git diff --check` and the immutable supply-chain verifier pass.
 
 - Workflow/profile regression tests cover planner fail-closed behavior,
   matrix/toolchain propagation, known-group enforcement, and profile isolation.

@@ -8,20 +8,22 @@ weakening the existing required checks during observation.
 
 ## Activation
 
-- **Implementation:** detector-driven dynamic matrix from
-  `verification/profiles.yml`, with explicit Go cache dependency paths
-- **Activation pull request:** [#176](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/pull/176)
-- **Activation commit:** `db50c14781067d74ce05e689d13f951239d92f34`
-- **Activation time:** `2026-07-31T02:47:21Z`
-- **Earliest time-based completion:** `2026-08-14T02:47:21Z`
+- **Implementation:** pending restoration of automatic Quick, Full, and trusted
+  Security validation after PR #181 removed the event-driven caller
+- **Activation pull request:** pending
+- **Activation commit:** pending
+- **Activation time:** pending
+- **Earliest time-based completion:** 14 days after the pending activation time
 - **Minimum sample:** 10 merged code pull requests after activation
 
-The previous sharded window began at `2026-07-26T14:13:58Z` and ended when
-PR #176 changed Quick cache behavior. Its 13 samples are retained below as
-historical evidence and do not count toward the active window. The still earlier
-window beginning at `2026-07-26T12:09:01Z` measured the serial implementation
-and also remains historical. Any later change to Quick behavior or coverage
-resets both the time and pull-request counters.
+The sharded window that began at `2026-07-26T14:13:58Z` and the restarted
+window after PR #176 are historical only. PR #181 removed automatic Quick and
+Full validation from pull request and `main` events, so no observation window
+is currently active. A separate activation-record change will insert the
+restoration merge commit and timestamp after the automatic-validation recovery
+pull request merges. Both the recovery pull request and that activation-record
+pull request are excluded from the sample. Any later change to Quick or Full
+behavior or coverage resets both counters again.
 
 ## Inclusion Rules
 
@@ -83,9 +85,9 @@ Historical median critical-duration ratio: **68.85%**.
 Historical aggregate runner reduction: **86.34%** (1,580 Quick runner-seconds
 compared with 11,568 Full runner-seconds).
 
-## Active Window Samples
+## Pending Window Samples
 
-No qualifying natural samples have merged after the current activation.
+No qualifying natural samples exist for a current activation epoch.
 
 Current qualifying sample count: **0**.
 
@@ -95,8 +97,8 @@ Current aggregate runner reduction: **Not available**.
 
 ## Decision
 
-**Observation reset and active.** PR #176 restored deterministic Go caching and
-therefore changed Quick behavior. The 14-day and qualifying-sample counters
-restart at the activation commit and time above. Issue #117 must not change
-required contexts until every criterion is supported by linked Actions evidence
-from this active window.
+**Observation reset and paused pending automatic-validation restoration.** The
+next epoch starts only from the recovery merge commit and timestamp recorded by
+a separate documentation pull request. Issue #117 must not change required
+contexts until every criterion is supported by linked Actions evidence from
+that new epoch.

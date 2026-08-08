@@ -1,15 +1,16 @@
 name: Security
 
 on:
-  pull_request:
-    types:
-      - opened
-      - synchronize
-      - reopened
-      - ready_for_review
-  push:
-    branches:
-      - main
+  workflow_call:
+    inputs:
+      base-sha:
+        description: Trusted base commit to use for security policy inputs
+        required: true
+        type: string
+      head-sha:
+        description: Exact repository commit to scan and audit
+        required: true
+        type: string
   workflow_dispatch:
   schedule:
     - cron: '17 3 * * 1'
@@ -29,7 +30,7 @@ jobs:
           fetch-depth: 1
           persist-credentials: false
           path: trusted-security
-          ref: ${{ github.event.pull_request.base.sha || github.sha }}
+          ref: ${{ inputs['base-sha'] || github.sha }}
 
       - name: Checkout complete repository history
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -37,7 +38,7 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
           path: repository
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          ref: ${{ inputs['head-sha'] || github.sha }}
 
       - name: Setup Python
         uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
@@ -94,6 +95,7 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
+          ref: ${{ inputs['head-sha'] || github.sha }}
 
       - name: Setup Node.js
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
@@ -138,6 +140,7 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
+          ref: ${{ inputs['head-sha'] || github.sha }}
 
       - name: Setup Go
         uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
@@ -158,6 +161,7 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
+          ref: ${{ inputs['head-sha'] || github.sha }}
 
       - name: Run OSV scanner
         run: >-

@@ -3,6 +3,21 @@ name: Validation
 on:
   workflow_call:
   workflow_dispatch:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - edited
+      - labeled
+      - unlabeled
+      - assigned
+      - unassigned
+      - ready_for_review
+      - converted_to_draft
+  push:
+    branches:
+      - main
 
 permissions:
   contents: read
@@ -86,6 +101,22 @@ jobs:
       cancel-in-progress: true
     uses: ./.github/workflows/templates-ci.yml
 
+  security:
+    name: Security validation
+    if: >-
+      github.event_name != 'pull_request' ||
+      github.event.action == 'opened' ||
+      github.event.action == 'synchronize' ||
+      github.event.action == 'reopened' ||
+      (github.event.action == 'edited' && github.event.changes.base != null)
+    concurrency:
+      group: validation-full-security-${{ github.event.pull_request.number || github.ref }}
+      cancel-in-progress: true
+    uses: ./.github/workflows/security.yml
+    with:
+      base-sha: ${{ github.event.pull_request.base.sha || github.event.before || github.sha }}
+      head-sha: ${{ github.event.pull_request.head.sha || github.sha }}
+
   validation-gate:
     name: Validation Gate
     if: >-
@@ -98,6 +129,7 @@ jobs:
     needs:
       - repository
       - templates
+      - security
     runs-on: ubuntu-latest
     concurrency:
       group: validation-full-gate-${{ github.event.pull_request.number || github.ref }}
@@ -107,10 +139,12 @@ jobs:
         env:
           REPOSITORY_RESULT: ${{ needs.repository.result }}
           TEMPLATES_RESULT: ${{ needs.templates.result }}
+          SECURITY_RESULT: ${{ needs.security.result }}
         shell: bash
         run: |
           test "$REPOSITORY_RESULT" = success
           test "$TEMPLATES_RESULT" = success
+          test "$SECURITY_RESULT" = success
 
   full-validation-not-required:
     name: Full Validation Not Required
