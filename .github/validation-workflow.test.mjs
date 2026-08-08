@@ -87,6 +87,10 @@ test('provides a valid Quick base for manual reusable validation', () => {
 });
 
 test('requires repository, templates, and trusted Security in the full gate', () => {
+  assert.match(
+    repositoryWorkflow,
+    /repository-hygiene:[\s\S]*?Checkout repository[\s\S]*?fetch-depth: 0/,
+  );
   assert.match(workflow, /REPOSITORY_RESULT:/);
   assert.match(workflow, /TEMPLATES_RESULT:/);
   assert.match(workflow, /SECURITY_RESULT:/);
