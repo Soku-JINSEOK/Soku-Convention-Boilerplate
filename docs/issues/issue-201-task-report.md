@@ -106,6 +106,16 @@ from clean `main` in `detect-verification-scope.test.mjs` and `verify.test.mjs`;
 they are not caused by this branch. Hosted final-head checks are authoritative
 for those environment-dependent and cross-platform gates.
 
+Hosted implementation-head evidence for signed commit `bdeb676`:
+
+- Validation run `31240501837` passed Quick, full repository and runtime
+  validation, Soku quality/race, Linux/macOS/Windows lifecycle conformance,
+  five-target packaging, and every trusted Security job.
+- CodeQL passed for Actions, Go, Java/Kotlin, JavaScript/TypeScript, and Python.
+- PR Metadata Gate and the required external Cloud Build context passed.
+- This evidence-record commit is documentation-only; all required contexts must
+  pass again on its new exact head before readiness or merge.
+
 ## Public Disclosure Review
 
 - [x] No credentials, tokens, private keys, or credential-bearing URLs
@@ -214,6 +224,13 @@ Gitleaks, govulncheck, diff check, Node.js/Python/Go template gate가 통과했�
 없습니다. 또한 repository-wide regression runner의 두 실패는 clean `main`에서도
 동일하게 재현됩니다. 이 환경 및 cross-platform 항목은 최종 head hosted check를
 권위 있는 결과로 사용합니다.
+
+서명된 implementation head `bdeb676`에서는 Validation run `31240501837`의 Quick,
+full repository/runtime, race, Linux/macOS/Windows lifecycle, 5개 package, trusted
+Security가 모두 통과했습니다. CodeQL, PR Metadata Gate, required external Cloud
+Build context도 통과했습니다. 이 증거 기록은 documentation-only commit이므로 새
+exact head에서도 모든 required context를 다시 통과해야 Ready 또는 merge할 수
+있습니다.
 
 ## 공개 적합성 검토
 
