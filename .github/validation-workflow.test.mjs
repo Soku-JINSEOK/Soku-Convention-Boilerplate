@@ -38,11 +38,11 @@ const projectSyncWorkflow = readFileSync(
   'utf8',
 );
 
-test('keeps general validation manual and reusable', () => {
+test('runs automatic validation and remains manual and reusable', () => {
   assert.match(workflow, /^\s{2}workflow_call:/m);
   assert.match(workflow, /^\s{2}workflow_dispatch:/m);
-  assert.doesNotMatch(workflow, /^\s{2}pull_request:/m);
-  assert.doesNotMatch(workflow, /^\s{2}push:/m);
+  assert.match(workflow, /^\s{2}pull_request:/m);
+  assert.match(workflow, /^\s{2}push:/m);
   assert.match(workflow, /ci-quick-gate:\n\s+name: CI Quick Gate/);
   assert.match(workflow, /uses: \.\/\.github\/workflows\/ci-quick\.yml/);
   assert.match(workflow, /validation-gate:[\s\S]*name: Validation Gate/);
@@ -86,13 +86,41 @@ test('provides a valid Quick base for manual reusable validation', () => {
   );
 });
 
-test('retains the full validation result contract', () => {
+test('requires repository, templates, and trusted Security in the full gate', () => {
+  assert.match(
+    repositoryWorkflow,
+    /repository-hygiene:[\s\S]*?Checkout repository[\s\S]*?fetch-depth: 0/,
+  );
   assert.match(workflow, /REPOSITORY_RESULT:/);
+  assert.match(workflow, /TEMPLATES_RESULT:/);
+  assert.match(workflow, /SECURITY_RESULT:/);
+  assert.match(workflow, /group: validation-full-security-/);
+  assert.match(workflow, /uses: \.\/\.github\/workflows\/security\.yml/);
+  assert.match(
+    workflow,
+    /base-sha: \$\{\{ github\.event\.pull_request\.base\.sha \|\| github\.event\.before \|\| github\.sha \}\}/,
+  );
+  assert.match(
+    workflow,
+    /head-sha: \$\{\{ github\.event\.pull_request\.head\.sha \|\| github\.sha \}\}/,
+  );
 });
 
 test('metadata-only events preserve the required Validation Gate context', () => {
-  assert.match(workflow, /validation-gate:\n\s+name: Validation Gate/);
+  assert.match(
+    workflow,
+    /validation-gate:\n\s+name: Validation Gate\n\s+if: always\(\)/,
+  );
   assert.match(workflow, /full-validation-not-required:/);
+  assert.match(
+    workflow,
+    /validation-gate:[\s\S]*?needs:[\s\S]*?- full-validation-not-required/,
+  );
+  assert.match(workflow, /NOT_REQUIRED_RESULT:/);
+  assert.match(workflow, /REPOSITORY_RESULT" = skipped/);
+  assert.match(workflow, /TEMPLATES_RESULT" = skipped/);
+  assert.match(workflow, /SECURITY_RESULT" = skipped/);
+  assert.match(workflow, /NOT_REQUIRED_RESULT" = success/);
   assert.match(workflow, /Metadata-only event preserves the existing Validation Gate/);
   assert.match(workflow, /validation-metadata-not-required-/);
 });
@@ -104,15 +132,22 @@ test('keeps full validation cancellation domains independent', () => {
   assert.doesNotMatch(workflow, /^concurrency:/m);
 });
 
-test('keeps event-driven policy, Security, and Project synchronization explicit', () => {
+test('keeps automatic validation, policy, and Project synchronization explicit', () => {
   assert.match(policyWorkflow, /^\s{2}pull_request:/m);
   assert.doesNotMatch(policyWorkflow, /^\s{2}push:/m);
   assert.match(policyWorkflow, /policy:\n\s+name: PR Metadata Gate/);
-  assert.match(policyWorkflow, /validation-gate:\n\s+name: Validation Gate/);
-  assert.match(policyWorkflow, /POLICY_RESULT: \$\{\{ needs\.policy\.result \}\}/);
-  assert.match(securityWorkflow, /^\s{2}pull_request:/m);
-  assert.match(securityWorkflow, /^\s{2}push:/m);
+  assert.doesNotMatch(policyWorkflow, /validation-gate:\n\s+name: Validation Gate/);
+  assert.doesNotMatch(policyWorkflow, /POLICY_RESULT:/);
+  assert.match(securityWorkflow, /^\s{2}workflow_call:/m);
+  assert.match(securityWorkflow, /^\s{4}inputs:/m);
+  assert.match(securityWorkflow, /^\s{6}base-sha:/m);
+  assert.match(securityWorkflow, /^\s{6}head-sha:/m);
+  assert.match(securityWorkflow, /^\s{2}workflow_dispatch:/m);
   assert.match(securityWorkflow, /^\s{2}schedule:/m);
+  assert.doesNotMatch(securityWorkflow, /^\s{2}pull_request:/m);
+  assert.doesNotMatch(securityWorkflow, /^\s{2}push:/m);
+  assert.match(securityWorkflow, /ref: \$\{\{ inputs\['base-sha'\] \|\| github\.sha \}\}/);
+  assert.match(securityWorkflow, /ref: \$\{\{ inputs\['head-sha'\] \|\| github\.sha \}\}/);
   assert.match(projectSyncWorkflow, /^\s{2}issues:/m);
   assert.match(projectSyncWorkflow, /^\s{2}pull_request:/m);
   assert.match(projectSyncWorkflow, /^\s{2}schedule:/m);
@@ -124,11 +159,11 @@ test('keeps event-driven policy, Security, and Project synchronization explicit'
   assert.doesNotMatch(projectSyncWorkflow, /contents: write/);
   assert.doesNotMatch(projectSyncWorkflow, /pull_request_target/);
 
-  const securityPullRequestTrigger =
-    /pull_request:\n\s+types:\n((?:\s+- .+\n)+)/.exec(securityWorkflow);
-  assert.ok(securityPullRequestTrigger, 'Security PR event list must be explicit');
-  assert.match(securityPullRequestTrigger[1], /\bready_for_review\b/);
-  assert.doesNotMatch(securityPullRequestTrigger[1], /\bclosed\b/);
+  const validationPullRequestTrigger =
+    /pull_request:\n\s+types:\n((?:\s+- .+\n)+)/.exec(workflow);
+  assert.ok(validationPullRequestTrigger, 'Validation PR event list must be explicit');
+  assert.match(validationPullRequestTrigger[1], /\bready_for_review\b/);
+  assert.doesNotMatch(validationPullRequestTrigger[1], /\bclosed\b/);
 });
 
 test('executes policy and history controls from the trusted base checkout', () => {
@@ -149,6 +184,8 @@ test('executes policy and history controls from the trusted base checkout', () =
   assert.match(securityWorkflow, /name: Checkout trusted security policy/);
   assert.match(securityWorkflow, /path: trusted-security/);
   assert.match(securityWorkflow, /path: repository/);
+  assert.match(securityWorkflow, /ref: \$\{\{ inputs\['base-sha'\] \|\| github\.sha \}\}/);
+  assert.match(securityWorkflow, /ref: \$\{\{ inputs\['head-sha'\] \|\| github\.sha \}\}/);
   assert.match(
     securityWorkflow,
     /HISTORICAL_BASELINE_COMMIT: 2be9df2421e5661ea5d978fa7832a0ae32936e9d/,
