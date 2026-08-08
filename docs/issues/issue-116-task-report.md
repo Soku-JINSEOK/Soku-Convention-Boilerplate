@@ -97,6 +97,14 @@ sample.
   so service/container stages remain for hosted validation. Neither missing
   local capability is represented as a passing full run.
 - `git diff --check` and the immutable supply-chain verifier pass.
+- The first hosted recovery run exposed a pre-existing shallow-checkout defect
+  in `Repository Hygiene`: the job could not read the pinned historical
+  baseline commit. Its checkout now fetches full history, with a workflow
+  regression assertion covering that requirement.
+- Restoring trusted Security also surfaced newly disclosed high-severity
+  advisories in the JavaScript template lockfile. The lockfile now resolves
+  `js-yaml` 4.3.1 and `nanoid` 3.3.18; `npm ci`, the template test/build/lint
+  suite, and `npm audit --audit-level=high` pass locally with zero findings.
 
 - Workflow/profile regression tests cover planner fail-closed behavior,
   matrix/toolchain propagation, known-group enforcement, and profile isolation.
