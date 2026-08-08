@@ -136,6 +136,12 @@ Issue.
 
 ## Token setup and rotation
 
+The authoritative operational procedure is the
+[Project Sync credential setup and rotation runbook](./PROJECT_SYNC_CREDENTIAL_RUNBOOK.md).
+It separates replacement audit, secret replacement, post-replacement audit,
+optional approved apply, and old-credential revocation so no successful read is
+mistaken for approval to perform the next mutation.
+
 Use a dedicated fine-grained token or GitHub App credential owned by the
 repository maintainer. Grant only:
 
