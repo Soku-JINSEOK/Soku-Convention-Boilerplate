@@ -107,8 +107,20 @@ test('requires repository, templates, and trusted Security in the full gate', ()
 });
 
 test('metadata-only events preserve the required Validation Gate context', () => {
-  assert.match(workflow, /validation-gate:\n\s+name: Validation Gate/);
+  assert.match(
+    workflow,
+    /validation-gate:\n\s+name: Validation Gate\n\s+if: always\(\)/,
+  );
   assert.match(workflow, /full-validation-not-required:/);
+  assert.match(
+    workflow,
+    /validation-gate:[\s\S]*?needs:[\s\S]*?- full-validation-not-required/,
+  );
+  assert.match(workflow, /NOT_REQUIRED_RESULT:/);
+  assert.match(workflow, /REPOSITORY_RESULT" = skipped/);
+  assert.match(workflow, /TEMPLATES_RESULT" = skipped/);
+  assert.match(workflow, /SECURITY_RESULT" = skipped/);
+  assert.match(workflow, /NOT_REQUIRED_RESULT" = success/);
   assert.match(workflow, /Metadata-only event preserves the existing Validation Gate/);
   assert.match(workflow, /validation-metadata-not-required-/);
 });

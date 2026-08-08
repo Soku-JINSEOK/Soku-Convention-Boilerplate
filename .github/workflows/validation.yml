@@ -119,17 +119,12 @@ jobs:
 
   validation-gate:
     name: Validation Gate
-    if: >-
-      always() &&
-      (github.event_name != 'pull_request' ||
-      github.event.action == 'opened' ||
-      github.event.action == 'synchronize' ||
-      github.event.action == 'reopened' ||
-      (github.event.action == 'edited' && github.event.changes.base != null))
+    if: always()
     needs:
       - repository
       - templates
       - security
+      - full-validation-not-required
     runs-on: ubuntu-latest
     concurrency:
       group: validation-full-gate-${{ github.event.pull_request.number || github.ref }}
@@ -140,11 +135,22 @@ jobs:
           REPOSITORY_RESULT: ${{ needs.repository.result }}
           TEMPLATES_RESULT: ${{ needs.templates.result }}
           SECURITY_RESULT: ${{ needs.security.result }}
+          NOT_REQUIRED_RESULT: ${{ needs.full-validation-not-required.result }}
         shell: bash
         run: |
-          test "$REPOSITORY_RESULT" = success
-          test "$TEMPLATES_RESULT" = success
-          test "$SECURITY_RESULT" = success
+          if [[ "$REPOSITORY_RESULT" = success &&
+                "$TEMPLATES_RESULT" = success &&
+                "$SECURITY_RESULT" = success &&
+                "$NOT_REQUIRED_RESULT" = skipped ]]; then
+            exit 0
+          fi
+          if [[ "$REPOSITORY_RESULT" = skipped &&
+                "$TEMPLATES_RESULT" = skipped &&
+                "$SECURITY_RESULT" = skipped &&
+                "$NOT_REQUIRED_RESULT" = success ]]; then
+            exit 0
+          fi
+          exit 1
 
   full-validation-not-required:
     name: Full Validation Not Required
