@@ -62,24 +62,32 @@ run "cloud_build_validation_enabled" {
 
   assert {
     condition = (
-      google_cloudbuild_trigger.pull_request[0].location == "global" &&
+      google_cloudbuild_trigger.pull_request[0].location == "asia-northeast1" &&
       google_cloudbuild_trigger.pull_request[0].name == "soku-convention-boilerplate-pr" &&
       google_cloudbuild_trigger.pull_request[0].filename == "cloudbuild/validation.yaml" &&
       google_cloudbuild_trigger.pull_request[0].github[0].owner == "Soku-JINSEOK" &&
       google_cloudbuild_trigger.pull_request[0].github[0].name == "Soku-Convention-Boilerplate" &&
       google_cloudbuild_trigger.pull_request[0].github[0].pull_request[0].branch == "^main$" &&
-      google_cloudbuild_trigger.pull_request[0].github[0].pull_request[0].comment_control == "COMMENTS_ENABLED_FOR_EXTERNAL_CONTRIBUTORS_ONLY"
+      google_cloudbuild_trigger.pull_request[0].github[0].pull_request[0].comment_control == "COMMENTS_ENABLED"
     )
     error_message = "The pull-request trigger must use the reviewed first-generation GitHub policy."
   }
 
   assert {
     condition = (
-      google_cloudbuild_trigger.main[0].location == "global" &&
+      google_cloudbuild_trigger.main[0].location == "asia-northeast1" &&
       google_cloudbuild_trigger.main[0].name == "soku-convention-boilerplate-main" &&
       google_cloudbuild_trigger.main[0].filename == "cloudbuild/validation.yaml" &&
-      google_cloudbuild_trigger.main[0].github[0].push[0].branch == "^main$"
+      google_cloudbuild_trigger.main[0].github[0].push[0].branch == "^main$" &&
+      toset(google_cloudbuild_trigger.main[0].included_files) == toset([
+        ".github/cloudbuild-validation.test.mjs",
+        ".github/deploy-gcp.test.mjs",
+        "cloudbuild/**",
+        "infra/gcp/**",
+        "scripts/gcp-bootstrap.sh",
+        "templates/gcloud/**",
+      ])
     )
-    error_message = "The main trigger must validate only pushes to main."
+    error_message = "The main trigger must validate only GCP-related pushes to main in Tokyo."
   }
 }
