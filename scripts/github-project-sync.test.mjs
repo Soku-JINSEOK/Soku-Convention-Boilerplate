@@ -182,7 +182,7 @@ test('does not reuse an initial tracking Issue for unrelated Dependabot PRs', as
   });
   const fake = new FakeClient({
     issues: [],
-    pullRequests: [dependabot(182), dependabot(143)],
+    pullRequests: [dependabot(182), dependabot(141)],
     project: {...fakeProject(), items: []},
   });
   const audit = await auditRepository({
@@ -193,8 +193,12 @@ test('does not reuse an initial tracking Issue for unrelated Dependabot PRs', as
     config,
   });
   assert.ok(audit.operations.some((item) => item.target === 'PR #182'));
-  assert.equal(audit.operations.some((item) => item.target === 'PR #143'), false);
-  assert.ok(audit.warnings.some((item) => item.target === 'PR #143'));
+  assert.equal(audit.operations.some((item) => item.target === 'PR #141'), false);
+  assert.ok(audit.warnings.some((item) => item.target === 'PR #141'));
+});
+
+test('configuration records the audited July dependency relation', () => {
+  assert.equal(config.backfill.relationMappings['143'], 69);
 });
 
 test('generated configuration disables dependency tracking by default', async () => {
