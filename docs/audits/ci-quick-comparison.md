@@ -8,22 +8,23 @@ weakening the existing required checks during observation.
 
 ## Activation
 
-- **Implementation:** pending restoration of automatic Quick, Full, and trusted
-  Security validation after PR #181 removed the event-driven caller
-- **Activation pull request:** pending
-- **Activation commit:** pending
-- **Activation time:** pending
-- **Earliest time-based completion:** 14 days after the pending activation time
+- **Implementation:** automatic Quick, Full, and trusted Security validation
+  restored by
+  [#199](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/pull/199)
+- **Activation pull request:**
+  [#199](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/pull/199)
+- **Activation commit:** `44a4106cab9e51f1568665e27d022a4d293e89c2`
+- **Activation time:** `2026-08-08T02:16:45Z`
+- **Earliest time-based completion:** `2026-08-22T02:16:45Z`
 - **Minimum sample:** 10 merged code pull requests after activation
 
 The sharded window that began at `2026-07-26T14:13:58Z` and the restarted
 window after PR #176 are historical only. PR #181 removed automatic Quick and
-Full validation from pull request and `main` events, so no observation window
-is currently active. A separate activation-record change will insert the
-restoration merge commit and timestamp after the automatic-validation recovery
-pull request merges. Both the recovery pull request and that activation-record
-pull request are excluded from the sample. Any later change to Quick or Full
-behavior or coverage resets both counters again.
+Full validation from pull request and `main` events, invalidating those
+observation windows. PR #199 restored the automatic caller and its merge commit
+starts the current observation window at the timestamp above. PR #199 and this
+activation-record pull request are excluded from the sample. Any later change
+to Quick or Full behavior or coverage resets both counters again.
 
 ## Inclusion Rules
 
@@ -85,7 +86,7 @@ Historical median critical-duration ratio: **68.85%**.
 Historical aggregate runner reduction: **86.34%** (1,580 Quick runner-seconds
 compared with 11,568 Full runner-seconds).
 
-## Pending Window Samples
+## Current Window Samples
 
 No qualifying natural samples exist for a current activation epoch.
 
@@ -97,8 +98,6 @@ Current aggregate runner reduction: **Not available**.
 
 ## Decision
 
-**Observation reset and paused pending automatic-validation restoration.** The
-next epoch starts only from the recovery merge commit and timestamp recorded by
-a separate documentation pull request. Issue #117 must not change required
-contexts until every criterion is supported by linked Actions evidence from
-that new epoch.
+**Observation active from the PR #199 recovery merge.** Issue #117 must not
+change required contexts until every criterion is supported by linked Actions
+evidence from this epoch.

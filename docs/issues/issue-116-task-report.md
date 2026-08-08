@@ -76,10 +76,13 @@ and manual entrypoints remain independent. Pull Request Policy retains only the
 trusted `PR Metadata Gate`; its temporary compatibility `Validation Gate` is
 removed.
 
-The recovery pull request does not activate the measurement window by itself.
-After it merges, a separate activation-record pull request will record the
-recovery merge commit and timestamp. Neither pull request counts as a natural
-sample.
+The recovery merged in
+[#199](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/pull/199)
+as commit `44a4106cab9e51f1568665e27d022a4d293e89c2` at
+`2026-08-08T02:16:45Z`. That merge starts the new measurement epoch, with the
+earliest time-based completion at `2026-08-22T02:16:45Z`. The recovery pull
+request and its separate activation-record pull request are excluded from the
+sample, so the current count remains 0/10.
 
 ## Verification
 
@@ -105,6 +108,17 @@ sample.
   advisories in the JavaScript template lockfile. The lockfile now resolves
   `js-yaml` 4.3.1 and `nanoid` 3.3.18; `npm ci`, the template test/build/lint
   suite, and `npm audit --audit-level=high` pass locally with zero findings.
+- The final signed PR head `540d4d19ac1d0b084efe74c22b98bb5729df3516`
+  passed automatic Quick, Full repository, runtime-template, trusted Security,
+  CodeQL, PR Metadata, and external Cloud Build validation. The Cloud Build PR
+  trigger was reconciled from requiring `/gcbrun` for every contributor to the
+  repository contract that requires it only for external contributors; the
+  final head then started automatically without another approval comment.
+- The signed merge commit `44a4106cab9e51f1568665e27d022a4d293e89c2`
+  passed the automatic `main` Validation run
+  [31234601365](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/actions/runs/31234601365),
+  including `CI Quick Gate`, `Validation Gate`, and trusted Security. Its
+  CodeQL and external Cloud Build validations also passed.
 
 - Workflow/profile regression tests cover planner fail-closed behavior,
   matrix/toolchain propagation, known-group enforcement, and profile isolation.
