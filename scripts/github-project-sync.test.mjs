@@ -233,3 +233,50 @@ test('configuration does not contain raw issue or pull request bodies', () => {
   const source = readFileSync(new URL('../.github/project-sync.yml', import.meta.url), 'utf8');
   assert.doesNotMatch(source, /Dependabot release notes|## 🎯 Goal/);
 });
+
+test('credential runbook fixes the least-privilege and rotation contract', () => {
+  const runbook = readFileSync(
+    new URL('../docs/guides/PROJECT_SYNC_CREDENTIAL_RUNBOOK.md', import.meta.url),
+    'utf8',
+  );
+  const guide = readFileSync(
+    new URL('../docs/guides/GITHUB_PROJECT_SYNC.md', import.meta.url),
+    'utf8',
+  );
+
+  for (const requirement of [
+    'Repository | Metadata | Read',
+    'Repository | Issues | Read and write',
+    'Repository | Pull requests | Read and write',
+    'Authenticated user | Projects | Read and write',
+    'repository Contents write',
+    'Actions administration',
+    'workflow edit',
+    'organization administration',
+    'billing access',
+  ]) {
+    assert.ok(runbook.includes(requirement), requirement);
+  }
+
+  const phases = [
+    'Phase 1: prepare and directly audit the replacement',
+    'Phase 2: replace the repository secret',
+    'Phase 3: post-replacement audit',
+    'Phase 4: optional separately approved apply',
+    'Phase 5: revoke and close out',
+  ];
+  let previous = -1;
+  for (const phase of phases) {
+    const index = runbook.indexOf(phase);
+    assert.ok(index > previous, `${phase} must remain ordered`);
+    previous = index;
+  }
+
+  assert.match(runbook, /Never revoke the old credential before/u);
+  assert.match(runbook, /Never retry with a personal or\s+broadly scoped fallback token/u);
+  assert.match(runbook, /Abort and rollback matrix/u);
+  assert.match(runbook, /Only the UTC rotation date and the allowlisted redacted outcome fields/u);
+  assert.doesNotMatch(runbook, /gh[pousr]_[A-Za-z0-9_]{20,}/u);
+  assert.doesNotMatch(runbook, /github_pat_[A-Za-z0-9_]{20,}/u);
+  assert.match(guide, /PROJECT_SYNC_CREDENTIAL_RUNBOOK\.md/u);
+});
