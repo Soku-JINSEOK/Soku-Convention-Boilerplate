@@ -292,3 +292,19 @@ test('release preflight can call validation without enabling delivery', () => {
     /github\.event_name == 'workflow_dispatch'[^\n]*deliver/,
   );
 });
+
+test('canonical main builds one verified digest artifact after Quick succeeds', () => {
+  assert.match(workflow, /verified-image:\n\s+name: Build verified Cloud Run image/);
+  assert.match(
+    workflow,
+    /github\.event_name == 'push' &&\n\s+github\.ref == 'refs\/heads\/main' &&\n\s+github\.repository == 'Soku-JINSEOK\/Soku-Convention-Boilerplate' &&\n\s+vars\.GCP_CI_WIF_PROVIDER != '' &&\n\s+vars\.GCP_CI_WIF_SERVICE_ACCOUNT != ''/,
+  );
+  assert.match(workflow, /verified-image:[\s\S]*needs:\n\s+- quick/);
+  assert.match(workflow, /verified-image:[\s\S]*id-token: write/);
+  assert.match(workflow, /scripts\/build-verified-image\.sh/);
+  assert.match(workflow, /name: verified-cloud-run-image/);
+  assert.match(
+    workflow,
+    /path: \$\{\{ github\.workspace \}\}\/verified-cloud-run-image\/manifest\.json/,
+  );
+});
