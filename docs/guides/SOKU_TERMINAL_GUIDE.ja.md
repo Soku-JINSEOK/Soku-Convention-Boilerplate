@@ -47,6 +47,24 @@ soku upgrade --boilerplate-release v1.1.0 --yes
 `status`、`diff`、`--dry-run` は管理対象ファイルの変更を適用しません。実際の
 upgrade には lifecycle contract に従った明示的な確認が必要です。
 
+## Review 済み Core File 1 件の Handoff
+
+現在の core-managed file に review 済みの意図的な project 変更がある場合、
+normalized SHA-256 を計算してから manifest-only handoff plan を確認します。
+
+```bash
+soku ownership handoff \
+  --path .prettierignore \
+  --expected-sha256 <lowercase-64-character-sha256> \
+  --dry-run
+```
+
+正確な plan を `--yes` または interactive confirmation で適用します。Command は
+canonical path 1 件だけを受け付け、その file の bytes と mode を変更せず、将来の
+core rendering suppression を manifest v3 に記録します。Clean、stale、missing、
+symlink、mergeable、provider-managed、project-owned、repeated path は write 前に
+拒否されます。
+
 ## 1 セッションで Completion を読み込む
 
 現在利用中の shell に対応するコマンドを実行してください。
@@ -68,9 +86,9 @@ soku completion fish | source
 soku completion powershell | Out-String | Invoke-Expression
 ```
 
-`soku <Tab>`、`soku docs <Tab>`、`soku docs manual <Tab>`、
+`soku <Tab>`、`soku ownership <Tab>`、`soku docs <Tab>`、`soku docs manual <Tab>`、
 `soku --color <Tab>`、`soku init --profile <Tab>` を試してください。候補には
-`docs manual`、`completion`、color mode、`bootstrap`、`standard`、
+`ownership handoff`、`docs manual`、`completion`、color mode、`bootstrap`、`standard`、
 `scaled` profile が含まれます。
 
 ## ユーザー所有パスへのインストール

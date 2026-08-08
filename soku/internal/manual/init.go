@@ -85,7 +85,7 @@ func Init(options InitOptions) (InitReport, error) {
 	report := InitReport{
 		State: "planned", ComponentID: componentID, CatalogVersion: catalogVersion,
 		ConfigurationPath: options.ConfigPath, ManifestSchemaBefore: document.SchemaVersion,
-		ManifestSchemaAfter: manifest.SchemaVersionV2, Changes: []InitChange{},
+		ManifestSchemaAfter: max(document.SchemaVersion, manifest.SchemaVersionV2), Changes: []InitChange{},
 		Recovery: []string{},
 	}
 	existingComponent := -1
@@ -152,7 +152,9 @@ func Init(options InitOptions) (InitReport, error) {
 			ContentMode: componentMode, BaselineSHA256: change.BaselineSHA256, LifecycleState: "current",
 		})
 	}
-	document.SchemaVersion = manifest.SchemaVersionV2
+	if document.SchemaVersion < manifest.SchemaVersionV2 {
+		document.SchemaVersion = manifest.SchemaVersionV2
+	}
 	if options.SokuVersion != "" {
 		document.SokuVersion = options.SokuVersion
 	}
@@ -162,7 +164,7 @@ func Init(options InitOptions) (InitReport, error) {
 	sort.Slice(document.Files, func(i, j int) bool { return document.Files[i].Path < document.Files[j].Path })
 	sort.Slice(document.Components, func(i, j int) bool { return document.Components[i].ID < document.Components[j].ID })
 	if err := manifest.Validate(document); err != nil {
-		return InitReport{}, failure(2, "manual.manifest.invalid", "construct manifest v2: %v", err)
+		return InitReport{}, failure(2, "manual.manifest.invalid", "construct manifest v%d: %v", document.SchemaVersion, err)
 	}
 	if err := applyInitTransaction(options, report.Changes, document); err != nil {
 		return InitReport{}, err
@@ -222,7 +224,7 @@ func applyInitTransaction(options InitOptions, changes []InitChange, document ma
 		return err
 	}
 	directory := filepath.Join(options.Root, ".soku", "transactions", id)
-	backup := filepath.Join(directory, "manifest-v1.json")
+	backup := filepath.Join(directory, "manifest-before.json")
 	if err := os.MkdirAll(directory, 0o700); err != nil {
 		return failure(7, "manual.apply.rolled_back", "create transaction: %v", err)
 	}
@@ -259,7 +261,7 @@ func applyInitTransaction(options InitOptions, changes []InitChange, document ma
 		if restoreErr != nil || cleanupErr != nil {
 			return failure(8, "manual.rollback.failed", "component apply failed and exact manifest restoration failed; preserve .soku/transactions/%s", id)
 		}
-		return failure(7, "manual.apply.rolled_back", "component apply failed and rollback restored manifest v1 and created files: %v", applyErr)
+		return failure(7, "manual.apply.rolled_back", "component apply failed and rollback restored the exact prior manifest and created files: %v", applyErr)
 	}
 	for _, change := range changes {
 		if change.Action == "unchanged" {

@@ -88,7 +88,7 @@ func Run(ctx context.Context, options Options, fetcher Fetcher) (Report, error) 
 	}
 	report := Report{State: "planned", Source: snapshot.Source, Release: snapshot.Release, ResolvedCommit: snapshot.ResolvedCommit, Profile: config.Profile, Stacks: append([]string(nil), config.Stacks...), SelectionHash: selectionHash, ConfigurationHash: configurationHash, Changes: []Change{}, Verification: []Verification{}, Recovery: Recovery{Instructions: []string{}}, Components: []manifest.Component{}}
 	if existing, loadErr := manifest.NewStore(options.Root).Load(); loadErr == nil {
-		state, rerunErr := checkRerun(options.Root, existing, snapshot, config, configurationHash)
+		state, rerunErr := checkRerun(options.Root, existing, snapshot, config)
 		if rerunErr != nil {
 			return Report{}, rerunErr
 		}
@@ -180,8 +180,14 @@ func Run(ctx context.Context, options Options, fetcher Fetcher) (Report, error) 
 	return report, nil
 }
 
-func checkRerun(root string, document manifest.Document, snapshot SourceSnapshot, config Config, configurationHash string) (bool, error) {
-	if document.Boilerplate.Source != snapshot.Source || document.Boilerplate.Release != snapshot.Release || document.Boilerplate.ResolvedCommit != snapshot.ResolvedCommit || document.Selection.Profile != config.Profile || document.Selection.ConfigurationHash != configurationHash || strings.Join(document.Selection.Stacks, "\x00") != strings.Join(config.Stacks, "\x00") {
+func checkRerun(root string, document manifest.Document, snapshot SourceSnapshot, config Config) (bool, error) {
+	expectedSelection := selectionFromConfig(config)
+	expectedSelection.ProjectOwnedOverrides = append([]string(nil), document.Selection.ProjectOwnedOverrides...)
+	expectedHash, err := manifest.HashSelection(expectedSelection)
+	if err != nil {
+		return false, err
+	}
+	if document.Boilerplate.Source != snapshot.Source || document.Boilerplate.Release != snapshot.Release || document.Boilerplate.ResolvedCommit != snapshot.ResolvedCommit || document.Selection.Profile != config.Profile || document.Selection.ConfigurationHash != expectedHash || strings.Join(document.Selection.Stacks, "\x00") != strings.Join(config.Stacks, "\x00") {
 		return false, fail(4, "init.conflict", "repository is initialized with a different source or selection; use soku status or soku upgrade")
 	}
 	for _, file := range document.Files {

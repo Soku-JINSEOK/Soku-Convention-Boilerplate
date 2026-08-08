@@ -48,6 +48,25 @@ soku upgrade --boilerplate-release v1.1.0 --yes
 `status`, `diff`, and `--dry-run` do not apply managed-file changes. A real
 upgrade requires explicit confirmation according to the lifecycle contract.
 
+## Hand Off One Reviewed Core File
+
+When a current core-managed file contains an intentional reviewed project
+change, first calculate its normalized SHA-256, then review the manifest-only
+handoff plan:
+
+```bash
+soku ownership handoff \
+  --path .prettierignore \
+  --expected-sha256 <lowercase-64-character-sha256> \
+  --dry-run
+```
+
+Apply the exact plan with `--yes` or interactive confirmation. The command
+accepts only one canonical path, never changes that file's bytes or mode, and
+records future core-rendering suppression in manifest v3. A clean, stale,
+missing, symlinked, mergeable, provider-managed, project-owned, or repeated
+path is refused before writes.
+
 ## Load Completion for One Session
 
 Run the command for the shell that is already active:
@@ -69,9 +88,9 @@ soku completion fish | source
 soku completion powershell | Out-String | Invoke-Expression
 ```
 
-Try `soku <Tab>`, `soku docs <Tab>`, `soku docs manual <Tab>`,
+Try `soku <Tab>`, `soku ownership <Tab>`, `soku docs <Tab>`, `soku docs manual <Tab>`,
 `soku --color <Tab>`, or `soku init --profile <Tab>`. Candidates include
-`docs manual`, `completion`, color modes, and `bootstrap`, `standard`, and
+`ownership handoff`, `docs manual`, `completion`, color modes, and `bootstrap`, `standard`, and
 `scaled` profiles.
 
 ## Install in a User-Owned Path

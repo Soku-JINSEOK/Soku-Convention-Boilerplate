@@ -6,7 +6,7 @@
 
 `soku` is the cross-platform command for the lifecycle contract in
 [`SOKU_LIFECYCLE.md`](../docs/standards/SOKU_LIFECYCLE.md). It provides stable
-parsing and output, transactional `init`, portable manifest-v1/v2 records, and
+parsing and output, transactional `init`, portable manifest-v1/v2/v3 records, and
 read-only `status` diagnostics, immutable release comparison, and transactional
 core upgrades.
 
@@ -192,6 +192,30 @@ exit `4` before a journal, backup, managed file, or manifest is written. Optiona
 Apply failure with complete rollback exits `7`; incomplete rollback retains the
 mode-restricted journal and exits `8` with recovery data.
 
+## Explicit Project Ownership Handoff
+
+Use a handoff only after reviewing one intentional modification to a
+core-managed file:
+
+```bash
+soku ownership handoff \
+  --path .prettierignore \
+  --expected-sha256 <lowercase-64-character-sha256> \
+  --dry-run
+```
+
+Apply the exact validated plan with `--yes` or interactive confirmation. The
+command refuses clean, stale, missing, symlinked, obsolete, mergeable,
+provider-managed, already project-owned, non-canonical, case-mismatched,
+repeated, and batch paths. It never writes or changes the mode of the selected
+file. A confirmed handoff migrates the manifest to v3, records the path in
+`selection.project_owned_overrides`, and changes its file record to
+`project-owned` / `unmanaged-expected`.
+
+Same-release diff and future upgrades suppress core rendering for the recorded
+path. Providers and components cannot claim it, and no implicit reclaim exists.
+Dry-run writes no manifest, pending file, backup, or transaction journal.
+
 ## Optional GitHub Project Sync Component
 
 Project synchronization is an opt-in first-party component. Plain `soku init`
@@ -264,12 +288,15 @@ last. A clean upgrade to the already recorded release is a no-op.
 ## Manifest and Status
 
 The durable record is `.soku/manifest.json`. Its JSON Schema Draft 2020-12
-contracts are [`schema/manifest-v1.schema.json`](./schema/manifest-v1.schema.json)
-and [`schema/manifest-v2.schema.json`](./schema/manifest-v2.schema.json), with
-representative fixtures under `testdata/manifest-v1/` and
-`testdata/manifest-v2/`. Base initialization emits v1. An explicit opt-in
+contracts are [`schema/manifest-v1.schema.json`](./schema/manifest-v1.schema.json),
+[`schema/manifest-v2.schema.json`](./schema/manifest-v2.schema.json), and
+[`schema/manifest-v3.schema.json`](./schema/manifest-v3.schema.json), with
+representative fixtures under the corresponding `testdata/manifest-v*/`
+directories. Base initialization emits v1. An explicit opt-in
 component installation migrates to v2 and adds only portable component ID,
-catalog version, and configuration-path metadata. The record contains only
+catalog version, and configuration-path metadata. An ownership handoff
+explicitly migrates v1/v2 to v3; later component installation preserves v3.
+The record contains only
 portable selections, immutable source identities, ownership metadata, and
 canonical hashes. Raw configuration, secrets, credential-bearing URLs, and
 machine-specific absolute paths are rejected.

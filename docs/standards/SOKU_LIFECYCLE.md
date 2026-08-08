@@ -77,6 +77,7 @@ transaction with the manifest replaced last.
 | `status` | Diagnose manifest compatibility, integration state, local customization, pending work, and drift without changing the repository. | No |
 | `diff` | Render and compare the desired state with the current managed state without applying it. | No |
 | `upgrade` | Require an explicit new boilerplate version or integration revision, plan the compatible transition, and apply it transactionally. | Yes |
+| `ownership handoff` | Hand exactly one intentionally modified core-managed path to permanent project ownership without changing that file. | Yes |
 | `docs manual plan` | Validate a versioned capture configuration and render a deterministic, read-only real-runtime capture plan. | No |
 | `docs manual doctor` | Diagnose the local runner, browser, font, output, provider, and credential-environment prerequisites. `--probe` alone may run the installed fixed runner. | No |
 | `docs manual init` | Install the reviewed `docs-manual` component into initialized state and explicitly migrate manifest v1 to v2. | Yes |
@@ -265,6 +266,20 @@ v1 manifest bytes if apply fails. Later lifecycle transitions preserve v2
 component records unchanged unless a separately approved component operation
 changes them.
 
+Manifest v3 is published at
+[`soku/schema/manifest-v3.schema.json`](../../soku/schema/manifest-v3.schema.json).
+It preserves every v1/v2 field and semantic rule and adds the sorted, non-empty
+`selection.project_owned_overrides` list. Each path in that list must identify
+an exact `project-owned` / `unmanaged-expected` file record. The selection hash
+includes the override list, so changing one baseline field cannot impersonate a
+reviewed ownership handoff. Existing v1/v2 selection hashes and serialized
+records remain unchanged.
+
+Base `init` still emits v1, and the first component still migrates v1 to v2.
+`ownership handoff` explicitly migrates v1 or v2 to v3. Later core transitions
+and component installations preserve v3; they must never downgrade it. Read-only
+commands never migrate any schema as a side effect.
+
 The first core component using this contract is `github-project-sync` catalog
 version `1`. It records only `.github/project-sync.yml` as project-owned
 configuration; its workflow, runtime, and focused test asset are core-managed.
@@ -298,6 +313,9 @@ or traversing paths, backslash bypasses,
 `.git` and `.soku` paths, Windows-incompatible components, case-insensitive
 collisions, ambiguous owners, inconsistent integration references, secrets,
 credential-bearing URLs, raw configuration, and environment-specific paths.
+Manifest v3 additionally sorts and validates project-owned override paths,
+rejects case mismatches, and requires each override to reference an exact
+project-owned file entry.
 
 ### Status and Recovery
 
@@ -343,6 +361,36 @@ mutation with exit code `4`.
 
 Project-owned files may be referenced in diagnostics or shown in a plan, but
 they are never automatically created, replaced, deleted, or merged.
+
+### Explicit Project Ownership Handoff
+
+The only public handoff surface is:
+
+```text
+soku ownership handoff \
+  --path <canonical-relative-path> \
+  --expected-sha256 <lowercase-64-hex> \
+  --dry-run|--yes
+```
+
+One invocation accepts exactly one path and one expected normalized current
+hash. The path must be a present, readable, non-symlinked, regular,
+`core-managed` / `current` file whose current hash differs from its recorded
+baseline and exactly equals `--expected-sha256`. Missing, clean, obsolete,
+mergeable, provider-managed, already project-owned, stale-hash, non-canonical,
+reserved, case-mismatched, repeated, or batch input is rejected before writes.
+
+The plan shows the prior owner, class, content mode, baseline, lifecycle state,
+and the resulting project-owned state. Apply does not write, reformat, remove,
+chmod, or otherwise touch the selected file. It revalidates the file bytes,
+mode, and hash immediately before replacing only the manifest through the
+existing manifest-last transaction. A failed apply restores the exact prior
+manifest. Dry-run creates no pending file, backup, or journal.
+
+Core rendering for every v3 override is suppressed during same-release diff and
+future release/profile transitions. Provider output still cannot claim that
+path. Core ownership reclaim requires a separately reviewed explicit command;
+an upgrade, provider, component, or hand-edited hash cannot reclaim it.
 
 ## Canonical Paths and Content
 
@@ -412,6 +460,11 @@ the manifest last. A v1-to-v2 component migration that fails must remove every
 new component file and restore the exact v1 manifest. Component initialization
 does not take ownership of a same-path user file, even when its bytes happen to
 match a catalog asset.
+
+If the current manifest is v3, component installation preserves v3 and its
+complete `project_owned_overrides` selection. It may add component metadata and
+catalogued component files, but it cannot render or reclaim an overridden core
+path.
 
 ## Executable-Free Provider Contract
 
@@ -523,6 +576,7 @@ The control-plane follow-up may coordinate only these provider-owned details:
 | #21 | Test the supported operating-system, release, manifest, and provider compatibility matrix. |
 | #22 | Implement the generic executable-free provider loader and API wire format without consumer-specific branching. |
 | #164 | Add manifest v2 component selection and the local/manual `docs-manual` planner, doctor, installer, and fixed Node runner boundary. |
+| #201 | Add manifest v3 and the single-path, non-overwriting project ownership handoff transition. |
 
 ## Conformance Scenarios
 
@@ -540,6 +594,9 @@ Implementations must cover at least these scenarios:
 | Exact provider data is not available for a valid request | State remains `pending`; connected CI or delivery output is absent. |
 | Exact compatible provider data arrives | A reviewed transaction may move state to `connected` and create only declared connected outputs. |
 | A managed file differs from its baseline without a successful declared merge | Conflict exits `4` before any write. |
+| A modified current core-managed file matches the exact handoff path and hash | Dry-run reports the complete v3 transition; confirmed apply changes only the manifest and preserves file bytes and mode. |
+| Handoff input is clean, stale, repeated, non-canonical, symlinked, missing, obsolete, mergeable, provider-managed, or project-owned | Rejected before any manifest, backup, journal, or selected-file write. |
+| A later core release still renders a handed-off path | The v3 override suppresses core rendering; the project bytes remain untouched and reclaim requires a separate explicit operation. |
 | Provider application fails after core staging and rollback succeeds | All touched files and the prior manifest are restored; exit code is `7`. |
 | Provider application and rollback both fail | Exit code is `8`, and bounded recovery information remains for manual action. |
 

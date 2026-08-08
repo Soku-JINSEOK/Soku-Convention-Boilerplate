@@ -61,7 +61,7 @@ func execute(args []string, runtime Runtime, handlers Handlers) runResult {
 }
 
 func successHandlers(handler Handler) Handlers {
-	return Handlers{Init: handler, Status: handler, Diff: handler, Upgrade: handler}
+	return Handlers{Init: handler, Status: handler, Diff: handler, Upgrade: handler, OwnershipHandoff: handler}
 }
 
 func TestHelpAndVersionOutput(t *testing.T) {
@@ -131,7 +131,7 @@ func TestExitCodeContract(t *testing.T) {
 
 func TestPublicCommandSurface(t *testing.T) {
 	result := execute([]string{"--help"}, testRuntime{}, defaultHandlers())
-	for _, command := range []string{"init", "status", "diff", "upgrade", "docs", "completion"} {
+	for _, command := range []string{"init", "status", "diff", "upgrade", "ownership", "docs", "completion"} {
 		if !strings.Contains(result.stdout, "  "+command+" ") {
 			t.Errorf("help does not list %q", command)
 		}
@@ -147,6 +147,38 @@ func TestPublicCommandSurface(t *testing.T) {
 	}
 	if result := execute([]string{"-v"}, testRuntime{}, defaultHandlers()); result.code != 2 {
 		t.Errorf("-v exit code = %d, want 2", result.code)
+	}
+}
+
+func TestOwnershipHandoffCommandContract(t *testing.T) {
+	const expected = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+	var got Request
+	handler := HandlerFunc(func(_ context.Context, request Request) error {
+		got = request
+		return nil
+	})
+	handlers := defaultHandlers()
+	handlers.OwnershipHandoff = handler
+	result := execute([]string{
+		"ownership", "handoff", "--path", ".prettierignore", "--expected-sha256", expected, "--dry-run",
+	}, testRuntime{}, handlers)
+	if result.code != 0 || got.Command != "ownership handoff" || got.Path != ".prettierignore" || got.ExpectedSHA256 != expected || !got.DryRun {
+		t.Fatalf("result=%#v request=%#v", result, got)
+	}
+
+	invalid := [][]string{
+		{"ownership", "handoff", "--expected-sha256", expected, "--dry-run"},
+		{"ownership", "handoff", "--path", ".prettierignore", "--dry-run"},
+		{"ownership", "handoff", "--path", "a", "--path", "b", "--expected-sha256", expected, "--dry-run"},
+		{"ownership", "handoff", "--path", "a", "--expected-sha256", expected, "--expected-sha256", expected, "--dry-run"},
+		{"ownership", "handoff", "--path", "a", "--expected-sha256", expected},
+		{"ownership", "handoff", "--path", "a", "--expected-sha256", expected, "--dry-run", "--yes"},
+	}
+	for _, args := range invalid {
+		result := execute(args, testRuntime{}, handlers)
+		if result.code != 2 {
+			t.Fatalf("args=%v result=%#v", args, result)
+		}
 	}
 }
 
