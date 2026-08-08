@@ -293,6 +293,47 @@ func TestManualInitCollisionAndRollbackRestoreExactV1(t *testing.T) {
 	})
 }
 
+func TestManualInitPreservesManifestV3(t *testing.T) {
+	root := t.TempDir()
+	projectPath := "policy.txt"
+	if err := os.WriteFile(filepath.Join(root, projectPath), []byte("project owned\n"), 0o640); err != nil {
+		t.Fatal(err)
+	}
+	selection := manifest.Selection{
+		Profile: "standard", Stacks: []string{}, ProjectOwnedOverrides: []string{projectPath},
+	}
+	selection.ConfigurationHash, _ = manifest.HashSelection(selection)
+	document := manifest.Document{
+		SchemaVersion: manifest.SchemaVersionV3,
+		SokuVersion:   "v0.3.0",
+		Boilerplate: manifest.Boilerplate{
+			Source: "https://github.com/example/boilerplate", Release: "v1.0.0", ResolvedCommit: manualTestCommit,
+		},
+		Selection: selection,
+		Files: []manifest.File{{
+			Path: projectPath, Owner: "project", Class: "project-owned", LifecycleState: "unmanaged-expected",
+		}},
+		Integrations: []manifest.Integration{},
+	}
+	if err := manifest.NewStore(root).Write(document); err != nil {
+		t.Fatal(err)
+	}
+	report, err := Init(InitOptions{
+		Root: root, ConfigPath: "docs/manual/capture.yml", Yes: true, SokuVersion: "v0.3.0",
+	})
+	if err != nil || report.ManifestSchemaBefore != 3 || report.ManifestSchemaAfter != 3 {
+		t.Fatalf("report = %#v, %v", report, err)
+	}
+	applied, err := manifest.NewStore(root).Load()
+	if err != nil || applied.SchemaVersion != manifest.SchemaVersionV3 ||
+		len(applied.Selection.ProjectOwnedOverrides) != 1 || applied.Selection.ProjectOwnedOverrides[0] != projectPath {
+		t.Fatalf("manifest = %#v, %v", applied, err)
+	}
+	if got, err := os.ReadFile(filepath.Join(root, projectPath)); err != nil || string(got) != "project owned\n" {
+		t.Fatalf("project-owned path changed: %v", err)
+	}
+}
+
 func writeV1Manifest(t *testing.T, root string) {
 	t.Helper()
 	selection := manifest.Selection{Profile: "standard", Stacks: []string{}}

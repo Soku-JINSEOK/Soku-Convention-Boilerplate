@@ -104,10 +104,24 @@ func TestInspectCleanPendingDriftAndCompatibility(t *testing.T) {
 
 func TestInspectUnsupportedSchemaIsDiagnostic(t *testing.T) {
 	root := t.TempDir()
-	data := []byte(`{"schema_version":3}`)
+	data := []byte(`{"schema_version":4}`)
 	writeStateFile(t, root, "manifest.json", data)
 	result, err := Inspect(root)
-	if err != nil || result.Code != 5 || result.Report.State != "incompatible" || result.Report.Manifest.SchemaVersion != 3 {
+	if err != nil || result.Code != 5 || result.Report.State != "incompatible" || result.Report.Manifest.SchemaVersion != 4 {
+		t.Fatalf("Inspect() = %#v, %v", result, err)
+	}
+}
+
+func TestInspectProjectOwnedFilesAreExpectedNotDrift(t *testing.T) {
+	root := t.TempDir()
+	writeProjectFile(t, root, "project.txt", []byte("owned"), 0o600)
+	document := statusDocument()
+	document.Files = []manifest.File{{
+		Path: "project.txt", Owner: "project", Class: "project-owned", LifecycleState: "unmanaged-expected",
+	}}
+	writeManifest(t, root, document)
+	result, err := Inspect(root)
+	if err != nil || result.Code != 0 || result.Report.State != "clean" || result.Report.Counts.UnmanagedExpected != 1 {
 		t.Fatalf("Inspect() = %#v, %v", result, err)
 	}
 }

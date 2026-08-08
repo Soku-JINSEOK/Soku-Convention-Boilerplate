@@ -186,6 +186,7 @@ func rollbackResult(root, directory string, record transactionRecord, applyErr e
 	if err := os.RemoveAll(directory); err != nil {
 		return id, fail(8, "rollback.failed", "apply failed and rollback cleanup failed; preserve .soku/transactions/%s", id)
 	}
+	_ = os.Remove(filepath.Join(root, ".soku", "transactions"))
 	return id, fail(7, "apply.rolled_back", "apply failed and rollback restored the previous state: %v", applyErr)
 }
 

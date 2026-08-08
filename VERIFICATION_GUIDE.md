@@ -37,6 +37,9 @@ specific limitation and the follow-up needed to close it.
 
 Published tags and releases are immutable. Verification must never move,
 delete, or reuse them, and must not publish a new release as a side effect.
+Issue #201 prepares the source-only `soku/v0.3.0` candidate. It is not a
+published baseline until a separately approved signed tag, Release,
+five-archive matrix, checksums, and coordinated npm publication complete.
 
 ## Local Repository Checks
 

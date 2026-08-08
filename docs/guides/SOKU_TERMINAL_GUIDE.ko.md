@@ -46,6 +46,23 @@ soku upgrade --boilerplate-release v1.1.0 --yes
 `status`, `diff`, `--dry-run`은 관리 파일 변경을 적용하지 않습니다. 실제 upgrade는
 lifecycle 계약에 따른 명시적 확인이 필요합니다.
 
+## 검토된 Core 파일 하나 Handoff
+
+현재 core-managed 파일에 검토된 의도적인 project 변경이 있을 때 normalized
+SHA-256을 계산한 뒤 manifest-only handoff 계획을 검토합니다.
+
+```bash
+soku ownership handoff \
+  --path .prettierignore \
+  --expected-sha256 <lowercase-64-character-sha256> \
+  --dry-run
+```
+
+정확한 계획을 `--yes` 또는 interactive confirmation으로 적용합니다. Command는
+canonical path 하나만 허용하고 해당 파일의 bytes나 mode를 변경하지 않으며 향후
+core rendering 억제를 manifest v3에 기록합니다. Clean, stale, missing, symlink,
+mergeable, provider-managed, project-owned, repeated path는 write 전에 거부합니다.
+
 ## 한 세션에서 Completion 로드
 
 현재 사용 중인 shell에 해당하는 명령을 실행하십시오.
@@ -67,9 +84,9 @@ soku completion fish | source
 soku completion powershell | Out-String | Invoke-Expression
 ```
 
-`soku <Tab>`, `soku docs <Tab>`, `soku docs manual <Tab>`,
+`soku <Tab>`, `soku ownership <Tab>`, `soku docs <Tab>`, `soku docs manual <Tab>`,
 `soku --color <Tab>`, `soku init --profile <Tab>`을 사용해 보십시오. 후보에는
-`docs manual`, `completion`, color mode와 `bootstrap`, `standard`, `scaled`
+`ownership handoff`, `docs manual`, `completion`, color mode와 `bootstrap`, `standard`, `scaled`
 profile이 포함됩니다.
 
 ## 사용자 소유 경로에 설치

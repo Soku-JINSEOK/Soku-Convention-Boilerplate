@@ -22,6 +22,7 @@ Commands:
   status      Inspect lifecycle state without changes
   diff        Compare current and desired managed state
   upgrade     Upgrade managed convention state
+  ownership   Manage explicit file ownership transitions
   docs        Manage opt-in documentation components
   completion  Generate a shell completion script
 
@@ -141,6 +142,7 @@ func newRootCommand(deps dependencies, out *output) *cobra.Command {
 		newLifecycleCommand("status", false, &opts, deps, out, deps.handlers.Status),
 		newLifecycleCommand("diff", false, &opts, deps, out, deps.handlers.Diff),
 		newLifecycleCommand("upgrade", true, &opts, deps, out, deps.handlers.Upgrade),
+		newOwnershipCommand(&opts, deps, out),
 		newDocsCommand(&opts, deps, out),
 		newCompletionCommand(&opts, out),
 	)
@@ -153,6 +155,108 @@ func newRootCommand(deps dependencies, out *output) *cobra.Command {
 		return nil
 	}
 	return root
+}
+
+type singleStringValue struct {
+	target *string
+	set    bool
+}
+
+func (value *singleStringValue) String() string {
+	if value == nil || value.target == nil {
+		return ""
+	}
+	return *value.target
+}
+
+func (value *singleStringValue) Set(input string) error {
+	if value.set {
+		return fmt.Errorf("flag may be specified only once")
+	}
+	value.set = true
+	*value.target = input
+	return nil
+}
+
+func (*singleStringValue) Type() string { return "string" }
+
+func newOwnershipCommand(opts *options, deps dependencies, out *output) *cobra.Command {
+	var ownership *cobra.Command
+	ownership = &cobra.Command{
+		Use:   "ownership",
+		Short: "Manage explicit file ownership transitions",
+		Args: func(_ *cobra.Command, args []string) error {
+			if len(args) > 0 {
+				return invocationError("ownership does not accept arguments")
+			}
+			return nil
+		},
+		RunE: func(*cobra.Command, []string) error {
+			return out.help("ownership", helpFor(ownership))
+		},
+	}
+
+	var path, expectedSHA256 string
+	var dryRun, yes bool
+	handoff := &cobra.Command{
+		Use:   "handoff",
+		Short: "Hand one modified core-managed path to the project",
+		Args: func(_ *cobra.Command, args []string) error {
+			if len(args) > 0 {
+				return invocationError("ownership handoff does not accept arguments")
+			}
+			return nil
+		},
+		RunE: func(command *cobra.Command, _ []string) error {
+			if opts.version {
+				return out.version(deps.metadata)
+			}
+			if strings.TrimSpace(path) == "" {
+				return invocationError("--path is required")
+			}
+			if strings.TrimSpace(expectedSHA256) == "" {
+				return invocationError("--expected-sha256 is required")
+			}
+			terminal := deps.runtime.IsTerminal()
+			interactive := !opts.nonInteractive && terminal
+			if dryRun && yes {
+				return invocationError("--dry-run and --yes cannot be used together")
+			}
+			if !dryRun && !yes && !interactive {
+				return invocationError("non-interactive mutation requires --dry-run or --yes")
+			}
+			if out.json && !dryRun && !yes {
+				return invocationError("--json mutation requires --yes; use --json --dry-run for a plan")
+			}
+			request := Request{
+				Command: "ownership handoff", JSON: out.json, Quiet: opts.quiet,
+				NonInteractive: opts.nonInteractive || !terminal, DryRun: dryRun, Yes: yes,
+				Interactive: interactive, Path: path, ExpectedSHA256: expectedSHA256,
+				Input: deps.stdin, PromptOutput: deps.stderr, SokuVersion: deps.metadata.Version,
+			}
+			result, err := invokeHandler(command.Context(), deps.handlers.OwnershipHandoff, request)
+			if err != nil {
+				return err
+			}
+			if err := out.result(request.Command, result, opts.quiet); err != nil {
+				return err
+			}
+			if result.Code != ExitSuccess {
+				return &resultExit{Code: result.Code}
+			}
+			return nil
+		},
+	}
+	handoff.Flags().Var(&singleStringValue{target: &path}, "path", "one canonical repository-relative managed path")
+	handoff.Flags().Var(&singleStringValue{target: &expectedSHA256}, "expected-sha256", "expected current normalized lowercase SHA-256")
+	handoff.Flags().BoolVar(&dryRun, "dry-run", false, "produce the complete handoff plan without writing")
+	handoff.Flags().BoolVar(&yes, "yes", false, "approve the already validated ownership handoff")
+	ownership.AddCommand(handoff)
+	for _, command := range []*cobra.Command{ownership, handoff} {
+		command.InitDefaultHelpFlag()
+		command.Flags().Lookup("help").Shorthand = ""
+	}
+	return ownership
 }
 
 func newDocsCommand(opts *options, deps dependencies, out *output) *cobra.Command {
@@ -488,7 +592,7 @@ func hasJSONFlag(args []string) bool {
 }
 
 func commandFromArgs(args []string) string {
-	valueFlags := map[string]bool{"--config": true, "--color": true, "--boilerplate-source": true, "--boilerplate-release": true, "--stack": true, "--profile": true, "--project-name": true, "--module-path": true, "--java-group": true, "--service-name": true, "--project-sync-project-number": true, "--integration-source": true, "--integration-ref": true, "--integration-config": true}
+	valueFlags := map[string]bool{"--config": true, "--color": true, "--boilerplate-source": true, "--boilerplate-release": true, "--stack": true, "--profile": true, "--project-name": true, "--module-path": true, "--java-group": true, "--service-name": true, "--project-sync-project-number": true, "--integration-source": true, "--integration-ref": true, "--integration-config": true, "--path": true, "--expected-sha256": true}
 	positionals := []string{}
 	for index := 0; index < len(args); index++ {
 		arg := args[index]
@@ -505,6 +609,9 @@ func commandFromArgs(args []string) string {
 		return strings.Join(positionals[:3], " ")
 	}
 	if len(positionals) >= 2 && positionals[0] == "docs" {
+		return strings.Join(positionals[:2], " ")
+	}
+	if len(positionals) >= 2 && positionals[0] == "ownership" {
 		return strings.Join(positionals[:2], " ")
 	}
 	if len(positionals) >= 2 && positionals[0] == "completion" {
@@ -561,6 +668,26 @@ func helpFor(command *cobra.Command) string {
 	}
 	if fullName == "docs manual" {
 		return "Plan, diagnose, or install real-runtime manual capture.\n\nUsage:\n  soku docs manual <plan|doctor|init> [flags]\n"
+	}
+	if fullName == "ownership" {
+		return "Manage explicit file ownership transitions.\n\nUsage:\n  soku ownership handoff [flags]\n"
+	}
+	if fullName == "ownership handoff" {
+		return `Hand one intentionally modified core-managed path to the project.
+
+Usage:
+  soku ownership handoff --path <path> --expected-sha256 <sha256> --dry-run|--yes
+
+Flags:
+      --dry-run                  produce the complete handoff plan without writing
+      --expected-sha256 string   expected current normalized lowercase SHA-256
+      --help                     help for ownership handoff
+      --json                     emit one machine-readable JSON envelope
+      --non-interactive          forbid interactive prompts
+      --path string              one canonical repository-relative managed path
+      --quiet                    suppress non-essential human output
+      --yes                      approve the already validated ownership handoff
+`
 	}
 	if fullName == "completion" {
 		return "Generate a shell completion script.\n\nUsage:\n  soku completion <bash|zsh|fish|powershell> [flags]\n"

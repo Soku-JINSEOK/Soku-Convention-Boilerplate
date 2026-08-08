@@ -1,0 +1,25 @@
+{
+  "schema_version": 3,
+  "soku_version": "v0.3.0",
+  "boilerplate": {
+    "source": "https://github.com/example/boilerplate",
+    "release": "v1.0.5",
+    "resolved_commit": "0123456789abcdef0123456789abcdef01234567"
+  },
+  "selection": {
+    "profile": "standard",
+    "stacks": [],
+    "project_owned_overrides": ["policy.txt"],
+    "configuration_hash": "156cbc47339cd2b4b34530576624c0ce9a54a27873b98b68ef0a1c0270e32245"
+  },
+  "files": [
+    {
+      "path": "policy.txt",
+      "owner": "project",
+      "class": "project-owned",
+      "lifecycle_state": "unmanaged-expected"
+    }
+  ],
+  "integrations": [],
+  "components": []
+}

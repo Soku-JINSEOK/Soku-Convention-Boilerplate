@@ -1,0 +1,19 @@
+dist/
+coverage/
+node_modules/
+
+# Byte-exact governance-v2 artifacts are rendered and audited centrally.
+.github/governance-version
+.github/PULL_REQUEST_TEMPLATE.md
+.github/labels.yml
+.github/ISSUE_TEMPLATE/config.yml
+.github/ISSUE_TEMPLATE/bug_report.yml
+.github/ISSUE_TEMPLATE/chore_task.yml
+.github/ISSUE_TEMPLATE/docs_update.yml
+.github/ISSUE_TEMPLATE/feature_request.yml
+.github/ISSUE_TEMPLATE/refactor_proposal.yml
+.github/workflows/contribution-title-check.yml
+.github/workflows/pull-request-policy.yml
+scripts/contribution-title.mjs
+scripts/contribution-title.test.mjs
+scripts/pull-request-policy.mjs

@@ -135,6 +135,14 @@ func RunTransition(ctx context.Context, options TransitionOptions, fetcher Fetch
 	if err != nil {
 		return TransitionReport{}, err
 	}
+	baseTree, err = suppressProjectOwnedOverrides(baseTree, document.Selection.ProjectOwnedOverrides, true)
+	if err != nil {
+		return TransitionReport{}, err
+	}
+	targetTree, err = suppressProjectOwnedOverrides(targetTree, document.Selection.ProjectOwnedOverrides, false)
+	if err != nil {
+		return TransitionReport{}, err
+	}
 	providerBase, err := providerBaselineChanges(options.Root, document)
 	if err != nil {
 		return TransitionReport{}, err
@@ -273,7 +281,7 @@ func renderSnapshot(snapshot SourceSnapshot, config Config) ([]Change, error) {
 func configFromManifest(document manifest.Document) (Config, error) {
 	selection := document.Selection
 	config := Config{SchemaVersion: 1, BoilerplateSource: document.Boilerplate.Source, BoilerplateRelease: document.Boilerplate.Release, Profile: selection.Profile, Stacks: append([]string(nil), selection.Stacks...), ProjectName: selection.ProjectName, ModulePath: selection.ModulePath, JavaGroup: selection.JavaGroup, ServiceName: selection.ServiceName}
-	hash, err := configHash(config)
+	hash, err := manifest.HashSelection(selection)
 	if err != nil {
 		return Config{}, err
 	}
@@ -429,6 +437,36 @@ func planTransition(root string, document manifest.Document, baseTree, targetTre
 	return result, nil
 }
 
+func suppressProjectOwnedOverrides(tree []Change, overrides []string, requireAll bool) ([]Change, error) {
+	if len(overrides) == 0 {
+		return tree, nil
+	}
+	wanted := make(map[string]bool, len(overrides))
+	for _, path := range overrides {
+		wanted[path] = true
+	}
+	found := make(map[string]bool, len(overrides))
+	filtered := make([]Change, 0, len(tree))
+	for _, change := range tree {
+		if !wanted[change.Path] {
+			filtered = append(filtered, change)
+			continue
+		}
+		if change.Owner != "core" || change.Class != "core-managed" {
+			return nil, fail(5, "ownership.override.incompatible", "project-owned override %q no longer identifies a core-managed output", change.Path)
+		}
+		found[change.Path] = true
+	}
+	if requireAll {
+		for _, path := range overrides {
+			if !found[path] {
+				return nil, fail(5, "ownership.override.incompatible", "project-owned override %q cannot be reproduced from the pinned release", path)
+			}
+		}
+	}
+	return filtered, nil
+}
+
 func buildTransitionManifestWithIntegrations(version string, previous manifest.Document, snapshot SourceSnapshot, config Config, changes []Change, integrations []manifest.Integration) (manifest.Document, error) {
 	active := make([]Change, 0, len(changes))
 	for _, change := range changes {
@@ -446,6 +484,11 @@ func buildTransitionManifestWithIntegrations(version string, previous manifest.D
 	}
 	document.SchemaVersion = previous.SchemaVersion
 	document.Components = append([]manifest.Component(nil), previous.Components...)
+	document.Selection.ProjectOwnedOverrides = append([]string(nil), previous.Selection.ProjectOwnedOverrides...)
+	document.Selection.ConfigurationHash, err = manifest.HashSelection(document.Selection)
+	if err != nil {
+		return manifest.Document{}, err
+	}
 	for _, file := range previous.Files {
 		if file.Class == "project-owned" {
 			document.Files = append(document.Files, file)

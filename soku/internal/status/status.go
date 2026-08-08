@@ -288,7 +288,7 @@ func hasCompatibilityFailure(document manifest.Document) bool {
 }
 
 func hasDrift(counts Counts) bool {
-	return counts.Missing+counts.Changed+counts.Obsolete+counts.UnmanagedExpected+
+	return counts.Missing+counts.Changed+counts.Obsolete+
 		counts.TypeMismatch+counts.Unreadable+counts.SymlinkEscape+
 		counts.IntegrationPending+counts.IntegrationDrift > 0
 }

@@ -24,6 +24,8 @@ const (
 	// SchemaVersionV2 adds opt-in component selections without changing file
 	// ownership classes.
 	SchemaVersionV2 = 2
+	// SchemaVersionV3 adds explicit project-owned core-rendering suppressions.
+	SchemaVersionV3 = 3
 	// ManifestPath is the repository-relative location of durable lifecycle state.
 	ManifestPath = ".soku/manifest.json"
 	// PendingPath is the repository-relative interrupted-write marker.
@@ -35,7 +37,7 @@ var (
 	portableDrivePattern = regexp.MustCompile(`^[A-Za-z]:`)
 )
 
-// Document is the complete manifest-v1 wire record.
+// Document is the complete portable manifest wire record.
 type Document struct {
 	SchemaVersion int           `json:"schema_version"`
 	SokuVersion   string        `json:"soku_version"`
@@ -55,13 +57,14 @@ type Boilerplate struct {
 
 // Selection records portable inputs without retaining raw configuration.
 type Selection struct {
-	Profile           string   `json:"profile"`
-	Stacks            []string `json:"stacks"`
-	ProjectName       string   `json:"project_name,omitempty"`
-	ModulePath        string   `json:"module_path,omitempty"`
-	JavaGroup         string   `json:"java_group,omitempty"`
-	ServiceName       string   `json:"service_name,omitempty"`
-	ConfigurationHash string   `json:"configuration_hash"`
+	Profile               string   `json:"profile"`
+	Stacks                []string `json:"stacks"`
+	ProjectName           string   `json:"project_name,omitempty"`
+	ModulePath            string   `json:"module_path,omitempty"`
+	JavaGroup             string   `json:"java_group,omitempty"`
+	ServiceName           string   `json:"service_name,omitempty"`
+	ProjectOwnedOverrides []string `json:"project_owned_overrides,omitempty"`
+	ConfigurationHash     string   `json:"configuration_hash"`
 }
 
 // File records ownership and the last applied baseline for one path.
@@ -115,7 +118,7 @@ func Decode(data []byte) (Document, error) {
 	if header.SchemaVersion == nil || *header.SchemaVersion <= 0 {
 		return Document{}, errors.New("schema_version must be a positive integer")
 	}
-	if *header.SchemaVersion != SchemaVersion && *header.SchemaVersion != SchemaVersionV2 {
+	if *header.SchemaVersion != SchemaVersion && *header.SchemaVersion != SchemaVersionV2 && *header.SchemaVersion != SchemaVersionV3 {
 		return Document{}, &UnsupportedSchemaError{Version: *header.SchemaVersion}
 	}
 
@@ -137,10 +140,12 @@ func Decode(data []byte) (Document, error) {
 // MarshalCanonical validates and serializes a deterministically ordered record.
 func MarshalCanonical(document Document) ([]byte, error) {
 	document.Selection.Stacks = append([]string{}, document.Selection.Stacks...)
+	document.Selection.ProjectOwnedOverrides = append([]string{}, document.Selection.ProjectOwnedOverrides...)
 	document.Files = append([]File(nil), document.Files...)
 	document.Integrations = append([]Integration(nil), document.Integrations...)
 	document.Components = append([]Component(nil), document.Components...)
 	sort.Strings(document.Selection.Stacks)
+	sort.Strings(document.Selection.ProjectOwnedOverrides)
 	sort.Slice(document.Files, func(i, j int) bool { return document.Files[i].Path < document.Files[j].Path })
 	sort.Slice(document.Integrations, func(i, j int) bool { return document.Integrations[i].ID < document.Integrations[j].ID })
 	sort.Slice(document.Components, func(i, j int) bool { return document.Components[i].ID < document.Components[j].ID })
@@ -160,11 +165,17 @@ func MarshalCanonical(document Document) ([]byte, error) {
 
 // Validate enforces the semantic rules that JSON Schema cannot express alone.
 func Validate(document Document) error {
-	if document.SchemaVersion != SchemaVersion && document.SchemaVersion != SchemaVersionV2 {
+	if document.SchemaVersion != SchemaVersion && document.SchemaVersion != SchemaVersionV2 && document.SchemaVersion != SchemaVersionV3 {
 		return &UnsupportedSchemaError{Version: document.SchemaVersion}
 	}
 	if document.SchemaVersion == SchemaVersion && len(document.Components) != 0 {
 		return errors.New("manifest schema v1 must not contain components")
+	}
+	if document.SchemaVersion != SchemaVersionV3 && len(document.Selection.ProjectOwnedOverrides) != 0 {
+		return fmt.Errorf("manifest schema v%d must not contain project_owned_overrides", document.SchemaVersion)
+	}
+	if document.SchemaVersion == SchemaVersionV3 && len(document.Selection.ProjectOwnedOverrides) == 0 {
+		return errors.New("manifest schema v3 requires at least one project_owned_override")
 	}
 	if strings.TrimSpace(document.SokuVersion) == "" {
 		return errors.New("soku_version is required")
@@ -183,6 +194,16 @@ func Validate(document Document) error {
 	}
 	if err := validateSortedUnique("selection.stacks", document.Selection.Stacks); err != nil {
 		return err
+	}
+	if document.SchemaVersion == SchemaVersionV3 {
+		if err := validateSortedUnique("selection.project_owned_overrides", document.Selection.ProjectOwnedOverrides); err != nil {
+			return err
+		}
+		for _, override := range document.Selection.ProjectOwnedOverrides {
+			if err := ValidatePath(override); err != nil {
+				return fmt.Errorf("selection.project_owned_overrides: %w", err)
+			}
+		}
 	}
 	if !isSHA256(document.Selection.ConfigurationHash) {
 		return errors.New("selection.configuration_hash must be a lowercase SHA-256")
@@ -302,6 +323,12 @@ func Validate(document Document) error {
 		}
 		paths[folded] = file
 	}
+	for _, override := range document.Selection.ProjectOwnedOverrides {
+		file, exists := paths[strings.ToLower(override)]
+		if !exists || file.Path != override || file.Owner != "project" || file.Class != "project-owned" || file.LifecycleState != "unmanaged-expected" {
+			return fmt.Errorf("project-owned override %q does not reference an exact project-owned file", override)
+		}
+	}
 
 	previousComponentID := ""
 	componentPaths := map[string]string{}
@@ -368,14 +395,24 @@ func selectionUses(stacks []string, candidates ...string) bool {
 // The stored hash deliberately excludes itself so it can be reproduced from a
 // manifest without retaining raw configuration or machine-local values.
 func HashSelection(selection Selection) (string, error) {
-	data, err := json.Marshal(struct {
-		Profile     string   `json:"profile"`
-		Stacks      []string `json:"stacks"`
-		ProjectName string   `json:"project_name,omitempty"`
-		ModulePath  string   `json:"module_path,omitempty"`
-		JavaGroup   string   `json:"java_group,omitempty"`
-		ServiceName string   `json:"service_name,omitempty"`
-	}{selection.Profile, selection.Stacks, selection.ProjectName, selection.ModulePath, selection.JavaGroup, selection.ServiceName})
+	value := struct {
+		Profile               string   `json:"profile"`
+		Stacks                []string `json:"stacks"`
+		ProjectName           string   `json:"project_name,omitempty"`
+		ModulePath            string   `json:"module_path,omitempty"`
+		JavaGroup             string   `json:"java_group,omitempty"`
+		ServiceName           string   `json:"service_name,omitempty"`
+		ProjectOwnedOverrides []string `json:"project_owned_overrides,omitempty"`
+	}{
+		selection.Profile,
+		selection.Stacks,
+		selection.ProjectName,
+		selection.ModulePath,
+		selection.JavaGroup,
+		selection.ServiceName,
+		selection.ProjectOwnedOverrides,
+	}
+	data, err := json.Marshal(value)
 	if err != nil {
 		return "", fmt.Errorf("encode canonical selection: %w", err)
 	}

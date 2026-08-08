@@ -38,6 +38,8 @@ type Request struct {
 	Verify                   bool
 	ProjectSync              bool
 	ProjectSyncProjectNumber int
+	Path                     string
+	ExpectedSHA256           string
 	Probe                    bool
 	SourceSet                bool
 	ReleaseSet               bool
@@ -81,25 +83,64 @@ func (f ResultHandlerFunc) Handle(ctx context.Context, request Request) (Result,
 
 // Handlers contains one independently replaceable lifecycle boundary.
 type Handlers struct {
-	Init         Handler
-	Status       Handler
-	Diff         Handler
-	Upgrade      Handler
-	ManualPlan   Handler
-	ManualDoctor Handler
-	ManualInit   Handler
+	Init             Handler
+	Status           Handler
+	Diff             Handler
+	Upgrade          Handler
+	ManualPlan       Handler
+	ManualDoctor     Handler
+	ManualInit       Handler
+	OwnershipHandoff Handler
 }
 
 func defaultHandlers() Handlers {
 	return Handlers{
-		Init:         initHandler(),
-		Status:       statusHandler(),
-		Diff:         transitionHandler(false),
-		Upgrade:      transitionHandler(true),
-		ManualPlan:   manualPlanHandler(),
-		ManualDoctor: manualDoctorHandler(),
-		ManualInit:   manualInitHandler(),
+		Init:             initHandler(),
+		Status:           statusHandler(),
+		Diff:             transitionHandler(false),
+		Upgrade:          transitionHandler(true),
+		ManualPlan:       manualPlanHandler(),
+		ManualDoctor:     manualDoctorHandler(),
+		ManualInit:       manualInitHandler(),
+		OwnershipHandoff: ownershipHandoffHandler(),
 	}
+}
+
+func ownershipHandoffHandler() Handler {
+	return ResultHandlerFunc(func(_ context.Context, request Request) (Result, error) {
+		root, err := os.Getwd()
+		if err != nil {
+			return Result{}, err
+		}
+		confirm := func(report initcmd.HandoffReport) (bool, error) {
+			if request.PromptOutput == nil || request.Input == nil {
+				return false, fmt.Errorf("interactive streams are unavailable")
+			}
+			if _, err := fmt.Fprint(request.PromptOutput, initcmd.HumanHandoff(report)+"Apply this handoff? [y/N] "); err != nil {
+				return false, err
+			}
+			var answer string
+			_, err := fmt.Fscanln(request.Input, &answer)
+			if err != nil && err != io.EOF {
+				return false, err
+			}
+			answer = strings.ToLower(strings.TrimSpace(answer))
+			return answer == "y" || answer == "yes", nil
+		}
+		report, err := initcmd.HandoffOwnership(initcmd.HandoffOptions{
+			Root: root, Path: request.Path, ExpectedSHA256: request.ExpectedSHA256,
+			DryRun: request.DryRun, Yes: request.Yes, Interactive: request.Interactive,
+			Confirm: confirm, SokuVersion: request.SokuVersion,
+		})
+		if err != nil {
+			var failure *initcmd.Failure
+			if errors.As(err, &failure) {
+				return Result{}, &ExitError{Code: ExitCode(failure.Code), Key: failure.Key, Message: failure.Message, Cause: failure, Data: failure.Data}
+			}
+			return Result{}, err
+		}
+		return Result{Human: initcmd.HumanHandoff(report), Data: report, Code: ExitSuccess}, nil
+	})
 }
 
 func manualPlanHandler() Handler {

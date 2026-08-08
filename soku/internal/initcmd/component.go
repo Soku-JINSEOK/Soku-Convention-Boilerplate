@@ -172,7 +172,9 @@ func installProjectSync(options Options, document manifest.Document) (Report, er
 	next := document
 	next.Files = append([]manifest.File(nil), document.Files...)
 	next.Components = append([]manifest.Component(nil), document.Components...)
-	next.SchemaVersion = manifest.SchemaVersionV2
+	if next.SchemaVersion < manifest.SchemaVersionV2 {
+		next.SchemaVersion = manifest.SchemaVersionV2
+	}
 	if options.SokuVersion != "" {
 		next.SokuVersion = options.SokuVersion
 	}

@@ -150,6 +150,35 @@ func TestProjectSyncInstallsIntoInitializedRepositoryWithoutFetching(t *testing.
 	}
 }
 
+func TestProjectSyncInstallationPreservesManifestV3(t *testing.T) {
+	snapshot := repositorySnapshot(t)
+	root := initializeOwnershipRelease(t, snapshot)
+	path := ".prettierignore"
+	content := []byte("project-owned formatting boundary\n")
+	if err := os.WriteFile(filepath.Join(root, path), content, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	hash, _ := manifest.HashContent(content, "text")
+	if _, err := HandoffOwnership(HandoffOptions{
+		Root: root, Path: path, ExpectedSHA256: hash, Yes: true, SokuVersion: "v0.3.0",
+	}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := Run(context.Background(), Options{
+		Root: root, ProjectSync: true, ProjectSyncProjectNumber: 17, Yes: true, SokuVersion: "v0.3.0",
+	}, staticFetcher{err: errors.New("component-only installation must not fetch")}); err != nil {
+		t.Fatal(err)
+	}
+	document, err := manifest.NewStore(root).Load()
+	if err != nil || document.SchemaVersion != manifest.SchemaVersionV3 || !hasProjectSyncComponent(document) ||
+		len(document.Selection.ProjectOwnedOverrides) != 1 || document.Selection.ProjectOwnedOverrides[0] != path {
+		t.Fatalf("manifest = %#v, %v", document, err)
+	}
+	if got, err := os.ReadFile(filepath.Join(root, path)); err != nil || string(got) != string(content) {
+		t.Fatalf("project-owned path changed: %v", err)
+	}
+}
+
 func TestProjectSyncV1MigrationRollbackRestoresExactManifest(t *testing.T) {
 	snapshot := repositorySnapshot(t)
 	explicit := Explicit{Source: testSource, Release: "v1.0.0", Stacks: []string{"mysql"}, SourceSet: true, ReleaseSet: true, StacksSet: true}
