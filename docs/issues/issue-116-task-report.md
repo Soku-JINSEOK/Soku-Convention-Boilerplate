@@ -82,7 +82,23 @@ as commit `44a4106cab9e51f1568665e27d022a4d293e89c2` at
 `2026-08-08T02:16:45Z`. That merge starts the new measurement epoch, with the
 earliest time-based completion at `2026-08-22T02:16:45Z`. The recovery pull
 request and its separate activation-record pull request are excluded from the
-sample, so the current count remains 0/10.
+sample.
+
+The current epoch now contains three qualifying natural code pull requests:
+[#202](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/pull/202),
+[#203](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/pull/203),
+and [#204](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/pull/204).
+Their exact-head Validation evidence is recorded in
+[`docs/audits/ci-quick-comparison.md`](../audits/ci-quick-comparison.md).
+The authoritative count is **3/10**; there are no observed Quick-pass /
+Full-fail misses or unresolved flakes. The current median Quick/Full critical
+duration ratio is **67.6%**, which does not meet the required maximum of 50%,
+while the median runner-second reduction is **55.6%**, which meets the required
+minimum of 40% for this small sample.
+
+This documentation reconciliation does not change Quick or Full behavior and
+is excluded from the natural-sample counter. The remaining natural samples,
+14-day observation period, and fixture checks remain mandatory before #117.
 
 ## Verification
 
