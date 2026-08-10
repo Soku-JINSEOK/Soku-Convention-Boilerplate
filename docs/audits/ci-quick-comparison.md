@@ -88,16 +88,35 @@ compared with 11,568 Full runner-seconds).
 
 ## Current Window Samples
 
-No qualifying natural samples exist for a current activation epoch.
+Three qualifying natural code pull requests have merged after activation. The
+activation and activation-record pull requests remain excluded.
 
-Current qualifying sample count: **0**.
+| PR | Final head | Code-bearing Validation run | Quick critical | Full critical | Quick/Full | Quick runner-s | Full runner-s | Runner reduction |
+| -- | ---------- | --------------------------- | -------------: | ------------: | ---------: | -------------: | ------------: | ---------------: |
+| [#202](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/pull/202) | `0ce60b08edf028280410a4d9a28057220a18c72d` | [31240704823](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/actions/runs/31240704823) | 75 s | 111 s | 67.6% | 292 | 658 | 55.6% |
+| [#203](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/pull/203) | `e8da77b57bcab884ffb52e1d860d08c1af4af123` | [31241720724](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/actions/runs/31241720724) | 141 s | 121 s | 116.5% | 428 | 794 | 46.1% |
+| [#204](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/pull/204) | `fe87ce9c2bc41daf5ca86d4721eaf8834cb5c87f` | [31243280270](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/actions/runs/31243280270) | 68 s | 121 s | 56.2% | 267 | 697 | 61.7% |
 
-Current median critical-duration ratio: **Not available**.
+Each listed head passed its Quick, Full, trusted Security, and aggregate
+Validation jobs. No Quick-pass / Full-fail miss or unresolved flaky outcome was
+observed in the current sample.
 
-Current aggregate runner reduction: **Not available**.
+Current qualifying sample count: **3/10**.
+
+Current median critical-duration ratio: **67.6%** — this does not yet satisfy
+the required maximum of 50%.
+
+Current median runner-second reduction: **55.6%** — this satisfies the required
+minimum of 40% for the current small sample.
+
+The earliest time-based completion remains **2026-08-22T02:16:45Z**. Detector
+and planner fixtures, the 14-day observation period, and the remaining natural
+samples are still required.
 
 ## Decision
 
-**Observation active from the PR #199 recovery merge.** Issue #117 must not
-change required contexts until every criterion is supported by linked Actions
-evidence from this epoch.
+**Observation remains active from the PR #199 recovery merge.** Issue #117 must
+not change required contexts until every criterion is supported by linked
+Actions evidence from this epoch. This documentation-only reconciliation does
+not change Quick or Full behavior and is excluded from the natural-sample
+counter.
