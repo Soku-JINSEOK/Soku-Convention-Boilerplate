@@ -106,8 +106,12 @@ Current qualifying sample count: **3/10**.
 Current median critical-duration ratio: **67.6%** — this does not yet satisfy
 the required maximum of 50%.
 
-Current median runner-second reduction: **55.6%** — this satisfies the required
-minimum of 40% for the current small sample.
+Current aggregate runner-second reduction: **54.1%** — 987 Quick
+runner-seconds compared with 2,149 Full runner-seconds. This satisfies the
+required minimum of 40% for the current small sample.
+
+The per-sample median runner-second reduction is **55.6%**. It is descriptive
+only and is not the acceptance metric.
 
 The earliest time-based completion remains **2026-08-22T02:16:45Z**. Detector
 and planner fixtures, the 14-day observation period, and the remaining natural

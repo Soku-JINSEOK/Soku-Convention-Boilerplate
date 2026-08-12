@@ -93,8 +93,11 @@ Their exact-head Validation evidence is recorded in
 The authoritative count is **3/10**; there are no observed Quick-pass /
 Full-fail misses or unresolved flakes. The current median Quick/Full critical
 duration ratio is **67.6%**, which does not meet the required maximum of 50%,
-while the median runner-second reduction is **55.6%**, which meets the required
-minimum of 40% for this small sample.
+while aggregate runner-seconds are **987 seconds for Quick** and **2,149
+seconds for Full**. The resulting aggregate reduction is **54.1%**, which meets
+the required minimum of 40% for this small sample. The per-sample median
+runner-second reduction is **55.6%** and is descriptive only, not the acceptance
+metric.
 
 This documentation reconciliation does not change Quick or Full behavior and
 is excluded from the natural-sample counter. The remaining natural samples,
