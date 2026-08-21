@@ -1,43 +1,37 @@
 # 🧩 Soku-Convention-Boilerplate
 
-> 読みやすいコード、安定した構造、そして長期的な保守性を重視するチームとAIエージェントのための、再利用可能なコーディング規約のベースラインです。
+> `soku` CLI を活用した宣言的なリポジトリ規約ベースラインおよびライフサイクルツールチェーンです。
 
 [English](./README.md) | [한국어](./README.ko.md)
 
 ## 👋 概要
 
-`Soku-Convention-Boilerplate` は、あらゆるプロジェクトにおいて一貫したコードスタイル、構造、およびコラボレーション基準を維持するための再利用可能なベーステンプレートです。  
-これは単なるスターターとしてではなく、読みやすさと長期的な保守性を中心とした開発文化を築くための、再現可能な運用の基盤として設計されています。
+従来のプロジェクトボイラープレートは、複製直後から規約が乖離していく**テンプレートドリフト（Template Drift）**に陥りやすく、アップストリームの更新を手動で diff する際に人的エラーが発生します。
 
-## 🗺️ マスターブループリント
+`Soku-Convention-Boilerplate` は、**Google Style Guide に沿ったベースライン**と **`soku` CLI ツールチェーン**を統合し、プロジェクトのライフサイクル全体を通じてリポジトリ規約を明示的、レビュー可能、かつ再現可能に管理します。
 
-標準的な設計および運用モデルについては、[BLUEPRINT.md](./BLUEPRINT.md) を参照してください。
-初回導入時の profile 選択から初期化と upgrade までは、
-[総合利用マニュアル](./docs/guides/USAGE_MANUAL.md) に従ってください。
+* **🎯 宣言的なコーディング規約:** マルチスタックプロファイル（TypeScript、Go、Python、Java）をサポートし、統一されたフォーマットと静的解析ルールを提供します。
+* **🛡️ 管理所有権モデル（Managed Ownership）:** Soku は管理対象ファイルの所有権とベースラインを `.soku/manifest.json` に記録し、プロジェクト固有のコードは自動ライフサイクル変更の対象外として保護します。
+* **🔁 再現可能な CLI ワークフロー:** 明示的な不変入力、dry-run による計画の事前検証、およびトランザクション型の安全なアップグレードを提供します。
 
-## ⚡ クイックスタート
+## 🗺️ マスターブループリントおよび運用規約
 
-<details>
-<summary>最小コマンドで新規リポジトリを開始する</summary>
+* **標準アーキテクチャ設計:** [BLUEPRINT.md](./BLUEPRINT.md)（設計権威ドキュメント）
+* **ライフサイクルおよび所有権契約:** [SOKU_LIFECYCLE.md](./docs/standards/SOKU_LIFECYCLE.md)（規範的 ADR）
+* **導入手順および利用マニュアル:** [USAGE_MANUAL.md](./docs/guides/USAGE_MANUAL.md)（全体利用ガイド）
+* **完全検証スイート:** [VERIFICATION_GUIDE.md](./VERIFICATION_GUIDE.md)（ローカル、ホスティング、リリース検証）
 
-運用スタイルに合う手順を1つ選択してください。
+## ⚡ 60秒クイックスタート
 
-### 1) 事前準備
-
-```bash
-soku --version
-```
-
-### 2) `soku` のインストール
+### 1) `soku` CLI のインストール
 
 ```bash
 npm install -g @soku-jinseok/soku@0.2.1
 ```
 
-npm が利用できない場合は、`soku/v0.2.1` リリースのバイナリを取得し、`checksums.txt`で
-整合性を確認してインストールしてください。
+*（または `soku/v0.2.1` リリースページからスタンドアロンバイナリを取得し、`checksums.txt` で検証してインストール）*
 
-### 3) ブートストラップと検証
+### 2) 初期化計画の事前プレビュー（`--dry-run`）
 
 ```bash
 soku init \
@@ -50,27 +44,53 @@ soku init \
   --dry-run
 ```
 
-結果を確認したら、`--dry-run` を `--yes` に置き換えて適用します。
-
-### 4) PR/CI 前のローカル検証
+### 3) 同一の入力値で確定適用（`--yes`）
 
 ```bash
-make fmt-check
-make lint
-make test
-make build
+soku init \
+  --boilerplate-source https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate \
+  --boilerplate-release v1.0.5 \
+  --profile standard \
+  --stack javascript-typescript-node \
+  --project-name my-service \
+  --verify \
+  --yes
 ```
 
-</details>
+### 4) 標準検証の実行
+
+初期化された対象プロジェクト（例: Node.js / TypeScript スタック）:
+
+```bash
+npm run format:check && npm run lint && npm run test && npm run build
+```
+
+当ボイラープレートリポジトリ自体の完全検証スイートの実行:
+
+```bash
+./scripts/verify.sh
+```
+
+## 🏗️ アーキテクチャおよびライフサイクルフロー
+
+```mermaid
+flowchart TB
+    BP["Boilerplate Source<br/>Release: v1.0.5 (Signed Tag)"]
+    CLI["soku CLI Engine<br/>Distribution: soku/v0.2.1"]
+    Repo["Target Downstream Repository<br/>.soku/manifest.json + Managed File Boundaries"]
+
+    BP --> CLI
+    CLI -->|init / verify / upgrade| Repo
+```
 
 ## 📦 現在公開中のベースライン
 
-現在公開中の release は boilerplate `v1.0.5` と CLI `soku/v0.2.1` です。
-署名済み `v1.0.5` corrective release は、immutable `v1.0.4` の公開 migration
-smoke で確認された境界を修正し、lifecycle-owned `.soku/` state を JavaScript
-および TypeScript formatting の対象外にします。既存 tag は不変のまま保持し、
-現在の boilerplate baseline として `v1.0.5` を使用してください。完全な検証は
-[VERIFICATION_GUIDE.md](./VERIFICATION_GUIDE.md) を参照してください。
+現在公開中のリリースは、2つの独立したリリース軸で運用されています:
+
+* **ボイラープレートベースライン:** `v1.0.5`（署名付きタグ）
+* **CLI ディストリビューション:** `soku/v0.2.1`（スタンドアロンバイナリおよび npm パッケージ）
+
+署名済み `v1.0.5` 修正リリースは、immutable `v1.0.4` の公開マイグレーション smoke で確認された境界を修正し、ライフサイクル管理下の `.soku/` 状態を JavaScript および TypeScript フォーマットの対象外にします。既存のタグは不変のまま維持され、現在のボイラープレートベースラインとして `v1.0.5` を使用してください。完全な検証手順については [VERIFICATION_GUIDE.md](./VERIFICATION_GUIDE.md) を参照してください。
 
 ---
 
@@ -136,11 +156,11 @@ smoke で確認された境界を修正し、lifecycle-owned `.soku/` state を 
 
 プルリクエストとコードレビューは、以下の事項を最優先に扱います：
 
-- 動作の正しさ (Correctness)
-- 保守性 (Maintainability)
-- アーキテクチャ的な明確さ (Architectural clarity)
-- テスト容易性 (Testability)
-- 意思決定のトレードオフ
+* 動作の正しさ (Correctness)
+* 保守性 (Maintainability)
+* アーキテクチャ的な明確さ (Architectural clarity)
+* テスト容易性 (Testability)
+* 意思決定のトレードオフ
 
 書式や改行などのスタイルに関する論点は、自動化されたリンター/フォーマッターツールに完全に委ねます。
 
@@ -152,11 +172,11 @@ smoke で確認された境界を修正し、lifecycle-owned `.soku/` state を 
 
 このリポジトリは、AIエージェントが以下の事項を直感的に把握できるように最適化されている必要があります：
 
-- プロジェクトの本来の意図およびアーキテクチャの目的
-- コード所有権の境界線
-- 構造的な規約および命名規則
-- ドキュメント作成基準
-- ビルド、テスト、および検証ワークフロー
+* プロジェクトの本来の意図およびアーキテクチャの目的
+* コード所有権の境界線
+* 構造的な規約および命名規則
+* ドキュメント作成基準
+* ビルド、テスト、および検証ワークフロー
 
 これを実現するため、グローバルなルールと方針は、直接的で明快な英語で一貫して記述されます。
 
@@ -164,64 +184,64 @@ smoke で確認された境界を修正し、lifecycle-owned `.soku/` state を 
 
 このボイラープレートは、以下の役割を果たすために存在します：
 
-- 新しいリポジトリを開始する際の標準スケルトン（スターティングポイント）
-- 個人およびチームプロジェクト全体に適用される一貫した規約共有レイヤー
-- 可読性が高く、読みやすい堅牢なコードを書くためのトレーニング場
-- 自動化を通じて書式に関する摩擦を排除する快適な開発環境
-- 人間の開発者とAIエージェントが共に理解し合える安定したリポジトリ構造の構築
+* 新しいリポジトリを開始する際の標準スケルトン（スターティングポイント）
+* 個人およびチームプロジェクト全体に適用される一貫した規約共有レイヤー
+* 可読性が高く、読みやすい堅牢なコードを書くためのトレーニング場
+* 自動化を通じて書式に関する摩擦を排除する快適な開発環境
+* 人間の開発者とAIエージェントが共に理解し合える安定したリポジトリ構造の構築
 
 ## 📚 関連ドキュメント一覧
 
-- [README.md](./README.md): 多言語概要およびプロジェクトポジショニング
-- [BLUEPRINT.md](./BLUEPRINT.md): 公式リポジトリ設計図および権限マップドキュメント
-- [CONTRIBUTING.md](./CONTRIBUTING.md): コントリビューションの流れとコミットメッセージルール
-- [AGENTS.md](./AGENTS.md): AIエージェント動作ガイド（英語専用）
-- [LICENSE](./LICENSE): ボイラープレート基本ライセンスドキュメント（MIT）
-- [SECURITY.md](./SECURITY.md): セキュリティ欠陥の報告窓口
-- [`soku` CLI](./soku/README.md): ビルド、インストール、検証、パッケージ、およびリリース運用
-- [Soku ターミナルおよび completion ガイド](./docs/guides/SOKU_TERMINAL_GUIDE.ja.md): 色、日常フロー、自動化、4 shell の設定
-- [VERIFICATION_GUIDE.md](./VERIFICATION_GUIDE.md): ローカル、hosted、governance、artifact、security、cost の完全な検証
+* [README.md](./README.md): 多言語概要およびプロジェクトポジショニング
+* [BLUEPRINT.md](./BLUEPRINT.md): 公式リポジトリ設計図および権限マップドキュメント
+* [CONTRIBUTING.md](./CONTRIBUTING.md): コントリビューションの流れとコミットメッセージルール
+* [AGENTS.md](./AGENTS.md): AIエージェント動作ガイド（英語専用）
+* [LICENSE](./LICENSE): ボイラープレート基本ライセンスドキュメント（MIT）
+* [SECURITY.md](./SECURITY.md): セキュリティ欠陥の報告窓口
+* [`soku` CLI](./soku/README.md): ビルド、インストール、検証、パッケージ、およびリリース運用
+* [Soku ターミナルおよび completion ガイド](./docs/guides/SOKU_TERMINAL_GUIDE.ja.md): 色、日常フロー、自動化、4 shell の設定
+* [VERIFICATION_GUIDE.md](./VERIFICATION_GUIDE.md): ローカル、hosted、governance、artifact、security、cost の完全な検証
 
 ### 📏 `docs/standards/` — 構造とプロセスの規範ドキュメント
 
-- [CODE_STYLE.md](./docs/standards/CODE_STYLE.md): コードスタイルのベースラインと作成ルール
-- [PROJECT_STRUCTURE.md](./docs/standards/PROJECT_STRUCTURE.md): リポジトリフォルダ構成および構造ルール
-- [GITHUB_STANDARDS.md](./docs/standards/GITHUB_STANDARDS.md): イシュー、PR、レビュー、およびテンプレート運用基準
-- [RELEASE_AND_SYNC.md](./docs/standards/RELEASE_AND_SYNC.md): リリースタグ配備と同期手順
-- [SOKU_LIFECYCLE.md](./docs/standards/SOKU_LIFECYCLE.md): `soku` CLI、マニフェスト、所有権、プロバイダ、およびトランザクションライフサイクルの規範
-- [REAL_RUNTIME_MANUAL_CAPTURE.md](./docs/standards/REAL_RUNTIME_MANUAL_CAPTURE.md): local/manual の実 frontend capture、provenance、adapter、map provider の境界
-- [CICD_STANDARDS.md](./docs/standards/CICD_STANDARDS.md): 継続的インテグレーションおよびデリバリー（CI/CD）の運用基準
+* [CODE_STYLE.md](./docs/standards/CODE_STYLE.md): コードスタイルのベースラインと作成ルール
+* [PROJECT_STRUCTURE.md](./docs/standards/PROJECT_STRUCTURE.md): リポジトリフォルダ構成および構造ルール
+* [GITHUB_STANDARDS.md](./docs/standards/GITHUB_STANDARDS.md): イシュー、PR、レビュー、およびテンプレート運用基準
+* [RELEASE_AND_SYNC.md](./docs/standards/RELEASE_AND_SYNC.md): リリースタグ配備と同期手順
+* [SOKU_LIFECYCLE.md](./docs/standards/SOKU_LIFECYCLE.md): `soku` CLI、マニフェスト、所有権、プロバイダ、およびトランザクションライフサイクルの規範
+* [REAL_RUNTIME_MANUAL_CAPTURE.md](./docs/standards/REAL_RUNTIME_MANUAL_CAPTURE.md): local/manual の実 frontend capture、provenance、adapter、map provider の境界
+* [CICD_STANDARDS.md](./docs/standards/CICD_STANDARDS.md): 継続的インテグレーションおよびデリバリー（CI/CD）の運用基準
 
 ### 🛡️ `docs/policy/` — 領域別基本ポリシー宣言書
 
-- [LICENSE_POLICY.md](./docs/policy/LICENSE_POLICY.md): ライセンス選択ガイドライン
-- [SECURITY_POLICY.md](./docs/policy/SECURITY_POLICY.md): ソース、機密情報（Secret）、配備段階別のセキュリティ基本方針
-- [CLOUD_POLICY.md](./docs/policy/CLOUD_POLICY.md): クラウドプロバイダ（GCP, AWS, Azure）の選定ルール
+* [LICENSE_POLICY.md](./docs/policy/LICENSE_POLICY.md): ライセンス選択ガイドライン
+* [SECURITY_POLICY.md](./docs/policy/SECURITY_POLICY.md): ソース、機密情報（Secret）、配備段階別のセキュリティ基本方針
+* [CLOUD_POLICY.md](./docs/policy/CLOUD_POLICY.md): クラウドプロバイダ（GCP, AWS, Azure）の選定ルール
 
 ### 🧭 `docs/guides/` — ベストプラクティスおよび案内ガイドドキュメント
 
-- [USAGE_MANUAL.md](./docs/guides/USAGE_MANUAL.md): 適用レベルと検証済み installation から governance、任意の GCP dev deploy、upgrade までをつなぐ人間向け開始点
-- [STACK_EXAMPLES.md](./docs/guides/STACK_EXAMPLES.md): 主要言語、DB、クラウドワークフローの構築例
-- [STACK_CONFIGS.md](./docs/guides/STACK_CONFIGS.md): スタック別設定ファイルテンプレート一覧
-- [README_GUIDE.md](./docs/guides/README_GUIDE.md): プロジェクトのREADMEを明確に維持するためのガイド
-- [INIT_GUIDE.md](./docs/guides/INIT_GUIDE.md): 下流リポジトリをセットアップする際にAIが参照するチェックリスト
-- [APPLICABILITY.md](./docs/guides/APPLICABILITY.md): 個人開発とチーム開発における適用規約の分類基準
-- [LANGUAGE_SELECTION.md](./docs/guides/LANGUAGE_SELECTION.md): 新しいプロジェクトや機能に使用するプログラミング言語を選ぶための基準
+* [USAGE_MANUAL.md](./docs/guides/USAGE_MANUAL.md): 適用レベルと検証済み installation から governance、任意の GCP dev deploy、upgrade までをつなぐ人間向け開始点
+* [STACK_EXAMPLES.md](./docs/guides/STACK_EXAMPLES.md): 主要言語、DB、クラウドワークフローの構築例
+* [STACK_CONFIGS.md](./docs/guides/STACK_CONFIGS.md): スタック別設定ファイルテンプレート一覧
+* [README_GUIDE.md](./docs/guides/README_GUIDE.md): プロジェクトのREADMEを明確に維持するためのガイド
+* [INIT_GUIDE.md](./docs/guides/INIT_GUIDE.md): 下流リポジトリをセットアップする際にAIが参照するチェックリスト
+* [APPLICABILITY.md](./docs/guides/APPLICABILITY.md): 個人開発とチーム開発における適用規約の分類基準
+* [LANGUAGE_SELECTION.md](./docs/guides/LANGUAGE_SELECTION.md): 新しいプロジェクトや機能に使用するプログラミング言語を選ぶための基準
 
 ### 📝 `docs/issues/` — タスクレポート成果物
 
-- [TASK_REPORT_TEMPLATE.md](./docs/issues/TASK_REPORT_TEMPLATE.md): 実装着手前に文書化・承認を得るための計画テンプレート
+* [TASK_REPORT_TEMPLATE.md](./docs/issues/TASK_REPORT_TEMPLATE.md): 実装着手前に文書化・承認を得るための計画テンプレート
 
 ## 🧱 スタータースタック対応範囲
 
 このボイラープレートは、様々な技術スタックに対応できるよう、継続的に拡張可能な状態を維持します。基本ガイドは以下をカバーします：
 
-- `JavaScript` / `TypeScript` / `Node.js`
-- `Python`
-- `Go`
-- `Java` / `Spring`
-- `MySQL` / `PostgreSQL`
-- `gcloud` / `AWS` / `Azure`
+* `JavaScript` / `TypeScript` / `Node.js`
+* `Python`
+* `Go`
+* `Java` / `Spring`
+* `MySQL` / `PostgreSQL`
+* `gcloud` / `AWS` / `Azure`
 
 ## 🛠️ 設定テンプレートセット
 
