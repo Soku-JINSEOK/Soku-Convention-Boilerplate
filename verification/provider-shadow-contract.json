@@ -1,6 +1,6 @@
 {
-  "schemaVersion": 1,
-  "contractVersion": "option-b-v1",
+  "schemaVersion": 2,
+  "contractVersion": "option-b-v2",
   "provider": "gcp-cloud-build-shadow",
   "validationProfile": "ci-quick",
   "validationEntrypoint": "scripts/verify.sh",
@@ -29,13 +29,19 @@
     "commandContractVersion",
     "evidenceReference",
     "duplicate",
-    "cancellationReason"
+    "cancellationReason",
+    "attestationStatus",
+    "serverIssuedBuildTriggerId",
+    "sourceProvenance"
   ],
   "sourceShaBinding": {
     "required": true,
     "cloudBuildSubstitution": "COMMIT_SHA",
-    "argument": "--source-sha",
     "baseShaSubstitution": "_BASE_SHA",
+    "headBranchSubstitution": "_HEAD_BRANCH",
+    "baseBranchSubstitution": "_BASE_BRANCH",
+    "headRepoUrlSubstitution": "_HEAD_REPO_URL",
+    "argument": "--source-sha",
     "format": "40-lower-hex",
     "mustMatchBuildSource": true
   },
@@ -56,6 +62,30 @@
     "syntheticBuildCountsAsNatural": false,
     "syntheticSamplesSeparateCounter": "currentGcpSyntheticSamples",
     "emptyCommitForSampleCollection": "prohibited"
+  },
+  "classificationPolicy": {
+    "buildConfigSelfDeclaredNaturalAllowed": false,
+    "buildConfigOutputClassification": "UNATTESTED_CANDIDATE",
+    "naturalClassificationAuthority": "trusted-post-build-attestor",
+    "naturalClassificationImplementation": "not-implemented",
+    "manualBuildCountsAsNatural": false,
+    "unverifiedCandidateCountsAsNatural": false,
+    "sourceGeneratedResultCanAttest": false
+  },
+  "attestationContract": {
+    "serverIssuedBuildIdRequired": true,
+    "serverIssuedBuildTriggerIdRequired": true,
+    "expectedTriggerResourceIdentityRequired": true,
+    "resolvedRepositoryFromSourceProvenanceRequired": true,
+    "resolvedCommitShaFromSourceProvenanceRequired": true,
+    "expectedRepositoryRequired": true,
+    "expectedPullRequestTriggerRequired": true,
+    "buildStatusConclusionRequired": true,
+    "approvedValidationContractRequired": true,
+    "duplicateBuildAttemptCheckRequired": true,
+    "manualBuildRejected": true,
+    "userSubstitutionsInsufficient": true,
+    "sourceGeneratedResultCannotAttest": true
   },
   "builderPolicy": {
     "immutableDigestRequired": true,
@@ -81,11 +111,14 @@
     "timestampsRequired": true,
     "conclusionRequired": true,
     "artifactOrLogReferenceRequired": true,
-    "providerSpecificContext": "gcp-cloud-build-shadow",
     "actionsHistoricalSamplesPreserved": true,
-    "providerSampleMergeAllowed": false
+    "providerSpecificContext": "gcp-cloud-build-shadow",
+    "providerSampleMergeAllowed": false,
+    "attestationRequired": true,
+    "operationalEvidenceStatus": "MISSING"
   },
   "ownerGates": [
+    "trusted post-build attestor implementation",
     "live Cloud Build execution",
     "Cloud Build trigger creation",
     "GCP IAM or Secret Manager changes",
