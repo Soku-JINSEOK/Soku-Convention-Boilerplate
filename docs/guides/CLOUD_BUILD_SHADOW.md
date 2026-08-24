@@ -59,6 +59,35 @@ node scripts/verify-cloud-build-shadow.mjs \
 
 This command is not run against a live Cloud Build service in this checkpoint. Local identity completeness is not natural-sample attestation.
 
+## JSON parser resource boundary
+
+The JSON-compatible shadow configuration and provider contract use a bounded
+parser entrypoint. Every file is checked as a regular file, its byte size is
+checked before the full contents are read, and the decoded text is measured in
+UTF-8 bytes rather than JavaScript character count. The current limits are:
+
+~~~text
+MAX_JSON_INPUT_BYTES=1048576
+MAX_JSON_NESTING_DEPTH=64
+ENFORCEMENT_PHASE=PRE_PARSE
+DEPTH_ALGORITHM=ITERATIVE
+OVER_LIMIT_BEHAVIOR=FAIL_CLOSED
+STACK_TRACE_EXPOSURE=NO
+~~~
+
+The 1 MiB boundary limits memory and lexical work while leaving ample room for
+the small static configuration and contract. The depth boundary permits the
+approved schema while preventing unbounded recursive parser work. A delimiter
+scanner tracks object/array state, string mode, escapes, and current depth
+iteratively; brackets inside strings do not count as nesting.
+
+Resource checks run before duplicate-key detection, JSON parsing, strict schema
+validation, or semantic validation. The same bounded entrypoint is used for
+the shadow config and provider contract (and for locally parsed JSON output).
+Excess size or depth returns a deterministic concise error without echoing the
+payload. Catching `RangeError` after stack exhaustion is not an accepted
+control; the limit must prevent the recursive parser from being reached.
+
 ## Provider-separated metrics
 
 The frozen counters are:

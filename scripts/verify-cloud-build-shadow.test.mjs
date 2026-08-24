@@ -1,12 +1,16 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { test } from 'node:test';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
   CANONICAL_SHADOW_SCRIPT,
+  MAX_JSON_INPUT_BYTES,
+  MAX_JSON_NESTING_DEPTH,
   UNATTESTED_CANDIDATE,
   parseStrictJson,
+  scanJsonResourceLimits,
   validateOptionB,
   validateProviderContract,
   validateRuntimeIdentity,
@@ -65,6 +69,159 @@ function runGuard(overrides = {}) {
   return spawnSync('bash', ['-ceu', script], { cwd: root, env: environment, encoding: 'utf8' });
 }
 
+function nestedJson(depth) {
+  return '['.repeat(depth) + 'null' + ']'.repeat(depth);
+}
+
+function mixedNestedJson(depth) {
+  let value = 'null';
+  for (let index = depth - 1; index >= 0; index -= 1) {
+    value = index % 2 === 0 ? '{"value":' + value + '}' : '[' + value + ']';
+  }
+  return value;
+}
+
+function withJsonFixture(configText, contractText, callback) {
+  const fixtureRoot = mkdtempSync(join(tmpdir(), 'boilerplate-208-json-boundary-'));
+  try {
+    writeFileSync(join(fixtureRoot, 'config.json'), configText, 'utf8');
+    writeFileSync(join(fixtureRoot, 'contract.json'), contractText, 'utf8');
+    return callback(fixtureRoot);
+  } finally {
+    rmSync(fixtureRoot, { recursive: true, force: true });
+  }
+}
+
+function runCliFixture(configText, contractText) {
+  return withJsonFixture(configText, contractText, (fixtureRoot) =>
+    spawnSync(
+      process.execPath,
+      [join(root, 'scripts', 'verify-cloud-build-shadow.mjs'), '--config', 'config.json', '--contract', 'contract.json'],
+      { cwd: fixtureRoot, env: process.env, encoding: 'utf8' },
+    ),
+  );
+}
+
+function assertControlledFailure(result, expectedMessage) {
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, expectedMessage);
+  assert.doesNotMatch(result.stderr, /RangeError|Maximum call stack size exceeded|\n\s+at /);
+}
+
+// JSON resource-boundary regression matrix.
+test('parser resource policy is explicit and exact', () => {
+  assert.deepEqual(validContract.parserResourcePolicy, {
+    maximumInputBytes: MAX_JSON_INPUT_BYTES,
+    maximumNestingDepth: MAX_JSON_NESTING_DEPTH,
+    enforcementPhase: 'pre-parse',
+    depthAlgorithm: 'iterative',
+    overLimitBehavior: 'fail-closed',
+    stackTraceExposure: false,
+    appliesTo: ['shadow config', 'provider contract'],
+  });
+});
+
+test('depth zero and shallow JSON pass', () => {
+  assert.deepEqual(scanJsonResourceLimits('null', 'depth zero'), { byteLength: 4, maximumDepth: 0 });
+  assert.deepEqual(parseStrictJson('{"value":[1,2,3]}', 'shallow'), { value: [1, 2, 3] });
+});
+
+test('depth 63 and 64 pass', () => {
+  assert.equal(scanJsonResourceLimits(nestedJson(63), 'depth 63').maximumDepth, 63);
+  assert.equal(scanJsonResourceLimits(nestedJson(64), 'depth 64').maximumDepth, 64);
+  assert.doesNotThrow(() => parseStrictJson(nestedJson(64), 'depth 64'));
+});
+
+test('depth 65, 1000, and 5000 fail before recursive parsing', () => {
+  for (const depth of [65, 1000, 5000]) {
+    assert.throws(() => parseStrictJson(nestedJson(depth), 'depth ' + depth), /maximum nesting depth of 64/);
+  }
+});
+
+test('mixed object and array depth 64 passes and depth 65 fails', () => {
+  assert.doesNotThrow(() => parseStrictJson(mixedNestedJson(64), 'mixed depth 64'));
+  assert.throws(() => parseStrictJson(mixedNestedJson(65), 'mixed depth 65'), /maximum nesting depth of 64/);
+});
+
+test('brackets inside strings do not increase depth', () => {
+  const value = '{'.repeat(5000) + '['.repeat(5000) + ']'.repeat(5000) + '}'.repeat(5000);
+  assert.equal(scanJsonResourceLimits(JSON.stringify(value), 'string brackets').maximumDepth, 0);
+  assert.equal(parseStrictJson(JSON.stringify(value), 'string brackets'), value);
+});
+
+test('escaped quotes, backslashes, and unicode escape text remain string content', () => {
+  const value = String.raw`escaped quote: \" and slash: \\ and unicode text: \\u005b`;
+  const encoded = JSON.stringify(value);
+  assert.equal(scanJsonResourceLimits(encoded, 'escaped string').maximumDepth, 0);
+  assert.equal(parseStrictJson(encoded, 'escaped string'), value);
+});
+
+test('malformed delimiter and string structures fail closed', () => {
+  assert.throws(() => parseStrictJson(']', 'underflow'), /unmatched closing delimiter/);
+  assert.throws(() => parseStrictJson('{]', 'mismatch'), /mismatched closing delimiter/);
+  assert.throws(() => parseStrictJson('{', 'unclosed object'), /unclosed delimiter/);
+  assert.throws(() => parseStrictJson('[', 'unclosed array'), /unclosed delimiter/);
+  assert.throws(() => parseStrictJson('"unterminated', 'unterminated string'), /unterminated string/);
+  assert.throws(() => parseStrictJson('{"value":1} trailing', 'trailing data'), /trailing data/);
+});
+
+test('input size below and exactly one MiB passes', () => {
+  const below = JSON.stringify('a'.repeat(1024));
+  assert.ok(Buffer.byteLength(below, 'utf8') < MAX_JSON_INPUT_BYTES);
+  assert.doesNotThrow(() => parseStrictJson(below, 'below size'));
+
+  const prefix = '{"value":"';
+  const suffix = '"}';
+  const exact = prefix + 'a'.repeat(MAX_JSON_INPUT_BYTES - Buffer.byteLength(prefix + suffix, 'utf8')) + suffix;
+  assert.equal(Buffer.byteLength(exact, 'utf8'), MAX_JSON_INPUT_BYTES);
+  assert.doesNotThrow(() => parseStrictJson(exact, 'exact size'));
+});
+
+test('input size one byte over the limit fails before depth or duplicate checks', () => {
+  const prefix = '{"value":"';
+  const suffix = '"}';
+  const oversized = prefix + 'a'.repeat(MAX_JSON_INPUT_BYTES + 1 - Buffer.byteLength(prefix + suffix, 'utf8')) + suffix;
+  assert.throws(() => parseStrictJson(oversized, 'oversized'), /exceeds maximum size of 1048576 bytes/);
+});
+
+test('multibyte UTF-8 size is measured in bytes rather than characters', () => {
+  const multibyte = JSON.stringify('é'.repeat(Math.floor(MAX_JSON_INPUT_BYTES / 2)));
+  assert.ok(multibyte.length < MAX_JSON_INPUT_BYTES);
+  assert.ok(Buffer.byteLength(multibyte, 'utf8') > MAX_JSON_INPUT_BYTES);
+  assert.throws(() => parseStrictJson(multibyte, 'multibyte'), /exceeds maximum size of 1048576 bytes/);
+});
+
+test('config file resource limits run before duplicate and semantic validation', () => {
+  const validContractText = JSON.stringify(validContract);
+  withJsonFixture(nestedJson(5000), validContractText, (fixtureRoot) => {
+    assert.throws(
+      () => validateShadowFiles({ root: fixtureRoot, configPath: 'config.json', contractPath: 'contract.json' }),
+      /shadow config exceeds maximum nesting depth of 64/,
+    );
+  });
+});
+
+test('provider contract file resource limits run before semantic validation', () => {
+  const validConfigText = readFileSync(join(root, 'cloudbuild', 'shadow-validation.yaml'), 'utf8');
+  withJsonFixture(validConfigText, nestedJson(5000), (fixtureRoot) => {
+    assert.throws(
+      () => validateShadowFiles({ root: fixtureRoot, configPath: 'config.json', contractPath: 'contract.json' }),
+      /provider contract exceeds maximum nesting depth of 64/,
+    );
+  });
+});
+
+test('CLI excessive depth exits cleanly without stack trace', () => {
+  const result = runCliFixture(nestedJson(5000), JSON.stringify(validContract));
+  assertControlledFailure(result, /shadow config exceeds maximum nesting depth of 64/);
+});
+
+test('provider contract parser rejects unknown resource policy fields', () => {
+  const contract = clone(validContract);
+  contract.parserResourcePolicy.futureUnknown = true;
+  assert.throws(() => validateProviderContract(contract), /parserResourcePolicy has unknown or missing fields/);
+});
+
 // Existing Option B regression matrix.
 test('valid Option B contract passes', () => {
   const result = validateShadowFiles({ root });
@@ -72,6 +229,11 @@ test('valid Option B contract passes', () => {
   assert.equal(result.contract.actionsSamples, 3);
   assert.equal(result.contract.gcpSamples, 0);
   assert.equal(result.config.classification, UNATTESTED_CANDIDATE);
+});
+
+test('runtime identity accepts the validated contract summary used by the CLI', () => {
+  const result = validateShadowFiles({ root });
+  assert.doesNotThrow(() => validateRuntimeIdentity(validRuntime(), result.contract));
 });
 
 test('mutable builder reference fails closed', () => {

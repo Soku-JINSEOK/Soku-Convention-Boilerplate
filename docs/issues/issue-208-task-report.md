@@ -88,6 +88,67 @@ The full repository profile was not rerun because the read-only prerequisite pro
 
 The targeted test count is the actual Node test-runner count after correction. It includes the original contract cases and strict cases for self-attestation, runtime empty values, `ALLOW_LOOSE`, guard removal/weakening, artifacts/images/secrets, nested shell, quoted or split push, unknown fields, duplicate keys, malformed JSON, provenance, and zero natural samples.
 
+## JSON resource-bound correction
+
+The independent review of checkpoint `289b5691b171166050d3de9d3489ac4ee4e301fb`
+reproduced a 5,000-level nested JSON input that caused
+`RangeError: Maximum call stack size exceeded`. This was a source correction
+requirement; a top-level exception catch was not used as the remediation.
+
+The narrow correction is limited to these five existing files:
+
+1. `scripts/verify-cloud-build-shadow.mjs`
+2. `scripts/verify-cloud-build-shadow.test.mjs`
+3. `verification/provider-shadow-contract.json`
+4. `docs/guides/CLOUD_BUILD_SHADOW.md`
+5. `docs/issues/issue-208-task-report.md`
+
+The validator now applies a UTF-8 byte limit of `1048576` and an iterative
+nesting limit of `64` before duplicate-key parsing, JSON parsing, strict schema
+validation, or semantic validation. File inputs are checked for regular-file
+identity and size before reading. Over-limit input fails closed with a concise
+deterministic message and does not expose a stack trace or input payload.
+
+~~~text
+RESOURCE_BOUND_STATUS=IMPLEMENTED_LOCALLY
+MAX_JSON_INPUT_BYTES=1048576
+MAX_JSON_NESTING_DEPTH=64
+STACK_EXHAUSTION_PREVENTION=PRE_PARSE_ITERATIVE_BOUND
+CURRENT_SOURCE_CHANGED_FILES=5
+~~
+
+The implementation is pre-parse prevention, not a top-level `RangeError` catch.
+
+Boundary and regression verification recorded for this correction:
+
+~~~text
+DEPTH_0_63_64=PASS
+DEPTH_65_1000_5000=CONTROLLED_FAIL
+MIXED_DEPTH_BOUNDARY=PASS
+STRING_BRACKET_HANDLING=PASS
+MALFORMED_STRUCTURE_HANDLING=PASS
+ONE_MIB_BOUNDARY=PASS
+MULTIBYTE_UTF8_BYTE_COUNT=PASS
+CONFIG_FILE_PATH=PASS
+CONTRACT_FILE_PATH=PASS
+CLI_STACK_TRACE_SUPPRESSION=PASS
+TARGETED_SHADOW_TESTS=69/69_PASS
+NATURAL_SAMPLES=0
+SYNTHETIC_SAMPLES=0
+LIVE_GCP_EXECUTION_STATUS=NOT_RUN
+FULL_PROFILE_STATUS=BLOCKED_EXTERNAL
+FULL_PROFILE_SOURCE_FAILURE_OBSERVED=NO
+FULL_PROFILE_INDEPENDENT_RERUN=NOT_RUN_ENVIRONMENT_UNAVAILABLE
+LOCAL_VERIFICATION_ENTRYPOINT=BLOCKED_EXTERNAL_NPM_DNS
+PUSH_STATUS=NOT_PUSHED
+INDEPENDENT_REVIEW_STATUS=PENDING
+~~
+
+The full repository profile remains subject to its external Docker,
+gpg-agent, and npm registry prerequisites. GitHub readback in this task
+observed Issue #208 as Open/`status:in-progress`; no GitHub mutation was
+performed. The previous checkpoint remains preserved as its parent.
+
 ## Provider and release boundary
 
 ~~~text

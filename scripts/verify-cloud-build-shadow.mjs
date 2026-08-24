@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { spawnSync } from 'node:child_process';
-import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, lstatSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, isAbsolute, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -11,6 +11,8 @@ const IMAGE_DIGEST = /^[a-z0-9./_-]+:[^@\s]+@sha256:[0-9a-f]{64}$/;
 const APPROVED_BUILDER =
   'node:24.17.0-bookworm@sha256:733e1c06ada118ed9f6133a31aa1290be6929664026fb28821500437c61f2c6f';
 export const UNATTESTED_CANDIDATE = 'UNATTESTED_CANDIDATE';
+export const MAX_JSON_INPUT_BYTES = 1048576;
+export const MAX_JSON_NESTING_DEPTH = 64;
 
 const REQUIRED_SAMPLE_FIELDS = [
   'provider',
@@ -145,6 +147,7 @@ const CONTRACT_KEYS = [
   'builderPolicy',
   'executionBoundary',
   'evidenceContract',
+  'parserResourcePolicy',
   'ownerGates',
 ];
 
@@ -227,6 +230,16 @@ const EVIDENCE_KEYS = [
   'attestationRequired',
   'operationalEvidenceStatus',
 ];
+const PARSER_RESOURCE_POLICY_KEYS = [
+  'maximumInputBytes',
+  'maximumNestingDepth',
+  'enforcementPhase',
+  'depthAlgorithm',
+  'overLimitBehavior',
+  'stackTraceExposure',
+  'appliesTo',
+];
+const PARSER_RESOURCE_POLICY_APPLIES_TO = ['shadow config', 'provider contract'];
 const OWNER_GATES = [
   'trusted post-build attestor implementation',
   'live Cloud Build execution',
@@ -286,6 +299,65 @@ function requireExactKeys(value, expectedKeys, label) {
 
 function requireExactArray(actual, expected, label) {
   requireValue(JSON.stringify(actual) === JSON.stringify(expected), label + ' must match the approved structure');
+}
+
+function jsonInputByteLength(text, label) {
+  requireValue(typeof text === 'string', label + ' input must be text');
+  const byteLength = Buffer.byteLength(text, 'utf8');
+  requireValue(byteLength <= MAX_JSON_INPUT_BYTES, label + ' exceeds maximum size of ' + MAX_JSON_INPUT_BYTES + ' bytes');
+  return byteLength;
+}
+
+function jsonBufferByteLength(buffer, label) {
+  requireValue(Buffer.isBuffer(buffer), label + ' input must be bytes');
+  requireValue(buffer.byteLength <= MAX_JSON_INPUT_BYTES, label + ' exceeds maximum size of ' + MAX_JSON_INPUT_BYTES + ' bytes');
+  return buffer.byteLength;
+}
+
+export function scanJsonResourceLimits(text, label = 'JSON') {
+  const byteLength = jsonInputByteLength(text, label);
+  const delimiters = [];
+  let depth = 0;
+  let maximumDepth = 0;
+  let insideString = false;
+  let escaped = false;
+
+  for (let index = 0; index < text.length; index += 1) {
+    const character = text[index];
+    if (insideString) {
+      if (escaped) {
+        escaped = false;
+      } else if (character === '\\') {
+        escaped = true;
+      } else if (character === '"') {
+        insideString = false;
+      }
+      continue;
+    }
+
+    if (character === '"') {
+      insideString = true;
+      continue;
+    }
+    if (character === '{' || character === '[') {
+      delimiters.push(character);
+      depth += 1;
+      maximumDepth = Math.max(maximumDepth, depth);
+      requireValue(depth <= MAX_JSON_NESTING_DEPTH, label + ' exceeds maximum nesting depth of ' + MAX_JSON_NESTING_DEPTH);
+      continue;
+    }
+    if (character === '}' || character === ']') {
+      requireValue(delimiters.length > 0, label + ' has an unmatched closing delimiter');
+      const opening = delimiters.pop();
+      const matching = opening === '{' ? '}' : ']';
+      requireValue(character === matching, label + ' has mismatched closing delimiter');
+      depth -= 1;
+    }
+  }
+
+  requireValue(!insideString, label + ' has an unterminated string');
+  requireValue(delimiters.length === 0, label + ' has an unclosed delimiter');
+  return { byteLength, maximumDepth };
 }
 
 class StrictJsonParser {
@@ -431,17 +503,41 @@ class StrictJsonParser {
 }
 
 export function parseStrictJson(text, label = 'JSON') {
-  requireValue(typeof text === 'string', label + ' input must be text');
+  scanJsonResourceLimits(text, label);
   return new StrictJsonParser(text, label).parse();
 }
 
 function readJson(filePath, label) {
   requireValue(existsSync(filePath), label + ' does not exist');
+  let fileStat;
   try {
-    return parseStrictJson(readFileSync(filePath, 'utf8'), label);
+    fileStat = lstatSync(filePath);
   } catch (error) {
-    fail(error.message);
+    fail(label + ' could not be inspected');
   }
+  requireValue(fileStat.isFile() && !fileStat.isSymbolicLink(), label + ' must be a regular file');
+  requireValue(fileStat.size <= MAX_JSON_INPUT_BYTES, label + ' exceeds maximum size of ' + MAX_JSON_INPUT_BYTES + ' bytes');
+  let bytes;
+  try {
+    bytes = readFileSync(filePath);
+  } catch (error) {
+    fail(label + ' could not be read');
+  }
+  jsonBufferByteLength(bytes, label);
+  const text = bytes.toString('utf8');
+  requireValue(Buffer.byteLength(text, 'utf8') === bytes.byteLength, label + ' must be valid UTF-8');
+  return parseStrictJson(text, label);
+}
+
+function validateParserResourcePolicy(policy) {
+  requireExactKeys(policy, PARSER_RESOURCE_POLICY_KEYS, 'parserResourcePolicy');
+  requireInteger(policy.maximumInputBytes, MAX_JSON_INPUT_BYTES, 'parserResourcePolicy.maximumInputBytes');
+  requireInteger(policy.maximumNestingDepth, MAX_JSON_NESTING_DEPTH, 'parserResourcePolicy.maximumNestingDepth');
+  requireExact(policy.enforcementPhase, 'pre-parse', 'parserResourcePolicy.enforcementPhase');
+  requireExact(policy.depthAlgorithm, 'iterative', 'parserResourcePolicy.depthAlgorithm');
+  requireExact(policy.overLimitBehavior, 'fail-closed', 'parserResourcePolicy.overLimitBehavior');
+  requireBoolean(policy.stackTraceExposure, false, 'parserResourcePolicy.stackTraceExposure');
+  requireExactArray(policy.appliesTo, PARSER_RESOURCE_POLICY_APPLIES_TO, 'parserResourcePolicy.appliesTo');
 }
 
 function validateSafeRelativePath(value, label) {
@@ -465,6 +561,7 @@ function validateContractObjectKeys(contract) {
   requireExactKeys(contract.builderPolicy, BUILDER_POLICY_KEYS, 'builderPolicy');
   requireExactKeys(contract.executionBoundary, EXECUTION_BOUNDARY_KEYS, 'executionBoundary');
   requireExactKeys(contract.evidenceContract, EVIDENCE_KEYS, 'evidenceContract');
+  validateParserResourcePolicy(contract.parserResourcePolicy);
   requireExactArray(contract.ownerGates, OWNER_GATES, 'ownerGates');
 }
 
@@ -600,7 +697,9 @@ function requireRuntimeString(value, label) {
 
 export function validateRuntimeIdentity(metadata, contract) {
   requireExactKeys(metadata, RUNTIME_IDENTITY_KEYS, 'runtime identity');
-  requireExact(metadata.profile, contract.validationProfile, 'runtime profile');
+  const contractProfile = contract.validationProfile ?? contract.profile;
+  requireValue(typeof contractProfile === 'string', 'contract validation profile is missing');
+  requireExact(metadata.profile, contractProfile, 'runtime profile');
   requireValue(typeof metadata.repository === 'string' && /^[^/\s]+\/[^/\s]+$/.test(metadata.repository), 'repository identity is invalid');
   requireValue(typeof metadata.pullRequest === 'string' && /^[1-9][0-9]*$/.test(metadata.pullRequest), 'pull request identity is invalid');
   requireRuntimeString(metadata.headBranch, 'head branch');

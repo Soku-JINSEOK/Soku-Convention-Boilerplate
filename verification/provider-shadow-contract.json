@@ -117,6 +117,18 @@
     "attestationRequired": true,
     "operationalEvidenceStatus": "MISSING"
   },
+  "parserResourcePolicy": {
+    "maximumInputBytes": 1048576,
+    "maximumNestingDepth": 64,
+    "enforcementPhase": "pre-parse",
+    "depthAlgorithm": "iterative",
+    "overLimitBehavior": "fail-closed",
+    "stackTraceExposure": false,
+    "appliesTo": [
+      "shadow config",
+      "provider contract"
+    ]
+  },
   "ownerGates": [
     "trusted post-build attestor implementation",
     "live Cloud Build execution",
