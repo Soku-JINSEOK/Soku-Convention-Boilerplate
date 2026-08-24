@@ -1,0 +1,22 @@
+{
+  "steps": [
+    {
+      "id": "gcp-shadow-quick",
+      "name": "node:24.17.0-bookworm@sha256:733e1c06ada118ed9f6133a31aa1290be6929664026fb28821500437c61f2c6f",
+      "entrypoint": "bash",
+      "args": [
+        "-ceu",
+        ": \"${COMMIT_SHA:?COMMIT_SHA is required}\"\n: \"${BUILD_ID:?BUILD_ID is required}\"\n: \"${REPO_FULL_NAME:?REPO_FULL_NAME is required}\"\n: \"${_PR_NUMBER:?_PR_NUMBER is required}\"\n: \"${_BASE_SHA:?_BASE_SHA must be supplied by an approved PR trigger}\"\n: \"${TRIGGER_NAME:?TRIGGER_NAME is required}\"\nnode scripts/verify-cloud-build-shadow.mjs \\\n  --config cloudbuild/shadow-validation.yaml \\\n  --contract verification/provider-shadow-contract.json \\\n  --profile ci-quick \\\n  --repository \"${REPO_FULL_NAME}\" \\\n  --pull-request \"${_PR_NUMBER}\" \\\n  --base-sha \"${_BASE_SHA}\" \\\n  --source-sha \"${COMMIT_SHA}\" \\\n  --build-id \"${BUILD_ID}\" \\\n  --trigger \"${TRIGGER_NAME}\" \\\n  --attempt \"${BUILD_ID}\" \\\n  --event pull_request \\\n  --execute"
+      ]
+    }
+  ],
+  "serviceAccount": "${_CLOUD_BUILD_SERVICE_ACCOUNT}",
+  "timeout": "900s",
+  "options": {
+    "logging": "CLOUD_LOGGING_ONLY"
+  },
+  "substitutions": {
+    "_BASE_SHA": "",
+    "_CLOUD_BUILD_SERVICE_ACCOUNT": ""
+  }
+}

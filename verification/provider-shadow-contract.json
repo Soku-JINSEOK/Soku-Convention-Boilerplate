@@ -1,0 +1,95 @@
+{
+  "schemaVersion": 1,
+  "contractVersion": "option-b-v1",
+  "provider": "gcp-cloud-build-shadow",
+  "validationProfile": "ci-quick",
+  "validationEntrypoint": "scripts/verify.sh",
+  "historicalActionsNaturalSamples": 3,
+  "currentGcpNaturalSamples": 0,
+  "currentGcpSyntheticSamples": 0,
+  "pilotNaturalTarget": 3,
+  "transitionEvaluationNaturalTarget": 10,
+  "providerSampleMergeAllowed": false,
+  "eligibleNaturalSampleFields": [
+    "provider",
+    "repository",
+    "sourceSha",
+    "baseSha",
+    "pullRequest",
+    "naturalEventId",
+    "buildId",
+    "triggerId",
+    "triggerVersion",
+    "attempt",
+    "validationProfile",
+    "startedAt",
+    "completedAt",
+    "status",
+    "conclusion",
+    "commandContractVersion",
+    "evidenceReference",
+    "duplicate",
+    "cancellationReason"
+  ],
+  "sourceShaBinding": {
+    "required": true,
+    "cloudBuildSubstitution": "COMMIT_SHA",
+    "argument": "--source-sha",
+    "baseShaSubstitution": "_BASE_SHA",
+    "format": "40-lower-hex",
+    "mustMatchBuildSource": true
+  },
+  "failureCancellationPolicy": {
+    "denominator": "included",
+    "successfulNumerator": "success-only",
+    "failedBuilds": "included-and-classified",
+    "cancelledBuilds": "included-and-classified",
+    "supersededHeads": "included-and-classified"
+  },
+  "duplicateAttemptPolicy": {
+    "sameBuildCallbacks": "count-once",
+    "sameShaRerun": "new-attempt-not-new-natural-sample",
+    "duplicateNaturalSample": "excluded"
+  },
+  "syntheticPolicy": {
+    "manualBuildCountsAsNatural": false,
+    "syntheticBuildCountsAsNatural": false,
+    "syntheticSamplesSeparateCounter": "currentGcpSyntheticSamples",
+    "emptyCommitForSampleCollection": "prohibited"
+  },
+  "builderPolicy": {
+    "immutableDigestRequired": true,
+    "mutableTagOnlyAllowed": false,
+    "rootPrivilegeAllowed": false,
+    "externalDownloads": "must-be-pinned-or-locked",
+    "credentialMaterialInBuild": false
+  },
+  "executionBoundary": {
+    "requiredCheckTransition": false,
+    "existingActionsDisabled": false,
+    "deliveryAuthority": false,
+    "publicationAuthority": false,
+    "deploymentAuthority": false,
+    "githubWriteCallback": false,
+    "liveExecutionInThisCheckpoint": false
+  },
+  "evidenceContract": {
+    "buildIdRequired": true,
+    "triggerIdentityRequired": true,
+    "attemptRequired": true,
+    "validationProfileRequired": true,
+    "timestampsRequired": true,
+    "conclusionRequired": true,
+    "artifactOrLogReferenceRequired": true,
+    "providerSpecificContext": "gcp-cloud-build-shadow",
+    "actionsHistoricalSamplesPreserved": true,
+    "providerSampleMergeAllowed": false
+  },
+  "ownerGates": [
+    "live Cloud Build execution",
+    "Cloud Build trigger creation",
+    "GCP IAM or Secret Manager changes",
+    "GitHub required-check transition",
+    "delivery or publication"
+  ]
+}
