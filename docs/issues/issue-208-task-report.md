@@ -172,8 +172,11 @@ Control-plane #74 remains a full-history secret-scan gap, #75 remains a historic
 
 ~~~text
 SOURCE_CHANGED_FILES=6
-NEW_TRACKED_FILES=0
-LOCAL_COMMIT_COUNT=ONE_DIRECT_CHILD_ONLY
+NEW_TRACKED_FILES=6
+SOURCE_IMPLEMENTATION_COMMIT_COUNT=THREE_LINEAR_NON_MERGE_COMMITS
+SOURCE_IMPLEMENTATION_COMMIT_CHAIN=99ae819e5641b1fc7a585aa723c67883eef968f6 -> 289b5691b171166050d3de9d3489ac4ee4e301fb -> cff7d7b3cdb4a8e96e4f3a8c7ce1b33ae58a13dd
+REPORT_ACCOUNTING_CORRECTION_COMMIT_COUNT=ONE_DIRECT_NON_MERGE_CHILD
+TOTAL_LOCAL_COMMIT_COUNT_AFTER_REPORT_CORRECTION=FOUR_LINEAR_NON_MERGE_COMMITS
 PREVIOUS_CHECKPOINT_PRESERVED=YES
 PUSH_COUNT=0
 GITHUB_MUTATION_COUNT=0
@@ -190,7 +193,7 @@ DELIVERY_COUNT=0
 PUBLICATION_COUNT=0
 ~~
 
-The single local correction commit SHA and parent are recorded in the private external evidence ledger after commit creation; the task report does not self-embed a commit identity that cannot be known before the commit exists.
+The three source implementation commits are recorded in SOURCE_IMPLEMENTATION_COMMIT_CHAIN above. When committed, this report-only correction becomes the fourth linear local commit and one direct non-merge child of cff7d7b3cdb4a8e96e4f3a8c7ce1b33ae58a13dd; its final SHA is recorded in post-commit evidence rather than self-embedded.
 
 ## AI assistance
 
