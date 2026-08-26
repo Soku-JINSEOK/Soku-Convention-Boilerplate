@@ -1,0 +1,33 @@
+{
+  "steps": [
+    {
+      "id": "gcp-shadow-quick",
+      "name": "node:24.17.0-bookworm@sha256:733e1c06ada118ed9f6133a31aa1290be6929664026fb28821500437c61f2c6f",
+      "entrypoint": "bash",
+      "args": [
+        "-ceu",
+        "set -euo pipefail\nrequire_non_empty() {\n  local name=\"$1\"\n  local value=\"$2\"\n  if [[ -z \"$value\" || \"$value\" =~ [[:space:]] ]]; then\n    printf \"%s must be non-empty and contain no whitespace\\n\" \"$name\" >&2\n    exit 2\n  fi\n}\nrequire_sha() {\n  local name=\"$1\"\n  local value=\"$2\"\n  if [[ ! \"$value\" =~ ^[0-9a-f]{40}$ ]]; then\n    printf \"%s must be 40 lowercase hexadecimal characters\\n\" \"$name\" >&2\n    exit 2\n  fi\n}\nrequire_pr() {\n  local value=\"$1\"\n  if [[ ! \"$value\" =~ ^[1-9][0-9]*$ ]]; then\n    printf \"PR_NUMBER must be a positive integer\\n\" >&2\n    exit 2\n  fi\n}\nrequire_non_empty \"COMMIT_SHA\" \"$${CB_COMMIT_SHA}\"\nrequire_non_empty \"BUILD_ID\" \"$${CB_BUILD_ID}\"\nrequire_non_empty \"REPO_FULL_NAME\" \"$${CB_REPO_FULL_NAME}\"\nrequire_non_empty \"PR_NUMBER\" \"$${CB_PR_NUMBER}\"\nrequire_non_empty \"HEAD_BRANCH\" \"$${CB_HEAD_BRANCH}\"\nrequire_non_empty \"BASE_BRANCH\" \"$${CB_BASE_BRANCH}\"\nrequire_non_empty \"HEAD_REPO_URL\" \"$${CB_HEAD_REPO_URL}\"\nrequire_non_empty \"BASE_SHA\" \"$${CB_BASE_SHA}\"\nrequire_non_empty \"TRIGGER_NAME\" \"$${CB_TRIGGER_NAME}\"\nrequire_sha \"COMMIT_SHA\" \"$${CB_COMMIT_SHA}\"\nrequire_sha \"BASE_SHA\" \"$${CB_BASE_SHA}\"\nrequire_pr \"$${CB_PR_NUMBER}\"\nnode scripts/verify-cloud-build-shadow.mjs \\\n  --config cloudbuild/shadow-validation.yaml \\\n  --contract verification/provider-shadow-contract.json \\\n  --profile ci-quick \\\n  --repository \"$${CB_REPO_FULL_NAME}\" \\\n  --pull-request \"$${CB_PR_NUMBER}\" \\\n  --head-branch \"$${CB_HEAD_BRANCH}\" \\\n  --base-branch \"$${CB_BASE_BRANCH}\" \\\n  --head-repo-url \"$${CB_HEAD_REPO_URL}\" \\\n  --base-sha \"$${CB_BASE_SHA}\" \\\n  --source-sha \"$${CB_COMMIT_SHA}\" \\\n  --build-id \"$${CB_BUILD_ID}\" \\\n  --trigger \"$${CB_TRIGGER_NAME}\" \\\n  --attempt \"$${CB_BUILD_ID}\" \\\n  --event pull_request \\\n  --execute"
+      ],
+      "env": [
+        "CB_COMMIT_SHA=${COMMIT_SHA}",
+        "CB_BUILD_ID=${BUILD_ID}",
+        "CB_REPO_FULL_NAME=${REPO_FULL_NAME}",
+        "CB_PR_NUMBER=${_PR_NUMBER}",
+        "CB_HEAD_BRANCH=${_HEAD_BRANCH}",
+        "CB_BASE_BRANCH=${_BASE_BRANCH}",
+        "CB_HEAD_REPO_URL=${_HEAD_REPO_URL}",
+        "CB_BASE_SHA=${_BASE_SHA}",
+        "CB_TRIGGER_NAME=${TRIGGER_NAME}"
+      ]
+    }
+  ],
+  "serviceAccount": "${_CLOUD_BUILD_SERVICE_ACCOUNT}",
+  "timeout": "900s",
+  "options": {
+    "logging": "CLOUD_LOGGING_ONLY"
+  },
+  "substitutions": {
+    "_BASE_SHA": "",
+    "_CLOUD_BUILD_SERVICE_ACCOUNT": ""
+  }
+}
