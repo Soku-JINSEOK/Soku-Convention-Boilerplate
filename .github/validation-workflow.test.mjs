@@ -38,6 +38,31 @@ const projectSyncWorkflow = readFileSync(
   'utf8',
 );
 
+const validationGateConcurrencyGroup = ({
+  pullRequestNumber,
+  ref,
+  runId,
+  notRequiredResult,
+}) =>
+  `validation-full-gate-${pullRequestNumber || ref}-${
+    notRequiredResult === 'success' ? runId : 'code'
+  }`;
+
+const isValidationGateSuccess = ({
+  repositoryResult,
+  templatesResult,
+  securityResult,
+  notRequiredResult,
+}) =>
+  (repositoryResult === 'success' &&
+    templatesResult === 'success' &&
+    securityResult === 'success' &&
+    notRequiredResult === 'skipped') ||
+  (repositoryResult === 'skipped' &&
+    templatesResult === 'skipped' &&
+    securityResult === 'skipped' &&
+    notRequiredResult === 'success');
+
 test('runs automatic validation and remains manual and reusable', () => {
   assert.match(workflow, /^\s{2}workflow_call:/m);
   assert.match(workflow, /^\s{2}workflow_dispatch:/m);
@@ -122,14 +147,73 @@ test('metadata-only events preserve the required Validation Gate context', () =>
   assert.match(workflow, /SECURITY_RESULT" = skipped/);
   assert.match(workflow, /NOT_REQUIRED_RESULT" = success/);
   assert.match(workflow, /Metadata-only event preserves the existing Validation Gate/);
-  assert.match(workflow, /validation-metadata-not-required-/);
+  const metadataSubstitute =
+    /full-validation-not-required:[\s\S]*$/.exec(workflow);
+  assert.ok(metadataSubstitute, 'metadata substitute job must exist');
+  assert.doesNotMatch(metadataSubstitute[0], /concurrency:/);
+  assert.doesNotMatch(workflow, /validation-metadata-not-required-/);
 });
 
 test('keeps full validation cancellation domains independent', () => {
   assert.match(workflow, /group: validation-full-repository-/);
   assert.match(workflow, /group: validation-full-templates-/);
-  assert.match(workflow, /group: validation-full-gate-/);
+  assert.match(
+    workflow,
+    /group: validation-full-gate-\$\{\{ github\.event\.pull_request\.number \|\| github\.ref \}\}-\$\{\{ needs\.full-validation-not-required\.result == 'success' && github\.run_id \|\| 'code' \}\}/,
+  );
   assert.doesNotMatch(workflow, /^concurrency:/m);
+});
+
+test('isolates metadata gates while retaining code-bearing cancellation', () => {
+  const firstMetadataGroup = validationGateConcurrencyGroup({
+    pullRequestNumber: 210,
+    ref: 'refs/pull/210/merge',
+    runId: 1001,
+    notRequiredResult: 'success',
+  });
+  const secondMetadataGroup = validationGateConcurrencyGroup({
+    pullRequestNumber: 210,
+    ref: 'refs/pull/210/merge',
+    runId: 1002,
+    notRequiredResult: 'success',
+  });
+  assert.notEqual(firstMetadataGroup, secondMetadataGroup);
+
+  const firstCodeGroup = validationGateConcurrencyGroup({
+    pullRequestNumber: 210,
+    ref: 'refs/pull/210/merge',
+    runId: 1001,
+    notRequiredResult: 'skipped',
+  });
+  const secondCodeGroup = validationGateConcurrencyGroup({
+    pullRequestNumber: 210,
+    ref: 'refs/pull/210/merge',
+    runId: 1002,
+    notRequiredResult: 'skipped',
+  });
+  assert.equal(firstCodeGroup, secondCodeGroup);
+  assert.equal(firstCodeGroup, 'validation-full-gate-210-code');
+});
+
+test('keeps cancelled metadata substitutes fail closed', () => {
+  assert.equal(
+    isValidationGateSuccess({
+      repositoryResult: 'skipped',
+      templatesResult: 'skipped',
+      securityResult: 'skipped',
+      notRequiredResult: 'cancelled',
+    }),
+    false,
+  );
+  assert.equal(
+    isValidationGateSuccess({
+      repositoryResult: 'skipped',
+      templatesResult: 'skipped',
+      securityResult: 'skipped',
+      notRequiredResult: 'success',
+    }),
+    true,
+  );
 });
 
 test('keeps automatic validation, policy, and Project synchronization explicit', () => {
