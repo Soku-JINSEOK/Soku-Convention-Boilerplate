@@ -2,11 +2,9 @@ package cicd
 
 import (
 	"bytes"
-	"encoding/json"
 	"io"
 	"os"
 	"regexp"
-	"sort"
 	"strings"
 
 	"gopkg.in/yaml.v3"
@@ -204,16 +202,4 @@ func validateSortedUniqueIDs(values []string, allowed map[string]bool, name stri
 		previous = value
 	}
 	return nil
-}
-
-func canonicalDecision(decision Decision) Decision {
-	copy := decision
-	copy.RequiredOS = append([]string(nil), decision.RequiredOS...)
-	sort.Strings(copy.RequiredOS)
-	copy.Capabilities = append([]string(nil), decision.Capabilities...)
-	return copy
-}
-
-func decisionJSON(decision Decision) ([]byte, error) {
-	return json.Marshal(canonicalDecision(decision))
 }

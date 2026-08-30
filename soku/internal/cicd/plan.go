@@ -3,7 +3,6 @@ package cicd
 import (
 	"crypto/sha256"
 	"encoding/hex"
-	"errors"
 	"fmt"
 	"net/url"
 	"os"
@@ -204,9 +203,6 @@ func readRepositoryIdentity(root string, configData []byte) (RepositoryIdentity,
 	}
 	info, err := os.Stat(absoluteRoot)
 	if err != nil || !info.IsDir() {
-		if err == nil {
-			err = errors.New("repository root is not a directory")
-		}
 		return RepositoryIdentity{}, invalid("ci-cd.repository.invalid", "repository root is unavailable")
 	}
 	head, err := gitValue(absoluteRoot, "rev-parse", "--verify", "HEAD")
