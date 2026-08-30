@@ -254,6 +254,21 @@ func TestValidationRejectsUnsafePortableState(t *testing.T) {
 			t.Errorf("path %q was accepted", value)
 		}
 	}
+	if err := ValidatePath(".soku/ci-cd/caller.yml"); err == nil {
+		t.Error("reserved CI/CD caller path was accepted by the ordinary path validator")
+	}
+	if err := ValidateManagedPath(".soku/ci-cd/caller.yml"); err != nil {
+		t.Fatalf("managed CI/CD caller path was rejected: %v", err)
+	}
+	if err := ValidateManagedPath(".soku/other-state.json"); err == nil {
+		t.Error("unreserved .soku path was accepted as a managed path")
+	}
+	if err := ValidateComponentPath(".soku/ci-cd-decision.yml"); err != nil {
+		t.Fatalf("CI/CD component configuration path was rejected: %v", err)
+	}
+	if err := ValidateComponentPath(".soku/other-config.yml"); err == nil {
+		t.Error("unreserved .soku path was accepted as a component configuration path")
+	}
 
 	tests := []struct {
 		name   string

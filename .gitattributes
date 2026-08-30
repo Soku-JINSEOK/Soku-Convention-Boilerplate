@@ -1,0 +1,7 @@
+# Hash-locked CI/CD provenance must retain the exact reviewed bytes on every
+# checkout platform. Generated callers are also written with their embedded
+# LF bytes and are not subject to platform line-ending conversion.
+soku/catalog/ci-cd-adapter-mapping-v1.json -text
+soku/schema/ci-cd-adapter-mapping-v1.schema.json -text
+soku/internal/cicd/testdata/upstream/** -text
+soku/internal/cicd/templates/** -text

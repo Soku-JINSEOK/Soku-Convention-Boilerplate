@@ -303,6 +303,19 @@ func ensureNoState(root string) error {
 	}
 	return nil
 }
+
+// CheckTransactionState exposes the shared recovery guard to component
+// installers without exposing the legacy configuration or source machinery.
+func CheckTransactionState(root string) error {
+	return ensureNoState(root)
+}
+
+// CheckWritePath verifies every existing path component before a transaction
+// writes below the repository root.
+func CheckWritePath(root, relative string) error {
+	return ensureNoSymlink(root, relative)
+}
+
 func configHash(config Config) (string, error) {
 	selection := selectionFromConfig(config)
 	return manifest.HashSelection(selection)

@@ -270,8 +270,11 @@ func Validate(document Document) error {
 	paths := make(map[string]File, len(document.Files))
 	previousPath := ""
 	for _, file := range document.Files {
-		if err := ValidatePath(file.Path); err != nil {
+		if err := ValidateManagedPath(file.Path); err != nil {
 			return err
+		}
+		if isCICDManagedPath(file.Path) && (file.Owner != "core" || file.Class != "core-managed") {
+			return fmt.Errorf("CI/CD managed path %q must be core-owned", file.Path)
 		}
 		folded := strings.ToLower(file.Path)
 		if _, exists := paths[folded]; exists {
@@ -343,7 +346,7 @@ func Validate(document Document) error {
 		if strings.TrimSpace(component.CatalogVersion) == "" {
 			return fmt.Errorf("component %q catalog_version is required", component.ID)
 		}
-		if err := ValidatePath(component.ConfigurationPath); err != nil {
+		if err := ValidateComponentPath(component.ConfigurationPath); err != nil {
 			return fmt.Errorf("component %q configuration_path: %w", component.ID, err)
 		}
 		folded := strings.ToLower(component.ConfigurationPath)
@@ -422,6 +425,24 @@ func HashSelection(selection Selection) (string, error) {
 
 // ValidatePath accepts only canonical repository-relative POSIX paths.
 func ValidatePath(value string) error {
+	return validatePath(value, false)
+}
+
+// ValidateManagedPath accepts ordinary repository paths plus the narrowly
+// reserved CI/CD caller directory. The latter lives below .soku so the
+// validation-only self-hosted caller cannot be discovered as a workflow, but
+// it must still be represented in the existing manifest file state.
+func ValidateManagedPath(value string) error {
+	return validatePath(value, isCICDManagedPath(value))
+}
+
+// ValidateComponentPath accepts ordinary component configuration paths and
+// the documented .soku/ci-cd-decision.yml configuration location.
+func ValidateComponentPath(value string) error {
+	return validatePath(value, value == ".soku/ci-cd-decision.yml")
+}
+
+func validatePath(value string, allowCICD bool) error {
 	if value == "" || strings.Contains(value, "\\") || strings.HasPrefix(value, "/") || path.IsAbs(value) {
 		return fmt.Errorf("file path %q is not a canonical relative POSIX path", value)
 	}
@@ -430,7 +451,10 @@ func ValidatePath(value string) error {
 	}
 	for _, component := range strings.Split(value, "/") {
 		lower := strings.ToLower(component)
-		if component == ".." || lower == ".git" || lower == ".soku" {
+		if component == ".." || lower == ".git" || (lower == ".soku" && !allowCICD) {
+			return fmt.Errorf("file path %q enters reserved state", value)
+		}
+		if lower == ".soku" && allowCICD && !isCICDManagedPath(value) && value != ".soku/ci-cd-decision.yml" {
 			return fmt.Errorf("file path %q enters reserved state", value)
 		}
 		if strings.ContainsAny(component, "<>:\"|?*") || strings.HasSuffix(component, ".") || strings.HasSuffix(component, " ") {
@@ -447,6 +471,10 @@ func ValidatePath(value string) error {
 		}
 	}
 	return nil
+}
+
+func isCICDManagedPath(value string) bool {
+	return strings.HasPrefix(strings.ToLower(value), ".soku/ci-cd/") && len(value) > len(".soku/ci-cd/")
 }
 
 // HashContent calculates the canonical baseline for the declared mode.

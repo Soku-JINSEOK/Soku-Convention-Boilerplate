@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"context"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -13,9 +14,15 @@ func TestCICDHelpAndInitSafetyBoundary(t *testing.T) {
 	}
 
 	config := filepath.Join("..", "..", "testdata", "cicd", "valid", "github-public.yml")
-	result := execute([]string{"ci-cd", "init", "--config", config, "--dry-run"}, testRuntime{}, defaultHandlers())
-	if result.code != int(ExitSafetyRefusal) || !strings.Contains(result.stderr, "not available") {
-		t.Fatalf("init safety result = %#v", result)
+	var request Request
+	handlers := defaultHandlers()
+	handlers.CICDInit = HandlerFunc(func(_ context.Context, got Request) error {
+		request = got
+		return nil
+	})
+	result := execute([]string{"ci-cd", "init", "--config", config, "--dry-run"}, testRuntime{}, handlers)
+	if result.code != 0 || !request.DryRun || request.Yes || request.Command != "ci-cd init" {
+		t.Fatalf("init request result = %#v request=%#v", result, request)
 	}
 
 	invalidFlags := execute([]string{"ci-cd", "init", "--config", config}, testRuntime{}, defaultHandlers())
