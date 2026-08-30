@@ -1,0 +1,1 @@
+{"artifacts":[{"id":"verification-record","path":"result.txt","sha256":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"}],"commands":[{"argv":["python3","verify.py"],"cwd":".","id":"verify-source","timeout_seconds":30}],"pipeline_template_id":"synthetic-portable-v1","profile_id":"portable-local-check"}

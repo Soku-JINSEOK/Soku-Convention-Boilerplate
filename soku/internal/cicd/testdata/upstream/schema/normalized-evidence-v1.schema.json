@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/control-plane/normalized-evidence-v1.schema.json",
+  "title": "normalized-evidence-v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "source_sha", "pipeline_template_id", "profile_id", "contract_sha256", "requirements_sha256", "adapter_id", "adapter_sha256", "executor", "commands", "artifacts", "started_at", "ended_at", "conclusion", "disclosure"],
+  "properties": {
+    "schema_version": {"const": "normalized-evidence-v1"},
+    "source_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "pipeline_template_id": {"type": "string"},
+    "profile_id": {"type": "string"},
+    "contract_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "requirements_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "adapter_id": {"type": "string"},
+    "adapter_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "executor": {
+      "type": "object", "additionalProperties": false,
+      "required": ["os", "architecture", "capabilities"],
+      "properties": {
+        "os": {"enum": ["linux", "darwin", "windows"]},
+        "architecture": {"enum": ["amd64", "arm64"]},
+        "capabilities": {"type": "array", "items": {"type": "string"}, "uniqueItems": true}
+      }
+    },
+    "commands": {
+      "type": "array",
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["id", "conclusion"],
+        "properties": {"id": {"type": "string"}, "conclusion": {"enum": ["success", "failure", "timeout", "cancelled"]}}
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["id", "sha256"],
+        "properties": {"id": {"type": "string"}, "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}}
+      }
+    },
+    "started_at": {"type": "string", "format": "date-time"},
+    "ended_at": {"type": "string", "format": "date-time"},
+    "conclusion": {"enum": ["success", "failure", "timeout", "cancelled", "superseded", "unsupported", "partial"]},
+    "disclosure": {"const": "redacted-metadata-only"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"conclusion": {"enum": ["unsupported", "superseded"]}}},
+      "then": {"properties": {"commands": {"maxItems": 0}, "artifacts": {"maxItems": 0}}}
+    },
+    {
+      "if": {"properties": {"conclusion": {"enum": ["failure", "timeout"]}}},
+      "then": {"properties": {"commands": {"minItems": 1}, "artifacts": {"maxItems": 0}}}
+    },
+    {
+      "if": {"properties": {"conclusion": {"const": "cancelled"}}},
+      "then": {"properties": {"artifacts": {"maxItems": 0}}}
+    },
+    {
+      "if": {"properties": {"conclusion": {"const": "partial"}}},
+      "then": {"properties": {"commands": {"minItems": 1}}}
+    }
+  ]
+}

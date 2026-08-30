@@ -20,3 +20,9 @@ All three changes are CI-only. They do not enable delivery, publication,
 release, deployment, Cloud triggers, IAM, credentials, runners, billing, or
 paid capacity. Planning is read-only and does not retain repository names,
 absolute paths, timestamps, or machine inventory.
+
+PR B records the public engine merge and byte hashes for the versioned schemas,
+Local/GCP/Jenkins synthetic fixtures, and adapter descriptors. Its catalog is
+strictly limited to `ci-only + github-hosted`, `ci-only + gcp-managed`, and
+`ci-only + github-self-hosted`; each renderer is validation-only and binds
+`delivery_authority: none`.

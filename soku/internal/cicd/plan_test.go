@@ -39,8 +39,8 @@ func TestBuildPlanIsDeterministicAndPortable(t *testing.T) {
 	if string(firstJSON) != string(secondJSON) || first.PlanDigest != second.PlanDigest {
 		t.Fatal("repeated plans are not byte-stable")
 	}
-	if first.Platform != platformGitHubHosted || first.Installability {
-		t.Fatalf("unexpected initial hosted plan: %#v", first)
+	if first.Platform != platformGitHubHosted || !first.Installability || first.AdapterResolution.Status != "resolved" {
+		t.Fatalf("unexpected hosted plan: %#v", first)
 	}
 	if first.Verification.PR.Argv[0] != "scripts/verify.sh" || first.Verification.Full.Argv[2] != "full" {
 		t.Fatalf("unexpected verification argv: %#v", first.Verification)
@@ -73,7 +73,7 @@ func TestBuildPlanSelectionRules(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			if plan.Platform != test.platform || plan.Installability {
+			if plan.Platform != test.platform || !plan.Installability || plan.AdapterResolution.Status != "resolved" {
 				t.Fatalf("plan = %#v", plan)
 			}
 		})

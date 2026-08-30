@@ -1,0 +1,20 @@
+{
+  "schema_version": "adapter-descriptor-v1",
+  "adapter_id": "local-reference-v1",
+  "implementation_sha256": "25a0a928b72e6286bca1fe6b8811b2037475e6711fb7b84aaa92bee5e6dea8a7",
+  "lifecycle": "experimental",
+  "execution_mode": "local-executable",
+  "supported": {
+    "requirements_versions": ["execution-requirements-v1"],
+    "evidence_versions": ["normalized-evidence-v1"],
+    "os": ["darwin"],
+    "architectures": ["amd64", "arm64"],
+    "shells": ["none"],
+    "networks": ["public"],
+    "capabilities": ["process-execution"]
+  },
+  "source_binding": "exact-clean-git-sha",
+  "failure_semantics": {"command_order": "exact-reviewed-order", "failure": "fail-fast", "timeout": "terminate-process-group", "cancellation": "terminate-process-group", "supersession": "no-process-start"},
+  "conclusions": ["success", "failure", "timeout", "cancelled", "superseded", "unsupported", "partial"],
+  "delivery_authority": "none"
+}
