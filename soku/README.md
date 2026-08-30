@@ -107,8 +107,8 @@ The supported stack IDs are `javascript-typescript-node`, `python`, `go`,
 
 ## CI/CD Decision Planning
 
-The CI/CD decision layer is read-only until its reviewed adapter mappings are
-available:
+The CI/CD decision layer is read-only and resolves only its reviewed,
+validation-only adapter mappings:
 
 ```bash
 soku ci-cd plan --config .soku/ci-cd-decision.yml --json
@@ -118,8 +118,11 @@ The strict `ci-cd-decision-v1` input binds CI-only verification to the fixed
 `ci-quick` and `full` profiles and requires `delivery.enabled: false`. Planning
 records only the Git remote host, immutable HEAD/tree, and content hashes; it
 does not inspect or change Cloud, IAM, credentials, runners, or repository
-settings. `soku ci-cd init` accepts exactly one of `--dry-run` or `--yes`, but
-returns a safety refusal while no reviewed mapping is published.
+settings. The catalog binds exactly `github-hosted`, `gcp-managed`, and
+`github-self-hosted` to fixed `ci-quick`/`full` argv and immutable provenance;
+it does not create triggers, IAM bindings, resources, or delivery authority.
+`soku ci-cd init` accepts exactly one of `--dry-run` or `--yes`, but returns a
+safety refusal until the transactional installer is published.
 
 ## Profiles
 

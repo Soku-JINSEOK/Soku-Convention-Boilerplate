@@ -93,12 +93,13 @@ type InputSummary struct {
 }
 
 type RepositoryIdentity struct {
-	RemoteHost    string `json:"remote_host"`
-	HeadSHA       string `json:"head_sha"`
-	TreeSHA       string `json:"tree_sha"`
-	ConfigSHA256  string `json:"config_sha256"`
-	ProfileSHA256 string `json:"profile_sha256"`
-	CatalogSHA256 string `json:"catalog_sha256"`
+	RemoteHost           string `json:"remote_host"`
+	HeadSHA              string `json:"head_sha"`
+	TreeSHA              string `json:"tree_sha"`
+	ConfigSHA256         string `json:"config_sha256"`
+	ProfileSHA256        string `json:"profile_sha256"`
+	CatalogSHA256        string `json:"catalog_sha256"`
+	AdapterCatalogSHA256 string `json:"adapter_catalog_sha256"`
 }
 
 type RequirementsSummary struct {

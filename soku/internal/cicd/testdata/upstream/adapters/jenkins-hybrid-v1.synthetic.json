@@ -1,0 +1,20 @@
+{
+  "schema_version": "adapter-descriptor-v1",
+  "adapter_id": "jenkins-hybrid-v1",
+  "implementation_sha256": "33b82051ca56d41f3ce885264880101a079893acef4367334d0cbad221f93423",
+  "lifecycle": "experimental",
+  "execution_mode": "synthetic-only",
+  "supported": {
+    "requirements_versions": ["execution-requirements-v1"],
+    "evidence_versions": ["normalized-evidence-v1"],
+    "os": ["linux", "darwin", "windows"],
+    "architectures": ["amd64", "arm64"],
+    "shells": ["none"],
+    "networks": ["public", "on-premises"],
+    "capabilities": ["process-execution"]
+  },
+  "source_binding": "exact-clean-git-sha",
+  "failure_semantics": {"command_order": "exact-reviewed-order", "failure": "fail-fast", "timeout": "terminate-process-group", "cancellation": "terminate-process-group", "supersession": "no-process-start"},
+  "conclusions": ["success", "failure", "timeout", "cancelled", "superseded", "unsupported", "partial"],
+  "delivery_authority": "none"
+}

@@ -1,0 +1,16 @@
+{
+  "schema_version": "execution-requirements-v1",
+  "pipeline_template_id": "synthetic-portable-v1",
+  "profile_id": "portable-local-check",
+  "source_sha": "0000000000000000000000000000000000000000",
+  "contract_sha256": "c9ee836f5c1f4046772df78c263d913abfaa53e3156e43faade92ced86f1c35a",
+  "platform": {"os": "darwin", "architecture": "arm64", "shell": "none"},
+  "network": "public",
+  "capabilities": ["process-execution"],
+  "commands": [
+    {"id": "verify-source", "argv": ["python3", "verify.py"], "cwd": ".", "timeout_seconds": 30}
+  ],
+  "artifacts": [
+    {"id": "verification-record", "path": "result.txt", "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"}
+  ]
+}
