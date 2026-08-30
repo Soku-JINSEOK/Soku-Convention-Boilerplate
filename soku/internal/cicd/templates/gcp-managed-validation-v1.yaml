@@ -1,0 +1,12 @@
+steps:
+  - id: ci-quick
+    name: node:24.17.0-bookworm@sha256:733e1c06ada118ed9f6133a31aa1290be6929664026fb28821500437c61f2c6f
+    entrypoint: ./scripts/verify.sh
+    args: [--profile, ci-quick, --group, <group-id>, --base, <base-sha>, --head, <head-sha>]
+  - id: full
+    name: node:24.17.0-bookworm@sha256:733e1c06ada118ed9f6133a31aa1290be6929664026fb28821500437c61f2c6f
+    entrypoint: ./scripts/verify.sh
+    args: [--profile, full]
+timeout: 900s
+options:
+  logging: CLOUD_LOGGING_ONLY

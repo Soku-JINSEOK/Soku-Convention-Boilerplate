@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/soku/internal/cicd"
 	"github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/soku/internal/initcmd"
 	"github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/soku/internal/manual"
 	lifecyclestatus "github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/soku/internal/status"
@@ -87,6 +88,8 @@ type Handlers struct {
 	Status           Handler
 	Diff             Handler
 	Upgrade          Handler
+	CICDPlan         Handler
+	CICDInit         Handler
 	ManualPlan       Handler
 	ManualDoctor     Handler
 	ManualInit       Handler
@@ -99,11 +102,58 @@ func defaultHandlers() Handlers {
 		Status:           statusHandler(),
 		Diff:             transitionHandler(false),
 		Upgrade:          transitionHandler(true),
+		CICDPlan:         cicdPlanHandler(),
+		CICDInit:         cicdInitHandler(),
 		ManualPlan:       manualPlanHandler(),
 		ManualDoctor:     manualDoctorHandler(),
 		ManualInit:       manualInitHandler(),
 		OwnershipHandoff: ownershipHandoffHandler(),
 	}
+}
+
+func cicdPlanHandler() Handler {
+	return ResultHandlerFunc(func(_ context.Context, request Request) (Result, error) {
+		root, err := os.Getwd()
+		if err != nil {
+			return Result{}, err
+		}
+		plan, err := cicd.BuildPlan(root, request.ConfigPath)
+		if err != nil {
+			var planningError *cicd.Error
+			if errors.As(err, &planningError) {
+				return Result{}, &ExitError{
+					Code: ExitValidationFailure, Key: planningError.Code,
+					Message: planningError.Message, Cause: planningError,
+				}
+			}
+			return Result{}, err
+		}
+		return Result{Human: cicd.HumanPlan(plan), Data: plan, Code: ExitSuccess}, nil
+	})
+}
+
+func cicdInitHandler() Handler {
+	return ResultHandlerFunc(func(_ context.Context, request Request) (Result, error) {
+		root, err := os.Getwd()
+		if err != nil {
+			return Result{}, err
+		}
+		report, err := cicd.Init(cicd.InitOptions{
+			Root: root, ConfigPath: request.ConfigPath, DryRun: request.DryRun, Yes: request.Yes,
+			SokuVersion: request.SokuVersion,
+		})
+		if err != nil {
+			var initError *cicd.InitError
+			if errors.As(err, &initError) {
+				return Result{}, &ExitError{
+					Code: ExitCode(initError.ExitCode), Key: initError.Code, Message: initError.Message,
+					Cause: initError, Data: initError.Data,
+				}
+			}
+			return Result{}, err
+		}
+		return Result{Human: cicd.HumanInit(report), Data: report, Code: ExitSuccess}, nil
+	})
 }
 
 func ownershipHandoffHandler() Handler {

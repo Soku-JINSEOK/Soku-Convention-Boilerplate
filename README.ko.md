@@ -1,43 +1,37 @@
 # 🧩 Soku-Convention-Boilerplate
 
-> 읽기 쉬운 코드, 안정적인 구조, 그리고 장기적인 유지보수성을 중요하게 생각하는 팀과 AI 에이전트를 위한 재사용 가능한 컨벤션 베이스라인입니다.
+> `soku` CLI 기반의 선언적 저장소 컨벤션 베이스라인 및 수명주기 거버넌스 툴체인입니다.
 
 [English](./README.md) | [日本語](./README.ja.md)
 
 ## 👋 개요
 
-`Soku-Convention-Boilerplate`는 모든 프로젝트에서 일관된 코드 스타일, 구조 및 협업 기준을 유지하기 위한 재사용 가능한 베이스 템플릿입니다.  
-단순한 시작 템플릿이 아니라 가독성과 장기적인 유지보수성을 중심으로 하는 개발 문화를 구축할 수 있는 반복 가능한 운영 기반으로 설계되었습니다.
+전통적인 프로젝트 보일러플레이트는 복사 직후 원본과 규칙이 어긋나는 **템플릿 드리프트(Template Drift)**를 겪으며, 업스트림 변경 사항을 동기화할 때 위험한 수동 diff 작업이 필요합니다.
 
-## 🗺️ 마스터 블루프린트
+`Soku-Convention-Boilerplate`는 **Google Style Guide 기반 베이스라인**과 **`soku` CLI 툴체인**을 결합하여, 프로젝트 수명주기 전반에 걸쳐 저장소 컨벤션을 명시적이고 검토 가능하며 재현 가능하게 관리합니다.
 
-표준화된 설계와 운영 모델에 대해서는 [BLUEPRINT.md](./BLUEPRINT.md) 문서를 참고하십시오.
-최초 적용 시 profile 선택부터 초기화와 upgrade까지는
-[종합 사용 매뉴얼](./docs/guides/USAGE_MANUAL.md)을 따르십시오.
+* **🎯 선언적 컨벤션:** 멀티 스택 프로필(TypeScript, Go, Python, Java)을 지원하며 통합된 포맷팅 및 정적 분석 규칙을 제공합니다.
+* **🛡️ 관리 소유권 모델(Managed Ownership):** Soku는 관리 대상 파일의 소유권과 베이스라인을 `.soku/manifest.json`에 기록하며, 프로젝트 고유 코드는 자동 수명주기 변이 대상에서 제외합니다.
+* **🔁 재현 가능한 CLI 워크플로:** 명시적 불변 입력값, dry-run 계획 사전 검토, 트랜잭션 방식의 안전한 업그레이드를 지원합니다.
 
-## ⚡ 빠른 시작
+## 🗺️ 마스터 블루프린트 및 운영 계약
 
-<details>
-<summary>최소 명령어로 새 저장소 시작하기</summary>
+* **표준 아키텍처 설계:** [BLUEPRINT.md](./BLUEPRINT.md) (설계 권위 문서)
+* **수명주기 및 소유권 계약:** [SOKU_LIFECYCLE.md](./docs/standards/SOKU_LIFECYCLE.md) (규범적 ADR)
+* **단계별 도입 및 사용 매뉴얼:** [USAGE_MANUAL.md](./docs/guides/USAGE_MANUAL.md) (전 과정 가이드)
+* **전체 검증 스위트:** [VERIFICATION_GUIDE.md](./VERIFICATION_GUIDE.md) (로컬, 호스팅 및 릴리스 검사)
 
-운영 방식에 맞는 경로를 하나 선택해 진행하세요.
+## ⚡ 60초 빠른 시작
 
-### 1) 기본 도구 준비
-
-```bash
-soku --version
-```
-
-### 2) `soku` 설치
+### 1) `soku` CLI 설치
 
 ```bash
 npm install -g @soku-jinseok/soku@0.2.1
 ```
 
-npm을 사용할 수 없으면 `soku/v0.2.1` 릴리스의 바이너리를 받아 `checksums.txt`로
-무결성을 확인해 설치하세요.
+*(또는 `soku/v0.2.1` 릴리스 페이지에서 독립 실행형 바이너리를 다운로드하고 `checksums.txt`로 검증)*
 
-### 3) 부트스트랩 및 검증
+### 2) 초기화 계획 사전 검토 (`--dry-run`)
 
 ```bash
 soku init \
@@ -50,27 +44,53 @@ soku init \
   --dry-run
 ```
 
-검토 후에는 `--dry-run` 대신 `--yes`를 사용해 적용하세요.
-
-### 4) PR/CI 전에 로컬 검증
+### 3) 동일 입력값으로 확정 적용 (`--yes`)
 
 ```bash
-make fmt-check
-make lint
-make test
-make build
+soku init \
+  --boilerplate-source https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate \
+  --boilerplate-release v1.0.5 \
+  --profile standard \
+  --stack javascript-typescript-node \
+  --project-name my-service \
+  --verify \
+  --yes
 ```
 
-</details>
+### 4) 표준 검증 실행
+
+초기화된 대상 프로젝트(예: Node.js / TypeScript 스택):
+
+```bash
+npm run format:check && npm run lint && npm run test && npm run build
+```
+
+이 보일러플레이트 저장소 자체의 전체 검증 스위트 실행:
+
+```bash
+./scripts/verify.sh
+```
+
+## 🏗️ 아키텍처 및 수명주기 흐름
+
+```mermaid
+flowchart TB
+    BP["Boilerplate Source<br/>Release: v1.0.5 (Signed Tag)"]
+    CLI["soku CLI Engine<br/>Distribution: soku/v0.2.1"]
+    Repo["Target Downstream Repository<br/>.soku/manifest.json + Managed File Boundaries"]
+
+    BP --> CLI
+    CLI -->|init / verify / upgrade| Repo
+```
 
 ## 📦 현재 공개 베이스라인
 
-현재 공개 release는 보일러플레이트 `v1.0.5`와 CLI `soku/v0.2.1`입니다.
-서명된 `v1.0.5` corrective release는 immutable `v1.0.4`의 공개 migration
-smoke에서 확인된 경계를 수정해 lifecycle-owned `.soku/` state를 JavaScript와
-TypeScript formatting 대상에서 제외합니다. 기존 tag는 불변으로 보존하며 현재
-보일러플레이트 baseline으로 `v1.0.5`를 사용하십시오. 전체 검사는
-[VERIFICATION_GUIDE.md](./VERIFICATION_GUIDE.md)를 참고하십시오.
+현재 공개 릴리스는 두 개의 독립된 릴리스 축으로 운영됩니다:
+
+* **보일러플레이트 베이스라인:** `v1.0.5` (서명된 태그)
+* **CLI 배포판:** `soku/v0.2.1` (독립 실행형 바이너리 및 npm 패키지)
+
+서명된 `v1.0.5` 수정 릴리스는 불변 `v1.0.4`의 공개 마이그레이션 smoke에서 확인된 경계를 수정하여 수명주기 소유의 `.soku/` 상태를 JavaScript 및 TypeScript 포맷팅 대상에서 제외합니다. 기존 태그는 불변으로 유지되며, 현재 보일러플레이트 베이스라인으로 `v1.0.5`를 사용하십시오. 전체 검사는 [VERIFICATION_GUIDE.md](./VERIFICATION_GUIDE.md)를 참고하십시오.
 
 ---
 
@@ -136,11 +156,11 @@ TypeScript formatting 대상에서 제외합니다. 기존 tag는 불변으로 �
 
 풀 리퀘스트와 코드 리뷰는 다음 사항을 최우선적으로 다룹니다:
 
-- 동작의 올바름 (Correctness)
-- 유지보수성 (Maintainability)
-- 아키텍처적 명확성 (Architectural clarity)
-- 테스트 가능성 (Testability)
-- 의사결정의 트레이드오프
+* 동작의 올바름 (Correctness)
+* 유지보수성 (Maintainability)
+* 아키텍처적 명확성 (Architectural clarity)
+* 테스트 가능성 (Testability)
+* 의사결정의 트레이드오프
 
 서식 및 줄 바꿈 등의 스타일링 쟁점은 자동화 린트/포맷 툴에게 전적으로 위임합니다.
 
@@ -152,11 +172,11 @@ TypeScript formatting 대상에서 제외합니다. 기존 tag는 불변으로 �
 
 이 저장소는 AI 에이전트가 다음 사항들을 직관적으로 파악할 수 있도록 최적화되어 있어야 합니다:
 
-- 프로젝트의 원래 의도 및 아키텍처 목적
-- 코드 소유권 범위 및 경계선
-- 구조적 컨벤션 및 네이밍 규칙
-- 문서 작성 기준
-- 빌드, 테스트 및 검증 워크플로우
+* 프로젝트의 원래 의도 및 아키텍처 목적
+* 코드 소유권 범위 및 경계선
+* 구조적 컨벤션 및 네이밍 규칙
+* 문서 작성 기준
+* 빌드, 테스트 및 검증 워크플로우
 
 이를 실현하기 위해 글로벌 가이드와 지침은 직접적이고 명료한 영어로 일관되게 작성됩니다.
 
@@ -164,64 +184,64 @@ TypeScript formatting 대상에서 제외합니다. 기존 tag는 불변으로 �
 
 이 보일러플레이트는 다음 역할을 수행하기 위해 존재합니다:
 
-- 신규 저장소를 시작할 때의 표준 스켈레톤 (스타팅 포인트)
-- 개인 및 팀 프로젝트 전체에 적용되는 일관된 컨벤션 공유 계층
-- 가독성 높고 읽기 쉬운 견고한 코드를 작성하기 위한 훈련장
-- 자동화를 통해 서식 관련 마찰을 제거하는 쾌적한 로컬 개발 도구 모음
-- 사람 개발자와 AI 에이전트가 함께 소통하고 이해할 수 있는 안정된 저장소 Shape 구축
+* 신규 저장소를 시작할 때의 표준 스켈레톤 (스타팅 포인트)
+* 개인 및 팀 프로젝트 전체에 적용되는 일관된 컨벤션 공유 계층
+* 가독성 높고 읽기 쉬운 견고한 코드를 작성하기 위한 훈련장
+* 자동화를 통해 서식 관련 마찰을 제거하는 쾌적한 로컬 개발 도구 모음
+* 사람 개발자와 AI 에이전트가 함께 소통하고 이해할 수 있는 안정된 저장소 Shape 구축
 
 ## 📚 관련 문서 목록
 
-- [README.md](./README.md): 다국어 개요 및 프로젝트 포지셔닝
-- [BLUEPRINT.md](./BLUEPRINT.md): 공식 저장소 아키텍처 설계도 및 권한 계층 정보
-- [CONTRIBUTING.md](./CONTRIBUTING.md): 기여 방식 워크플로우 및 커밋 메시지 규칙서
-- [AGENTS.md](./AGENTS.md): AI 에이전트 동작 안내서 (영어 전용)
-- [LICENSE](./LICENSE): 보일러플레이트 기본 라이선스 문서 (MIT)
-- [SECURITY.md](./SECURITY.md): 보안 결함 제보 창구
-- [`soku` CLI](./soku/README.md): 빌드, 설치, 검증, 패키징 및 릴리즈 운영 안내
-- [Soku 터미널 및 completion 가이드](./docs/guides/SOKU_TERMINAL_GUIDE.ko.md): 색상, 일상 흐름, 자동화 및 네 shell 설정
-- [VERIFICATION_GUIDE.md](./VERIFICATION_GUIDE.md): 로컬, hosted, 거버넌스, 아티팩트, 보안 및 비용 전체 검증
+* [README.md](./README.md): 다국어 개요 및 프로젝트 포지셔닝
+* [BLUEPRINT.md](./BLUEPRINT.md): 공식 저장소 아키텍처 설계도 및 권한 계층 정보
+* [CONTRIBUTING.md](./CONTRIBUTING.md): 기여 방식 워크플로우 및 커밋 메시지 규칙서
+* [AGENTS.md](./AGENTS.md): AI 에이전트 동작 안내서 (영어 전용)
+* [LICENSE](./LICENSE): 보일러플레이트 기본 라이선스 문서 (MIT)
+* [SECURITY.md](./SECURITY.md): 보안 결함 제보 창구
+* [`soku` CLI](./soku/README.md): 빌드, 설치, 검증, 패키징 및 릴리즈 운영 안내
+* [Soku 터미널 및 completion 가이드](./docs/guides/SOKU_TERMINAL_GUIDE.ko.md): 색상, 일상 흐름, 자동화 및 네 shell 설정
+* [VERIFICATION_GUIDE.md](./VERIFICATION_GUIDE.md): 로컬, hosted, 거버넌스, 아티팩트, 보안 및 비용 전체 검증
 
 ### 📏 `docs/standards/` — 구조 및 프로세스 규범 지침서
 
-- [CODE_STYLE.md](./docs/standards/CODE_STYLE.md): 기본 코드 작성 스타일 표준
-- [PROJECT_STRUCTURE.md](./docs/standards/PROJECT_STRUCTURE.md): 디렉토리 및 모듈 레이아웃 규칙
-- [GITHUB_STANDARDS.md](./docs/standards/GITHUB_STANDARDS.md): 이슈, PR, 리뷰, 레이블 및 템플릿 운영 기준
-- [RELEASE_AND_SYNC.md](./docs/standards/RELEASE_AND_SYNC.md): 버전 릴리즈 태그 배포 및 다운스트림 동기화 절차
-- [SOKU_LIFECYCLE.md](./docs/standards/SOKU_LIFECYCLE.md): `soku` CLI, 매니페스트, 소유권, 공급자 및 트랜잭션 라이프사이클 규범
-- [REAL_RUNTIME_MANUAL_CAPTURE.md](./docs/standards/REAL_RUNTIME_MANUAL_CAPTURE.md): 로컬 수동 실제 frontend 캡처, provenance, adapter 및 map provider 경계
-- [CICD_STANDARDS.md](./docs/standards/CICD_STANDARDS.md): 지속적 통합 및 배포(CI/CD) 수용 규칙
+* [CODE_STYLE.md](./docs/standards/CODE_STYLE.md): 기본 코드 작성 스타일 표준
+* [PROJECT_STRUCTURE.md](./docs/standards/PROJECT_STRUCTURE.md): 디렉토리 및 모듈 레이아웃 규칙
+* [GITHUB_STANDARDS.md](./docs/standards/GITHUB_STANDARDS.md): 이슈, PR, 리뷰, 레이블 및 템플릿 운영 기준
+* [RELEASE_AND_SYNC.md](./docs/standards/RELEASE_AND_SYNC.md): 버전 릴리즈 태그 배포 및 다운스트림 동기화 절차
+* [SOKU_LIFECYCLE.md](./docs/standards/SOKU_LIFECYCLE.md): `soku` CLI, 매니페스트, 소유권, 공급자 및 트랜잭션 라이프사이클 규범
+* [REAL_RUNTIME_MANUAL_CAPTURE.md](./docs/standards/REAL_RUNTIME_MANUAL_CAPTURE.md): 로컬 수동 실제 frontend 캡처, provenance, adapter 및 map provider 경계
+* [CICD_STANDARDS.md](./docs/standards/CICD_STANDARDS.md): 지속적 통합 및 배포(CI/CD) 수용 규칙
 
 ### 🛡️ `docs/policy/` — 영역별 기본 정책 선언서
 
-- [LICENSE_POLICY.md](./docs/policy/LICENSE_POLICY.md): 오픈소스 라이선스 선택 가이드라인
-- [SECURITY_POLICY.md](./docs/policy/SECURITY_POLICY.md): 소스, 비밀값(Secret), 배포 단계별 기본 보안 수칙
-- [CLOUD_POLICY.md](./docs/policy/CLOUD_POLICY.md): 실무 클라우드(GCP, AWS, Azure) 공급업체 결정 규칙
+* [LICENSE_POLICY.md](./docs/policy/LICENSE_POLICY.md): 오픈소스 라이선스 선택 가이드라인
+* [SECURITY_POLICY.md](./docs/policy/SECURITY_POLICY.md): 소스, 비밀값(Secret), 배포 단계별 기본 보안 수칙
+* [CLOUD_POLICY.md](./docs/policy/CLOUD_POLICY.md): 실무 클라우드(GCP, AWS, Azure) 공급업체 결정 규칙
 
 ### 🧭 `docs/guides/` — 모범 사례 및 안내 가이드 문서
 
-- [USAGE_MANUAL.md](./docs/guides/USAGE_MANUAL.md): 적용 수준과 검증된 설치부터 governance, 선택적 GCP dev 배포, upgrade까지 연결하는 인간 사용자용 시작점
-- [STACK_EXAMPLES.md](./docs/guides/STACK_EXAMPLES.md): 다국어, 프레임워크, DB 및 클라우드 구축 모범 사례 모음
-- [STACK_CONFIGS.md](./docs/guides/STACK_CONFIGS.md): 스택별 설정 파일 스타터 템플릿 복제 가이드
-- [README_GUIDE.md](./docs/guides/README_GUIDE.md): 프로젝트 README를 읽기 쉽고 명확하게 유지하는 작성법
-- [INIT_GUIDE.md](./docs/guides/INIT_GUIDE.md): 다운스트림 프로젝트를 부트스트랩할 때 에이전트가 참고하는 환경 탐색 체크리스트
-- [APPLICABILITY.md](./docs/guides/APPLICABILITY.md): 개인 프로젝트와 팀 프로젝트에서 각각 적용 가능한 수준 분리 기준
-- [LANGUAGE_SELECTION.md](./docs/guides/LANGUAGE_SELECTION.md): 새 프로젝트나 기능에 사용할 프로그래밍 언어를 선택하는 기준
+* [USAGE_MANUAL.md](./docs/guides/USAGE_MANUAL.md): 적용 수준과 검증된 설치부터 governance, 선택적 GCP dev 배포, upgrade까지 연결하는 인간 사용자용 시작점
+* [STACK_EXAMPLES.md](./docs/guides/STACK_EXAMPLES.md): 다국어, 프레임워크, DB 및 클라우드 구축 모범 사례 모음
+* [STACK_CONFIGS.md](./docs/guides/STACK_CONFIGS.md): 스택별 설정 파일 스타터 템플릿 복제 가이드
+* [README_GUIDE.md](./docs/guides/README_GUIDE.md): 프로젝트 README를 읽기 쉽고 명확하게 유지하는 작성법
+* [INIT_GUIDE.md](./docs/guides/INIT_GUIDE.md): 다운스트림 프로젝트를 부트스트랩할 때 에이전트가 참고하는 환경 탐색 체크리스트
+* [APPLICABILITY.md](./docs/guides/APPLICABILITY.md): 개인 프로젝트와 팀 프로젝트에서 각각 적용 가능한 수준 분리 기준
+* [LANGUAGE_SELECTION.md](./docs/guides/LANGUAGE_SELECTION.md): 새 프로젝트나 기능에 사용할 프로그래밍 언어를 선택하는 기준
 
 ### 📝 `docs/issues/` — 작업 보고서 아티팩트
 
-- [TASK_REPORT_TEMPLATE.md](./docs/issues/TASK_REPORT_TEMPLATE.md): 구현 착수 전 문서화하고 승인받는 계획 템플릿
+* [TASK_REPORT_TEMPLATE.md](./docs/issues/TASK_REPORT_TEMPLATE.md): 구현 착수 전 문서화하고 승인받는 계획 템플릿
 
 ## 🧱 시작 스택 지원 범위
 
 이 보일러플레이트는 다양한 기술 스택을 담아낼 수 있도록 지속적으로 확장 가능한 상태를 유지합니다. 기본 지원 가이드는 다음을 커버합니다:
 
-- `JavaScript` / `TypeScript` / `Node.js`
-- `Python`
-- `Go`
-- `Java` / `Spring`
-- `MySQL` / `PostgreSQL`
-- `gcloud` / `AWS` / `Azure`
+* `JavaScript` / `TypeScript` / `Node.js`
+* `Python`
+* `Go`
+* `Java` / `Spring`
+* `MySQL` / `PostgreSQL`
+* `gcloud` / `AWS` / `Azure`
 
 ## 🛠️ 설정 템플릿 세트
 

@@ -28,6 +28,14 @@ type transactionPath struct {
 }
 type ApplyHook func(stage, path string) error
 
+// ApplyTransaction applies an already validated set of repository changes and
+// replaces the manifest last. It is the shared transaction boundary for the
+// base lifecycle and opt-in components; callers must finish their own
+// component-specific planning and TOCTOU checks before invoking it.
+func ApplyTransaction(root string, changes []Change, document manifest.Document, hook ApplyHook) (string, error) {
+	return applyTransaction(root, changes, document, hook)
+}
+
 func applyTransaction(root string, changes []Change, document manifest.Document, hook ApplyHook) (string, error) {
 	id, err := transactionID()
 	if err != nil {

@@ -127,7 +127,7 @@ jobs:
       - full-validation-not-required
     runs-on: ubuntu-latest
     concurrency:
-      group: validation-full-gate-${{ github.event.pull_request.number || github.ref }}
+      group: validation-full-gate-${{ github.event.pull_request.number || github.ref }}-${{ needs.full-validation-not-required.result == 'success' && github.run_id || 'code' }}
       cancel-in-progress: true
     steps:
       - name: Require every validation group
@@ -161,8 +161,5 @@ jobs:
       github.event.action != 'reopened' &&
       !(github.event.action == 'edited' && github.event.changes.base != null)
     runs-on: ubuntu-latest
-    concurrency:
-      group: validation-metadata-not-required-${{ github.event.pull_request.number }}
-      cancel-in-progress: true
     steps:
       - run: echo "Metadata-only event preserves the existing Validation Gate."

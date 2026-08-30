@@ -1,0 +1,20 @@
+{
+  "schema_version": "adapter-descriptor-v1",
+  "adapter_id": "gcp-cloud-build-v1",
+  "implementation_sha256": "15e2b0d3c33891ebb115c06ea0e24e8db76162125a0188686ee864fe068c6a4e",
+  "lifecycle": "experimental",
+  "execution_mode": "synthetic-only",
+  "supported": {
+    "requirements_versions": ["execution-requirements-v1"],
+    "evidence_versions": ["normalized-evidence-v1"],
+    "os": ["linux"],
+    "architectures": ["amd64"],
+    "shells": ["none"],
+    "networks": ["public", "gcp-private"],
+    "capabilities": ["container", "process-execution"]
+  },
+  "source_binding": "exact-clean-git-sha",
+  "failure_semantics": {"command_order": "exact-reviewed-order", "failure": "fail-fast", "timeout": "terminate-process-group", "cancellation": "terminate-process-group", "supersession": "no-process-start"},
+  "conclusions": ["success", "failure", "timeout", "cancelled", "superseded", "unsupported", "partial"],
+  "delivery_authority": "none"
+}

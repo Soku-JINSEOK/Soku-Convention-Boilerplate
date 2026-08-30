@@ -1,0 +1,140 @@
+{
+  "schemaVersion": 2,
+  "contractVersion": "option-b-v2",
+  "provider": "gcp-cloud-build-shadow",
+  "validationProfile": "ci-quick",
+  "validationEntrypoint": "scripts/verify.sh",
+  "historicalActionsNaturalSamples": 3,
+  "currentGcpNaturalSamples": 0,
+  "currentGcpSyntheticSamples": 0,
+  "pilotNaturalTarget": 3,
+  "transitionEvaluationNaturalTarget": 10,
+  "providerSampleMergeAllowed": false,
+  "eligibleNaturalSampleFields": [
+    "provider",
+    "repository",
+    "sourceSha",
+    "baseSha",
+    "pullRequest",
+    "naturalEventId",
+    "buildId",
+    "triggerId",
+    "triggerVersion",
+    "attempt",
+    "validationProfile",
+    "startedAt",
+    "completedAt",
+    "status",
+    "conclusion",
+    "commandContractVersion",
+    "evidenceReference",
+    "duplicate",
+    "cancellationReason",
+    "attestationStatus",
+    "serverIssuedBuildTriggerId",
+    "sourceProvenance"
+  ],
+  "sourceShaBinding": {
+    "required": true,
+    "cloudBuildSubstitution": "COMMIT_SHA",
+    "baseShaSubstitution": "_BASE_SHA",
+    "headBranchSubstitution": "_HEAD_BRANCH",
+    "baseBranchSubstitution": "_BASE_BRANCH",
+    "headRepoUrlSubstitution": "_HEAD_REPO_URL",
+    "argument": "--source-sha",
+    "format": "40-lower-hex",
+    "mustMatchBuildSource": true
+  },
+  "failureCancellationPolicy": {
+    "denominator": "included",
+    "successfulNumerator": "success-only",
+    "failedBuilds": "included-and-classified",
+    "cancelledBuilds": "included-and-classified",
+    "supersededHeads": "included-and-classified"
+  },
+  "duplicateAttemptPolicy": {
+    "sameBuildCallbacks": "count-once",
+    "sameShaRerun": "new-attempt-not-new-natural-sample",
+    "duplicateNaturalSample": "excluded"
+  },
+  "syntheticPolicy": {
+    "manualBuildCountsAsNatural": false,
+    "syntheticBuildCountsAsNatural": false,
+    "syntheticSamplesSeparateCounter": "currentGcpSyntheticSamples",
+    "emptyCommitForSampleCollection": "prohibited"
+  },
+  "classificationPolicy": {
+    "buildConfigSelfDeclaredNaturalAllowed": false,
+    "buildConfigOutputClassification": "UNATTESTED_CANDIDATE",
+    "naturalClassificationAuthority": "trusted-post-build-attestor",
+    "naturalClassificationImplementation": "not-implemented",
+    "manualBuildCountsAsNatural": false,
+    "unverifiedCandidateCountsAsNatural": false,
+    "sourceGeneratedResultCanAttest": false
+  },
+  "attestationContract": {
+    "serverIssuedBuildIdRequired": true,
+    "serverIssuedBuildTriggerIdRequired": true,
+    "expectedTriggerResourceIdentityRequired": true,
+    "resolvedRepositoryFromSourceProvenanceRequired": true,
+    "resolvedCommitShaFromSourceProvenanceRequired": true,
+    "expectedRepositoryRequired": true,
+    "expectedPullRequestTriggerRequired": true,
+    "buildStatusConclusionRequired": true,
+    "approvedValidationContractRequired": true,
+    "duplicateBuildAttemptCheckRequired": true,
+    "manualBuildRejected": true,
+    "userSubstitutionsInsufficient": true,
+    "sourceGeneratedResultCannotAttest": true
+  },
+  "builderPolicy": {
+    "immutableDigestRequired": true,
+    "mutableTagOnlyAllowed": false,
+    "rootPrivilegeAllowed": false,
+    "externalDownloads": "must-be-pinned-or-locked",
+    "credentialMaterialInBuild": false
+  },
+  "executionBoundary": {
+    "requiredCheckTransition": false,
+    "existingActionsDisabled": false,
+    "deliveryAuthority": false,
+    "publicationAuthority": false,
+    "deploymentAuthority": false,
+    "githubWriteCallback": false,
+    "liveExecutionInThisCheckpoint": false
+  },
+  "evidenceContract": {
+    "buildIdRequired": true,
+    "triggerIdentityRequired": true,
+    "attemptRequired": true,
+    "validationProfileRequired": true,
+    "timestampsRequired": true,
+    "conclusionRequired": true,
+    "artifactOrLogReferenceRequired": true,
+    "actionsHistoricalSamplesPreserved": true,
+    "providerSpecificContext": "gcp-cloud-build-shadow",
+    "providerSampleMergeAllowed": false,
+    "attestationRequired": true,
+    "operationalEvidenceStatus": "MISSING"
+  },
+  "parserResourcePolicy": {
+    "maximumInputBytes": 1048576,
+    "maximumNestingDepth": 64,
+    "enforcementPhase": "pre-parse",
+    "depthAlgorithm": "iterative",
+    "overLimitBehavior": "fail-closed",
+    "stackTraceExposure": false,
+    "appliesTo": [
+      "shadow config",
+      "provider contract"
+    ]
+  },
+  "ownerGates": [
+    "trusted post-build attestor implementation",
+    "live Cloud Build execution",
+    "Cloud Build trigger creation",
+    "GCP IAM or Secret Manager changes",
+    "GitHub required-check transition",
+    "delivery or publication"
+  ]
+}

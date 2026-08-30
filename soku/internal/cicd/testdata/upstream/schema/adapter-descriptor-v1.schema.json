@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/control-plane/adapter-descriptor-v1.schema.json",
+  "title": "adapter-descriptor-v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "adapter_id", "implementation_sha256", "lifecycle", "execution_mode", "supported", "source_binding", "failure_semantics", "conclusions", "delivery_authority"],
+  "properties": {
+    "schema_version": {"const": "adapter-descriptor-v1"},
+    "adapter_id": {"type": "string", "pattern": "^[a-z][a-z0-9-]*-v[0-9]+$"},
+    "implementation_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "lifecycle": {"enum": ["experimental", "reviewed", "deprecated", "disabled"]},
+    "execution_mode": {"enum": ["local-executable", "synthetic-only"]},
+    "supported": {
+      "type": "object", "additionalProperties": false,
+      "required": ["requirements_versions", "evidence_versions", "os", "architectures", "shells", "networks", "capabilities"],
+      "properties": {
+        "requirements_versions": {"type": "array", "items": {"const": "execution-requirements-v1"}},
+        "evidence_versions": {"type": "array", "items": {"const": "normalized-evidence-v1"}},
+        "os": {"type": "array", "items": {"enum": ["linux", "darwin", "windows"]}, "uniqueItems": true},
+        "architectures": {"type": "array", "items": {"enum": ["amd64", "arm64"]}, "uniqueItems": true},
+        "shells": {"type": "array", "items": {"const": "none"}, "uniqueItems": true},
+        "networks": {"type": "array", "items": {"enum": ["none", "public", "gcp-private", "on-premises"]}, "uniqueItems": true},
+        "capabilities": {"type": "array", "items": {"type": "string"}, "uniqueItems": true}
+      }
+    },
+    "source_binding": {"const": "exact-clean-git-sha"},
+    "failure_semantics": {
+      "type": "object", "additionalProperties": false,
+      "required": ["command_order", "failure", "timeout", "cancellation", "supersession"],
+      "properties": {
+        "command_order": {"const": "exact-reviewed-order"},
+        "failure": {"const": "fail-fast"},
+        "timeout": {"const": "terminate-process-group"},
+        "cancellation": {"const": "terminate-process-group"},
+        "supersession": {"const": "no-process-start"}
+      }
+    },
+    "conclusions": {"const": ["success", "failure", "timeout", "cancelled", "superseded", "unsupported", "partial"]},
+    "delivery_authority": {"const": "none"}
+  }
+}

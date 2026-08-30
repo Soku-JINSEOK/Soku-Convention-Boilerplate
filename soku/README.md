@@ -105,6 +105,30 @@ The supported stack IDs are `javascript-typescript-node`, `python`, `go`,
 `--stack` to select more than one; an explicit list replaces detection. Go requires `--module-path`, Java requires
 `--java-group`, and Java/GCP service output accepts `--service-name`.
 
+## CI/CD Decision Planning
+
+The CI/CD decision layer is read-only and resolves only its reviewed,
+validation-only adapter mappings:
+
+```bash
+soku ci-cd plan --config .soku/ci-cd-decision.yml --json
+```
+
+The strict `ci-cd-decision-v1` input binds CI-only verification to the fixed
+`ci-quick` and `full` profiles and requires `delivery.enabled: false`. Planning
+records only the Git remote host, immutable HEAD/tree, and content hashes; it
+does not inspect or change Cloud, IAM, credentials, runners, or repository
+settings. The catalog binds exactly `github-hosted`, `gcp-managed`, and
+`github-self-hosted` to fixed `ci-quick`/`full` argv and immutable provenance;
+it does not create triggers, IAM bindings, resources, or delivery authority.
+`soku ci-cd init` accepts exactly one of `--dry-run` or `--yes` and requires an
+existing initialized `.soku/manifest.json`. It recomputes the plan and trusted
+renderer immediately before an explicit `--yes` write, records the component
+and managed caller through the existing manifest-last transaction, and refuses
+unpublished mappings, collisions, stale state, or incomplete recovery state.
+The generated caller is validation-only; no Cloud, IAM, credential, runner,
+delivery, publication, or repository-setting mutation is performed.
+
 ## Profiles
 
 Catalog v2 composes three built-in profiles in one fixed order:

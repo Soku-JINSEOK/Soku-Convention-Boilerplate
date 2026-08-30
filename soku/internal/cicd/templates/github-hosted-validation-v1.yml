@@ -1,0 +1,45 @@
+name: Soku CI validation
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  quick:
+    name: ci-quick / ${{ matrix.group }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        group: [always, soku, javascript-typescript-node, python, go, java-spring, database, cloud, infra-gcp]
+    steps:
+      - name: Checkout exact head
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Run fixed ci-quick group
+        shell: bash
+        run: >-
+          ./scripts/verify.sh --profile ci-quick
+          --group '${{ matrix.group }}'
+          --base '${{ github.event.pull_request.base.sha || github.event.before }}'
+          --head '${{ github.event.pull_request.head.sha || github.sha }}'
+  full:
+    name: full
+    runs-on: ubuntu-24.04
+    needs: quick
+    steps:
+      - name: Checkout exact head
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Run fixed full profile
+        shell: bash
+        run: ./scripts/verify.sh --profile full

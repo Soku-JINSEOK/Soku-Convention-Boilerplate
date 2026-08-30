@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ci-cd-adapter-mapping-v1",
+  "title": "Soku CI/CD adapter mapping catalog",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "engine", "mappings"],
+  "properties": {
+    "schema_version": { "const": "ci-cd-adapter-mapping-v1" },
+    "engine": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "ref", "files"],
+      "properties": {
+        "source": { "const": "github:Soku-JINSEOK/ci-cd-control-plane-engine" },
+        "ref": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "files": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["path", "sha256"],
+            "properties": {
+              "path": { "type": "string", "pattern": "^execution/" },
+              "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+              "implementation_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+            }
+          }
+        }
+      }
+    },
+    "mappings": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "mapping_id", "platform", "adapter_id", "adapter_ref",
+          "engine_adapter_id", "engine_descriptor_path",
+          "engine_descriptor_sha256", "implementation_sha256",
+          "renderer_id", "renderer_template", "renderer_sha256",
+          "verification", "runner", "delivery_authority", "output_path"
+        ],
+        "properties": {
+          "mapping_id": { "type": "string", "pattern": "^ci-only-[a-z0-9-]+-v[0-9]+$" },
+          "platform": { "enum": ["github-hosted", "gcp-managed", "github-self-hosted"] },
+          "adapter_id": { "type": "string", "pattern": "^[a-z][a-z0-9-]+-v[0-9]+$" },
+          "adapter_ref": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+          "engine_adapter_id": { "type": "string", "pattern": "^[a-z][a-z0-9-]+-v[0-9]+$" },
+          "engine_descriptor_path": { "type": "string", "pattern": "^execution/adapters/" },
+          "engine_descriptor_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+          "implementation_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+          "renderer_id": { "type": "string", "pattern": "^[a-z][a-z0-9-]+-v[0-9]+$" },
+          "renderer_template": { "type": "string", "pattern": "^[a-z0-9-]+-v[0-9]+\\.(yml|yaml)$" },
+          "renderer_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+          "verification": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["pr", "pr_argv", "full", "full_argv"],
+            "properties": {
+              "pr": { "const": "ci-quick" },
+              "pr_argv": { "$ref": "#/$defs/argv" },
+              "full": { "const": "full" },
+              "full_argv": { "$ref": "#/$defs/argv" }
+            }
+          },
+          "runner": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["os", "architectures", "capabilities", "networks"],
+            "properties": {
+              "os": { "$ref": "#/$defs/string_array" },
+              "architectures": { "$ref": "#/$defs/string_array" },
+              "capabilities": { "$ref": "#/$defs/string_array" },
+              "networks": { "$ref": "#/$defs/string_array" }
+            }
+          },
+          "delivery_authority": { "const": "none" },
+          "output_path": { "type": "string", "pattern": "^(\\.github/workflows|cloudbuild|\\.soku/ci-cd)/" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "string_array": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^[a-z][a-z0-9-]{0,63}$" }
+    },
+    "argv": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    }
+  }
+}

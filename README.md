@@ -1,43 +1,37 @@
 # 🧩 Soku-Convention-Boilerplate
 
-> A reusable convention baseline for teams and AI agents who care about readable code, stable structure, and long-term maintainability.
+> Declarative repository convention baseline and lifecycle tooling powered by the `soku` CLI.
 
 [한국어](./README.ko.md) | [日本語](./README.ja.md)
 
 ## 👋 Overview
 
-`Soku-Convention-Boilerplate` is a reusable base template for maintaining consistent code style, structure, and collaboration standards across any project.  
-It is designed not just as a starter, but as a repeatable foundation for building a development culture centered on readability and long-term maintainability.
+Traditional project boilerplates suffer from **template drift**: once copied, conventions diverge and upstream updates require error-prone manual diffing.
 
-## 🗺️ Master Blueprint
+`Soku-Convention-Boilerplate` combines a **Google Style Guide-aligned baseline** with the **`soku` CLI toolchain** to make repository conventions explicit, reviewable, and reproducible across the project lifecycle.
 
-For the canonical operating design, start with [BLUEPRINT.md](./BLUEPRINT.md).
-For first-time adoption from profile selection through initialization and
-upgrades, follow the [end-to-end usage manual](./docs/guides/USAGE_MANUAL.md).
+* **🎯 Declarative Conventions:** Multi-stack profiles (TypeScript, Go, Python, Java) with unified formatting and static analysis rules.
+* **🛡️ Managed Ownership Model:** Soku records managed-file ownership and baselines in `.soku/manifest.json`, while project-owned files remain outside automatic lifecycle mutation.
+* **🔁 Reproducible CLI Workflow:** Explicit immutable inputs, dry-run plan inspection, and transactional upgrades.
 
-## ⚡ Quick Start
+## 🗺️ Master Blueprint & Operating Contract
 
-<details>
-<summary>Start a new repository with the minimum commands</summary>
+* **Canonical Operating Design:** [BLUEPRINT.md](./BLUEPRINT.md) (Architecture Authority)
+* **Lifecycle & Ownership Contract:** [SOKU_LIFECYCLE.md](./docs/standards/SOKU_LIFECYCLE.md) (Normative ADR)
+* **Adoption & Step-by-Step Manual:** [USAGE_MANUAL.md](./docs/guides/USAGE_MANUAL.md) (End-to-End Walkthrough)
+* **Verification Suite:** [VERIFICATION_GUIDE.md](./VERIFICATION_GUIDE.md) (Local, Hosted & Release Checks)
 
-Choose one path that matches your workflow.
+## ⚡ 60-Second Quick Start
 
-### 1) Prepare baseline tools
-
-```bash
-soku --version
-```
-
-### 2) Install `soku`
+### 1) Install the `soku` CLI
 
 ```bash
 npm install -g @soku-jinseok/soku@0.2.1
 ```
 
-If npm is not available, install via binary from the `soku/v0.2.1` release page and
-verify with `checksums.txt`.
+*(Or download the standalone binary from the `soku/v0.2.1` release page and verify with `checksums.txt`)*
 
-### 3) Bootstrap and validate
+### 2) Preview the initialization plan (`--dry-run`)
 
 ```bash
 soku init \
@@ -50,27 +44,53 @@ soku init \
   --dry-run
 ```
 
-If the plan is acceptable, apply the same command with `--yes` in place of `--dry-run`.
-
-### 4) Run local checks before opening PR
+### 3) Apply the plan with confirmation (`--yes`)
 
 ```bash
-make fmt-check
-make lint
-make test
-make build
+soku init \
+  --boilerplate-source https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate \
+  --boilerplate-release v1.0.5 \
+  --profile standard \
+  --stack javascript-typescript-node \
+  --project-name my-service \
+  --verify \
+  --yes
 ```
 
-</details>
+### 4) Run standard checks
+
+In the initialized project (e.g., Node.js / TypeScript stack):
+
+```bash
+npm run format:check && npm run lint && npm run test && npm run build
+```
+
+To run the complete verification suite for this boilerplate repository itself:
+
+```bash
+./scripts/verify.sh
+```
+
+## 🏗️ Architecture & Lifecycle Flow
+
+```mermaid
+flowchart TB
+    BP["Boilerplate Source<br/>Release: v1.0.5 (Signed Tag)"]
+    CLI["soku CLI Engine<br/>Distribution: soku/v0.2.1"]
+    Repo["Target Downstream Repository<br/>.soku/manifest.json + Managed File Boundaries"]
+
+    BP --> CLI
+    CLI -->|init / verify / upgrade| Repo
+```
 
 ## 📦 Current Published Baseline
 
-The current published releases are boilerplate `v1.0.5` and CLI
-`soku/v0.2.1`. The signed `v1.0.5` corrective release excludes lifecycle-owned
-`.soku/` state from JavaScript and TypeScript formatting after public migration
-smoke exposed the boundary in immutable `v1.0.4`. Existing tags remain
-immutable; use `v1.0.5` as the current boilerplate baseline. See
-[VERIFICATION_GUIDE.md](./VERIFICATION_GUIDE.md) for the complete checks.
+The current published releases operate on two independent release axes:
+
+* **Boilerplate Baseline:** `v1.0.5` (Signed tag)
+* **CLI Distribution:** `soku/v0.2.1` (Standalone binary & npm package)
+
+The signed `v1.0.5` corrective release excludes lifecycle-owned `.soku/` state from JavaScript and TypeScript formatting after public migration smoke exposed the boundary in immutable `v1.0.4`. Existing tags remain immutable; use `v1.0.5` as the current boilerplate baseline. See [VERIFICATION_GUIDE.md](./VERIFICATION_GUIDE.md) for the complete checks.
 
 ---
 
@@ -137,11 +157,11 @@ document language follows the [Language Policy in BLUEPRINT.md](./BLUEPRINT.md#l
 
 Pull requests and code reviews should prioritize:
 
-- correctness
-- maintainability
-- architectural clarity
-- testability
-- explicit tradeoffs
+* correctness
+* maintainability
+* architectural clarity
+* testability
+* explicit tradeoffs
 
 Style issues should be handled by tooling whenever possible.
 
@@ -154,11 +174,11 @@ If a convention only works for one project, it should be treated as a project-sp
 
 This repository should be organized so that AI agents can quickly infer:
 
-- project intent
-- code ownership boundaries
-- structural conventions
-- documentation expectations
-- execution and validation workflows
+* project intent
+* code ownership boundaries
+* structural conventions
+* documentation expectations
+* execution and validation workflows
 
 To support that goal, global rules should be explicit, stable, and written in direct English.
 
@@ -166,73 +186,73 @@ To support that goal, global rules should be explicit, stable, and written in di
 
 This boilerplate is intended to serve as:
 
-- a standard starting point for new repositories
-- a shared convention layer across personal and team projects
-- a training ground for writing clean, readable, maintainable code
-- a base environment where automation reduces style friction
-- a repository structure that remains understandable to both humans and AI agents
+* a standard starting point for new repositories
+* a shared convention layer across personal and team projects
+* a training ground for writing clean, readable, maintainable code
+* a base environment where automation reduces style friction
+* a repository structure that remains understandable to both humans and AI agents
 
 ## 📚 Documents
 
-- [README.md](./README.md): multilingual overview and project positioning
-- [BLUEPRINT.md](./BLUEPRINT.md): canonical repository design and authority map
-- [CONTRIBUTING.md](./CONTRIBUTING.md): contributor workflow and review expectations
-- [AGENTS.md](./AGENTS.md): English-only operating guidance for AI agents
-- [LICENSE](./LICENSE): default boilerplate license
-- [SECURITY.md](./SECURITY.md): security reporting entrypoint
-- [`soku` CLI](./soku/README.md): build, install, verification, packaging, and release operation
-- [Soku terminal and completion guide](./docs/guides/SOKU_TERMINAL_GUIDE.md): color, daily workflow, automation, and four-shell setup
-- [VERIFICATION_GUIDE.md](./VERIFICATION_GUIDE.md): complete local, hosted, governance, artifact, security, and cost checks
+* [README.md](./README.md): multilingual overview and project positioning
+* [BLUEPRINT.md](./BLUEPRINT.md): canonical repository design and authority map
+* [CONTRIBUTING.md](./CONTRIBUTING.md): contributor workflow and review expectations
+* [AGENTS.md](./AGENTS.md): English-only operating guidance for AI agents
+* [LICENSE](./LICENSE): default boilerplate license
+* [SECURITY.md](./SECURITY.md): security reporting entrypoint
+* [`soku` CLI](./soku/README.md): build, install, verification, packaging, and release operation
+* [Soku terminal and completion guide](./docs/guides/SOKU_TERMINAL_GUIDE.md): color, daily workflow, automation, and four-shell setup
+* [VERIFICATION_GUIDE.md](./VERIFICATION_GUIDE.md): complete local, hosted, governance, artifact, security, and cost checks
 
 ### 📏 `docs/standards/` — normative structural and process rules
 
-- [CODE_STYLE.md](./docs/standards/CODE_STYLE.md): style baseline and code-writing rules
-- [PROJECT_STRUCTURE.md](./docs/standards/PROJECT_STRUCTURE.md): repository folder organization and structural rules
-- [GITHUB_STANDARDS.md](./docs/standards/GITHUB_STANDARDS.md): issue, PR, review, and template governance
-- [RELEASE_AND_SYNC.md](./docs/standards/RELEASE_AND_SYNC.md): release tagging and downstream sync model
-- [SOKU_LIFECYCLE.md](./docs/standards/SOKU_LIFECYCLE.md): normative CLI, manifest, ownership, provider, and transactional lifecycle contract for `soku`
-- [REAL_RUNTIME_MANUAL_CAPTURE.md](./docs/standards/REAL_RUNTIME_MANUAL_CAPTURE.md): local/manual real-frontend screenshot, provenance, adapter, and map-provider boundaries
-- [CICD_STANDARDS.md](./docs/standards/CICD_STANDARDS.md): continuous integration and delivery expectations
+* [CODE_STYLE.md](./docs/standards/CODE_STYLE.md): style baseline and code-writing rules
+* [PROJECT_STRUCTURE.md](./docs/standards/PROJECT_STRUCTURE.md): repository folder organization and structural rules
+* [GITHUB_STANDARDS.md](./docs/standards/GITHUB_STANDARDS.md): issue, PR, review, and template governance
+* [RELEASE_AND_SYNC.md](./docs/standards/RELEASE_AND_SYNC.md): release tagging and downstream sync model
+* [SOKU_LIFECYCLE.md](./docs/standards/SOKU_LIFECYCLE.md): normative CLI, manifest, ownership, provider, and transactional lifecycle contract for `soku`
+* [REAL_RUNTIME_MANUAL_CAPTURE.md](./docs/standards/REAL_RUNTIME_MANUAL_CAPTURE.md): local/manual real-frontend screenshot, provenance, adapter, and map-provider boundaries
+* [CICD_STANDARDS.md](./docs/standards/CICD_STANDARDS.md): continuous integration and delivery expectations
 
 ### 🛡️ `docs/policy/` — declared policy positions
 
-- [LICENSE_POLICY.md](./docs/policy/LICENSE_POLICY.md): how repositories should choose and declare licenses
-- [SECURITY_POLICY.md](./docs/policy/SECURITY_POLICY.md): baseline security expectations for source, secrets, and delivery
-- [CLOUD_POLICY.md](./docs/policy/CLOUD_POLICY.md): practical cloud-provider decision rules for GCP, AWS, and Azure
+* [LICENSE_POLICY.md](./docs/policy/LICENSE_POLICY.md): how repositories should choose and declare licenses
+* [SECURITY_POLICY.md](./docs/policy/SECURITY_POLICY.md): baseline security expectations for source, secrets, and delivery
+* [CLOUD_POLICY.md](./docs/policy/CLOUD_POLICY.md): practical cloud-provider decision rules for GCP, AWS, and Azure
 
 ### 🧭 `docs/guides/` — reference material and walkthroughs
 
-- [USAGE_MANUAL.md](./docs/guides/USAGE_MANUAL.md): the human start page from adoption level and verified installation through governance, optional GCP dev delivery, and upgrades
-- [STACK_EXAMPLES.md](./docs/guides/STACK_EXAMPLES.md): practical examples across common languages, frameworks, databases, and cloud workflows
-- [STACK_CONFIGS.md](./docs/guides/STACK_CONFIGS.md): copyable starter configuration sets by stack
-- [README_GUIDE.md](./docs/guides/README_GUIDE.md): how repository README files should be written and maintained
-- [INIT_GUIDE.md](./docs/guides/INIT_GUIDE.md): stack-detection and setup checklist for AI agents bootstrapping a downstream repository
-- [CLOUD_RUN_CICD.md](./docs/guides/CLOUD_RUN_CICD.md): local parity and Cloud Run CD pipeline guide (OIDC/WIF, plan/deploy, rollback, evidence)
-- [GITHUB_PROJECT_SYNC.md](./docs/guides/GITHUB_PROJECT_SYNC.md): guarded Issue, pull request, and user-owned Project #2 metadata synchronization
-- [APPLICABILITY.md](./docs/guides/APPLICABILITY.md): which parts of this boilerplate apply to personal projects vs. teams
-- [LANGUAGE_SELECTION.md](./docs/guides/LANGUAGE_SELECTION.md): how to choose a programming language for a new project or feature
+* [USAGE_MANUAL.md](./docs/guides/USAGE_MANUAL.md): the human start page from adoption level and verified installation through governance, optional GCP dev delivery, and upgrades
+* [STACK_EXAMPLES.md](./docs/guides/STACK_EXAMPLES.md): practical examples across common languages, frameworks, databases, and cloud workflows
+* [STACK_CONFIGS.md](./docs/guides/STACK_CONFIGS.md): copyable starter configuration sets by stack
+* [README_GUIDE.md](./docs/guides/README_GUIDE.md): how repository README files should be written and maintained
+* [INIT_GUIDE.md](./docs/guides/INIT_GUIDE.md): stack-detection and setup checklist for AI agents bootstrapping a downstream repository
+* [CLOUD_RUN_CICD.md](./docs/guides/CLOUD_RUN_CICD.md): local parity and Cloud Run CD pipeline guide (OIDC/WIF, plan/deploy, rollback, evidence)
+* [GITHUB_PROJECT_SYNC.md](./docs/guides/GITHUB_PROJECT_SYNC.md): guarded Issue, pull request, and user-owned Project #2 metadata synchronization
+* [APPLICABILITY.md](./docs/guides/APPLICABILITY.md): which parts of this boilerplate apply to personal projects vs. teams
+* [LANGUAGE_SELECTION.md](./docs/guides/LANGUAGE_SELECTION.md): how to choose a programming language for a new project or feature
 
 ### 📝 `docs/issues/` — task report artifacts
 
-- [TASK_REPORT_TEMPLATE.md](./docs/issues/TASK_REPORT_TEMPLATE.md): template for a written, approved plan before implementation starts
+* [TASK_REPORT_TEMPLATE.md](./docs/issues/TASK_REPORT_TEMPLATE.md): template for a written, approved plan before implementation starts
 
 ## 🧱 Starter Stack Coverage
 
 This boilerplate is prepared to grow into a multi-stack standard base.  
 Example guidance is included for:
 
-- `JavaScript`
-- `TypeScript`
-- `Node.js`
-- `Python`
-- `Go`
-- `Java`
-- `Spring`
-- `MySQL`
-- `PostgreSQL`
-- `gcloud`
-- `AWS`
-- `Azure`
+* `JavaScript`
+* `TypeScript`
+* `Node.js`
+* `Python`
+* `Go`
+* `Java`
+* `Spring`
+* `MySQL`
+* `PostgreSQL`
+* `gcloud`
+* `AWS`
+* `Azure`
 
 ## 🛠️ Configuration Sets
 
