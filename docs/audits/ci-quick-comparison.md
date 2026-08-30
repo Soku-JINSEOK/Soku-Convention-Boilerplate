@@ -15,7 +15,8 @@ weakening the existing required checks during observation.
   [#199](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/pull/199)
 - **Activation commit:** `44a4106cab9e51f1568665e27d022a4d293e89c2`
 - **Activation time:** `2026-08-08T02:16:45Z`
-- **Earliest time-based completion:** `2026-08-22T02:16:45Z`
+- **14-day elapsed criterion:** satisfied on `2026-08-22T02:16:45Z` (confirmed
+  `2026-08-30`)
 - **Minimum sample:** 10 merged code pull requests after activation
 
 The sharded window that began at `2026-07-26T14:13:58Z` and the restarted
@@ -113,9 +114,9 @@ required minimum of 40% for the current small sample.
 The per-sample median runner-second reduction is **55.6%**. It is descriptive
 only and is not the acceptance metric.
 
-The earliest time-based completion remains **2026-08-22T02:16:45Z**. Detector
-and planner fixtures, the 14-day observation period, and the remaining natural
-samples are still required.
+The 14-day elapsed criterion was satisfied on **2026-08-22T02:16:45Z** and is
+no longer a pending time gate as of `2026-08-30`. Detector and planner
+fixtures and the remaining natural samples are still required.
 
 ## Decision
 

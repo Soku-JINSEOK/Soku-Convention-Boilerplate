@@ -79,8 +79,9 @@ removed.
 The recovery merged in
 [#199](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/pull/199)
 as commit `44a4106cab9e51f1568665e27d022a4d293e89c2` at
-`2026-08-08T02:16:45Z`. That merge starts the new measurement epoch, with the
-earliest time-based completion at `2026-08-22T02:16:45Z`. The recovery pull
+`2026-08-08T02:16:45Z`. That merge starts the new measurement epoch. The
+14-day elapsed criterion was satisfied on `2026-08-22T02:16:45Z` and is no
+longer a pending time gate as of `2026-08-30`. The recovery pull
 request and its separate activation-record pull request are excluded from the
 sample.
 
@@ -100,8 +101,9 @@ runner-second reduction is **55.6%** and is descriptive only, not the acceptance
 metric.
 
 This documentation reconciliation does not change Quick or Full behavior and
-is excluded from the natural-sample counter. The remaining natural samples,
-14-day observation period, and fixture checks remain mandatory before #117.
+is excluded from the natural-sample counter. The remaining natural samples and
+fixture checks remain mandatory before #117; the 14-day elapsed criterion is
+already satisfied.
 
 ## Verification
 
