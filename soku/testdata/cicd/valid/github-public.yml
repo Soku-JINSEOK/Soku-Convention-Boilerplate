@@ -1,0 +1,16 @@
+schema_version: 1
+mode: ci-only
+source_host: github.com
+workload: library
+artifact: package
+required_os:
+  - linux
+network_scope: public
+cloud_authority: none
+operations_owner: absent
+capabilities: []
+verification:
+  pr: ci-quick
+  full: full
+delivery:
+  enabled: false
