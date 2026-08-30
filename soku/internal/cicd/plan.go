@@ -51,11 +51,11 @@ func BuildPlan(root, configPath string) (Plan, error) {
 		Verification: VerificationPlan{
 			PR: ProfileInvocation{
 				Profile: decision.Verification.PR,
-				Argv:    []string{"scripts/verify.sh", "--profile", "ci-quick", "--group", "<group-id>", "--base", "<base-sha>", "--head", "<head-sha>"},
+				Argv:    fixedPRArgv(),
 			},
 			Full: ProfileInvocation{
 				Profile: decision.Verification.Full,
-				Argv:    []string{"scripts/verify.sh", "--profile", "full"},
+				Argv:    fixedFullArgv(),
 			},
 		},
 		AdapterResolution: AdapterResolution{
@@ -72,7 +72,17 @@ func BuildPlan(root, configPath string) (Plan, error) {
 			Reason: "requirements do not match an approved validation mapping",
 		}
 	} else {
-		plan.Reasons = append(plan.Reasons, "selected platform has no trusted adapter mapping in this release")
+		resolution, installable, resolutionErr := resolveAdapter(root, choice.platform, decision)
+		if resolutionErr != nil {
+			return Plan{}, resolutionErr
+		}
+		plan.AdapterResolution = resolution
+		plan.Installability = installable
+		if installable {
+			plan.Reasons = append(plan.Reasons, "selected platform is bound to a trusted validation-only adapter mapping")
+		} else {
+			plan.Reasons = append(plan.Reasons, resolution.Reason)
+		}
 	}
 	sort.Strings(plan.Reasons)
 	sort.Strings(plan.MissingInputs)
@@ -229,13 +239,18 @@ func readRepositoryIdentity(root string, configData []byte) (RepositoryIdentity,
 	if err != nil {
 		return RepositoryIdentity{}, invalid("ci-cd.repository.invalid", "core catalog is unavailable")
 	}
+	adapterCatalog, err := os.ReadFile(filepath.Join(absoluteRoot, filepath.FromSlash(AdapterCatalogFile)))
+	if err != nil {
+		return RepositoryIdentity{}, invalid("ci-cd.repository.invalid", "adapter mapping catalog is unavailable")
+	}
 	return RepositoryIdentity{
-		RemoteHost:    host,
-		HeadSHA:       head,
-		TreeSHA:       tree,
-		ConfigSHA256:  sha256Hex(configData),
-		ProfileSHA256: sha256Hex(profile),
-		CatalogSHA256: sha256Hex(catalog),
+		RemoteHost:           host,
+		HeadSHA:              head,
+		TreeSHA:              tree,
+		ConfigSHA256:         sha256Hex(configData),
+		ProfileSHA256:        sha256Hex(profile),
+		CatalogSHA256:        sha256Hex(catalog),
+		AdapterCatalogSHA256: sha256Hex(adapterCatalog),
 	}, nil
 }
 
@@ -276,8 +291,8 @@ func HumanPlan(plan Plan) string {
 		plan.SchemaVersion, plan.Platform, plan.Installability, plan.Mode)
 	fmt.Fprintf(&builder, "Repository host: %s\nHEAD: %s\nTree: %s\n",
 		plan.Repository.RemoteHost, plan.Repository.HeadSHA, plan.Repository.TreeSHA)
-	fmt.Fprintf(&builder, "Config SHA-256: %s\nProfile SHA-256: %s\nCatalog SHA-256: %s\n",
-		plan.Repository.ConfigSHA256, plan.Repository.ProfileSHA256, plan.Repository.CatalogSHA256)
+	fmt.Fprintf(&builder, "Config SHA-256: %s\nProfile SHA-256: %s\nCatalog SHA-256: %s\nAdapter catalog SHA-256: %s\n",
+		plan.Repository.ConfigSHA256, plan.Repository.ProfileSHA256, plan.Repository.CatalogSHA256, plan.Repository.AdapterCatalogSHA256)
 	fmt.Fprintf(&builder, "PR profile: %s (%s)\nFull profile: %s (%s)\n",
 		plan.Verification.PR.Profile, strings.Join(plan.Verification.PR.Argv, " "),
 		plan.Verification.Full.Profile, strings.Join(plan.Verification.Full.Argv, " "))

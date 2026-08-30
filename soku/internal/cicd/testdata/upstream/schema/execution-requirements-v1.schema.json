@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/control-plane/execution-requirements-v1.schema.json",
+  "title": "execution-requirements-v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "pipeline_template_id", "profile_id", "source_sha", "contract_sha256", "platform", "network", "capabilities", "commands", "artifacts"],
+  "properties": {
+    "schema_version": {"const": "execution-requirements-v1"},
+    "pipeline_template_id": {"type": "string", "pattern": "^[a-z][a-z0-9-]{2,63}$"},
+    "profile_id": {"type": "string", "pattern": "^[a-z][a-z0-9-]{2,63}$"},
+    "source_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "contract_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "platform": {
+      "type": "object", "additionalProperties": false,
+      "required": ["os", "architecture", "shell"],
+      "properties": {
+        "os": {"enum": ["linux", "darwin", "windows"]},
+        "architecture": {"enum": ["amd64", "arm64"]},
+        "shell": {"const": "none"}
+      }
+    },
+    "network": {"enum": ["none", "public", "gcp-private", "on-premises"]},
+    "capabilities": {"type": "array", "items": {"type": "string", "pattern": "^[a-z][a-z0-9-]{1,63}$"}, "uniqueItems": true},
+    "commands": {
+      "type": "array", "minItems": 1,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["id", "argv", "cwd", "timeout_seconds"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^[a-z][a-z0-9-]{2,63}$"},
+          "argv": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+          "cwd": {"type": "string", "minLength": 1},
+          "timeout_seconds": {"type": "integer", "minimum": 1, "maximum": 86400}
+        }
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["id", "path", "sha256"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^[a-z][a-z0-9-]{2,63}$"},
+          "path": {"type": "string", "minLength": 1},
+          "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+        }
+      }
+    }
+  }
+}

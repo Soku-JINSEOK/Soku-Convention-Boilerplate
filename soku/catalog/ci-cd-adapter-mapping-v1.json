@@ -1,0 +1,100 @@
+{
+  "schema_version": "ci-cd-adapter-mapping-v1",
+  "engine": {
+    "source": "github:Soku-JINSEOK/ci-cd-control-plane-engine",
+    "ref": "56c89877446817112819cc43a77d027d4bedb292",
+    "files": [
+      {"path": "execution/adapters/gcp-cloud-build-v1.synthetic.json", "sha256": "beff940bc5eb93d7e69cdd7a4801003e3cda3dd1b8c9b9a636a6e22efd2be1fb", "implementation_sha256": "15e2b0d3c33891ebb115c06ea0e24e8db76162125a0188686ee864fe068c6a4e"},
+      {"path": "execution/adapters/jenkins-hybrid-v1.synthetic.json", "sha256": "1be9ac0467098a25cfcabf7c3cf9d8db2c54c333da58901e604d7a9e3ea00eca", "implementation_sha256": "33b82051ca56d41f3ce885264880101a079893acef4367334d0cbad221f93423"},
+      {"path": "execution/adapters/local-reference-v1.json", "sha256": "5d5e6cfadc8d0bb2d31686f4ad9954e320a2012b6eaa71b6c729149a8d5f4a54", "implementation_sha256": "25a0a928b72e6286bca1fe6b8811b2037475e6711fb7b84aaa92bee5e6dea8a7"},
+      {"path": "execution/fixtures/portable-local-success.json", "sha256": "adf82c61c074cd927ad7e274e2741fa766d7d613df601ae74a8c2b2824d038ac"},
+      {"path": "execution/fixtures/portable-reviewed-contract.json", "sha256": "c9ee836f5c1f4046772df78c263d913abfaa53e3156e43faade92ced86f1c35a"},
+      {"path": "execution/schema/adapter-descriptor-v1.schema.json", "sha256": "6c0dd7ea93fa029a00a45a7b34b3ebc355643c888f262d82963fd352cf080345"},
+      {"path": "execution/schema/execution-requirements-v1.schema.json", "sha256": "e355c414d72e9f0b2092f6a12a5a42960933f180cf80ea190f89e18d475c2e4f"},
+      {"path": "execution/schema/normalized-evidence-v1.schema.json", "sha256": "e514a42bb17418a0fc8f9bec882006d9e80664d162e2cb0611b12bdb707c3d57"}
+    ]
+  },
+  "mappings": [
+    {
+      "mapping_id": "ci-only-gcp-managed-v1",
+      "platform": "gcp-managed",
+      "adapter_id": "gcp-managed-validation-v1",
+      "adapter_ref": "56c89877446817112819cc43a77d027d4bedb292",
+      "engine_adapter_id": "gcp-cloud-build-v1",
+      "engine_descriptor_path": "execution/adapters/gcp-cloud-build-v1.synthetic.json",
+      "engine_descriptor_sha256": "beff940bc5eb93d7e69cdd7a4801003e3cda3dd1b8c9b9a636a6e22efd2be1fb",
+      "implementation_sha256": "15e2b0d3c33891ebb115c06ea0e24e8db76162125a0188686ee864fe068c6a4e",
+      "renderer_id": "gcp-managed-validation-v1",
+      "renderer_template": "gcp-managed-validation-v1.yaml",
+      "renderer_sha256": "709032cfd6f6be70b5b77bacd66f22b92a887e1e7dd688647e687e4a46bbf8ee",
+      "verification": {
+        "pr": "ci-quick",
+        "pr_argv": ["scripts/verify.sh", "--profile", "ci-quick", "--group", "<group-id>", "--base", "<base-sha>", "--head", "<head-sha>"],
+        "full": "full",
+        "full_argv": ["scripts/verify.sh", "--profile", "full"]
+      },
+      "runner": {
+        "os": ["linux"],
+        "architectures": ["amd64"],
+        "capabilities": ["container", "process-execution"],
+        "networks": ["gcp-private", "public"]
+      },
+      "delivery_authority": "none",
+      "output_path": "cloudbuild/soku-ci-validation.yaml"
+    },
+    {
+      "mapping_id": "ci-only-github-hosted-v1",
+      "platform": "github-hosted",
+      "adapter_id": "github-hosted-validation-v1",
+      "adapter_ref": "56c89877446817112819cc43a77d027d4bedb292",
+      "engine_adapter_id": "jenkins-hybrid-v1",
+      "engine_descriptor_path": "execution/adapters/jenkins-hybrid-v1.synthetic.json",
+      "engine_descriptor_sha256": "1be9ac0467098a25cfcabf7c3cf9d8db2c54c333da58901e604d7a9e3ea00eca",
+      "implementation_sha256": "33b82051ca56d41f3ce885264880101a079893acef4367334d0cbad221f93423",
+      "renderer_id": "github-hosted-validation-v1",
+      "renderer_template": "github-hosted-validation-v1.yml",
+      "renderer_sha256": "4f0a647943f0bb2b4ba37655d587562613e1121f65f07ec0412be388360b0a1a",
+      "verification": {
+        "pr": "ci-quick",
+        "pr_argv": ["scripts/verify.sh", "--profile", "ci-quick", "--group", "<group-id>", "--base", "<base-sha>", "--head", "<head-sha>"],
+        "full": "full",
+        "full_argv": ["scripts/verify.sh", "--profile", "full"]
+      },
+      "runner": {
+        "os": ["linux"],
+        "architectures": ["amd64"],
+        "capabilities": ["process-execution"],
+        "networks": ["none", "public"]
+      },
+      "delivery_authority": "none",
+      "output_path": ".github/workflows/soku-ci.yml"
+    },
+    {
+      "mapping_id": "ci-only-github-self-hosted-v1",
+      "platform": "github-self-hosted",
+      "adapter_id": "github-self-hosted-validation-v1",
+      "adapter_ref": "56c89877446817112819cc43a77d027d4bedb292",
+      "engine_adapter_id": "jenkins-hybrid-v1",
+      "engine_descriptor_path": "execution/adapters/jenkins-hybrid-v1.synthetic.json",
+      "engine_descriptor_sha256": "1be9ac0467098a25cfcabf7c3cf9d8db2c54c333da58901e604d7a9e3ea00eca",
+      "implementation_sha256": "33b82051ca56d41f3ce885264880101a079893acef4367334d0cbad221f93423",
+      "renderer_id": "github-self-hosted-validation-v1",
+      "renderer_template": "github-self-hosted-validation-v1.yml",
+      "renderer_sha256": "a08e8f19dacc2ca9547eacf5fc7e0c9e44ce9908e9b0fb2ae6fe6d5ae5f1da82",
+      "verification": {
+        "pr": "ci-quick",
+        "pr_argv": ["scripts/verify.sh", "--profile", "ci-quick", "--group", "<group-id>", "--base", "<base-sha>", "--head", "<head-sha>"],
+        "full": "full",
+        "full_argv": ["scripts/verify.sh", "--profile", "full"]
+      },
+      "runner": {
+        "os": ["darwin", "linux", "windows"],
+        "architectures": ["amd64", "arm64"],
+        "capabilities": ["hardware", "native", "process-execution"],
+        "networks": ["private-vpc", "public"]
+      },
+      "delivery_authority": "none",
+      "output_path": ".soku/ci-cd/github-self-hosted-validation.yml"
+    }
+  ]
+}
