@@ -121,8 +121,13 @@ does not inspect or change Cloud, IAM, credentials, runners, or repository
 settings. The catalog binds exactly `github-hosted`, `gcp-managed`, and
 `github-self-hosted` to fixed `ci-quick`/`full` argv and immutable provenance;
 it does not create triggers, IAM bindings, resources, or delivery authority.
-`soku ci-cd init` accepts exactly one of `--dry-run` or `--yes`, but returns a
-safety refusal until the transactional installer is published.
+`soku ci-cd init` accepts exactly one of `--dry-run` or `--yes` and requires an
+existing initialized `.soku/manifest.json`. It recomputes the plan and trusted
+renderer immediately before an explicit `--yes` write, records the component
+and managed caller through the existing manifest-last transaction, and refuses
+unpublished mappings, collisions, stale state, or incomplete recovery state.
+The generated caller is validation-only; no Cloud, IAM, credential, runner,
+delivery, publication, or repository-setting mutation is performed.
 
 ## Profiles
 

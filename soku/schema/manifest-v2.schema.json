@@ -87,7 +87,7 @@
       "additionalProperties": false,
       "required": ["path", "owner", "class", "lifecycle_state"],
       "properties": {
-        "path": { "$ref": "#/$defs/path" },
+        "path": { "$ref": "#/$defs/managed_path" },
         "owner": { "type": "string", "minLength": 1 },
         "class": {
           "enum": ["core-managed", "provider-managed", "mergeable", "project-owned"]
@@ -164,9 +164,25 @@
           "minLength": 1
         },
         "configuration_path": {
-          "$ref": "#/$defs/path"
+          "$ref": "#/$defs/component_path"
         }
       }
+    },
+    "managed_path": {
+      "anyOf": [
+        { "$ref": "#/$defs/path" },
+        { "$ref": "#/$defs/ci_cd_path" }
+      ]
+    },
+    "component_path": {
+      "anyOf": [
+        { "$ref": "#/$defs/path" },
+        { "const": ".soku/ci-cd-decision.yml" }
+      ]
+    },
+    "ci_cd_path": {
+      "type": "string",
+      "pattern": "^\\.soku/ci-cd/[A-Za-z0-9._-]+(?:/[A-Za-z0-9._-]+)*$"
     }
   }
 }

@@ -133,12 +133,26 @@ func cicdPlanHandler() Handler {
 }
 
 func cicdInitHandler() Handler {
-	return HandlerFunc(func(_ context.Context, _ Request) error {
-		return &ExitError{
-			Code:    ExitSafetyRefusal,
-			Key:     "ci-cd.init.unavailable",
-			Message: "soku ci-cd init is not available in this release",
+	return ResultHandlerFunc(func(_ context.Context, request Request) (Result, error) {
+		root, err := os.Getwd()
+		if err != nil {
+			return Result{}, err
 		}
+		report, err := cicd.Init(cicd.InitOptions{
+			Root: root, ConfigPath: request.ConfigPath, DryRun: request.DryRun, Yes: request.Yes,
+			SokuVersion: request.SokuVersion,
+		})
+		if err != nil {
+			var initError *cicd.InitError
+			if errors.As(err, &initError) {
+				return Result{}, &ExitError{
+					Code: ExitCode(initError.ExitCode), Key: initError.Code, Message: initError.Message,
+					Cause: initError, Data: initError.Data,
+				}
+			}
+			return Result{}, err
+		}
+		return Result{Human: cicd.HumanInit(report), Data: report, Code: ExitSuccess}, nil
 	})
 }
 
