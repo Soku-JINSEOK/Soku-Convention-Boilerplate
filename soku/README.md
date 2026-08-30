@@ -105,6 +105,22 @@ The supported stack IDs are `javascript-typescript-node`, `python`, `go`,
 `--stack` to select more than one; an explicit list replaces detection. Go requires `--module-path`, Java requires
 `--java-group`, and Java/GCP service output accepts `--service-name`.
 
+## CI/CD Decision Planning
+
+The CI/CD decision layer is read-only until its reviewed adapter mappings are
+available:
+
+```bash
+soku ci-cd plan --config .soku/ci-cd-decision.yml --json
+```
+
+The strict `ci-cd-decision-v1` input binds CI-only verification to the fixed
+`ci-quick` and `full` profiles and requires `delivery.enabled: false`. Planning
+records only the Git remote host, immutable HEAD/tree, and content hashes; it
+does not inspect or change Cloud, IAM, credentials, runners, or repository
+settings. `soku ci-cd init` accepts exactly one of `--dry-run` or `--yes`, but
+returns a safety refusal while no reviewed mapping is published.
+
 ## Profiles
 
 Catalog v2 composes three built-in profiles in one fixed order:

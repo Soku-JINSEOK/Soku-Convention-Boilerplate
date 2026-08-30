@@ -19,6 +19,7 @@ Usage:
 
 Commands:
   init        Initialize managed convention state
+  ci-cd       Plan and install validation-only CI/CD mappings
   status      Inspect lifecycle state without changes
   diff        Compare current and desired managed state
   upgrade     Upgrade managed convention state
@@ -139,6 +140,7 @@ func newRootCommand(deps dependencies, out *output) *cobra.Command {
 
 	root.AddCommand(
 		newLifecycleCommand("init", true, &opts, deps, out, deps.handlers.Init),
+		newCICDCommand(&opts, deps, out),
 		newLifecycleCommand("status", false, &opts, deps, out, deps.handlers.Status),
 		newLifecycleCommand("diff", false, &opts, deps, out, deps.handlers.Diff),
 		newLifecycleCommand("upgrade", true, &opts, deps, out, deps.handlers.Upgrade),
@@ -155,6 +157,87 @@ func newRootCommand(deps dependencies, out *output) *cobra.Command {
 		return nil
 	}
 	return root
+}
+
+func newCICDCommand(opts *options, deps dependencies, out *output) *cobra.Command {
+	var ciCD *cobra.Command
+	ciCD = &cobra.Command{
+		Use:   "ci-cd",
+		Short: "Plan and install validation-only CI/CD mappings",
+		Args: func(_ *cobra.Command, args []string) error {
+			if len(args) > 0 {
+				return invocationError("ci-cd does not accept arguments")
+			}
+			return nil
+		},
+		RunE: func(*cobra.Command, []string) error {
+			return out.help("ci-cd", helpFor(ciCD))
+		},
+	}
+	ciCD.AddCommand(
+		newCICDLeaf("plan", false, opts, deps, out, deps.handlers.CICDPlan),
+		newCICDLeaf("init", true, opts, deps, out, deps.handlers.CICDInit),
+	)
+	ciCD.InitDefaultHelpFlag()
+	ciCD.Flags().Lookup("help").Shorthand = ""
+	return ciCD
+}
+
+func newCICDLeaf(name string, mutation bool, opts *options, deps dependencies, out *output, handler Handler) *cobra.Command {
+	var dryRun, yes bool
+	var command *cobra.Command
+	command = &cobra.Command{
+		Use:   name,
+		Short: cicdDescription(name),
+		Args: func(_ *cobra.Command, args []string) error {
+			if len(args) > 0 {
+				return invocationError("ci-cd %s does not accept arguments", name)
+			}
+			return nil
+		},
+		RunE: func(_ *cobra.Command, _ []string) error {
+			if opts.version {
+				return out.version(deps.metadata)
+			}
+			if opts.configPath == "" {
+				return invocationError("--config is required")
+			}
+			if err := validateConfig(deps.runtime, opts.configPath); err != nil {
+				return err
+			}
+			if mutation && (dryRun == yes) {
+				return invocationError("soku ci-cd init requires exactly one of --dry-run or --yes")
+			}
+			if mutation && !dryRun && !yes {
+				return invocationError("soku ci-cd init requires exactly one of --dry-run or --yes")
+			}
+			terminal := deps.runtime.IsTerminal()
+			request := Request{
+				Command: "ci-cd " + name, ConfigPath: opts.configPath, JSON: out.json,
+				Quiet: opts.quiet, NonInteractive: opts.nonInteractive || !terminal,
+				DryRun: dryRun, Yes: yes, Interactive: !opts.nonInteractive && terminal,
+				Input: deps.stdin, PromptOutput: deps.stderr, SokuVersion: deps.metadata.Version,
+			}
+			result, err := invokeHandler(command.Context(), handler, request)
+			if err != nil {
+				return err
+			}
+			if err := out.result(request.Command, result, opts.quiet); err != nil {
+				return err
+			}
+			if result.Code != ExitSuccess {
+				return &resultExit{Code: result.Code}
+			}
+			return nil
+		},
+	}
+	if mutation {
+		command.Flags().BoolVar(&dryRun, "dry-run", false, "plan CI/CD installation without writing")
+		command.Flags().BoolVar(&yes, "yes", false, "approve the validated CI/CD installation")
+	}
+	command.InitDefaultHelpFlag()
+	command.Flags().Lookup("help").Shorthand = ""
+	return command
 }
 
 type singleStringValue struct {
@@ -611,6 +694,9 @@ func commandFromArgs(args []string) string {
 	if len(positionals) >= 2 && positionals[0] == "docs" {
 		return strings.Join(positionals[:2], " ")
 	}
+	if len(positionals) >= 2 && positionals[0] == "ci-cd" {
+		return strings.Join(positionals[:2], " ")
+	}
 	if len(positionals) >= 2 && positionals[0] == "ownership" {
 		return strings.Join(positionals[:2], " ")
 	}
@@ -658,6 +744,17 @@ func manualDescription(name string) string {
 	}
 }
 
+func cicdDescription(name string) string {
+	switch name {
+	case "plan":
+		return "Render a deterministic validation-only CI/CD plan"
+	case "init":
+		return "Install the validated CI/CD mapping transactionally"
+	default:
+		return "Manage validation-only CI/CD mappings"
+	}
+}
+
 func helpFor(command *cobra.Command) string {
 	if command == nil || command.Name() == "soku" {
 		return rootHelp
@@ -665,6 +762,21 @@ func helpFor(command *cobra.Command) string {
 	fullName := commandName(command)
 	if fullName == "docs" {
 		return "Manage opt-in documentation components.\n\nUsage:\n  soku docs manual <command> [flags]\n"
+	}
+	if fullName == "ci-cd" {
+		return "Plan and install validation-only CI/CD mappings.\n\nUsage:\n  soku ci-cd <plan|init> [flags]\n"
+	}
+	if strings.HasPrefix(fullName, "ci-cd ") {
+		flags := "      --config string       explicit portable YAML decision configuration\n" +
+			"      --help                help for " + fullName + "\n" +
+			"      --json                emit one machine-readable JSON envelope\n" +
+			"      --non-interactive     forbid interactive prompts\n" +
+			"      --quiet               suppress non-essential human output\n"
+		if command.Name() == "init" {
+			flags += "      --dry-run            plan CI/CD installation without writing\n" +
+				"      --yes                approve the validated CI/CD installation\n"
+		}
+		return fmt.Sprintf("%s.\n\nUsage:\n  soku ci-cd %s [flags]\n\nFlags:\n%s", cicdDescription(command.Name()), command.Name(), flags)
 	}
 	if fullName == "docs manual" {
 		return "Plan, diagnose, or install real-runtime manual capture.\n\nUsage:\n  soku docs manual <plan|doctor|init> [flags]\n"
