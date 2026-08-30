@@ -87,23 +87,37 @@ sample.
 
 The current epoch now contains three qualifying natural code pull requests:
 [#202](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/pull/202),
-[#203](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/pull/203),
-and [#204](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/pull/204).
-Their exact-head Validation evidence is recorded in
+[#212](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/pull/212),
+and [#215](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/pull/215).
+Their exact heads, Validation runs, and Jobs API measurements are recorded in
 [`docs/audits/ci-quick-comparison.md`](../audits/ci-quick-comparison.md).
-The authoritative count is **3/10**; there are no observed Quick-pass /
-Full-fail misses or unresolved flakes. The current median Quick/Full critical
-duration ratio is **67.6%**, which does not meet the required maximum of 50%,
-while aggregate runner-seconds are **987 seconds for Quick** and **2,149
-seconds for Full**. The resulting aggregate reduction is **54.1%**, which meets
-the required minimum of 40% for this small sample. The per-sample median
-runner-second reduction is **55.6%** and is descriptive only, not the acceptance
-metric.
+The authoritative count is **3/10**; no Quick-pass / Full-fail miss or
+unresolved flaky outcome was observed among the qualifying sample. The current
+median Quick/Full critical-duration ratio is **48.2%**, which meets the
+required maximum of 50%. Aggregate runner-seconds are **766 seconds for Quick**
+and **2,091 seconds for Full**, for an aggregate reduction of **63.4%**, which
+meets the required minimum of 40% for this small sample. The per-sample median
+runner-second reduction is **63.8%** and is descriptive only, not the
+acceptance metric.
+
+PRs [#203](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/pull/203)
+and [#204](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/pull/204)
+are documentation-only metadata records, #206 is documentation-only, and #210
+is synthetic provider-shadow work; none enters the natural denominator. PR #211
+changes metadata-event concurrency while preserving the code-bearing Quick /
+Full contract, so it is not a sample and does not reset this observation
+epoch. PR [#214](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/pull/214)
+is retained as non-success evidence rather than counted: its Windows Full job
+failed on the vendored GCP synthetic descriptor hash check
+([job 99220710289](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/actions/runs/33297941835/job/99220710289)).
+PR #215 added the repository byte-normalizing `.gitattributes` guard, but does
+not retroactively make #214 a qualifying pass. PR #200 is the activation record
+and remains excluded.
 
 This documentation reconciliation does not change Quick or Full behavior and
-is excluded from the natural-sample counter. The remaining natural samples and
-fixture checks remain mandatory before #117; the 14-day elapsed criterion is
-already satisfied.
+is excluded from the natural-sample counter. The remaining seven natural
+samples and fixture checks remain mandatory before #117; the 14-day elapsed
+criterion is already satisfied.
 
 ## Verification
 
