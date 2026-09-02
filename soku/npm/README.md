@@ -11,7 +11,7 @@ arguments.
 ## Install
 
 ```bash
-npm install -g @soku-jinseok/soku@0.2.0
+npm install -g @soku-jinseok/soku@0.2.1
 ```
 
 ## Usage

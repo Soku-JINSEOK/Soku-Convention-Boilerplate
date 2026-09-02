@@ -10,6 +10,7 @@ const requiredStaticFiles = [
   'README.ko.md',
   'README.ja.md',
   'soku/README.md',
+  'soku/npm/README.md',
   'soku/npm/package.json',
   '.github/workflows/release.yml',
   'docs/guides/USAGE_MANUAL.md',
@@ -208,6 +209,13 @@ export function verifyReleaseIdentity(identity, files) {
   ]) {
     requireSnippet(files, 'soku/README.md', snippet, errors);
   }
+
+  requireSnippet(
+    files,
+    'soku/npm/README.md',
+    `npm install -g ${npm.package}@${npm.version}`,
+    errors,
+  );
 
   for (const snippet of [
     boilerplate.tag,
