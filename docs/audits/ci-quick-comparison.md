@@ -15,7 +15,8 @@ weakening the existing required checks during observation.
   [#199](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/pull/199)
 - **Activation commit:** `44a4106cab9e51f1568665e27d022a4d293e89c2`
 - **Activation time:** `2026-08-08T02:16:45Z`
-- **Earliest time-based completion:** `2026-08-22T02:16:45Z`
+- **14-day elapsed criterion:** satisfied on `2026-08-22T02:16:45Z` (confirmed
+  `2026-08-30`)
 - **Minimum sample:** 10 merged code pull requests after activation
 
 The sharded window that began at `2026-07-26T14:13:58Z` and the restarted
@@ -46,16 +47,18 @@ All of the following must hold for the complete sample:
 
 ## Measurement Method
 
-Use the GitHub Actions Jobs API for the final successful Validation run on each
-merged head commit.
+Use the GitHub Actions Jobs API for the final successful code-bearing
+Validation run on each qualifying merged head commit. Aggregate gate jobs are
+status guards and are not included in the arithmetic below.
 
-- Quick jobs are successful jobs named `Quick validation / ...` plus
-  `CI Quick Gate`.
-- Full jobs are successful jobs named `Full repository validation / ...`,
-  `Full runtime-template validation / ...`, or `Security validation / ...`,
-  plus `Validation Gate`.
-- Critical duration is the interval from the earliest selected job start to
-  the latest selected job completion.
+- Quick arithmetic uses successful scope-shard jobs named
+  `Quick validation / Quick / ...`.
+- Full arithmetic uses successful jobs named `Full repository validation / ...`
+  and `Full runtime-template validation / ...`. Trusted Security jobs are
+  required evidence for the run but are not included in the Full runner-second
+  denominator, matching the historical table.
+- Critical duration is the interval from the earliest selected scope job start
+  to the latest selected scope job completion.
 - Runner-seconds are the sum of selected job durations.
 - Critical ratio is Quick critical duration divided by Full critical duration.
 - Runner reduction is one minus Quick runner-seconds divided by Full
@@ -88,16 +91,58 @@ compared with 11,568 Full runner-seconds).
 
 ## Current Window Samples
 
-No qualifying natural samples exist for a current activation epoch.
+Three qualifying natural code pull requests have merged after the PR #199
+activation. The activation record, metadata-only records, synthetic shadow
+work, and non-successful validation heads remain excluded.
 
-Current qualifying sample count: **0**.
+| PR | Final head | Code-bearing Validation run | Quick critical | Full critical | Quick/Full | Quick runner-s | Full runner-s | Runner reduction |
+| -- | ---------- | --------------------------- | -------------: | ------------: | ---------: | -------------: | ------------: | ---------------: |
+| [#202](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/pull/202) | `0ce60b08edf028280410a4d9a28057220a18c72d` | [31240704823](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/actions/runs/31240704823) | 75 s | 111 s | 67.6% | 292 | 658 | 55.6% |
+| [#212](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/pull/212) | `8457099efd0ed794a8b330bab6c0d10a73a8319b` | [33296837364](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/actions/runs/33296837364) | 54 s | 112 s | 48.2% | 232 | 641 | 63.8% |
+| [#215](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/pull/215) | `1ba272823f37d681d79fb46b7c4896c0dd5b134c` | [33298989265](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/actions/runs/33298989265) | 81 s | 200 s | 40.5% | 242 | 792 | 69.4% |
 
-Current median critical-duration ratio: **Not available**.
+Each listed head passed its Quick, Full, trusted Security, and aggregate
+Validation jobs. No Quick-pass / Full-fail miss or unresolved flaky outcome was
+observed among the qualifying sample.
 
-Current aggregate runner reduction: **Not available**.
+PR [#214](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/pull/214)
+is not a qualifying sample: its code-bearing Validation run had a failed
+Windows Full job because the vendored GCP synthetic descriptor hash differed on
+the Windows checkout
+([job 99220710289](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/actions/runs/33297941835/job/99220710289)).
+It is retained as non-success evidence and is not represented as a pass or
+resolved by a rerun. PR #215 subsequently added the repository byte-normalizing
+`.gitattributes` guard, but that does not retroactively change #214's result.
+
+PRs [#203](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/pull/203)
+and [#204](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/pull/204)
+are metadata-only documentation records, #206 is documentation-only, #210 is
+synthetic provider-shadow work, and #211 changes only metadata-event
+concurrency while preserving the code-bearing Quick/Full contract. They are
+excluded from the natural denominator. PR #200 is the activation record and is
+also excluded.
+
+Current qualifying sample count: **3/10**.
+
+Current median critical-duration ratio: **48.2%** — this satisfies the required
+maximum of 50% for the current small sample.
+
+Current aggregate runner-second reduction: **63.4%** — 766 Quick
+runner-seconds compared with 2,091 Full runner-seconds. This satisfies the
+required minimum of 40% for the current small sample.
+
+The per-sample median runner-second reduction is **63.8%**. It is descriptive
+only and is not the acceptance metric.
+
+The 14-day elapsed criterion was satisfied on **2026-08-22T02:16:45Z** and is
+no longer a pending time gate as of `2026-08-30`. Detector and planner
+fixtures, zero unresolved flakes across the qualifying sample, and the remaining
+seven natural samples are still required.
 
 ## Decision
 
-**Observation active from the PR #199 recovery merge.** Issue #117 must not
-change required contexts until every criterion is supported by linked Actions
-evidence from this epoch.
+**Observation remains active from the PR #199 recovery merge.** Issue #117 must
+not change required contexts until every criterion is supported by linked
+Actions evidence from this epoch. This documentation-only reconciliation does
+not change Quick or Full behavior and is excluded from the natural-sample
+counter.
