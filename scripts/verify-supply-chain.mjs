@@ -36,6 +36,7 @@ export const REQUIRED_UPDATE_TARGETS = [
   ['gomod', '/soku'],
   ['gomod', '/templates/go'],
   ['npm', '/soku/npm'],
+  ['npm', '/soku/internal/manual/assets/runner'],
   ['npm', '/templates/javascript-typescript-node'],
   ['pip', '/templates/python'],
   ['maven', '/templates/java-spring'],
