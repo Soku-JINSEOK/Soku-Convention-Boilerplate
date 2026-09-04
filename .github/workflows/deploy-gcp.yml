@@ -18,6 +18,9 @@ on:
       rollback_revision:
         description: Optional revision for rollback
         required: false
+      source_run_id:
+        description: Successful canonical main Validation run containing the verified image manifest (required for deploy)
+        required: false
 
 permissions:
   contents: read
@@ -37,15 +40,56 @@ jobs:
 
   deploy:
     name: Deploy to Cloud Run
-    if: ${{ inputs.operation == 'deploy' }}
+    if: >-
+      inputs.operation == 'deploy' &&
+      github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
     permissions:
+      actions: read
       contents: read
       id-token: write
     steps:
-      - name: Checkout
+      - name: Require source Validation run
+        env:
+          SOURCE_RUN_ID: ${{ inputs.source_run_id }}
+        run: |
+          test -n "$SOURCE_RUN_ID"
+          [[ "$SOURCE_RUN_ID" =~ ^[0-9]+$ ]]
+
+      - name: Checkout trusted deployment verifier
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: refs/heads/main
+
+      - name: Fetch source run metadata
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_RUN_ID: ${{ inputs.source_run_id }}
+        run: |
+          mkdir -p "${{ github.workspace }}/.promotion"
+          gh api \
+            "repos/${GITHUB_REPOSITORY}/actions/runs/${SOURCE_RUN_ID}" \
+            > "${{ github.workspace }}/.promotion/run.json"
+
+      - name: Download verified image manifest
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: verified-cloud-run-image
+          path: ${{ github.workspace }}/.promotion/artifact
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ inputs.source_run_id }}
+
+      - name: Verify source run and immutable image
+        id: promotion
+        run: |
+          node scripts/verify-image-promotion.mjs \
+            --manifest "${{ github.workspace }}/.promotion/artifact/manifest.json" \
+            --run-json "${{ github.workspace }}/.promotion/run.json" \
+            --repository "${{ github.repository }}" \
+            --github-output "$GITHUB_OUTPUT"
+
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
         with:
@@ -53,14 +97,16 @@ jobs:
           service_account: ${{ vars.GCP_WIF_SERVICE_ACCOUNT }}
       - name: Set up Google Cloud SDK
         uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3.0.1
-      - name: Build, push, and resolve deployment plan
+      - name: Create digest-only deployment plan
         id: plan
         run: |
           scripts/cd-plan.sh --environment "${{ inputs.environment }}" \
             --project-id "${{ vars.GCP_PROJECT_ID }}" --region "${{ vars.GCP_REGION }}" \
             --service-name "${{ vars.GCP_SERVICE_NAME }}" \
             --artifact-repository "${{ vars.GCP_ARTIFACT_REPOSITORY }}" \
-            --output-dir "${{ github.workspace }}/.cd" --skip-local-checks --skip-infra --push-image
+            --image-uri "${{ steps.promotion.outputs.image_uri }}" \
+            --source-commit "${{ steps.promotion.outputs.source_sha }}" \
+            --output-dir "${{ github.workspace }}/.cd"
       - name: Deploy immutable image
         run: |
           scripts/cd-deploy.sh \
@@ -78,7 +124,9 @@ jobs:
 
   rollback:
     name: Roll back Cloud Run traffic
-    if: ${{ inputs.operation == 'rollback' }}
+    if: >-
+      inputs.operation == 'rollback' &&
+      github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
     permissions:
@@ -87,6 +135,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: refs/heads/main
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
         with:

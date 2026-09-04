@@ -99,82 +99,43 @@ function planArgs(output) {
   return [
     '--environment', 'dev', '--project-id', 'project', '--region', 'asia',
     '--service-name', 'service', '--artifact-repository', 'artifacts',
-    '--output-dir', output, '--skip-local-checks', '--skip-infra', '--push-image',
+    '--image-uri', `${repository}@${digest}`,
+    '--source-commit', '1234567890abcdef1234567890abcdef12345678',
+    '--output-dir', output,
   ];
 }
 
-test('pushed plans prefer Artifact Registry digest when available', () => {
-  const temp = mkdtempSync(join(tmpdir(), 'cd-plan-registry-'));
+test('deployment plans accept only a pre-verified digest and source commit', () => {
+  const temp = mkdtempSync(join(tmpdir(), 'cd-plan-digest-'));
   const bin = join(temp, 'bin');
   spawnSync('mkdir', ['-p', bin]);
-  executable(join(bin, 'gcloud'), `
-if [[ "$*" == *"artifacts docker images describe"* ]]; then
-  echo '${repository}@${digest}'
-else
-  :
-fi`);
-  executable(join(bin, 'docker'), `
-case "$1" in
-  build|push) exit 0 ;;
-  inspect)
-    if [[ "$*" == *"{{.Id}}"* ]]; then echo image-id; else :; fi ;;
-esac`);
+  const invoked = join(temp, 'invoked');
+  for (const command of ['gcloud', 'docker', 'terraform']) {
+    executable(join(bin, command), `echo ${command} >> '${invoked}'; exit 99`);
+  }
   const result = run('cd-plan.sh', planArgs(join(temp, 'out')), {
     PATH: `${bin}:${process.env.PATH}`,
-    GITHUB_SHA: '1234567890abcdef1234567890abcdef12345678',
   });
   assert.equal(result.status, 0, result.stderr);
   const plan = readFileSync(join(temp, 'out/dev/1234567890ab/cd-plan.env'), 'utf8');
   assert.match(plan, new RegExp(`CD_PLAN_IMAGE_URI=${repository}@${digest}`));
-  assert.match(plan, /CD_PLAN_IMAGE_TAG_URI=.*:1234567890ab/);
+  assert.match(plan, /CD_PLAN_COMMIT_SHA=1234567890abcdef1234567890abcdef12345678/);
+  assert.equal(spawnSync('test', ['!', '-e', invoked]).status, 0);
 });
 
-test('pushed plans fall back to RepoDigests when Registry digest unavailable', () => {
-  const temp = mkdtempSync(join(tmpdir(), 'cd-plan-fallback-'));
-  const bin = join(temp, 'bin');
-  spawnSync('mkdir', ['-p', bin]);
-  executable(join(bin, 'gcloud'), `
-if [[ "$*" == *"artifacts docker images describe"* ]]; then
-  :
-else
-  :
-fi`);
-  executable(join(bin, 'docker'), `
-case "$1" in
-  build|push) exit 0 ;;
-  inspect)
-    if [[ "$*" == *"{{.Id}}"* ]]; then echo image-id; else echo '${repository}@${digest}'; fi ;;
-esac`);
-  const result = run('cd-plan.sh', planArgs(join(temp, 'out')), {
-    PATH: `${bin}:${process.env.PATH}`,
-    GITHUB_SHA: '1234567890abcdef1234567890abcdef12345678',
-  });
-  assert.equal(result.status, 0, result.stderr);
-  const plan = readFileSync(join(temp, 'out/dev/1234567890ab/cd-plan.env'), 'utf8');
-  assert.match(plan, new RegExp(`CD_PLAN_IMAGE_URI=${repository}@${digest}`));
-  assert.match(plan, /CD_PLAN_IMAGE_TAG_URI=.*:1234567890ab/);
-});
-
-test('pushed plans fail when no digest can be resolved', () => {
-  const temp = mkdtempSync(join(tmpdir(), 'cd-plan-missing-'));
-  const bin = join(temp, 'bin');
-  spawnSync('mkdir', ['-p', bin]);
-  executable(join(bin, 'gcloud'), `
-if [[ "$*" == *"artifacts docker images describe"* ]]; then
-  :
-else
-  :
-fi`);
-  executable(join(bin, 'docker'), `
-case "$1" in
-  build|push) exit 0 ;;
-  inspect) if [[ "$*" == *"{{.Id}}"* ]]; then echo image-id; else :; fi ;;
-esac`);
-  const result = run('cd-plan.sh', planArgs(join(temp, 'out')), {
-    PATH: `${bin}:${process.env.PATH}`,
-    GITHUB_SHA: '1234567890abcdef1234567890abcdef12345678',
-  });
-  assert.equal(result.status, 11, result.stderr);
+test('deployment plans reject tags, foreign repositories, and abbreviated commits', () => {
+  const temp = mkdtempSync(join(tmpdir(), 'cd-plan-invalid-'));
+  const cases = [
+    ['--image-uri', `${repository}:latest`],
+    ['--image-uri', `asia-docker.pkg.dev/other/artifacts/service@${digest}`],
+    ['--source-commit', '1234567890ab'],
+  ];
+  for (const [option, value] of cases) {
+    const args = planArgs(join(temp, 'out'));
+    args[args.indexOf(option) + 1] = value;
+    const result = run('cd-plan.sh', args);
+    assert.equal(result.status, 2);
+  }
 });
 
 test('rollback-only planning does not invoke Docker or Terraform', () => {
@@ -446,6 +407,10 @@ if [[ "$*" == *"output -raw wif_provider_name"* ]]; then
   echo projects/123/locations/global/workloadIdentityPools/github-actions/providers/gha
 elif [[ "$*" == *"output -raw deployer_service_account_email"* ]]; then
   echo deployer@app-project-123.iam.gserviceaccount.com
+elif [[ "$*" == *"output -raw wif_ci_provider_name"* ]]; then
+  echo projects/123/locations/global/workloadIdentityPools/github-actions/providers/github-ci
+elif [[ "$*" == *"output -raw ci_builder_service_account_email"* ]]; then
+  echo ci-builder@app-project-123.iam.gserviceaccount.com
 fi`);
   executable(join(bin, 'gh'), `
 echo "gh $*" >> '${log}'
@@ -472,8 +437,47 @@ elif [[ "$*" == "api repos/owner/repository --jq .owner.id" ]]; then echo 7890; 
   for (const variable of [
     'GCP_PROJECT_ID', 'GCP_REGION', 'GCP_SERVICE_NAME',
     'GCP_ARTIFACT_REPOSITORY', 'GCP_WIF_PROVIDER', 'GCP_WIF_SERVICE_ACCOUNT',
+    'GCP_CI_WIF_PROVIDER', 'GCP_CI_WIF_SERVICE_ACCOUNT',
   ]) assert.match(commands, new RegExp(`gh variable set ${variable} `));
-  assert.equal((commands.match(/gh variable set/g) ?? []).length, 6);
+  assert.equal((commands.match(/gh variable set/g) ?? []).length, 8);
+});
+
+test('CI builder bootstrap applies identity only and sets two variables', () => {
+  const temp = mkdtempSync(join(tmpdir(), 'gcp-ci-builder-'));
+  const bin = join(temp, 'bin');
+  spawnSync('mkdir', ['-p', bin]);
+  const log = join(temp, 'commands.log');
+  executable(join(bin, 'gcloud'), `
+echo "gcloud $*" >> '${log}'
+if [[ "$*" == "storage buckets describe"* ]]; then exit 1; fi`);
+  executable(join(bin, 'terraform'), `
+echo "terraform $*" >> '${log}'
+if [[ "$*" == *"output -raw wif_ci_provider_name"* ]]; then
+  echo projects/123/locations/global/workloadIdentityPools/github-actions/providers/github-ci
+elif [[ "$*" == *"output -raw ci_builder_service_account_email"* ]]; then
+  echo ci-builder@app-project-123.iam.gserviceaccount.com
+fi`);
+  executable(join(bin, 'gh'), `
+echo "gh $*" >> '${log}'
+if [[ "$*" == "repo view"* ]]; then echo owner/repository;
+elif [[ "$*" == "api repos/owner/repository --jq .id" ]]; then echo 123456;
+elif [[ "$*" == "api repos/owner/repository --jq .owner.id" ]]; then echo 7890; fi`);
+
+  const result = run('gcp-bootstrap.sh', [
+    '--ci-builder-only', '--apply',
+    '--confirm-project-id', 'app-project-123',
+  ], {
+    PATH: `${bin}:${process.env.PATH}`,
+    GCP_PROJECT_ID: 'app-project-123',
+  });
+  assert.equal(result.status, 0, result.stderr);
+  const commands = readFileSync(log, 'utf8');
+  assert.match(commands, /google_service_account\.github_actions_ci_builder/);
+  assert.match(commands, /google_iam_workload_identity_pool_provider\.github_ci/);
+  assert.match(commands, /gh variable set GCP_CI_WIF_PROVIDER /);
+  assert.match(commands, /gh variable set GCP_CI_WIF_SERVICE_ACCOUNT /);
+  assert.equal((commands.match(/gh variable set/g) ?? []).length, 2);
+  assert.doesNotMatch(commands, /docker|run deploy|image_uri=/);
 });
 
 test('deployment workflow is manual and check cannot authenticate or deploy', () => {
@@ -483,6 +487,7 @@ test('deployment workflow is manual and check cannot authenticate or deploy', ()
     '7c6bc770dae815cd3e89ee6cdf493a5fab2cc093',
     'aa5489c8933f4cc7a4f7d45035b3b1440c9c10db',
     '043fb46d1a93c77aae656e7c1c64a875d1fc6a0a',
+    '3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c',
   ]) assert.match(workflow, new RegExp(sha));
   for (const action of workflow.matchAll(/^\s+uses:\s+([^\s#]+)/gm)) {
     assert.match(action[1], /@[0-9a-f]{40}$/, `action is not pinned: ${action[1]}`);
@@ -493,8 +498,29 @@ test('deployment workflow is manual and check cannot authenticate or deploy', ()
   assert.doesNotMatch(workflow, /options: \[dev, staging, prod\]/);
   const checkJob = workflow.match(/  check:\n([\s\S]*?)\n  deploy:/)?.[1] ?? '';
   assert.doesNotMatch(checkJob, /google-github-actions|gcloud auth|docker push|terraform plan|cd-deploy\.sh --/);
-  assert.match(workflow, /if: \$\{\{ inputs\.operation == 'deploy' \}\}/);
-  assert.match(workflow, /if: \$\{\{ inputs\.operation == 'rollback' \}\}/);
+  assert.match(
+    workflow,
+    /inputs\.operation == 'deploy' &&\n\s+github\.ref == 'refs\/heads\/main'/,
+  );
+  assert.match(
+    workflow,
+    /inputs\.operation == 'rollback' &&\n\s+github\.ref == 'refs\/heads\/main'/,
+  );
+  assert.equal(
+    (workflow.match(/ref: refs\/heads\/main/g) ?? []).length,
+    2,
+  );
+  assert.match(workflow, /source_run_id:/);
+  assert.match(workflow, /actions\/runs\/\$\{SOURCE_RUN_ID\}/);
+  assert.match(workflow, /name: verified-cloud-run-image/);
+  assert.match(workflow, /scripts\/verify-image-promotion\.mjs/);
+  assert.doesNotMatch(
+    workflow,
+    /ref: \$\{\{ steps\.promotion\.outputs\.source_sha \}\}/,
+  );
+  assert.match(workflow, /--image-uri "\$\{\{ steps\.promotion\.outputs\.image_uri \}\}"/);
+  assert.match(workflow, /--source-commit "\$\{\{ steps\.promotion\.outputs\.source_sha \}\}"/);
+  assert.doesNotMatch(workflow, /--push-image|--skip-local-checks|--skip-infra/);
   assert.equal((workflow.match(/--identity-service-account "\$\{\{ vars\.GCP_WIF_SERVICE_ACCOUNT \}\}"/g) ?? []).length, 2);
   assert.equal((workflow.match(/path: \$\{\{ github\.workspace \}\}\/deploy-evidence\/deploy-\*\.json/g) ?? []).length, 2);
   assert.equal((workflow.match(/if-no-files-found: error/g) ?? []).length, 2);
@@ -526,6 +552,18 @@ test('Terraform separates foundation from digest-pinned runtime', () => {
   assert.match(variables, /variable "github_repository_owner_id"/);
   assert.doesNotMatch(main, /allowed_audiences/);
   assert.equal((main.match(/display_name\s+= "github-\$\{substr\(var\.service_name, 0, 20\)\}"/g) ?? []).length, 2);
+  assert.match(main, /resource "google_service_account" "github_actions_ci_builder"/);
+  assert.match(main, /resource "google_artifact_registry_repository_iam_member" "ci_builder_repository_writer"/);
+  assert.match(main, /resource "google_iam_workload_identity_pool_provider" "github_ci"/);
+  assert.match(main, /\.github\/workflows\/validation\.yml@refs\/heads\/main/);
+  assert.doesNotMatch(
+    main,
+    /github_actions_ci_builder\.email}"[\s\S]{0,200}roles\/run\./,
+  );
+  assert.doesNotMatch(
+    main,
+    /github_actions_ci_builder\.email}"[\s\S]{0,200}roles\/secretmanager\./,
+  );
   assert.match(variables, /"run\.googleapis\.com"/);
   assert.doesNotMatch(variables, /"cloudrun\.googleapis\.com"/);
   assert.match(versions, /backend "gcs" \{\}/);
@@ -534,12 +572,22 @@ test('Terraform separates foundation from digest-pinned runtime', () => {
 test('container builds target Cloud Run amd64 and expose a health endpoint', () => {
   const bootstrap = readFileSync(join(root, 'scripts/gcp-bootstrap.sh'), 'utf8');
   const plan = readFileSync(join(root, 'scripts/cd-plan.sh'), 'utf8');
+  const build = readFileSync(join(root, 'scripts/build-verified-image.sh'), 'utf8');
   const dockerfile = readFileSync(join(root, 'templates/gcloud/Dockerfile'), 'utf8');
   assert.match(bootstrap, /docker build --platform linux\/amd64/);
   assert.match(bootstrap, /FOUNDATION_TARGETS=\(/);
   assert.match(bootstrap, /-target=google_iam_workload_identity_pool_provider\.github/);
   assert.match(bootstrap, /apply "\$\{COMMON_VARS\[@\]\}" "\$\{FOUNDATION_TARGETS\[@\]\}" -var="deploy_runtime=false"/);
-  assert.match(plan, /docker build --platform linux\/amd64/);
+  assert.match(build, /docker build --platform linux\/amd64/);
+  assert.match(build, /\/health/);
+  for (const forbidden of [
+    /docker\s+(?:build|push)/,
+    /gcloud\s+artifacts/,
+    /terraform/,
+    /ci-local\.sh/,
+    /npm\s+(?:ci|install|test)/,
+    /go\s+(?:build|test)/,
+  ]) assert.doesNotMatch(plan, forbidden);
   assert.match(dockerfile, /\/app\/health/);
   assert.match(dockerfile, /apk add --no-cache busybox-extras/);
   assert.match(dockerfile, /CMD \["httpd", "-f", "-p", "8080"/);
