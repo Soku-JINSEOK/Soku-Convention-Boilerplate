@@ -80,6 +80,7 @@ updates:
 `);
 
   assert.ok(findings.some(({message}) => message.includes('/soku/npm')));
+  assert.ok(findings.some(({message}) => message.includes('/soku/internal/manual/assets/runner')));
   assert.ok(findings.some(({message}) => message.includes('/infra/gcp')));
 });
 
