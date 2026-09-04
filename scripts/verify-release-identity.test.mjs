@@ -37,6 +37,7 @@ const files = {
   'README.ko.md': currentIdentity,
   'README.ja.md': currentIdentity,
   'soku/README.md': currentIdentity,
+  'soku/npm/README.md': currentIdentity,
   'soku/npm/package.json': JSON.stringify({
     name: '@soku-jinseok/soku',
     version: '0.2.1',
@@ -117,6 +118,18 @@ test('rejects documentation and release-note drift', () => {
 
   assert.match(errors, /README\.md is missing release identity/);
   assert.match(errors, /Compatible soku/);
+});
+
+test('rejects a stale npm README installation version', () => {
+  const drifted = {
+    ...files,
+    'soku/npm/README.md': 'npm install -g @soku-jinseok/soku@0.2.0',
+  };
+
+  assert.match(
+    verify(identity, drifted).join('\n'),
+    /soku\/npm\/README\.md is missing release identity/,
+  );
 });
 
 test('rejects malformed or undocumented signer fingerprints', () => {
