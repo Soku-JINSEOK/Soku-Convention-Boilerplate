@@ -4,23 +4,23 @@
 #
 #    pip-compile --extra=dev --output-file=requirements-lock.txt pyproject.toml
 #
-ast-serialize==0.6.0
+ast-serialize==0.8.0
     # via mypy
 black==26.5.1
     # via your-project-name (pyproject.toml)
-click==8.4.2
+click==8.5.0
     # via black
 iniconfig==2.3.0
     # via pytest
-librt==0.13.0
+librt==0.15.0
     # via mypy
-mypy==2.3.0
+mypy==2.3.1
     # via your-project-name (pyproject.toml)
 mypy-extensions==1.1.0
     # via
     #   black
     #   mypy
-packaging==26.2
+packaging==26.3
     # via
     #   black
     #   pytest
@@ -28,17 +28,17 @@ pathspec==1.1.1
     # via
     #   black
     #   mypy
-platformdirs==4.11.0
+platformdirs==4.11.5
     # via black
 pluggy==1.6.0
     # via pytest
-pygments==2.20.0
+pygments==2.21.0
     # via pytest
 pytest==9.1.1
     # via your-project-name (pyproject.toml)
 pytokens==0.4.1
     # via black
-ruff==0.16.0
+ruff==0.16.5
     # via your-project-name (pyproject.toml)
 typing-extensions==4.16.0
     # via mypy
