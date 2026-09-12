@@ -10,8 +10,8 @@ from PR #226 and fast-uri 3.1.7 from PR #224. Either PR alone is incomplete.
 
 The current user instruction authorizes completion of the original local
 predeployment plan. Starting from main
-`0f9ac36abe4255c02cc27487cc68dc34bd8aaeba`, the candidate preserves exactly five
-functional changes: `.github/dependabot.yml`,
+`0f9ac36abe4255c02cc27487cc68dc34bd8aaeba`, the original candidate preserves five
+reviewed functional changes: `.github/dependabot.yml`,
 `scripts/verify-supply-chain.mjs`, `scripts/verify-supply-chain.test.mjs`,
 `scripts/pull-request-policy.test.mjs`, and
 `soku/internal/manual/assets/runner/package-lock.json`.
@@ -57,15 +57,15 @@ main acceptance are not proven by a local dependency audit.
 
 ## 한국어 요약
 
-#224의 fast-uri 보안 수정과 #226의 정확한 runner 검사 범위를 하나의 후보로
+PR #224의 fast-uri 보안 수정과 #226의 정확한 runner 검사 범위를 하나의 후보로
 통합했습니다. #225 보고서는 포함하지 않고 이 #227 보고서를 작성했습니다.
 로컬 검사는 기록한 범위에서 통과했지만 고정 브라우저·폰트·hosted 검증은
 완료되지 않았습니다. 기존 PR과 원격 설정은 보존했습니다.
 
 ## 日本語の要約
 
-#224 の fast-uri 修正と #226 の正確な runner 対象登録を統合しました。
-#225 の報告書は含めず、この #227 報告書を追加しています。記録した範囲の
+PR #224 の fast-uri 修正と #226 の正確な runner 対象登録を統合しました。
+Issue #225 の報告書は含めず、この #227 報告書を追加しています。記録した範囲の
 ローカル検証は合格しましたが、固定ブラウザー・フォント・hosted 検証は
 未完了です。既存 PR とリモート設定は保持しています。
 
@@ -88,3 +88,18 @@ PR #222 is not another missing source patch: all three changed files match
 current main exactly. Its old failed check does not justify applying it again.
 PR #158/#159/#160/#179 are separate, unintegrated pipeline work and are not
 claimed complete by this runner-only candidate.
+
+## Exact-candidate hosted failure and correction
+
+The new Draft #229 triggered real code validation at commit
+`5d54940d80301096589333db6b1dccda47854b5d`. Metadata-only Validation runs
+succeeded, but code run `34682376195` failed. Those green metadata runs are
+not evidence that code validation passed.
+
+The code run found three Markdown heading errors in this report and existing
+JS template vulnerabilities: vitest/@vitest/mocker 4.1.10 and js-yaml 4.3.1.
+The current owner request authorizes resolving these discovered validation
+failures. The follow-up adds the template manifest/lock patch (Vitest and
+coverage 4.1.11; compatible js-yaml 4.3.2) while preserving the original five
+runner functional files. It neither changes workflow/settings nor enables
+delivery. New code-triggered validation must succeed on the final head.
