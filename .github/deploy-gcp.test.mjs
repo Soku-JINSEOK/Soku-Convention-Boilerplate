@@ -592,3 +592,25 @@ test('container builds target Cloud Run amd64 and expose a health endpoint', () 
   assert.match(dockerfile, /apk add --no-cache busybox-extras/);
   assert.match(dockerfile, /CMD \["httpd", "-f", "-p", "8080"/);
 });
+
+
+test('WIF bindings isolate CI and deploy workflow principals in the shared pool', () => {
+  const source = readFileSync(join(root, 'infra/gcp/main.tf'), 'utf8');
+  const bindings = [...source.matchAll(/resource "google_service_account_iam_member" "(github_[a-z_]+_wi)" \{([\s\S]*?)^\}/gm)];
+  assert.equal(bindings.length, 2);
+  const suffix = '/attribute.workflow_ref/${var.github_org}/${var.github_repo}/.github/workflows/';
+  const expected = new Map([
+    ['github_deployer_wi', 'deploy-gcp.yml@refs/heads/main'],
+    ['github_ci_builder_wi', 'validation.yml@refs/heads/main'],
+  ]);
+  const members = new Map(bindings.map(([, name, body]) => {
+    assert.match(body, /role\s*= "roles\/iam.workloadIdentityUser"/);
+    const member = /member\s*= "([^"\n]+)"/.exec(body)?.[1];
+    assert.ok(member && member.endsWith(suffix + expected.get(name)));
+    return [name, member];
+  }));
+  assert.notEqual(members.get('github_deployer_wi'), members.get('github_ci_builder_wi'));
+  assert.doesNotMatch(source, /member\s*= "principalSet:[^"\n]*(?:attribute\.repository\/|\/\*)/);
+  // Both providers map the signed workflow claim used by the two bindings.
+  assert.equal((source.match(/"attribute\.workflow_ref"\s*= "assertion\.workflow_ref"/g) ?? []).length, 2);
+});

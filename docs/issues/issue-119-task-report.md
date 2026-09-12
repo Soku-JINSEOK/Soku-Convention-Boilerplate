@@ -55,3 +55,22 @@ reusable default requires a separately tested bootstrap migration.
 ## AI Assistance
 
 - **Planning/implementation/drafting:** OpenAI Codex (GPT-5)
+
+## GitHub code-review correction — 2026-09-12
+
+The owner requested review of GitHub incorporation and correction of defects.
+Review found that the proposed CI and deploy WIF providers share a pool while
+both service-account bindings trusted the same repository principalSet.
+Provider conditions alone do not isolate those service-account bindings.
+
+The two existing bindings now select the exact signed workflow_ref attribute:
+main validation.yml for the CI builder, and main deploy-gcp.yml for the
+deployer. Repository/owner numeric IDs, main-ref checks, provider workflow
+conditions and existing roles are preserved. No repository-wide binding is
+retained or added. Configuration regressions verify the two distinct members,
+claim mapping and absence of broad repository/pool members.
+
+This correction applies to the open #160 source proposal; main currently has
+one provider and does not contain this proposed two-provider defect. It is not
+an IAM apply or proof of live allow/deny behavior. Cloud validation, remaining
+pipeline forward-port, signing and merge approval remain separate.

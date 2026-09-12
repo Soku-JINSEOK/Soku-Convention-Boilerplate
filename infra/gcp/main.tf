@@ -361,7 +361,7 @@ resource "google_service_account_iam_member" "github_deployer_wi" {
 
   service_account_id = google_service_account.github_actions_deployer.name
   role               = "roles/iam.workloadIdentityUser"
-  member             = "principalSet://iam.googleapis.com/projects/${data.google_project.current.number}/locations/global/workloadIdentityPools/${google_iam_workload_identity_pool.github[0].workload_identity_pool_id}/attribute.repository/${var.github_org}/${var.github_repo}"
+  member             = "principalSet://iam.googleapis.com/projects/${data.google_project.current.number}/locations/global/workloadIdentityPools/${google_iam_workload_identity_pool.github[0].workload_identity_pool_id}/attribute.workflow_ref/${var.github_org}/${var.github_repo}/.github/workflows/deploy-gcp.yml@refs/heads/main"
 }
 
 resource "google_service_account_iam_member" "github_ci_builder_wi" {
@@ -369,7 +369,7 @@ resource "google_service_account_iam_member" "github_ci_builder_wi" {
 
   service_account_id = google_service_account.github_actions_ci_builder.name
   role               = "roles/iam.workloadIdentityUser"
-  member             = "principalSet://iam.googleapis.com/projects/${data.google_project.current.number}/locations/global/workloadIdentityPools/${google_iam_workload_identity_pool.github[0].workload_identity_pool_id}/attribute.repository/${var.github_org}/${var.github_repo}"
+  member             = "principalSet://iam.googleapis.com/projects/${data.google_project.current.number}/locations/global/workloadIdentityPools/${google_iam_workload_identity_pool.github[0].workload_identity_pool_id}/attribute.workflow_ref/${var.github_org}/${var.github_repo}/.github/workflows/validation.yml@refs/heads/main"
 }
 
 resource "google_cloudbuild_trigger" "pull_request" {
