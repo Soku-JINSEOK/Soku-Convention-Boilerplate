@@ -28,14 +28,22 @@ Reusable callers must provide exact values when validating a separate source.
 - Pin every checkout in those reusable workflows to the selected head.
 - Add focused regression checks for exact checkout propagation and fail-closed
   aggregation.
+- Register the new workflow and task report in the boilerplate hygiene
+  inventory, and document the Hosted Full classification and CI contract.
 - Preserve the existing validation.yml, release, deploy, IAM, ruleset, and
   Cloud Build resources.
 
 ## Verification
 
-- node --test .github/validation-workflow.test.mjs — 16 passed.
-- Every checkout in ci.yml and templates-ci.yml has the exact-head ref.
-- git diff --check — passed.
+- `node --test .github/validation-workflow.test.mjs scripts/verify-release-identity.test.mjs scripts/pull-request-policy.test.mjs scripts/verify-supply-chain.test.mjs` — 48 passed.
+- PyYAML parsed `ci.yml`, `templates-ci.yml`, `full-validation.yml`, and
+  `security.yml` successfully.
+- `node scripts/verify-supply-chain.mjs` — 39 protected files and 11 update
+  targets verified.
+- Every checkout in `ci.yml` and `templates-ci.yml` has the exact-head ref.
+- `git diff --check` — passed.
+- `actionlint` was not available in the local environment; hosted workflow
+  checks remain an explicit acceptance gate.
 
 ## Remaining gates
 
