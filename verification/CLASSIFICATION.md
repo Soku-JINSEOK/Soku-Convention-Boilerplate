@@ -54,6 +54,15 @@ does not allow DB or infrastructure skips, and runs on every event handled by
 existing full gate runs in parallel for at least 14 days and 10 code-changing
 pull requests.
 
+## `full-validation.yml` (Hosted Full)
+
+Repository and template workflows receive one exact `head-sha`; Security
+receives the same head plus a separately selected trusted `base-sha`. Daily
+`02:41 UTC`, manual, and reusable invocations aggregate into `Hosted Full
+Gate`; failure, cancellation, or an unexpected result fails the aggregate. This
+additive path does not remove the existing per-PR Full gate or change required
+contexts.
+
 ## `ci.yml` (Repository CI)
 
 | Check | Job | Command | Category |
