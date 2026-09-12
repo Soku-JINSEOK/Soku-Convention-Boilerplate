@@ -153,6 +153,7 @@ jobs:
             docs/issues/issue-114-task-report.md
             docs/issues/issue-115-task-report.md
             docs/issues/issue-116-task-report.md
+            docs/issues/issue-117-task-report.md
             docs/issues/issue-120-task-report.md
             docs/issues/issue-122-task-report.md
             docs/issues/issue-123-task-report.md
@@ -185,6 +186,7 @@ jobs:
             .github/CODEOWNERS
             .github/workflows/ci.yml
             .github/workflows/ci-quick.yml
+            .github/workflows/full-validation.yml
             .github/workflows/release.yml
             .github/workflows/deploy-gcp.yml
             .github/workflows/security.yml
