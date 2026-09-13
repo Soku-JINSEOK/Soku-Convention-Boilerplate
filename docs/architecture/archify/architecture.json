@@ -1,0 +1,159 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Convention boilerplate",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate",
+      "provider": "github",
+      "link_mode": "local-only",
+      "revision": "0f8ee107dda67fdd0aa9dfa6408454092a7cac5f"
+    },
+    "viewBox": [
+      1140,
+      520
+    ]
+  },
+  "components": [
+    {
+      "id": "release",
+      "type": "external",
+      "label": "Signed release",
+      "sublabel": "boilerplate source",
+      "pos": [
+        40,
+        220
+      ],
+      "size": [
+        150,
+        72
+      ],
+      "sources": [
+        {
+          "path": "README.md"
+        }
+      ]
+    },
+    {
+      "id": "cli",
+      "type": "backend",
+      "label": "soku CLI",
+      "sublabel": "init / verify / upgrade",
+      "pos": [
+        220,
+        220
+      ],
+      "size": [
+        150,
+        72
+      ],
+      "sources": [
+        {
+          "path": "soku/internal/initcmd/engine.go"
+        }
+      ]
+    },
+    {
+      "id": "manifest",
+      "type": "database",
+      "label": "Manifest",
+      "sublabel": "managed boundaries",
+      "pos": [
+        400,
+        220
+      ],
+      "size": [
+        150,
+        72
+      ],
+      "sources": [
+        {
+          "path": "soku/internal/initcmd/transaction.go"
+        }
+      ]
+    },
+    {
+      "id": "verify",
+      "type": "security",
+      "label": "Verifier",
+      "sublabel": "drift checks",
+      "pos": [
+        580,
+        220
+      ],
+      "size": [
+        150,
+        72
+      ],
+      "sources": [
+        {
+          "path": "scripts/verify.sh"
+        }
+      ]
+    },
+    {
+      "id": "provider",
+      "type": "cloud",
+      "label": "Provider",
+      "sublabel": "downstream repo",
+      "pos": [
+        760,
+        220
+      ],
+      "size": [
+        150,
+        72
+      ],
+      "sources": [
+        {
+          "path": "soku/catalog/core-v1.json"
+        }
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "release-cli",
+      "from": "release",
+      "to": "cli",
+      "label": "installs",
+      "labelDy": 60,
+      "variant": "emphasis"
+    },
+    {
+      "id": "cli-manifest",
+      "from": "cli",
+      "to": "manifest",
+      "label": "writes",
+      "labelDy": 60,
+      "variant": "default"
+    },
+    {
+      "id": "manifest-verify",
+      "from": "manifest",
+      "to": "verify",
+      "label": "checks",
+      "labelDy": 60,
+      "variant": "default"
+    },
+    {
+      "id": "verify-provider",
+      "from": "verify",
+      "to": "provider",
+      "label": "updates",
+      "labelDy": 60,
+      "variant": "default"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Flow basis",
+      "items": [
+        "Release → CLI → downstream manifest",
+        "Managed files stay within declared boundaries"
+      ]
+    }
+  ]
+}
