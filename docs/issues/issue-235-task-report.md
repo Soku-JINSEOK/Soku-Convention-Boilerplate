@@ -17,8 +17,11 @@ or publication changes.
 ## Verification and disposition
 
 - Archify showcase validation: passed and recorded in the pull request.
-- Repository validation: existing checks were run; baseline dependency findings
-  remain a separate remediation scope.
+- Repository validation: existing checks were run.
+- The manual runner now overrides `fast-uri` to `3.1.6`; the JavaScript/TypeScript
+  template now uses Vitest `4.1.11` and `js-yaml` `4.3.2`.
+- High-severity npm audits pass for both updated lockfiles; the hosted OSV gate
+  must be rerun on the new head.
 
 ## AI assistance
 
