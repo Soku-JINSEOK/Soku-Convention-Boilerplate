@@ -1,44 +1,67 @@
-# Issue 117 — preserve code validation evidence
+# Issue #117 — code-validation preservation and current-main Hosted Full forward-port
 
-## Current review scope
+## Purpose
 
-The owner requested verification of actual GitHub incorporation and correction
-of discovered defects. This partial source correction supports Issue #117; it
-does not perform its branch-protection or Hosted Full rollout.
+This integration combines the narrow code-validation correction with the
+additive current-main Hosted Full caller. It preserves the existing required
+contexts and does not mutate branch protection, rulesets, delivery, or deploy
+behavior.
 
-## Finding and correction
+## Code-validation correction
 
 Code run 34682376195 on PR #229 failed while later metadata-only runs skipped
 all code groups and reported success with the same required check names.
-Concurrency isolation did not prevent that overwrite. Both aggregate job names
-now depend on the event: code events retain `CI Quick Gate` and
-`Validation Gate`, while metadata events use `CI Quick Metadata Only` and
-`Validation Metadata Only`. Names do not depend on job success or cancellation.
+Concurrency isolation did not prevent that overwrite. Code events retain
+`CI Quick Gate` and `Validation Gate`; metadata events use
+`CI Quick Metadata Only` and `Validation Metadata Only`. Names do not depend
+on job success or cancellation.
 
-## Validation
+The integrated regression tests evaluate the actual workflow expressions for
+code and metadata events, including a base edit, and execute the aggregate
+shell. Failed, cancelled, or unexpectedly skipped code groups fail closed.
+No extra trigger, permission, or heavy validation execution is added.
 
-Regression tests evaluate the actual workflow expressions for code and metadata
-events, including a base edit. They execute the actual aggregate shell and
-require failure for failed, cancelled or unexpectedly skipped code groups.
-No extra job, trigger, permission or heavy validation execution is added.
+## Current-main Hosted Full contract
 
-The current security workflow, its trusted base/head separation and immutable
-history baseline remain unchanged. PR Metadata Gate and repository required
-contexts are unchanged. Skipping a required job is not used as a fix because
-GitHub treats skipped checks as passing.
+The current security workflow accepts two distinct inputs:
 
-## Remaining Issue 117 scope
+- `base-sha`: the trusted policy and comparison source;
+- `head-sha`: the exact repository commit to scan.
 
-PR #158 still requires a current-main forward-port of its Hosted Full caller:
-pass trusted `base-sha` and candidate `head-sha` to the current security workflow,
-retain full-history/baseline guards and permissions, then validate the complete
-caller contract. The comparison period, source acceptance and branch-protection
-rollout are not claimed complete. PR #159/#179 and the broader #160 integration
-remain separately reviewable pipeline work.
+Repository and template reusable workflows receive `head-sha` and pass it to
+every checkout. Hosted Full passes both values to Security and aggregates
+repository, template, and Security results into Hosted Full Gate. Manual and
+scheduled Hosted Full runs default both values to `github.sha`; reusable
+callers provide exact values when validating a separate source.
 
-## AI assistance
+## Integrated scope
 
-- Provider: OpenAI
-- Model: Codex (exact backend model identifier not exposed)
-- Usage Summary: GitHub job review, false-green reproduction, narrow workflow
-  correction and regression verification.
+- Preserve the #230 metadata/code gate separation and fail-closed aggregate
+  tests.
+- Forward the #233 exact-head input through `ci.yml` and
+  `templates-ci.yml`.
+- Add `.github/workflows/full-validation.yml` with repository, template, and
+  security aggregation.
+- Keep release, deploy, IAM, ruleset, and Cloud Build resources unchanged.
+- Retain both historical source reports in this single review record.
+
+## Verification evidence
+
+The source candidates separately recorded:
+
+- #230: regression tests for metadata-only naming, cancellation isolation,
+  exact head/base propagation, and aggregate shell failures.
+- #233: 48 hosted-contract tests passed; PyYAML parsed the reusable workflows;
+  39 protected files and 11 update targets were checked; exact-head checkout
+  propagation and `git diff --check) passed.
+
+The new integration commit requires fresh hosted validation against its exact
+head. Earlier results are not reused as evidence for that commit.
+
+## Remaining gates
+
+This source change does not run Hosted Full, alter GitHub rulesets, create or
+change Cloud Build triggers, publish a release, or deploy. Issue #116
+comparison evidence, owner-approved hosted acceptance, and any ruleset
+transition remain separate gates. The predecessor PR #158 remains preserved
+because its source-SHA implementation targets an older workflow contract.

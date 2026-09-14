@@ -12,6 +12,14 @@ const repositoryWorkflow = readFileSync(
   new URL('./workflows/ci.yml', import.meta.url),
   'utf8',
 );
+const templateWorkflow = readFileSync(
+  new URL('./workflows/templates-ci.yml', import.meta.url),
+  'utf8',
+);
+const hostedFullWorkflow = readFileSync(
+  new URL('./workflows/full-validation.yml', import.meta.url),
+  'utf8',
+);
 const quickWorkflow = readFileSync(
   new URL('./workflows/ci-quick.yml', import.meta.url),
   'utf8',
@@ -131,6 +139,48 @@ test('requires repository, templates, and trusted Security in the full gate', ()
     workflow,
     /head-sha: \$\{\{ github\.event\.pull_request\.head\.sha \|\| github\.sha \}\}/,
   );
+});
+
+test('forwards one exact head SHA through repository and template validation', () => {
+  for (const component of [repositoryWorkflow, templateWorkflow]) {
+    assert.match(component, /^\s{4}inputs:/m);
+    assert.match(component, /^\s{6}head-sha:/m);
+    const checkoutCount =
+      (component.match(/uses: actions\/checkout@/g) ?? []).length;
+    const exactRefCount =
+      (
+        component.match(
+          /ref: \$\{\{ inputs\['head-sha'\] \|\| github\.sha \}\}/g,
+        ) ?? []
+      ).length;
+    assert.equal(exactRefCount, checkoutCount);
+  }
+});
+
+test('Hosted Full uses the current base/head security contract and fails closed', () => {
+  assert.match(hostedFullWorkflow, /^\s{2}workflow_call:/m);
+  assert.match(hostedFullWorkflow, /^\s{2}workflow_dispatch:/m);
+  assert.match(hostedFullWorkflow, /^\s{2}schedule:/m);
+  assert.match(hostedFullWorkflow, /base-sha:/);
+  assert.match(hostedFullWorkflow, /head-sha:/);
+  assert.match(
+    hostedFullWorkflow,
+    /security:[\s\S]*base-sha: \$\{\{ inputs\['base-sha'\] \|\| github\.sha \}\}/,
+  );
+  assert.match(
+    hostedFullWorkflow,
+    /security:[\s\S]*head-sha: \$\{\{ inputs\['head-sha'\] \|\| github\.sha \}\}/,
+  );
+  for (const result of [
+    'REPOSITORY_RESULT',
+    'TEMPLATES_RESULT',
+    'SECURITY_RESULT',
+  ]) {
+    assert.match(
+      hostedFullWorkflow,
+      new RegExp('test "\\$' + result + '" = success'),
+    );
+  }
 });
 
 test('metadata-only events report separately from required code contexts', () => {
