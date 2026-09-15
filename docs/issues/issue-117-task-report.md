@@ -58,6 +58,21 @@ The source candidates separately recorded:
 The new integration commit requires fresh hosted validation against its exact
 head. Earlier results are not reused as evidence for that commit.
 
+## Follow-up validation — 2026-09-15
+
+The six Node regression suites now convert repository-relative file URLs with
+`fileURLToPath`, preserving Unicode workspace paths such as the local Korean
+directory. The combined `node --test scripts/*.test.mjs .github/*.test.mjs`
+run passed 210/210. The full local profile with infrastructure and database
+checks explicitly skipped reached every remaining repository, template,
+workflow, and release check; its final release-tag regression could not run
+because `gpg` is unavailable in this execution image.
+
+Hosted Full for the exact integration head completed successfully, including
+the required CI Quick, Validation, metadata separation, CodeQL,
+repository/template, and Security checks. The PR remains Draft pending owner,
+signing, and merge gates.
+
 ## Remaining gates
 
 This source change does not run Hosted Full, alter GitHub rulesets, create or
