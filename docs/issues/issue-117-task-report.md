@@ -73,6 +73,9 @@ the required CI Quick, Validation, metadata separation, CodeQL,
 repository/template, and Security checks. The PR remains Draft pending owner,
 signing, and merge gates.
 
+The cached actionlint source was built into an isolated temporary binary and
+reported no findings for `.github/workflows/*.yml`.
+
 ## Remaining gates
 
 This source change does not run Hosted Full, alter GitHub rulesets, create or
