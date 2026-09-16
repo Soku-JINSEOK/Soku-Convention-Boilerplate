@@ -24,6 +24,14 @@ permissions:
   pull-requests: read
 
 jobs:
+  hosted-full:
+    name: Exact-head Hosted Full
+    if: github.event_name == 'workflow_dispatch'
+    uses: ./.github/workflows/full-validation.yml
+    with:
+      base-sha: ${{ github.sha }}
+      head-sha: ${{ github.sha }}
+
   quick:
     name: Quick validation
     if: >-

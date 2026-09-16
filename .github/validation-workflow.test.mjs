@@ -183,6 +183,10 @@ test('Hosted Full uses the current base/head security contract and fails closed'
   }
 });
 
+test('manual Validation invokes Hosted Full for its exact dispatched revision', () => {
+  assert.match(workflow, /hosted-full:\n\s+name: Exact-head Hosted Full\n\s+if: github.event_name == 'workflow_dispatch'\n\s+uses: \.\/\.github\/workflows\/full-validation.yml\n\s+with:\n\s+base-sha: \$\{\{ github.sha \}\}\n\s+head-sha: \$\{\{ github.sha \}\}/);
+});
+
 test('metadata-only events report separately from required code contexts', () => {
   assert.match(
     workflow,

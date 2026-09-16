@@ -64,19 +64,54 @@ The six Node regression suites now convert repository-relative file URLs with
 `fileURLToPath`, preserving Unicode workspace paths such as the local Korean
 directory. The combined `node --test scripts/*.test.mjs .github/*.test.mjs`
 run passed 210/210. The full local profile with infrastructure and database
-checks explicitly skipped reached every remaining repository, template,
-workflow, and release check; its final release-tag regression could not run
-because `gpg` is unavailable in this execution image.
+checks explicitly skipped stopped at the release-tag regression because the
+local GPG runtime was unavailable. Checks after that failure were not verified
+by that run.
 
-Hosted Full for the exact integration head completed successfully, including
-the required CI Quick, Validation, metadata separation, CodeQL,
-repository/template, and Security checks. The PR remains Draft pending owner,
-signing, and merge gates.
+The 2026-09-16 readback of head
+`e34feca6a21186a70390cf9c360b2a246aa7c0bd` found successful PR Validation,
+policy, and metadata runs. All 76 returned check runs were successful or
+intentionally skipped. This does not establish completion of the separate
+Hosted Full workflow or its Hosted Full Gate. The earlier Hosted Full
+completion claim is withdrawn. The PR remains Draft pending the applicable
+hosted, owner, signing, and merge gates.
+
+On 2026-09-16, the isolated release-tag regression passed using the installed
+GnuPG 2.5.21 and libgcrypt 1.12.2 with a temporary launcher that supplies the
+library path to Git's GPG subprocess. The test used temporary repositories and
+temporary keys; it did not sign or publish a real release.
+
+The resumed full run passed repository hygiene, Soku unit/race/lifecycle and
+five-target reproducible packaging checks, all runtime templates, and the
+MySQL/PostgreSQL schema checks. Its secret scan then stopped on a historical
+synthetic key in the strict-config rejection test. `.gitleaksignore` records
+only that exact commit/file/rule/line fingerprint. A negative control confirmed
+that the same synthetic key at another location is still detected.
+
+Both Terraform roots passed formatting, backend-disabled initialization, and
+validation using the profile's pinned Terraform 1.15.3 container. Local Go
+1.26.5 produced four reachable standard-library vulnerability findings; the
+security profile passed with fixed toolchain Go 1.26.6, including both Go
+modules, npm and Python dependency audits, and the OSV scan.
+
+The final uninterrupted `scripts/verify.sh --profile full` run subsequently
+passed with exit code 0 on 2026-09-16, with Go 1.26.6, Node 22.23.2, the
+temporary GPG launcher, and Docker Desktop 28.0.4. Neither `--skip-infra` nor
+`--skip-db` was used. The profile's explicitly hosted-only checks remain
+unexecuted and are not counted as local passes. This validates the working
+tree containing the narrow historical-fixture exclusion, not a new hosted
+commit or release.
 
 The cached actionlint source was built into an isolated temporary binary and
 reported no findings for `.github/workflows/*.yml`.
 
 ## Remaining gates
+
+Manual Validation now also calls the exact-head Hosted Full workflow. This
+provides a registered dispatch entry point while `full-validation.yml` is
+still absent from the default branch. Automatic PR events do not invoke the
+additional caller. The workflow regression, policy, and supply-chain suites
+pass 43 tests after this change.
 
 This source change does not run Hosted Full, alter GitHub rulesets, create or
 change Cloud Build triggers, publish a release, or deploy. Issue #116
