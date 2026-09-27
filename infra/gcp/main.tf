@@ -315,7 +315,7 @@ resource "google_cloudbuild_trigger" "pull_request" {
   count = var.enable_cloud_build_validation ? 1 : 0
 
   project            = var.project_id
-  location           = "global"
+  location           = "asia-northeast1"
   name               = "soku-convention-boilerplate-pr"
   description        = "Validate pull requests without publishing or deploying artifacts."
   filename           = "cloudbuild/validation.yaml"
@@ -332,7 +332,7 @@ resource "google_cloudbuild_trigger" "pull_request" {
 
     pull_request {
       branch          = "^main$"
-      comment_control = "COMMENTS_ENABLED_FOR_EXTERNAL_CONTRIBUTORS_ONLY"
+      comment_control = "COMMENTS_ENABLED"
     }
   }
 
@@ -346,7 +346,7 @@ resource "google_cloudbuild_trigger" "main" {
   count = var.enable_cloud_build_validation ? 1 : 0
 
   project            = var.project_id
-  location           = "global"
+  location           = "asia-northeast1"
   name               = "soku-convention-boilerplate-main"
   description        = "Validate main without publishing or deploying artifacts."
   filename           = "cloudbuild/validation.yaml"
@@ -356,6 +356,15 @@ resource "google_cloudbuild_trigger" "main" {
   substitutions = {
     _CLOUD_BUILD_SERVICE_ACCOUNT = google_service_account.cloud_build_validation[0].id
   }
+
+  included_files = [
+    ".github/cloudbuild-validation.test.mjs",
+    ".github/deploy-gcp.test.mjs",
+    "cloudbuild/**",
+    "infra/gcp/**",
+    "scripts/gcp-bootstrap.sh",
+    "templates/gcloud/**",
+  ]
 
   github {
     owner = var.github_org
