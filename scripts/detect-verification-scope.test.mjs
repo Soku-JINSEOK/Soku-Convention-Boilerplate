@@ -9,13 +9,14 @@ import {tmpdir} from 'node:os';
 import {join, resolve} from 'node:path';
 import {spawnSync} from 'node:child_process';
 import test from 'node:test';
+import {fileURLToPath} from 'node:url';
 import {
   detectScopes,
   parseFilesInput,
   parseNameStatus,
 } from './detect-verification-scope.mjs';
 
-const root = resolve(new URL('..', import.meta.url).pathname);
+const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const detector = resolve(root, 'scripts/detect-verification-scope.mjs');
 const config = JSON.parse(
   readFileSync(resolve(root, 'verification/scopes.yml'), 'utf8'),

@@ -8,8 +8,9 @@ import {tmpdir} from 'node:os';
 import {resolve} from 'node:path';
 import {spawnSync} from 'node:child_process';
 import test from 'node:test';
+import {fileURLToPath} from 'node:url';
 
-const root = resolve(new URL('..', import.meta.url).pathname);
+const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
 
 function run(script, args) {
   return spawnSync('bash', [resolve(root, 'scripts', script), ...args], {

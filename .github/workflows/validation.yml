@@ -24,6 +24,14 @@ permissions:
   pull-requests: read
 
 jobs:
+  hosted-full:
+    name: Exact-head Hosted Full
+    if: github.event_name == 'workflow_dispatch'
+    uses: ./.github/workflows/full-validation.yml
+    with:
+      base-sha: ${{ github.sha }}
+      head-sha: ${{ github.sha }}
+
   quick:
     name: Quick validation
     if: >-
@@ -53,7 +61,12 @@ jobs:
       - run: echo "Metadata-only event preserves the existing CI Quick Gate."
 
   ci-quick-gate:
-    name: CI Quick Gate
+    name: >-
+      ${{ (
+        github.event_name != 'pull_request' ||
+        contains(fromJSON('["opened","synchronize","reopened"]'), github.event.action) ||
+        (github.event.action == 'edited' && github.event.changes.base != null)
+      ) && 'CI Quick Gate' || 'CI Quick Metadata Only' }}
     if: always()
     needs:
       - quick
@@ -118,7 +131,12 @@ jobs:
       head-sha: ${{ github.event.pull_request.head.sha || github.sha }}
 
   validation-gate:
-    name: Validation Gate
+    name: >-
+      ${{ (
+        github.event_name != 'pull_request' ||
+        contains(fromJSON('["opened","synchronize","reopened"]'), github.event.action) ||
+        (github.event.action == 'edited' && github.event.changes.base != null)
+      ) && 'Validation Gate' || 'Validation Metadata Only' }}
     if: always()
     needs:
       - repository

@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import test from 'node:test';
+import {fileURLToPath} from 'node:url';
 import {
   classifyIssue,
   classifyPullRequest,
@@ -51,7 +52,7 @@ test('arguments and policy epochs are deterministic', () => {
     {
       repo: 'owner/repo',
       asOf: '2026-07-23T01:00:19.000Z',
-      output: new URL('../report.md', import.meta.url).pathname,
+      output: fileURLToPath(new URL('../report.md', import.meta.url)),
     },
   );
   assert.equal(epochFor('2026-07-14T03:50:00Z', 'Issue', 1), 'legacy');

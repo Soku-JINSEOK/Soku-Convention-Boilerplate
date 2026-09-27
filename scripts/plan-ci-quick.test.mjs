@@ -2,9 +2,10 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {resolve} from 'node:path';
 import test from 'node:test';
+import {fileURLToPath} from 'node:url';
 import {planQuickGroups} from './plan-ci-quick.mjs';
 
-const root = resolve(new URL('..', import.meta.url).pathname);
+const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const profiles = JSON.parse(
   readFileSync(resolve(root, 'verification/profiles.yml'), 'utf8'),
 );

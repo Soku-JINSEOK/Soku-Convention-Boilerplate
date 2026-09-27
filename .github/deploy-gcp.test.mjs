@@ -10,8 +10,9 @@ import {tmpdir} from 'node:os';
 import {join, resolve} from 'node:path';
 import {spawnSync} from 'node:child_process';
 import test from 'node:test';
+import {fileURLToPath} from 'node:url';
 
-const root = resolve(new URL('..', import.meta.url).pathname);
+const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const digest = `sha256:${'a'.repeat(64)}`;
 const repository = 'asia-docker.pkg.dev/project/artifacts/service';
 // Deploy evidence is a public Actions artifact — keep it to a minimal,

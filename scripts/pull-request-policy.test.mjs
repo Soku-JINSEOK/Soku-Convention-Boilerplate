@@ -109,6 +109,8 @@ updates:
     directory: /soku
   - package-ecosystem: npm
     directory: /templates/javascript-typescript-node
+  - package-ecosystem: npm
+    directory: /soku/internal/manual/assets/runner
   - package-ecosystem: pip
     directory: /templates/python
   - package-ecosystem: docker
@@ -160,6 +162,7 @@ test("reads configured Dependabot ecosystems and directories", () => {
     {ecosystem: "github-actions", directory: "/"},
     {ecosystem: "gomod", directory: "/soku"},
     {ecosystem: "npm", directory: "/templates/javascript-typescript-node"},
+    {ecosystem: "npm", directory: "/soku/internal/manual/assets/runner"},
     {ecosystem: "pip", directory: "/templates/python"},
     {ecosystem: "docker", directory: "/templates/gcloud"},
     {ecosystem: "maven", directory: "/templates/java-spring"},
@@ -238,6 +241,10 @@ test("accepts every configured Dependabot ecosystem path", () => {
     [
       "dependabot/npm_and_yarn/templates/javascript-typescript-node/group",
       ["templates/javascript-typescript-node/package-lock.json"],
+    ],
+    [
+      "dependabot/npm_and_yarn/soku/internal/manual/assets/runner/fast-uri-3.1.7",
+      ["soku/internal/manual/assets/runner/package-lock.json"],
     ],
     [
       "dependabot/pip/templates/python/group",

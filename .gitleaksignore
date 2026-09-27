@@ -1,0 +1,3 @@
+# Synthetic numbered key in the historical strict-config rejection test.
+# Current source uses "example"; exclude only this exact historical finding.
+858647d42c68dd18d4e53a2f04b2e015ba0a55a5:soku/internal/manual/manual_test.go:generic-api-key:142
