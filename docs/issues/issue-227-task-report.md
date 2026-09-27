@@ -125,3 +125,13 @@ OSV scans. Neither infrastructure nor database checks were skipped. The
 changed reports passed markdownlint-cli2 v0.22.1 with zero errors. Hosted
 checks must be recorded separately against the signed head; earlier results
 from #236 do not validate it.
+
+GitHub's required-check evaluation on PR #237 exposed an additional workflow
+issue: metadata-only Validation runs left `Validation Gate` expected and blocked
+merge even after the signed code run and manual Hosted Full passed. The follow-up
+workflow correction restricts Validation PR triggers to code-bearing events
+and treats every `edited` event as code-bearing so base edits are revalidated.
+PR metadata policy remains a separate workflow. The corrected head must pass
+all hosted gates again before merge.
+The correction also passed the full local profile without skip flags and the
+three changed documentation files passed markdownlint-cli2 with zero errors.

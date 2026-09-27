@@ -131,3 +131,23 @@ signed commit, exact-head PR checks and manual Hosted Full are required before
 merge. The prior #236 check history does not
 substitute for this candidate's checks. The CI ruleset transition remains
 dependent on separate natural GCP-shadow evidence and an owner decision.
+
+## Required-context correction after hosted observation
+
+On PR #237, code-event Validation and manually dispatched Hosted Full passed at
+`78791d1675b8a7fe277fdb0b1351dac9cbbfd678`. Later label, assignment,
+description, and Ready events started metadata-only Validation runs. GitHub then
+showed `Validation Gate` as expected but absent and blocked the squash merge.
+Rerunning the original code workflow did not restore the required context.
+
+The correction subscribes Validation only to `opened`, `synchronize`,
+`reopened`, and `edited` PR events. Every subscribed PR run now executes the
+code-bearing Quick, repository, template, and Security paths with stable
+required gate names. `edited` deliberately reruns all groups because a base
+branch edit is among those events. The separate PR policy workflow continues
+to check labels, assignment, title, and body changes. The regression tests
+assert this event split and reject failed, cancelled, or skipped aggregate
+results. Fresh hosted checks are required on the correction commit.
+The correction working tree also passed the uninterrupted full local profile,
+including DB, Terraform, and security scopes, with exit code 0; actionlint
+v1.7.12 and 41 focused regression tests passed.

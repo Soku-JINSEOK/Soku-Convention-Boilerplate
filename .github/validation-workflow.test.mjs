@@ -1,7 +1,6 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import test from 'node:test';
-import vm from 'node:vm';
 import {spawnSync} from 'node:child_process';
 
 const workflow = readFileSync(
@@ -48,39 +47,14 @@ const projectSyncWorkflow = readFileSync(
   'utf8',
 );
 
-const validationGateConcurrencyGroup = ({
-  pullRequestNumber,
-  ref,
-  runId,
-  notRequiredResult,
-}) =>
-  `validation-full-gate-${pullRequestNumber || ref}-${
-    notRequiredResult === 'success' ? runId : 'code'
-  }`;
-
-const isValidationGateSuccess = ({
-  repositoryResult,
-  templatesResult,
-  securityResult,
-  notRequiredResult,
-}) =>
-  (repositoryResult === 'success' &&
-    templatesResult === 'success' &&
-    securityResult === 'success' &&
-    notRequiredResult === 'skipped') ||
-  (repositoryResult === 'skipped' &&
-    templatesResult === 'skipped' &&
-    securityResult === 'skipped' &&
-    notRequiredResult === 'success');
-
 test('runs automatic validation and remains manual and reusable', () => {
   assert.match(workflow, /^\s{2}workflow_call:/m);
   assert.match(workflow, /^\s{2}workflow_dispatch:/m);
   assert.match(workflow, /^\s{2}pull_request:/m);
   assert.match(workflow, /^\s{2}push:/m);
-  assert.match(workflow, /ci-quick-gate:[\s\S]*?'CI Quick Gate'/);
+  assert.match(workflow, /ci-quick-gate:\n\s+name: CI Quick Gate/);
   assert.match(workflow, /uses: \.\/\.github\/workflows\/ci-quick\.yml/);
-  assert.match(workflow, /validation-gate:[\s\S]*?'Validation Gate'/);
+  assert.match(workflow, /validation-gate:\n\s+name: Validation Gate/);
   assert.doesNotMatch(workflow, /PR Metadata Gate/);
 });
 
@@ -103,14 +77,11 @@ test('runs CI Quick in parallel without replacing the full gate', () => {
     quickWorkflow,
     /\.\/scripts\/verify\.sh --profile ci-quick/,
   );
-  assert.match(workflow, /'CI Quick Gate'/);
-  assert.match(workflow, /'Validation Gate'/);
+  assert.match(workflow, /name: CI Quick Gate/);
+  assert.match(workflow, /name: Validation Gate/);
   assert.match(workflow, /group: validation-quick-/);
-  assert.match(workflow, /name: CI Quick Not Required/);
-  assert.match(workflow, /NOT_REQUIRED_RESULT:/);
-  assert.match(workflow, /QUICK_RESULT" = success/);
-  assert.match(workflow, /QUICK_RESULT" = skipped/);
-  assert.match(workflow, /exit 1/);
+  assert.doesNotMatch(workflow, /quick-not-required:/);
+  assert.match(workflow, /test "\$QUICK_RESULT" = success/);
   assert.match(workflow, /head-sha: \$\{\{ github\.event\.pull_request\.head\.sha \|\| github\.sha \}\}/);
 });
 
@@ -187,27 +158,25 @@ test('manual Validation invokes Hosted Full for its exact dispatched revision', 
   assert.match(workflow, /hosted-full:\n\s+name: Exact-head Hosted Full\n\s+if: github.event_name == 'workflow_dispatch'\n\s+uses: \.\/\.github\/workflows\/full-validation.yml\n\s+with:\n\s+base-sha: \$\{\{ github.sha \}\}\n\s+head-sha: \$\{\{ github.sha \}\}/);
 });
 
-test('metadata-only events report separately from required code contexts', () => {
-  assert.match(
-    workflow,
-    /validation-gate:\n\s+name: >-[\s\S]*?if: always\(\)/,
-  );
-  assert.match(workflow, /full-validation-not-required:/);
-  assert.match(
-    workflow,
-    /validation-gate:[\s\S]*?needs:[\s\S]*?- full-validation-not-required/,
-  );
-  assert.match(workflow, /NOT_REQUIRED_RESULT:/);
-  assert.match(workflow, /REPOSITORY_RESULT" = skipped/);
-  assert.match(workflow, /TEMPLATES_RESULT" = skipped/);
-  assert.match(workflow, /SECURITY_RESULT" = skipped/);
-  assert.match(workflow, /NOT_REQUIRED_RESULT" = success/);
-  assert.match(workflow, /Metadata-only event preserves the existing Validation Gate/);
-  const metadataSubstitute =
-    /full-validation-not-required:[\s\S]*$/.exec(workflow);
-  assert.ok(metadataSubstitute, 'metadata substitute job must exist');
-  assert.doesNotMatch(metadataSubstitute[0], /concurrency:/);
-  assert.doesNotMatch(workflow, /validation-metadata-not-required-/);
+test('metadata-only events cannot replace required code contexts', () => {
+  const trigger = /pull_request:\n\s+types:\n((?:\s+- .+\n)+)/.exec(workflow);
+  assert.ok(trigger);
+  for (const action of ['opened', 'synchronize', 'reopened', 'edited']) {
+    assert.match(trigger[1], new RegExp(`\\b${action}\\b`));
+  }
+  for (const action of [
+    'labeled',
+    'unlabeled',
+    'assigned',
+    'unassigned',
+    'ready_for_review',
+    'converted_to_draft',
+  ]) {
+    assert.doesNotMatch(trigger[1], new RegExp(`\\b${action}\\b`));
+  }
+  assert.match(workflow, /validation-gate:\n\s+name: Validation Gate/);
+  assert.match(workflow, /ci-quick-gate:\n\s+name: CI Quick Gate/);
+  assert.doesNotMatch(workflow, /Metadata Only|not-required:/);
 });
 
 test('keeps full validation cancellation domains independent', () => {
@@ -215,61 +184,9 @@ test('keeps full validation cancellation domains independent', () => {
   assert.match(workflow, /group: validation-full-templates-/);
   assert.match(
     workflow,
-    /group: validation-full-gate-\$\{\{ github\.event\.pull_request\.number \|\| github\.ref \}\}-\$\{\{ needs\.full-validation-not-required\.result == 'success' && github\.run_id \|\| 'code' \}\}/,
+    /group: validation-full-gate-\$\{\{ github\.event\.pull_request\.number \|\| github\.ref \}\}/,
   );
   assert.doesNotMatch(workflow, /^concurrency:/m);
-});
-
-test('isolates metadata gates while retaining code-bearing cancellation', () => {
-  const firstMetadataGroup = validationGateConcurrencyGroup({
-    pullRequestNumber: 210,
-    ref: 'refs/pull/210/merge',
-    runId: 1001,
-    notRequiredResult: 'success',
-  });
-  const secondMetadataGroup = validationGateConcurrencyGroup({
-    pullRequestNumber: 210,
-    ref: 'refs/pull/210/merge',
-    runId: 1002,
-    notRequiredResult: 'success',
-  });
-  assert.notEqual(firstMetadataGroup, secondMetadataGroup);
-
-  const firstCodeGroup = validationGateConcurrencyGroup({
-    pullRequestNumber: 210,
-    ref: 'refs/pull/210/merge',
-    runId: 1001,
-    notRequiredResult: 'skipped',
-  });
-  const secondCodeGroup = validationGateConcurrencyGroup({
-    pullRequestNumber: 210,
-    ref: 'refs/pull/210/merge',
-    runId: 1002,
-    notRequiredResult: 'skipped',
-  });
-  assert.equal(firstCodeGroup, secondCodeGroup);
-  assert.equal(firstCodeGroup, 'validation-full-gate-210-code');
-});
-
-test('keeps cancelled metadata substitutes fail closed', () => {
-  assert.equal(
-    isValidationGateSuccess({
-      repositoryResult: 'skipped',
-      templatesResult: 'skipped',
-      securityResult: 'skipped',
-      notRequiredResult: 'cancelled',
-    }),
-    false,
-  );
-  assert.equal(
-    isValidationGateSuccess({
-      repositoryResult: 'skipped',
-      templatesResult: 'skipped',
-      securityResult: 'skipped',
-      notRequiredResult: 'success',
-    }),
-    true,
-  );
 });
 
 test('keeps automatic validation, policy, and Project synchronization explicit', () => {
@@ -302,7 +219,8 @@ test('keeps automatic validation, policy, and Project synchronization explicit',
   const validationPullRequestTrigger =
     /pull_request:\n\s+types:\n((?:\s+- .+\n)+)/.exec(workflow);
   assert.ok(validationPullRequestTrigger, 'Validation PR event list must be explicit');
-  assert.match(validationPullRequestTrigger[1], /\bready_for_review\b/);
+  assert.match(validationPullRequestTrigger[1], /\bedited\b/);
+  assert.doesNotMatch(validationPullRequestTrigger[1], /\bready_for_review\b/);
   assert.doesNotMatch(validationPullRequestTrigger[1], /\bclosed\b/);
 });
 
@@ -436,27 +354,10 @@ test('release preflight can call validation without enabling delivery', () => {
 
 const aggregateBlock = (id) => new RegExp(`^  ${id}:([\\s\\S]*?)(?=\\n  [a-z][a-z0-9-]*:|(?![\\s\\S]))`, 'm').exec(workflow)?.[1];
 
-test('actual workflow name expressions never replace code results on metadata events', () => {
-  for (const [id, code, metadata] of [
-    ['ci-quick-gate', 'CI Quick Gate', 'CI Quick Metadata Only'],
-    ['validation-gate', 'Validation Gate', 'Validation Metadata Only'],
-  ]) {
-    const expression = /name: >-\s*\$\{\{([\s\S]*?)\}\}/.exec(aggregateBlock(id))?.[1];
-    assert.ok(expression);
-    assert.doesNotMatch(expression, /needs\./);
-    for (const action of ['opened', 'synchronize', 'reopened', 'labeled', 'unlabeled', 'assigned', 'unassigned', 'edited', 'ready_for_review', 'converted_to_draft']) {
-      for (const baseChanged of [false, true]) {
-        const github = {event_name: 'pull_request', event: {action, changes: {base: baseChanged ? {} : null}}};
-        const name = vm.runInNewContext(expression, {github, contains: (a, b) => a.includes(b), fromJSON: JSON.parse});
-        const codeEvent = ['opened', 'synchronize', 'reopened'].includes(action) || (action === 'edited' && baseChanged);
-        assert.equal(name, codeEvent ? code : metadata, `${id}/${action}/${baseChanged}`);
-      }
-    }
-    for (const event_name of ['push', 'workflow_dispatch', 'workflow_call']) {
-      const name = vm.runInNewContext(expression, {github: {event_name, event: {}}, contains: (a, b) => a.includes(b), fromJSON: JSON.parse});
-      assert.equal(name, code);
-    }
-  }
+test('required check names are stable across every subscribed code event', () => {
+  assert.match(aggregateBlock('ci-quick-gate'), /name: CI Quick Gate/);
+  assert.match(aggregateBlock('validation-gate'), /name: Validation Gate/);
+  assert.doesNotMatch(workflow, /name: >-/);
 });
 
 test('actual aggregate shell rejects failed cancelled and unexpectedly skipped code groups', () => {
@@ -464,7 +365,7 @@ test('actual aggregate shell rejects failed cancelled and unexpectedly skipped c
     const script = /run: \|\n([\s\S]*)/.exec(aggregateBlock(id))?.[1].replace(/^ {10}/gm, '');
     assert.ok(script);
     const groups = id === 'ci-quick-gate' ? ['QUICK_RESULT'] : ['REPOSITORY_RESULT', 'TEMPLATES_RESULT', 'SECURITY_RESULT'];
-    const env = {...process.env, NOT_REQUIRED_RESULT: 'skipped', ...Object.fromEntries(groups.map(key => [key, 'success']))};
+    const env = {...process.env, ...Object.fromEntries(groups.map(key => [key, 'success']))};
     assert.equal(spawnSync('bash', ['-c', script], {env}).status, 0);
     for (const group of groups) for (const status of ['failure', 'cancelled', 'skipped']) {
       assert.notEqual(spawnSync('bash', ['-c', script], {env: {...env, [group]: status}}).status, 0, `${id}/${group}/${status}`);

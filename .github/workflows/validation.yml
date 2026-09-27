@@ -9,12 +9,6 @@ on:
       - synchronize
       - reopened
       - edited
-      - labeled
-      - unlabeled
-      - assigned
-      - unassigned
-      - ready_for_review
-      - converted_to_draft
   push:
     branches:
       - main
@@ -34,12 +28,6 @@ jobs:
 
   quick:
     name: Quick validation
-    if: >-
-      github.event_name != 'pull_request' ||
-      github.event.action == 'opened' ||
-      github.event.action == 'synchronize' ||
-      github.event.action == 'reopened' ||
-      (github.event.action == 'edited' && github.event.changes.base != null)
     concurrency:
       group: validation-quick-${{ github.event.pull_request.number || github.ref }}
       cancel-in-progress: true
@@ -48,54 +36,22 @@ jobs:
       base-sha: ${{ github.event.pull_request.base.sha || github.event.before || github.sha }}
       head-sha: ${{ github.event.pull_request.head.sha || github.sha }}
 
-  quick-not-required:
-    name: CI Quick Not Required
-    if: >-
-      github.event_name == 'pull_request' &&
-      github.event.action != 'opened' &&
-      github.event.action != 'synchronize' &&
-      github.event.action != 'reopened' &&
-      !(github.event.action == 'edited' && github.event.changes.base != null)
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "Metadata-only event preserves the existing CI Quick Gate."
-
   ci-quick-gate:
-    name: >-
-      ${{ (
-        github.event_name != 'pull_request' ||
-        contains(fromJSON('["opened","synchronize","reopened"]'), github.event.action) ||
-        (github.event.action == 'edited' && github.event.changes.base != null)
-      ) && 'CI Quick Gate' || 'CI Quick Metadata Only' }}
+    name: CI Quick Gate
     if: always()
     needs:
       - quick
-      - quick-not-required
     runs-on: ubuntu-latest
     steps:
       - name: Require quick validation
         env:
           QUICK_RESULT: ${{ needs.quick.result }}
-          NOT_REQUIRED_RESULT: ${{ needs.quick-not-required.result }}
+        shell: bash
         run: |
-          if [[ "$QUICK_RESULT" = success &&
-                "$NOT_REQUIRED_RESULT" = skipped ]]; then
-            exit 0
-          fi
-          if [[ "$QUICK_RESULT" = skipped &&
-                "$NOT_REQUIRED_RESULT" = success ]]; then
-            exit 0
-          fi
-          exit 1
+          test "$QUICK_RESULT" = success
 
   repository:
     name: Full repository validation
-    if: >-
-      github.event_name != 'pull_request' ||
-      github.event.action == 'opened' ||
-      github.event.action == 'synchronize' ||
-      github.event.action == 'reopened' ||
-      (github.event.action == 'edited' && github.event.changes.base != null)
     concurrency:
       group: validation-full-repository-${{ github.event.pull_request.number || github.ref }}
       cancel-in-progress: true
@@ -103,12 +59,6 @@ jobs:
 
   templates:
     name: Full runtime-template validation
-    if: >-
-      github.event_name != 'pull_request' ||
-      github.event.action == 'opened' ||
-      github.event.action == 'synchronize' ||
-      github.event.action == 'reopened' ||
-      (github.event.action == 'edited' && github.event.changes.base != null)
     concurrency:
       group: validation-full-templates-${{ github.event.pull_request.number || github.ref }}
       cancel-in-progress: true
@@ -116,12 +66,6 @@ jobs:
 
   security:
     name: Security validation
-    if: >-
-      github.event_name != 'pull_request' ||
-      github.event.action == 'opened' ||
-      github.event.action == 'synchronize' ||
-      github.event.action == 'reopened' ||
-      (github.event.action == 'edited' && github.event.changes.base != null)
     concurrency:
       group: validation-full-security-${{ github.event.pull_request.number || github.ref }}
       cancel-in-progress: true
@@ -131,21 +75,15 @@ jobs:
       head-sha: ${{ github.event.pull_request.head.sha || github.sha }}
 
   validation-gate:
-    name: >-
-      ${{ (
-        github.event_name != 'pull_request' ||
-        contains(fromJSON('["opened","synchronize","reopened"]'), github.event.action) ||
-        (github.event.action == 'edited' && github.event.changes.base != null)
-      ) && 'Validation Gate' || 'Validation Metadata Only' }}
+    name: Validation Gate
     if: always()
     needs:
       - repository
       - templates
       - security
-      - full-validation-not-required
     runs-on: ubuntu-latest
     concurrency:
-      group: validation-full-gate-${{ github.event.pull_request.number || github.ref }}-${{ needs.full-validation-not-required.result == 'success' && github.run_id || 'code' }}
+      group: validation-full-gate-${{ github.event.pull_request.number || github.ref }}
       cancel-in-progress: true
     steps:
       - name: Require every validation group
@@ -153,31 +91,9 @@ jobs:
           REPOSITORY_RESULT: ${{ needs.repository.result }}
           TEMPLATES_RESULT: ${{ needs.templates.result }}
           SECURITY_RESULT: ${{ needs.security.result }}
-          NOT_REQUIRED_RESULT: ${{ needs.full-validation-not-required.result }}
         shell: bash
         run: |
-          if [[ "$REPOSITORY_RESULT" = success &&
-                "$TEMPLATES_RESULT" = success &&
-                "$SECURITY_RESULT" = success &&
-                "$NOT_REQUIRED_RESULT" = skipped ]]; then
-            exit 0
-          fi
-          if [[ "$REPOSITORY_RESULT" = skipped &&
-                "$TEMPLATES_RESULT" = skipped &&
-                "$SECURITY_RESULT" = skipped &&
-                "$NOT_REQUIRED_RESULT" = success ]]; then
-            exit 0
-          fi
-          exit 1
-
-  full-validation-not-required:
-    name: Full Validation Not Required
-    if: >-
-      github.event_name == 'pull_request' &&
-      github.event.action != 'opened' &&
-      github.event.action != 'synchronize' &&
-      github.event.action != 'reopened' &&
-      !(github.event.action == 'edited' && github.event.changes.base != null)
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "Metadata-only event preserves the existing Validation Gate."
+          set -euo pipefail
+          test "$REPOSITORY_RESULT" = success
+          test "$TEMPLATES_RESULT" = success
+          test "$SECURITY_RESULT" = success

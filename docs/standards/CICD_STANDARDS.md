@@ -112,6 +112,13 @@ the full local-capable/hosted-only/release-only/deployment-only breakdown.
 This local tooling does not change `Validation Gate` or `PR Metadata Gate`
 above.
 
+`validation.yml` runs on code-bearing PR events and on `edited` events. An edit
+reruns the full validation because it may change the target base. Labels,
+assignment, and Draft/Ready changes are handled by the separate PR policy
+workflow; they do not start another Validation run. This keeps the required
+`Validation Gate` registered on the current PR head without allowing a
+metadata-only result to satisfy it.
+
 `full-validation.yml` adds an independent Hosted Full path without removing the
 existing per-PR Full gate. It runs repository, runtime-template, and security
 workflows against one exact head SHA; Security receives a separately selected
