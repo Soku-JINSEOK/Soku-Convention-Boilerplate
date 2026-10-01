@@ -52,6 +52,27 @@ or an external design account.
 - **Boundary:** Scoped document/source-illustration changes and a reviewable PR.
   Merge, release and deployment remain separate.
 
+## Approved extension: document architecture and CI recovery
+
+On 2026-10-01 the owner explicitly requested document-specific visualizations
+that communicate engineering conventions, plus remediation of CI/CD failures
+associated with commits, issues and pull requests.
+
+- Visualize authority, code/data boundaries, access control, cloud exposure,
+  verification, supply-chain inputs and the two release axes in their owning
+  documents. Keep examples distinguishable from implemented infrastructure.
+- Generate editable FigJam material and embed maintainable Mermaid diagrams
+  directly in GitHub documents, with a plain-text explanation and checks.
+- Patch the failing pinned dependencies: brace-expansion 5.0.9 to 5.0.12 and
+  fast-uri 3.1.7 to 3.1.8, preserving the current major versions.
+- Verify manifest/lock consistency, affected ecosystem behavior and hosted
+  security audits. Inspect current results rather than rewriting old failures.
+- Preserve required gates and trust boundaries. Historical cancelled runs are
+  superseded evidence, not passed runs. Merge and release remain separate.
+
+**Status:** Approved by the owner's explicit request. This extends the earlier
+documentation-only scope to the dependency and validation fixes above.
+
 ## Implementation Status
 
 Implemented eleven existing-document updates, three SVG figures and one
