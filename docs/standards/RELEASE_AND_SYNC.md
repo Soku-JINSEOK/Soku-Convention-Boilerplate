@@ -3,7 +3,7 @@
 > **Document purpose:** Release and synchronization standard. Defines independent convention and CLI releases, immutable identities and scoped downstream updates.
 >
 > **Key point:** Pin exact inputs, preserve project ownership and never rewrite published release identities.
-
+>
 > **Applies to:** Team (multi-repository) — see [`docs/guides/APPLICABILITY.md`](../guides/APPLICABILITY.md). If you maintain a single personal project off this boilerplate, you can skip tag-pinning discipline; this matters once you sync updates across more than one downstream repository.
 
 ## Independent artifacts and ownership

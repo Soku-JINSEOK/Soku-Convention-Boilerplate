@@ -26,7 +26,6 @@ flowchart TD
 
 **Reader check:** Does each image trace to its scenario, source and adapter disclosures without exposing credentials?
 
-
 ## Status and Scope
 
 - **Status:** Accepted for the opt-in `docs-manual` component

@@ -6,7 +6,7 @@
 
 ## Proposed shadow evidence boundary
 
-```mermaid
+~~~mermaid
 flowchart TD
   future["Future approved trigger: source and PR identity"] --> guard["Validate substitution identity"]
   guard --> valid{"Identity and contract valid?"}
@@ -16,12 +16,11 @@ flowchart TD
   candidate --> pending["Cannot count as natural operational sample"]
   server["Server-issued build and source evidence"] -.->|"Future independent verification"| attestor["Trusted attestor: not delivered here"]
   candidate -.->|"Compare with server evidence"| attestor
-```
+~~~
 
 **How to read:** Solid arrows describe the candidate validation contract. Dotted arrows are a future attestation requirement, not an implemented rollout. A source-generated result cannot attest to its own provenance.
 
 **Reader check:** Keep operational evidence marked missing until a trusted attestor verifies server evidence and duplicate-attempt state.
-
 
 Status: strict local contract only; live execution is not run and operational evidence is missing.
 

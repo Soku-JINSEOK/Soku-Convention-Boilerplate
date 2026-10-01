@@ -3,7 +3,7 @@
 > **Document purpose:** Project overview. Start here to understand the convention baseline, Soku lifecycle tooling and where to find setup and operating rules.
 >
 > **Key point:** Choose the usage manual for adoption, BLUEPRINT for authority and the document map for a specific question.
-
+>
 > Declarative repository convention baseline and lifecycle tooling powered by the `soku` CLI.
 
 [한국어](./README.ko.md) | [日本語](./README.ja.md)

@@ -3,7 +3,7 @@
 > **Document purpose:** Technology decision guide. Compares language choices through platform constraints, operating capability and representative workload evidence.
 >
 > **Key point:** Record why the chosen runtime fits better and which change would justify reconsidering it.
-
+>
 > **Applies to:** Both — see [`docs/guides/APPLICABILITY.md`](./APPLICABILITY.md).
 
 ## Constraint-first selection map

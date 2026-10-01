@@ -22,7 +22,6 @@ flowchart TD
 
 **Reader check:** Does the launcher select the expected platform asset and reject a mismatched download?
 
-
 Cross-platform launcher for the native `soku` CLI distributed from
 [`Soku-Convention-Boilerplate`](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate).
 

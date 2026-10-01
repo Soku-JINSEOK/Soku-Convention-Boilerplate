@@ -24,7 +24,6 @@ flowchart TD
 
 **Reader check:** Is the selected stack supported by evidence, and have existing files and local deviations been reviewed?
 
-
 ## Purpose
 
 This document is written for AI coding agents (not humans) that are applying

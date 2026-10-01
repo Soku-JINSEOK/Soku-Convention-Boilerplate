@@ -3,7 +3,7 @@
 > **Document purpose:** Code examples. Shows small examples of explicit interfaces and readable behavior across supported stacks.
 >
 > **Key point:** Use the examples to understand style; they do not constitute a production architecture.
-
+>
 > Practical reference snippets for building new repositories on top of `Soku-Convention-Boilerplate`.
 
 ## 📖 How to Read This Document

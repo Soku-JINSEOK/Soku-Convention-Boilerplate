@@ -3,7 +3,7 @@
 > **Document purpose:** Security operating policy. Defines secret hygiene, identity, resource authorization, dependency review and response responsibilities.
 >
 > **Key point:** Enforce permission at the trusted operation boundary and verify denial paths as well as allowed use.
-
+>
 > **Applies to:** Both (lighter for Personal) — see [`docs/guides/APPLICABILITY.md`](../guides/APPLICABILITY.md). Secret hygiene and dependency review matter solo too; only the "external reporter" framing in `SECURITY.md` assumes other users.
 
 ## Access enforcement and secret boundary

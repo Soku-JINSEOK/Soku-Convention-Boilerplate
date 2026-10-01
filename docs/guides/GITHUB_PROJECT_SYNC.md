@@ -25,7 +25,6 @@ flowchart TD
 
 **Reader check:** Check the event's credential context, repository scope, target freshness and unresolved per-target findings.
 
-
 This repository synchronizes GitHub Issue and pull request metadata with the
 user-owned Project #2. The synchronization scope is deliberately narrow:
 

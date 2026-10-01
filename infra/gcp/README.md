@@ -25,7 +25,6 @@ flowchart TD
 
 **Reader check:** Check the intended state prefix, identity and exact planned resources before any apply.
 
-
 This Terraform stack deliberately separates bootstrap from runtime creation while
 keeping both stages in one remote GCS state.
 

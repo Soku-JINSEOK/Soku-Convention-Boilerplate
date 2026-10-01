@@ -26,7 +26,6 @@ flowchart TD
 
 **Reader check:** Can the adopter identify the source version, intended file changes, test evidence and next recovery step?
 
-
 This is the human starting point for adopting Soku conventions. It connects the
 supported decisions and commands without replacing their authoritative
 contracts. Follow linked normative documents when an edge case needs more

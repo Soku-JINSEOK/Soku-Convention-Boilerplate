@@ -26,7 +26,6 @@ flowchart TD
 
 **Reader check:** Confirm environment, immutable image, runtime identity, health result and before/after revisions.
 
-
 This deployment path is manual by design. Local defaults and ordinary CI perform
 only syntax, formatting, validation, and mock regression checks. They never apply
 Terraform, push images, call GCP APIs, or deploy Cloud Run.

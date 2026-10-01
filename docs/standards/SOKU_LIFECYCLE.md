@@ -27,7 +27,6 @@ flowchart TD
 
 **Reader check:** Can the operator distinguish a safe refusal, a restored failure and an incomplete rollback requiring manual recovery?
 
-
 ## Status and Authority
 
 - **Status:** Accepted

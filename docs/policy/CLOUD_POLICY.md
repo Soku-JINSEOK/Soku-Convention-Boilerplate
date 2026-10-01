@@ -3,7 +3,7 @@
 > **Document purpose:** Cloud decision policy. Defines provider and service selection through workload, identity, recovery and operating cost.
 >
 > **Key point:** Document who operates each resource and why its obligations are justified by the workload.
-
+>
 > **Applies to:** Team/Scaled — see [`docs/guides/APPLICABILITY.md`](../guides/APPLICABILITY.md). A personal project on a single cloud account only needs the workload-fit reasoning below, not the multi-account governance framing.
 
 ## Cloud responsibilities and exposure
