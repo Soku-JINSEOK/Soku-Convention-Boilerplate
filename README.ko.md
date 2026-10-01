@@ -31,13 +31,13 @@
 
 각 문서의 구성도에서 책임·접근 경계·검증 근거를 확인한 뒤, 바로 아래 체크 항목으로 구현을 점검할 수 있습니다. 구체적인 제품 설계는 해당 프로젝트에 기록합니다.
 
-- [책임과 데이터 소유자가 드러나는 코드 구성](./docs/standards/PROJECT_STRUCTURE.md#ownership-and-dependency-map)
-- [도구로 일관되게 지키는 코드 품질](./docs/standards/CODE_STYLE.md#readable-module-contract)
-- [자원별 권한 검사와 비밀정보 보호](./docs/policy/SECURITY_POLICY.md#access-enforcement-and-secret-boundary)
-- [DNS·TLS·비공개 데이터·운영 담당자](./docs/policy/CLOUD_POLICY.md#cloud-responsibilities-and-exposure)
-- [위험에 맞춘 테스트와 사용자 검수](./VERIFICATION_GUIDE.md#requirement-to-evidence-map)
-- [검사 결과와 배포 조건을 구분하는 CI/CD](./docs/standards/CICD_STANDARDS.md#implemented-validation-topology)
-- [검토한 의존성과 버전을 고정한 배포](./docs/standards/SUPPLY_CHAIN.md#reviewed-input-and-generated-output-map)
+* [책임과 데이터 소유자가 드러나는 코드 구성](./docs/standards/PROJECT_STRUCTURE.md#ownership-and-dependency-map)
+* [도구로 일관되게 지키는 코드 품질](./docs/standards/CODE_STYLE.md#readable-module-contract)
+* [자원별 권한 검사와 비밀정보 보호](./docs/policy/SECURITY_POLICY.md#access-enforcement-and-secret-boundary)
+* [DNS·TLS·비공개 데이터·운영 담당자](./docs/policy/CLOUD_POLICY.md#cloud-responsibilities-and-exposure)
+* [위험에 맞춘 테스트와 사용자 검수](./VERIFICATION_GUIDE.md#requirement-to-evidence-map)
+* [검사 결과와 배포 조건을 구분하는 CI/CD](./docs/standards/CICD_STANDARDS.md#implemented-validation-topology)
+* [검토한 의존성과 버전을 고정한 배포](./docs/standards/SUPPLY_CHAIN.md#reviewed-input-and-generated-output-map)
 
 [FigJam: editable document, security and CI maps](https://www.figma.com/board/SJgcvEV1HZqYwHM5Nt5HWE)
 

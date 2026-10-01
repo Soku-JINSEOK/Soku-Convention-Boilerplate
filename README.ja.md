@@ -31,13 +31,13 @@
 
 各文書の構成図で責任・アクセス境界・検証根拠を確認し、直下のチェック項目で実装を点検できます。製品固有の設計は対象プロジェクトに記録します.
 
-- [責任とデータ所有者が分かるコード構成](./docs/standards/PROJECT_STRUCTURE.md#ownership-and-dependency-map)
-- [ツールで一貫して守るコード品質](./docs/standards/CODE_STYLE.md#readable-module-contract)
-- [リソース単位の権限確認と秘密情報の保護](./docs/policy/SECURITY_POLICY.md#access-enforcement-and-secret-boundary)
-- [DNS・TLS・非公開データ・運用担当者](./docs/policy/CLOUD_POLICY.md#cloud-responsibilities-and-exposure)
-- [リスクに応じたテストと利用者の受入確認](./VERIFICATION_GUIDE.md#requirement-to-evidence-map)
-- [検証結果と配布条件を分けるCI/CD](./docs/standards/CICD_STANDARDS.md#implemented-validation-topology)
-- [レビュー済み依存関係とバージョン固定の配布](./docs/standards/SUPPLY_CHAIN.md#reviewed-input-and-generated-output-map)
+* [責任とデータ所有者が分かるコード構成](./docs/standards/PROJECT_STRUCTURE.md#ownership-and-dependency-map)
+* [ツールで一貫して守るコード品質](./docs/standards/CODE_STYLE.md#readable-module-contract)
+* [リソース単位の権限確認と秘密情報の保護](./docs/policy/SECURITY_POLICY.md#access-enforcement-and-secret-boundary)
+* [DNS・TLS・非公開データ・運用担当者](./docs/policy/CLOUD_POLICY.md#cloud-responsibilities-and-exposure)
+* [リスクに応じたテストと利用者の受入確認](./VERIFICATION_GUIDE.md#requirement-to-evidence-map)
+* [検証結果と配布条件を分けるCI/CD](./docs/standards/CICD_STANDARDS.md#implemented-validation-topology)
+* [レビュー済み依存関係とバージョン固定の配布](./docs/standards/SUPPLY_CHAIN.md#reviewed-input-and-generated-output-map)
 
 [FigJam: editable document, security and CI maps](https://www.figma.com/board/SJgcvEV1HZqYwHM5Nt5HWE)
 

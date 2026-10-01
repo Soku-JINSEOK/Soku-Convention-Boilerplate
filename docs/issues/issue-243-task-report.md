@@ -73,9 +73,25 @@ associated with commits, issues and pull requests.
 **Status:** Approved by the owner's explicit request. This extends the earlier
 documentation-only scope to the dependency and validation fixes above.
 
+## Issue and PR failure remediation
+
+The same authorized CI/CD remediation scope includes the observed Project sync
+secondary rate limit (run 36798003322) and PR #240's missing Issue relation.
+
+The API client now serializes requests and retries only rate-limited GETs,
+at most twice, honoring Retry-After/reset headers with a bounded wait.
+Permission failures and mutations are not replayed; an exhausted limit fails.
+The distributed Soku asset uses the same implementation. Seven stub-based
+regression cases cover serialization, timing, exhaustion and failure behavior.
+They passed against the extracted client in an in-memory JavaScript harness;
+the actual Node suites must also pass in hosted CI.
+
+PR #240 now links its existing dependency tracking issue #242. Historical
+failures remain intact. No credential or trust boundary was broadened.
+
 ## Current extension status
 
-Added thirteen document-specific Mermaid diagrams, three README indexes,
+Added fourteen document-specific Mermaid diagrams, three README indexes,
 an editable FigJam board with authority/security/CI diagrams, and the two
 patch dependency updates. A read-only hosted job installs the capture runner
 lockfile and runs its existing type and unit checks; browser E2E remains
@@ -125,7 +141,8 @@ Limitations:
   merge under the repository's contribution rules.
 - tldraw editing was blocked by the execution environment's approval policy.
 - The earlier Figma selection limitation was resolved for this extension.
-  The editable board is https://www.figma.com/board/SJgcvEV1HZqYwHM5Nt5HWE.
+  The [editable board](https://www.figma.com/board/SJgcvEV1HZqYwHM5Nt5HWE)
+  is available.
   The original SVGs remain repository-authored illustrations.
 - Results above identify the checked implementation commit. Any later report
   edits require their own hosted checks before merge; no checks or branch rules

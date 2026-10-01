@@ -29,13 +29,13 @@ that the project does not need.
 
 Each linked document now includes its own component, boundary or evidence diagram. Use the diagram to understand the convention, then use the adjacent checks to review your implementation.
 
-- [Readable code and explicit ownership](./docs/standards/PROJECT_STRUCTURE.md#ownership-and-dependency-map)
-- [Tool-enforced code quality](./docs/standards/CODE_STYLE.md#readable-module-contract)
-- [Resource-level authorization and protected secrets](./docs/policy/SECURITY_POLICY.md#access-enforcement-and-secret-boundary)
-- [DNS, TLS, private data and operational ownership](./docs/policy/CLOUD_POLICY.md#cloud-responsibilities-and-exposure)
-- [Risk-based tests and user acceptance](./VERIFICATION_GUIDE.md#requirement-to-evidence-map)
-- [Independent CI results and release conditions](./docs/standards/CICD_STANDARDS.md#implemented-validation-topology)
-- [Reviewed dependencies and versioned distribution](./docs/standards/SUPPLY_CHAIN.md#reviewed-input-and-generated-output-map)
+* [Readable code and explicit ownership](./docs/standards/PROJECT_STRUCTURE.md#ownership-and-dependency-map)
+* [Tool-enforced code quality](./docs/standards/CODE_STYLE.md#readable-module-contract)
+* [Resource-level authorization and protected secrets](./docs/policy/SECURITY_POLICY.md#access-enforcement-and-secret-boundary)
+* [DNS, TLS, private data and operational ownership](./docs/policy/CLOUD_POLICY.md#cloud-responsibilities-and-exposure)
+* [Risk-based tests and user acceptance](./VERIFICATION_GUIDE.md#requirement-to-evidence-map)
+* [Independent CI results and release conditions](./docs/standards/CICD_STANDARDS.md#implemented-validation-topology)
+* [Reviewed dependencies and versioned distribution](./docs/standards/SUPPLY_CHAIN.md#reviewed-input-and-generated-output-map)
 
 [FigJam: editable document, security and CI maps](https://www.figma.com/board/SJgcvEV1HZqYwHM5Nt5HWE)
 

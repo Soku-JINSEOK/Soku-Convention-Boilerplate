@@ -134,6 +134,40 @@ Dependabot PR has no relation and the variable is missing, the workflow fails
 closed with an audit finding instead of guessing or creating an unrelated
 Issue.
 
+## Request scheduling and rate-limit recovery
+
+The API client serializes requests so audit pagination cannot create an
+unbounded burst. A rate-limited GET can retry at most twice. It waits at least
+60 seconds, then 120 seconds, and also honors a later `Retry-After` or primary
+rate-limit reset time. If the requested wait exceeds the 120-second per-retry
+budget, the run fails instead of retrying early.
+
+Ordinary authentication/permission failures fail immediately. Mutations,
+including GraphQL POSTs, are never automatically replayed. An exhausted retry
+budget remains a failed run. Inspect the log and credential configuration
+before a deliberate rerun. The repository and distributed Soku runtime share
+this behavior.
+
+```mermaid
+flowchart TD
+  audit["Audit requests"] --> queue["Serialized API queue"]
+  apply["Approved apply: fresh target hash"] --> queue
+  queue --> result{"Response?"}
+  result -->|"Success"| evidence["Result and sanitized evidence"]
+  result -->|"Rate-limited GET"| waitNode{"Wait within retry budget?"}
+  waitNode -->|"Yes"| delayNode["Honor server delay"]
+  delayNode --> queue
+  waitNode -->|"No"| stopNode["Fail and retain diagnostic"]
+  result -->|"Permission failure or failed mutation"| stopNode
+```
+
+- [ ] Configure the documented credential in the event's actual secret context.
+- [ ] Link a Dependabot PR to its existing tracking Issue; do not guess the relation.
+- [ ] Treat exhausted limits, denied access and skipped work as unresolved.
+- [ ] After a failed mutation, reread current state before any manual retry.
+
+This follows [GitHub's API rate-limit guidance](https://docs.github.com/en/rest/using-the-rest-api/best-practices-for-using-the-rest-api#handle-rate-limit-errors-appropriately).
+
 ## Token setup and rotation
 
 The authoritative operational procedure is the
