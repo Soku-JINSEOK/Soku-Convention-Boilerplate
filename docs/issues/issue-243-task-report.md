@@ -54,8 +54,9 @@ or an external design account.
 
 ## Implementation Status
 
-Prepared eleven existing-document updates, three SVG figures and one Mermaid
-source. No separate learning guide, new governance profile or universal
+Implemented eleven existing-document updates, three SVG figures and one
+Mermaid source in PR #244. Sixteen committed files were read back and matched
+the prepared contents. No separate learning guide, new governance profile or universal
 application topology was introduced.
 
 ## Verification
@@ -78,8 +79,8 @@ Limitations:
 - tldraw editing was blocked by the execution environment's approval policy.
 - Figma generation requires selecting a team/organization in its widget;
   no FigJam output was generated and none is claimed.
-- Hosted checks and commit-signature eligibility must be inspected on the
-  actual PR head before merge. No checks or branch rules are relaxed.
+- The diagram/report follow-up commit requires current-head hosted results
+  before merge. No checks or branch rules are relaxed.
 
 ## Public Disclosure Review
 

@@ -40,11 +40,12 @@
 <text x="395" y="300" font-size="16" fill="#334155">fit</text><path d="M895 312 H820" fill="none" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
 <text x="825" y="300" font-size="16" fill="#334155">access</text><path d="M640 405 V470" fill="none" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
 <text x="655" y="448" font-size="16" fill="#334155">verify</text><path d="M460 525 H385" fill="none" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
-<text x="390" y="510" font-size="16" fill="#334155">No / unknown</text><path d="M210 470 V425 H455 V385" fill="none" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
+<text x="390" y="510" font-size="16" fill="#334155">No</text><path d="M210 470 V425 H455 V385" fill="none" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
 <text x="235" y="447" font-size="16" fill="#334155">revise</text><path d="M640 580 V655" fill="none" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
 <text x="655" y="625" font-size="16" fill="#334155">Yes</text><path d="M820 717 H895" fill="none" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
-<text x="827" y="700" font-size="16" fill="#334155">No / unknown</text><path d="M640 780 V860" fill="none" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
+<text x="827" y="700" font-size="16" fill="#334155">No</text><path d="M640 780 V860" fill="none" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
 <text x="655" y="827" font-size="16" fill="#334155">Yes</text><path d="M460 922 H385" fill="none" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
-<text x="392" y="907" font-size="16" fill="#334155">failure</text><text x="40" y="1040" font-size="17">Review each applicable item with an owner, decision and evidence. Missing evidence is not a pass.</text>
+<text x="392" y="907" font-size="16" fill="#334155">failure</text><path d="M35 922 H15 V525 H35" fill="none" stroke="#475569" stroke-width="2" stroke-dasharray="7 5" marker-end="url(#arrow)"/>
+<text x="40" y="1040" font-size="17">Review each applicable item with an owner, decision and evidence. Missing evidence is not a pass.</text>
 </g>
 </svg>
