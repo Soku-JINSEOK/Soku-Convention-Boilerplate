@@ -653,3 +653,28 @@ jobs:
 
       - name: Verify archives, checksums, and packaged binary
         run: soku/scripts/package_test.sh
+
+  manual-capture-runner:
+    name: Manual capture runner
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+          ref: ${{ inputs['head-sha'] || github.sha }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: "24"
+
+      - name: Install locked runner dependencies
+        working-directory: soku/internal/manual/assets/runner
+        run: npm ci
+
+      - name: Check runner types and unit behavior
+        working-directory: soku/internal/manual/assets/runner
+        run: |
+          npm run typecheck
+          npm test
