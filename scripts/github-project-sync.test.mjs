@@ -414,3 +414,31 @@ test('a failed request does not poison the serialized queue', async () => {
   await assert.rejects(() => client.rest('GET', '/denied'), /Permission denied/);
   assert.deepEqual(await client.rest('GET', '/allowed'), {ok: true});
 });
+
+test('blocks queued requests after exhaustion until the server cooldown expires', async () => {
+  for (const [method, status, headers, expectedAttempts] of [
+    ['GET', 429, {}, 3],
+    ['GET', 403, {'x-ratelimit-remaining': '0', 'x-ratelimit-reset': '3600'}, 1],
+    ['POST', 429, {}, 1],
+  ]) {
+    let attempts = 0;
+    let time = 0;
+    let recovered = false;
+    const client = new GitHubApiClient({
+      token: 'test-token', now: () => time, wait: async () => {},
+      fetchImpl: async () => {
+        attempts += 1;
+        return recovered
+          ? apiResponse(200, {ok: true})
+          : apiResponse(status, {message: 'rate limited'}, headers);
+      },
+    });
+    await assert.rejects(() => client.rest(method, '/limited'), /failed/);
+    await assert.rejects(() => client.rest('GET', '/queued'), /cooldown/);
+    assert.equal(attempts, expectedAttempts);
+    time = 3_600_001;
+    recovered = true;
+    assert.deepEqual(await client.rest('GET', '/after-reset'), {ok: true});
+    assert.equal(attempts, expectedAttempts + 1);
+  }
+});

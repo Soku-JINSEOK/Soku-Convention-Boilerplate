@@ -140,7 +140,8 @@ The API client serializes requests so audit pagination cannot create an
 unbounded burst. A rate-limited GET can retry at most twice. It waits at least
 60 seconds, then 120 seconds, and also honors a later `Retry-After` or primary
 rate-limit reset time. If the requested wait exceeds the 120-second per-retry
-budget, the run fails instead of retrying early.
+budget, the run fails instead of retrying early. Queued and later requests
+remain blocked until that cooldown expires; they do not bypass the limit.
 
 Ordinary authentication/permission failures fail immediately. Mutations,
 including GraphQL POSTs, are never automatically replayed. An exhausted retry

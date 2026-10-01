@@ -81,7 +81,8 @@ secondary rate limit (run 36798003322) and PR #240's missing Issue relation.
 The API client now serializes requests and retries only rate-limited GETs,
 at most twice, honoring Retry-After/reset headers with a bounded wait.
 Permission failures and mutations are not replayed; an exhausted limit fails.
-The distributed Soku asset uses the same implementation. Seven stub-based
+Queued requests remain blocked until the server cooldown expires.
+The distributed Soku asset uses the same implementation. Eight stub-based
 regression cases cover serialization, timing, exhaustion and failure behavior.
 They passed against the extracted client in an in-memory JavaScript harness;
 the actual Node suites must also pass in hosted CI.

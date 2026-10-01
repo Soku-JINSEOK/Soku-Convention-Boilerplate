@@ -279,6 +279,7 @@ export class GitHubApiClient {
     this.wait = wait;
     this.now = now;
     this.pending = Promise.resolve();
+    this.blockedUntil = 0;
   }
 
   async request(method, pathOrUrl, body) {
@@ -289,6 +290,9 @@ export class GitHubApiClient {
   }
 
   async requestWithRetry(method, pathOrUrl, body) {
+    if (this.now() < this.blockedUntil) {
+      throw new Error('GitHub API rate-limit cooldown is still active; retry later.');
+    }
     const url = pathOrUrl.startsWith('http')
       ? pathOrUrl
       : `${this.apiBase}${pathOrUrl.startsWith('/') ? pathOrUrl : `/${pathOrUrl}`}`;
@@ -324,7 +328,7 @@ export class GitHubApiClient {
             /secondary rate limit|API rate limit exceeded/i.test(String(message))
           )
         );
-        if (method === 'GET' && rateLimited && attempt < 2) {
+        if (rateLimited) {
           const currentTime = this.now();
           const seconds = Number(retryAfter);
           const retryDelay = retryAfter === '' ? 0 : (
@@ -341,14 +345,16 @@ export class GitHubApiClient {
             Number.isFinite(retryDelay) ? retryDelay : 0,
             Number.isFinite(resetDelay) ? resetDelay : 0,
           );
-          // Do not retry early when GitHub requests a wait beyond this budget.
-          if (delay <= 120_000) {
+          // Queued requests must not bypass the server's cooldown on failure.
+          this.blockedUntil = currentTime + delay;
+          if (method === 'GET' && attempt < 2 && delay <= 120_000) {
             await this.wait(delay);
             continue;
           }
         }
         throw new Error(`GitHub ${method} ${pathOrUrl} failed (${response.status}): ${message ?? 'unknown error'}`);
       }
+      this.blockedUntil = 0;
       return {data, headers: response.headers, status: response.status};
     }
   }
