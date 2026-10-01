@@ -252,7 +252,6 @@ jobs:
             scripts/github-governance-audit.mjs
             scripts/github-project-sync.mjs
             scripts/github-project-sync.test.mjs
-          scripts/verify-diagram-text.test.mjs
             .github/project-sync.yml
             scripts/setup-git-signing.sh
             scripts/create-release-tag.sh
@@ -440,7 +439,9 @@ jobs:
           node scripts/verify-npm-publishing.mjs
 
       - name: Check English diagram text
-        run: node scripts/verify-diagram-text.mjs
+        run: |
+          node --test scripts/verify-diagram-text.test.mjs
+          node scripts/verify-diagram-text.mjs
 
       - name: Check Markdown formatting
         run: >-
