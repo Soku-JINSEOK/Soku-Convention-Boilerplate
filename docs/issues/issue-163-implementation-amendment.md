@@ -1,5 +1,9 @@
 # Issue 163 implementation amendment
 
+> **Document purpose:** Task decision record. Records the scope, decisions and verification for Issue #163: the CI/CD decision planner and its implementation amendment.
+>
+> **Key point:** Read approval, implementation status and verification separately; this report is dated task evidence, not a fresh claim of current completion.
+
 This note records the execution scope authorized by the current task. It
 supersedes the earlier task-report sequencing where that report separated the
 decision contract, planner, and installer into three independent changes.

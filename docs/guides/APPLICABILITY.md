@@ -1,5 +1,36 @@
 # 🧑‍💻 Applicability
 
+> **Document purpose:** Applicability guide. Helps personal, connected and team projects select proportionate conventions and evidence.
+>
+> **Key point:** Reduce process overhead according to risk; explain every N/A instead of silently omitting a responsibility.
+
+## Scale the process to the risk
+
+Project size adjusts the amount of evidence and coordination. It does not remove baseline secret hygiene, recoverability or responsibility for the change.
+
+**Diagram scope: Reference decision aid.** Select controls from the stated project constraints. A local app still needs data and recovery review; network controls become applicable when it uses shared resources.
+
+```mermaid
+flowchart TD
+  project["Project and change scope"] --> local["Baseline: purpose, data, tests and recovery"]
+  local --> connected{"Network or shared resource involved?"}
+  connected -->|"Yes"| access["Add identity, permissions and network evidence"]
+  connected -->|"No"| localReason["Record hosted components N/A with reason"]
+  access --> impact{"Multiple owners or higher impact?"}
+  localReason --> impact
+  impact -->|"Yes"| ownership["Add owners, review and operating targets"]
+  impact -->|"No"| simple["Keep lightweight accountable records"]
+  ownership --> record["Evidence, owner and unresolved items"]
+  simple --> record
+```
+
+**How to read:** Connectedness and impact are separate questions: a solo project can still expose shared data. Add controls for actual boundaries and risk instead of treating team size as the only trigger.
+
+**Reader check:** Are all applicable responsibilities covered, and does every omission have an explicit reason?
+
+- [ ] Choose evidence proportional to the affected behavior and reuse valid existing evidence.
+- [ ] Do not treat a personal project as exempt from secrets, dependency and data-recovery checks.
+
 ## 🎯 Purpose
 
 This boilerplate was originally written with team-scale collaboration in mind, so some of its documents assume things that do not hold for a solo/personal project: a second reviewer, a shared release cadence, multi-account cloud governance. This document audits which parts of the boilerplate apply to a **Personal** project, which assume a **Team**, and which apply to **Both** — so an individual adopting this boilerplate can tell what to keep, what to skip, and what to defer.
@@ -53,6 +84,28 @@ This maps onto the existing [Maturity Levels in BLUEPRINT.md](../../BLUEPRINT.md
 - `docs/policy/LICENSE_POLICY.md` — every repo needs a declared license.
 - `templates/_shared/ci/downstream-ci*.yml` — CI catches regressions with zero
   reviewers and separates quick feedback from scheduled full/security checks.
+
+## Design and readiness reviews by scope
+
+The [usage review](./USAGE_MANUAL.md#0-review-the-project-before-choosing-configuration),
+[structure review](../standards/PROJECT_STRUCTURE.md#design-boundary-review),
+[access review](../policy/SECURITY_POLICY.md#application-access-review),
+[product acceptance review](../../VERIFICATION_GUIDE.md#downstream-product-acceptance-review)
+and [delivery review](../standards/CICD_STANDARDS.md#delivery-readiness-review)
+apply to Both, at different depth. They supplement the existing documents;
+they are not an additional governance profile.
+
+| Project/change | Proportionate evidence |
+| --- | --- |
+| Small local script or app | Short purpose/scope, local input/data handling, relevant tests, execution/update and recovery notes |
+| Web or connected desktop app | Runtime/data and access boundaries, interface/network failures, target-environment acceptance and delivery plan |
+| Existing feature change | Reuse the current design; update affected decisions and regression/recovery evidence |
+| Team or higher-impact service | Named acceptance/release owners, agreed quality/recovery targets, traceable results and support handoff |
+
+Do not create a cloud account, DNS record, server, authentication subsystem or
+formal test category solely to check a box. Mark unused areas N/A with a reason
+and owner. Team coordination can be lighter for a personal project; sensitive
+data handling, relevant verification and recoverability still require decisions.
 
 ## 🔁 Maintenance Rule
 

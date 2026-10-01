@@ -1,5 +1,9 @@
 # Infra Domain Agent
 
+> **Document purpose:** Domain agent charter. Defines responsibilities and editing boundaries for the infra/ domain.
+>
+> **Key point:** Edit only the owned domain; coordinate shared contracts and report changes needed elsewhere.
+
 ## Owned Domain
 
 The `infra/` directory: infrastructure-as-code, deployment definitions, and environment configuration.

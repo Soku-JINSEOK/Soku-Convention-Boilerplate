@@ -1,9 +1,100 @@
 # End-to-end boilerplate usage manual
 
+> **Document purpose:** Human adoption guide. Connects project review, installation, safe initialization, validation, governance and optional delivery.
+>
+> **Key point:** Follow the linked owning contract for edge cases and verify a plan before applying changes.
+
+## Adoption and operating decisions
+
+**Diagram scope: Adoption procedure.** This combines human review with implemented CLI operations. See [init engine](../../soku/internal/initcmd/engine.go) and [upgrade engine](../../soku/internal/initcmd/upgrade.go) for the mutation boundary; optional delivery requires its own authorization.
+
+```mermaid
+flowchart TD
+  goal["Project goal, users and constraints"] --> fit["Select applicable conventions and stack"]
+  fit --> source["Select and verify immutable source"]
+  source --> plan["Preview initialization and owned files"]
+  plan --> conflict{"Collision or unsupported input?"}
+  conflict -->|"Yes"| resolve["Resolve configuration or ownership"]
+  resolve --> plan
+  conflict -->|"No"| apply["Apply the reviewed plan"]
+  apply --> verify{"Relevant verification passes?"}
+  verify -->|"No"| repair["Diagnose and recover"]
+  repair --> plan
+  verify -->|"Yes"| operate["Operate status, diff and reviewed upgrades"]
+  operate --> delivery["Optional delivery: separate readiness and authorization"]
+```
+
+**How to read:** Follow the document's numbered sections for commands. Configuration choices precede installation; preview precedes writes; verification precedes routine operation. Delivery is optional and has separate conditions.
+
+**Reader check:** Can the adopter identify the source version, intended file changes, test evidence and next recovery step?
+
 This is the human starting point for adopting Soku conventions. It connects the
 supported decisions and commands without replacing their authoritative
 contracts. Follow linked normative documents when an edge case needs more
 detail.
+
+For each document's purpose and presentation type, use the
+[complete document map](./DOCUMENTATION_MAP.md).
+
+## 0. Review the project before choosing configuration
+
+For document-specific component and boundary diagrams, use the
+[engineering convention index](../../README.md#engineering-conventions-at-a-glance).
+The [editable FigJam board](https://www.figma.com/board/SJgcvEV1HZqYwHM5Nt5HWE)
+contains the document authority, authorization and implemented CI maps.
+GitHub's diagrams and text remain readable without a Figma account.
+
+Start with the problem, execution environment and acceptance conditions. The
+boilerplate supplies conventions and starter configuration; the downstream
+project owns its application architecture, data model and deployment topology.
+This review is an adoption aid, not a requirement to build every listed
+component or to provision cloud infrastructure.
+
+![Requirements, design, evidence and release review with failure and recovery branches](../assets/review-evidence.svg)
+
+Read the image as a review loop: scope informs design; technology and security
+constrain it; verification gaps return to design; delivery requires a recovery
+plan; unhealthy delivery triggers recovery and another review. The text and
+tables below remain usable without the image.
+
+Use the [task report](../issues/TASK_REPORT_TEMPLATE.md) for a scoped change.
+For a new system, link its project-owned design document from that report.
+For each applicable item, record an owner, a decision, an evidence link and
+one status: `Pass`, `Fail`, `Blocked` or `N/A`. A pass needs evidence;
+N/A needs a reason and an owner. Unresolved applicable conditions block the
+affected implementation or release; unrelated work can continue.
+
+| Review | Question to answer | Evidence to record | Detailed source |
+| --- | --- | --- | --- |
+| R1 — Purpose and scope | Who uses it, what outcome changes, and what is excluded? | User scenario, boundaries, priorities and acceptance conditions | [Task report](../issues/TASK_REPORT_TEMPLATE.md) |
+| R2 — Quality and constraints | What load, latency, OS/browser support, availability, recovery time and cost limits actually apply? | Measurable targets, assumptions and an owner for each unknown | [Language selection](./LANGUAGE_SELECTION.md) |
+| R3 — Runtime and responsibilities | Where do UI, logic, storage and integrations run? Why are they separate or combined? | Runtime/data-flow diagram and component responsibilities | [Project structure](../standards/PROJECT_STRUCTURE.md#design-boundary-review) |
+| R4 — Data and interfaces | Which records are authoritative? How are concurrency, migrations and failed/duplicate requests handled? | Data relationships, API contracts, change and failure rules | [Project structure](../standards/PROJECT_STRUCTURE.md#design-boundary-review) |
+| R5 — Identity and exposure | Who can perform each action, and which connections or data are exposed? | Permission matrix, trust boundaries and secret handling | [Security policy](../policy/SECURITY_POLICY.md#application-access-review) |
+| R6 — Network and naming | Are a server, DNS, TLS, ports, proxy or offline synchronization needed? | Connection inventory, owners, renewal and failure behavior; N/A where unused | [Project structure](../standards/PROJECT_STRUCTURE.md#design-boundary-review) |
+| R7 — Acceptance and QA | How will normal, denied, failed and recovered behavior be checked? | Requirement-to-test mapping, results and user acceptance | [Verification guide](../../VERIFICATION_GUIDE.md#downstream-product-acceptance-review) |
+| R8 — Delivery and operation | How will the artifact reach users, be observed, updated and recovered? | Release/install plan, health checks, rollback/restore evidence and support owner | [CI/CD standards](../standards/CICD_STANDARDS.md#delivery-readiness-review) |
+
+Examples are illustrative, not universal targets. Replace "fast" with a
+measured condition such as "95% of list requests complete within 2 seconds
+at the agreed dataset and concurrency." Replace "safe" with an observable
+condition such as "a user cannot read another team's record by changing
+its identifier." Choose these values with the project's users and owners.
+
+For a local desktop app, a public domain, cloud account or server may be N/A.
+For a connected desktop app, review both local persistence and server
+authorization. An existing system change can reuse current design evidence
+and review only the affected boundaries; it still needs regression evidence.
+
+The following documents answer different questions:
+
+- [Language selection](./LANGUAGE_SELECTION.md): why this language/runtime fits.
+- [Stack configs](./STACK_CONFIGS.md): which existing starter files to copy.
+- [Applicability](./APPLICABILITY.md): which governance level fits the project.
+- [Verification guide](../../VERIFICATION_GUIDE.md): how to verify this
+  repository and separately plan product acceptance.
+- [Cloud Run delivery](./CLOUD_RUN_CICD.md): the implemented optional GCP path,
+  not the default architecture for every project.
 
 ## 1. Choose an adoption level and profile
 

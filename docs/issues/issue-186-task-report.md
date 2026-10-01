@@ -1,5 +1,9 @@
 # 📝 Issue #186 Task Report
 
+> **Document purpose:** Task decision record. Records the scope, decisions and verification for Issue #186: terminal presentation and deterministic shell completion.
+>
+> **Key point:** Read approval, implementation status and verification separately; this report is dated task evidence, not a fresh claim of current completion.
+
 ## Goal and Background
 
 [Issue #186](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/issues/186)

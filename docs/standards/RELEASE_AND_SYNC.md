@@ -1,6 +1,40 @@
 # 🔄 Release and Sync
 
+> **Document purpose:** Release and synchronization standard. Defines independent convention and CLI releases, immutable identities and scoped downstream updates.
+>
+> **Key point:** Pin exact inputs, preserve project ownership and never rewrite published release identities.
+>
 > **Applies to:** Team (multi-repository) — see [`docs/guides/APPLICABILITY.md`](../guides/APPLICABILITY.md). If you maintain a single personal project off this boilerplate, you can skip tag-pinning discipline; this matters once you sync updates across more than one downstream repository.
+
+## Independent artifacts and ownership
+
+Convention releases and CLI releases have separate identities and compatibility evidence. Manual convention synchronization imports convention-owned files; it does not distribute the CLI source tree or overwrite arbitrary application code.
+
+**Diagram scope: Normative release and adoption lifecycle.** This states the required process, not proof that a particular tag, package or downstream update passed. Check the immutable release record and actual verification evidence before consuming it.
+
+```mermaid
+flowchart TD
+  source["Reviewed source revision"] --> axis{"Which artifact is being released?"}
+  axis -->|"Conventions"| convention["Immutable v tag and compatibility record"]
+  axis -->|"CLI"| cli["Signed soku/v tag and compatibility record"]
+  cli --> packageNode["Native archives, checksums and applicable npm wrapper"]
+  convention --> plan["Downstream: inspect exact source and owned-file plan"]
+  packageNode -->|"Compatible installed tool"| plan
+  plan --> compatible{"Compatible and ownership preserved?"}
+  compatible -->|"No"| hold["Stop: resolve conflict or migration"]
+  compatible -->|"Yes"| apply["Apply supported update"]
+  apply --> verify{"Downstream verification passes?"}
+  verify -->|"No"| recovery["Use documented recovery; retain evidence"]
+  verify -->|"Yes"| record["Record consumed source and result"]
+```
+
+**How to read:** The two release axes can have different versions. The downstream plan identifies the source and files it may change before application. A failed verification requires recovery evidence, not rewriting a published tag.
+
+**Reader check:** Are the exact source, supported migration, project-owned files and recovery limits explicit?
+
+- [ ] Resolve the exact source commit and supported compatibility before updating.
+- [ ] Preserve project-owned files and recorded overrides; review removals and migrations.
+- [ ] Never infer a convention version from a CLI version or move a published tag.
 
 ## 🎯 Purpose
 

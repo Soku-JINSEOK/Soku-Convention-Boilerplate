@@ -1,5 +1,9 @@
 # 🤝 Domain Agent Adapter Guide
 
+> **Document purpose:** Agent charter adapter guide. Explains how tool-neutral domain ownership rules are connected to an AI coding tool.
+>
+> **Key point:** Agree shared contracts before concurrent work and keep each agent inside its assigned directory.
+
 ## 🎯 Purpose
 
 The files in this directory (`frontend-agent.md`, `backend-agent.md`, `app-agent.md`, `db-agent.md`, `infra-agent.md`, `docs-agent.md`) describe ownership boundaries for parallel AI agents working on a domain-based repository (see [Multi-Domain Layout in PROJECT_STRUCTURE.md](../../../docs/standards/PROJECT_STRUCTURE.md#multi-domain-layout-alternative)).

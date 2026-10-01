@@ -1,5 +1,9 @@
 # Issue #93 Task Report — Make Dependabot governance deterministic
 
+> **Document purpose:** Task decision record. Records the scope, decisions and verification for Issue #93: Make Dependabot governance deterministic.
+>
+> **Key point:** Read approval, implementation status and verification separately; this report is dated task evidence, not a fresh claim of current completion.
+
 ## Goal and Background
 
 Issue [#93](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/issues/93)

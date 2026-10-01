@@ -1,5 +1,51 @@
 # ✅ Verification Guide
 
+> **Document purpose:** Verification checklist. Maps repository, runtime, governance and delivery claims to executable checks and retained evidence.
+>
+> **Key point:** Missing or unavailable evidence is not a pass; record the tested revision and limits.
+
+## Requirement-to-evidence map
+
+Select verification from the product risk, then keep the actual result tied to its requirement and tested revision. The branches below supply complementary evidence; a green lint result alone cannot satisfy user acceptance.
+
+**Diagram scope: Reference verification model.** This maps risks to evidence; it does not assert that every downstream acceptance or recovery test exists. Use the implemented verification commands below to determine actual coverage.
+
+```mermaid
+flowchart TD
+  requirement["User outcome and failure risk"] --> type{"Which boundary could fail?"}
+  type -->|"Rule or calculation"| unit["Unit test: normal and edge cases"]
+  type -->|"API or data exchange"| integration["Integration test: contract and failure"]
+  type -->|"User task or recovery"| acceptance["Journey, acceptance or recovery exercise"]
+  unit --> evidence["Result with revision and environment"]
+  integration --> evidence
+  acceptance --> evidence
+  evidence --> complete{"Every applicable criterion evidenced?"}
+  complete -->|"No"| missing["Fail or Blocked: owner and next check"]
+  missing --> requirement
+  complete -->|"Yes"| accepted["Record acceptance and limitations"]
+```
+
+**How to read:** Choose checks by the failure they can detect. Unit tests cannot prove a complete user journey; a passing journey does not replace focused failure tests. Each result includes its environment and tested revision.
+
+**Reader check:** Can a reviewer trace each acceptance condition to an actual result and see every untested assumption?
+
+- [ ] Link a concrete result to every applicable acceptance condition, including negative and recovery cases.
+- [ ] Use N/A only with a reason; distinguish planned checks, actual passes, failures and unavailable checks.
+
+## Why verification follows risk
+
+Unit checks give precise feedback for rules; integration checks expose contract,
+database and failure-boundary mismatches; user-task checks establish whether the
+intended outcome works. Making every check end-to-end increases setup cost and
+makes failures harder to isolate. Using only unit checks leaves integration and
+acceptance assumptions untested.
+
+Select the cheapest check that can detect each relevant failure, then add
+boundary and acceptance evidence where a smaller check cannot establish the
+claim. Record the chosen check, alternative, limitation and revisit condition
+under [Explain Why](./CONTRIBUTING.md). A production escape, flaky
+dependency or sustained runtime increase should trigger review of that mapping.
+
 ## Purpose
 
 This guide is the operational checklist for validating this repository, its
@@ -40,6 +86,57 @@ delete, or reuse them, and must not publish a new release as a side effect.
 Issue #201 prepares the source-only `soku/v0.3.0` candidate. It is not a
 published baseline until a separately approved signed tag, Release,
 five-archive matrix, checksums, and coordinated npm publication complete.
+
+## Downstream product acceptance review
+
+The repository commands below verify Soku and its starter templates. They do
+not certify that a downstream product meets user requirements. Record that
+product's acceptance strategy in its own design/test documents, linked from the
+[task report](./docs/issues/TASK_REPORT_TEMPLATE.md). Start with the
+[usage review](./docs/guides/USAGE_MANUAL.md#0-review-the-project-before-choosing-configuration)
+and the [design boundaries](./docs/standards/PROJECT_STRUCTURE.md#design-boundary-review).
+
+QA includes requirement/design review, test planning, user validation and
+release decisions. Automated tests supply part of the evidence. Select checks
+from the product's risk and behavior; do not require every test category for a
+trivial change or treat code coverage as proof of product acceptance.
+
+| Requirement or risk | Suitable verification | Evidence to retain |
+| --- | --- | --- |
+| Calculation, validation or state rule | Focused unit tests | Input/expected-result cases and actual result |
+| API, database, file or external integration | Integration tests | Contract, realistic configuration and failure result |
+| Critical user task | End-to-end check and user acceptance | Complete user scenario and acceptance owner |
+| Resource/team/tenant access | Positive and denied-access checks | Actor/resource cases, including direct identifier manipulation |
+| Load, large data or responsiveness | Performance measurement where material | Dataset, concurrency, environment, latency/resource results |
+| Browser, OS, CPU or install/update support | Compatibility and clean-install/update checks | Supported matrix and verified versions |
+| Timeout, retry, duplicate request or concurrent write | Failure/concurrency checks | Resulting state, duplicate/conflict policy and recovery result |
+| Existing-data change, backup or deployment failure | Migration and restoration/recovery exercise | Compatible versions, restored behavior and recovery limits |
+| Ease of use and accessibility | User/task review and applicable accessibility checks | Observations, unresolved issues and acceptance decision |
+
+For each applicable requirement, record:
+
+| Requirement ID | Scenario and expected result | Method/environment | Owner | Status | Evidence |
+| --- | --- | --- | --- | --- | --- |
+| Example: ACCESS-01 | Another team's record remains inaccessible after changing its ID | Service integration; agreed test environment | Named reviewer | Blocked until executed | Link to actual result |
+
+Use `Pass`, `Fail`, `Blocked` or `N/A`. A pass requires the actual
+result, version and environment. N/A requires a reason and owner.
+A skipped, unavailable or flaky check is not a pass. An illustrative row is
+not completed evidence, and a passing build does not establish user acceptance.
+
+Before release:
+
+- [ ] Map each applicable acceptance condition to a verification result.
+- [ ] Check changed behavior and affected existing behavior.
+- [ ] Record user acceptance for changed critical workflows.
+- [ ] Resolve or explicitly defer defects with an owner and impact; a deferred
+  defect must still satisfy the agreed release conditions.
+- [ ] Record applicable security, compatibility, data migration and recovery
+  results, and separate app rollback from data restoration.
+- [ ] Confirm the release/support owner and a post-delivery verification plan.
+
+The [delivery review](./docs/standards/CICD_STANDARDS.md#delivery-readiness-review)
+uses this evidence. This review does not authorize production deployment.
 
 ## Local Repository Checks
 

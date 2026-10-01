@@ -1,8 +1,14 @@
 # 🧩 Soku-Convention-Boilerplate
 
+> **Document purpose:** Project overview. Start here to understand the convention baseline, Soku lifecycle tooling and where to find setup and operating rules.
+>
+> **Key point:** Choose the usage manual for adoption, BLUEPRINT for authority and the document map for a specific question.
+>
 > Declarative repository convention baseline and lifecycle tooling powered by the `soku` CLI.
 
 [한국어](./README.ko.md) | [日本語](./README.ja.md)
+
+[Complete document map: purpose and reading route for every document](./docs/guides/DOCUMENTATION_MAP.md)
 
 ## 👋 Overview
 
@@ -13,6 +19,31 @@ Traditional project boilerplates suffer from **template drift**: once copied, co
 * **🎯 Declarative Conventions:** Multi-stack profiles (TypeScript, Go, Python, Java) with unified formatting and static analysis rules.
 * **🛡️ Managed Ownership Model:** Soku records managed-file ownership and baselines in `.soku/manifest.json`, while project-owned files remain outside automatic lifecycle mutation.
 * **🔁 Reproducible CLI Workflow:** Explicit immutable inputs, dry-run plan inspection, and transactional upgrades.
+
+## First-time project review
+
+Before choosing starter files, review purpose, quality targets, runtime/data
+boundaries, access, acceptance and recovery in the
+[usage manual, section 0](./docs/guides/USAGE_MANUAL.md#0-review-the-project-before-choosing-configuration).
+It links each decision to its existing authoritative document. Record evidence
+for applicable items and a reason for N/A; do not add cloud or server components
+that the project does not need.
+
+![Requirements, design, verification and delivery review](./docs/assets/review-evidence.svg)
+
+## Engineering conventions at a glance
+
+Each linked document now includes its own component, boundary or evidence diagram. Use the diagram to understand the convention, then use the adjacent checks to review your implementation.
+
+* [Readable code and explicit ownership](./docs/standards/PROJECT_STRUCTURE.md#ownership-and-dependency-map)
+* [Tool-enforced code quality](./docs/standards/CODE_STYLE.md#readable-module-contract)
+* [Resource-level authorization and protected secrets](./docs/policy/SECURITY_POLICY.md#access-enforcement-and-secret-boundary)
+* [DNS, TLS, private data and operational ownership](./docs/policy/CLOUD_POLICY.md#cloud-responsibilities-and-exposure)
+* [Risk-based tests and user acceptance](./VERIFICATION_GUIDE.md#requirement-to-evidence-map)
+* [Independent CI results and release conditions](./docs/standards/CICD_STANDARDS.md#implemented-validation-topology)
+* [Reviewed dependencies and versioned distribution](./docs/standards/SUPPLY_CHAIN.md#reviewed-input-and-generated-output-map)
+
+[FigJam: editable document, security and CI maps](https://www.figma.com/board/SJgcvEV1HZqYwHM5Nt5HWE)
 
 ## 🗺️ Master Blueprint & Operating Contract
 
@@ -73,15 +104,27 @@ To run the complete verification suite for this boilerplate repository itself:
 
 ## 🏗️ Architecture & Lifecycle Flow
 
-```mermaid
-flowchart TB
-    BP["Boilerplate Source<br/>Release: v1.0.5 (Signed Tag)"]
-    CLI["soku CLI Engine<br/>Distribution: soku/v0.2.1"]
-    Repo["Target Downstream Repository<br/>.soku/manifest.json + Managed File Boundaries"]
+**Diagram scope: Implemented lifecycle overview.** The dashed edge is an ownership constraint, not a write. Confirmation and recovery details are in [the lifecycle contract](./docs/standards/SOKU_LIFECYCLE.md). Source: [init engine](./soku/internal/initcmd/engine.go) and [upgrade engine](./soku/internal/initcmd/upgrade.go).
 
-    BP --> CLI
-    CLI -->|init / verify / upgrade| Repo
+```mermaid
+flowchart TD
+  source["Boilerplate source: Release: v1.0.5"] -->|"Choose immutable source"| engine["soku CLI: Distribution: soku/v0.2.1"]
+  engine --> plan["Plan managed-file changes"]
+  manifest["Manifest and current files"] -->|"Ownership and baseline inputs"| plan
+  project["Project-owned application files"] -.->|"Exclude from automatic mutation"| plan
+  plan --> conflict{"Conflict or incompatible input?"}
+  conflict -->|"Yes"| stopNode["Stop before writes"]
+  conflict -->|"No"| consent["Preview or confirm application"]
+  consent -->|"Explicit dry-run"| preview["Report plan without writes"]
+  consent -->|"Confirmed application"| apply["Apply managed-file transaction"]
+  apply -->|"Success"| owned["Managed files and updated manifest"]
+  apply -->|"Failure"| recovery["Rollback or manual recovery"]
+  owned --> inspect["Read-only status and diff"]
 ```
+
+**How to read:** The source supplies conventions; the CLI plans changes in the downstream repository. The manifest records ownership and baselines. A conflict stops application rather than overwriting a local decision.
+
+**Reader check:** Identify the input release, proposed files, conflict handling and result before applying.
 
 ## 📦 Current Published Baseline
 

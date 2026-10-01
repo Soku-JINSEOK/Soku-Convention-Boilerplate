@@ -1,5 +1,9 @@
 # Issue #114 Task Report — Freeze and classify current CI checks
 
+> **Document purpose:** Task decision record. Records the scope, decisions and verification for Issue #114: Freeze and classify current CI checks.
+>
+> **Key point:** Read approval, implementation status and verification separately; this report is dated task evidence, not a fresh claim of current completion.
+
 ## Goal and Background
 
 Issue [#114](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/issues/114) is phase 1 (plus the start of phase 2) of the sub-issue of #112: before any required-gate or branch-protection change, every check currently run by `ci.yml`, `templates-ci.yml`, `security.yml`, `contribution-title-check.yml`, `pull-request-policy.yml`, `release.yml`, and `deploy-gcp.yml` must be classified as `local-capable` / `hosted-only` / `release-only` / `deployment-only`, and a single local entry point must run every `local-capable` check reproducibly.

@@ -1,5 +1,9 @@
 # Issue #201 Task Report — Explicit project ownership handoff
 
+> **Document purpose:** Task decision record. Records the scope, decisions and verification for Issue #201: Explicit project ownership handoff.
+>
+> **Key point:** Read approval, implementation status and verification separately; this report is dated task evidence, not a fresh claim of current completion.
+
 ## Goal and Background
 
 Issue [#201](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/issues/201)

@@ -1,5 +1,9 @@
 # Issue #136 Task Report — Add validation-only Cloud Build checks
 
+> **Document purpose:** Task decision record. Records the scope, decisions and verification for Issue #136: Add validation-only Cloud Build checks.
+>
+> **Key point:** Read approval, implementation status and verification separately; this report is dated task evidence, not a fresh claim of current completion.
+
 ## Goal and Background
 
 Issue [#136](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/issues/136)

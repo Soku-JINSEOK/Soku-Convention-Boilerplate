@@ -1,5 +1,9 @@
 # Issue #207 Task Report — Reposition README to clarify Soku lifecycle and sync translations
 
+> **Document purpose:** Task decision record. Records the scope, decisions and verification for Issue #207: Reposition README to clarify Soku lifecycle and sync translations.
+>
+> **Key point:** Read approval, implementation status and verification separately; this report is dated task evidence, not a fresh claim of current completion.
+
 ## Goal and Background
 
 Issue [#207](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/issues/207) addresses the first-screen presentation of `Soku-Convention-Boilerplate`. The previous top-of-README framed the project primarily as a static starter template rather than declarative convention baseline and lifecycle tooling powered by the `soku` CLI. Furthermore, the Quick Start was collapsed inside an accordion, and terminology required formal alignment with the normative `.soku/manifest.json` contract.

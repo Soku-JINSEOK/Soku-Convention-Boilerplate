@@ -1,6 +1,55 @@
 # ☁️ Cloud Policy
 
+> **Document purpose:** Cloud decision policy. Defines provider and service selection through workload, identity, recovery and operating cost.
+>
+> **Key point:** Document who operates each resource and why its obligations are justified by the workload.
+>
 > **Applies to:** Team/Scaled — see [`docs/guides/APPLICABILITY.md`](../guides/APPLICABILITY.md). A personal project on a single cloud account only needs the workload-fit reasoning below, not the multi-account governance framing.
+
+## Cloud responsibilities and exposure
+
+This reference shows responsibilities to document when a connected service uses cloud resources. It is provider-neutral and does not assert that these resources are deployed by this repository. A local application can omit the cloud entirely.
+
+**Diagram scope: Reference cloud responsibility model.** DNS resolves the name; HTTPS traffic goes to the resolved endpoint, not through a DNS owner. Dotted edges indicate ownership. This is not a snapshot of deployed infrastructure; the optional implemented GCP path is in [Cloud Run CI/CD](../guides/CLOUD_RUN_CICD.md).
+
+```mermaid
+flowchart TD
+  client["User or client"] -->|"Name lookup"| dns["DNS resolver and authoritative records"]
+  dns -->|"Resolved endpoint"| client
+  owner["DNS owner: records and renewal"] -.->|"Maintains"| dns
+  client -->|"HTTPS request"| entry["TLS endpoint: allowed ingress"]
+  entry --> auth["Application: identity and resource permission"]
+  auth -->|"Scoped data access"| data["Private storage: data and backup owner"]
+  auth -->|"Approved outbound request"| external["External service"]
+  external -->|"Timeout or failure"| recover["Defined retry or degraded response"]
+  data -->|"Backup and restore evidence"| recovery["Recovery owner and objectives"]
+  auth -->|"Redacted health signals"| monitor["Operations: alerts and incident response"]
+  budget["Usage and budget signals"] --> monitor
+  monitor -->|"Incident action"| recovery
+```
+
+**How to read:** This is a provider-neutral reference, not a claim of deployed resources. DNS maps the name, TLS protects transport, and application authorization controls resource access. Each layer has a different owner and failure mode.
+
+**Reader check:** Who owns certificates, access, data restoration, external failures and budget alerts? Mark hosted components N/A for an offline app.
+
+- [ ] Document ingress, egress, DNS/certificate renewal and environment-specific identities.
+- [ ] Estimate storage, requests and network costs, and name the alert and recovery owner.
+- [ ] Choose a single provider unless a concrete requirement justifies the additional operating burden.
+
+## Why workload fit precedes provider choice
+
+A provider or service adds account, identity, recovery and support obligations.
+Start with the workload and the team's ability to operate it. Managed services
+can reduce patching work but introduce service constraints, recurring cost and
+exit effort. Self-managed infrastructure trades those constraints for maintenance
+and incident responsibility. An offline application may need neither.
+
+Record the rejected option, expected load, storage/egress assumptions, recovery
+objectives, operator and budget review threshold. Validate with a representative
+cost estimate and recovery exercise; a provider comparison table is not operating
+evidence. Revisit when measured demand, residency requirements or operating
+capability changes. Use the shared
+[decision contract](../../CONTRIBUTING.md).
 
 ## 🎯 Purpose
 

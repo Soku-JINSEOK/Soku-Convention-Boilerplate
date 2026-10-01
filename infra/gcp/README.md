@@ -1,5 +1,33 @@
 # GCP infrastructure
 
+> **Document purpose:** Infrastructure configuration guide. Explains Terraform foundation, runtime, optional validation resources and isolated state responsibilities.
+>
+> **Key point:** Preview the intended resource scope and require explicit application before creating or changing cloud resources.
+
+## Terraform ownership and state
+
+**Diagram scope: Implemented bootstrap and declared state boundaries.** [gcp-bootstrap.sh](../../scripts/gcp-bootstrap.sh) selects the apply path; [main.tf](./main.tf) declares resources. Dotted edges identify state ownership, not execution order. The separate logging root follows its own reviewed plan. No live resource inventory is asserted.
+
+```mermaid
+flowchart TD
+  operator["Operator selects bootstrap mode"] --> preview["Preview resources and commands"]
+  preview --> approved{"Explicit apply and matching project confirmation?"}
+  approved -->|"No"| stopNode["No apply"]
+  approved -->|"Yes"| mode{"Validation-only mode?"}
+  mode -->|"Yes"| validation["Target APIs, validation identity and triggers"]
+  validation -->|"Uses isolated state"| validationState["Prefix: cloud-build-validation"]
+  mode -->|"No"| foundation["Target foundation; deploy_runtime=false"]
+  foundation --> imageNode["Build image and resolve digest"]
+  imageNode --> runtime["Apply runtime with immutable digest"]
+  foundation -.->|"Shared state"| appState["Prefix: cloud-run"]
+  runtime -.->|"Shared state"| appState
+  logging["Separate logging root and reviewed plan"] -.->|"Separate state"| logState["Prefix: cloud-build-logging"]
+```
+
+**How to read:** The boxes describe declared resource ownership, not live deployment status. Workload Identity Federation (WIF) connects the reviewed GitHub identity to the deployer; the validation identity is separate. State prefixes prevent one resource scope from silently managing another.
+
+**Reader check:** Check the intended state prefix, identity and exact planned resources before any apply.
+
 This Terraform stack deliberately separates bootstrap from runtime creation while
 keeping both stages in one remote GCS state.
 

@@ -1,5 +1,9 @@
 # 🧰 Stack Configs
 
+> **Document purpose:** Configuration catalog. Maps each supported stack to its copyable formatter, build, test and runtime configuration files.
+>
+> **Key point:** Select only relevant templates and replace project-specific placeholders before validation.
+
 ## 🎯 Purpose
 
 This document maps the copyable starter configuration files that live under `templates/`.

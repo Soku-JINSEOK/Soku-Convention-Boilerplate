@@ -1,5 +1,49 @@
 # GitHub Project and Metadata Synchronization
 
+> **Document purpose:** Metadata synchronization guide. Explains installation, audit, guarded apply and recovery for Issue and Project metadata synchronization.
+>
+> **Key point:** Use the scoped identity and fresh target state; source-code mutation and duplicate Project items are outside its scope.
+
+## Metadata audit and apply
+
+```mermaid
+flowchart TD
+  eventNode["Issue, PR, schedule or manual event"] --> trusted["Trusted workflow source and scoped credential"]
+  trusted --> audit["Read metadata and build an in-memory audit"]
+  audit --> mode{"Audit or apply mode?"}
+  mode -->|"Audit"| report["Write redacted proposed changes"]
+  mode -->|"Apply"| kind{"Dependency issue creation?"}
+  kind -->|"Yes"| lookup["Re-list issues; reuse matching title or create"]
+  kind -->|"No"| fresh["Reread existing target and compare audited hash"]
+  fresh --> same{"Target unchanged?"}
+  same -->|"No"| stale["Skip target with conflict"]
+  same -->|"Yes"| write["Apply allowed metadata changes"]
+  lookup --> results["Record per-operation result; continue remaining operations"]
+  write --> results
+  write -->|"Mutation error"| skipped["Record skipped operation with conflict"]
+  skipped --> results
+  stale --> results
+  results --> finalNode["Emit sanitized report; exit 1 if failures remain"]
+```
+
+**How to read:** Apply builds its own audit and compares fresh state in the same
+invocation; it does not consume a previously approved report file. Existing
+target mutations compare hashes. Dependency-issue creation instead re-lists
+issues and deduplicates by exact title. A Project item's hash is checked before
+its field-update batch, not atomically before every field write. Concurrent
+changes after the check remain possible.
+
+**Failure boundary:** An operation exception is recorded as skipped/conflicted,
+and independent operations continue. The final report returns exit 1 when
+failures remain. A partial apply is not an all-or-nothing transaction.
+
+**Evidence and reason:** [sync implementation](../../scripts/github-project-sync.mjs)
+owns `applyOperations`, `reportFor` and `GitHubApiClient.requestWithRetry`.
+Fresh reads reduce accidental overwrites; per-operation reporting exposes
+partial progress instead of implying atomicity.
+
+**Reader check:** Check the event's credential context, repository scope, target freshness and unresolved per-target findings.
+
 This repository synchronizes GitHub Issue and pull request metadata with the
 user-owned Project #2. The synchronization scope is deliberately narrow:
 
@@ -133,6 +177,49 @@ For future Dependabot pull requests, set the repository variable
 Dependabot PR has no relation and the variable is missing, the workflow fails
 closed with an audit finding instead of guessing or creating an unrelated
 Issue.
+
+## Request scheduling and rate-limit recovery
+
+The API client serializes requests so audit pagination cannot create an
+unbounded burst. A rate-limited GET can retry at most twice. It waits at least
+60 seconds, then 120 seconds, and also honors a later `Retry-After` or primary
+rate-limit reset time. If the requested wait exceeds the 120-second per-retry
+budget, the run fails instead of retrying early. Queued and later requests
+remain blocked until that cooldown expires; they do not bypass the limit.
+
+Ordinary authentication/permission failures fail immediately. Mutations,
+including GraphQL POSTs, are never automatically replayed. An exhausted retry
+budget remains a failed run. Inspect the log and credential configuration
+before a deliberate rerun. The repository and distributed Soku runtime share
+this behavior.
+
+```mermaid
+flowchart TD
+  requests["Audit and apply API requests"] --> queue["Serialized queue"]
+  queue --> cooldown{"Server cooldown still active?"}
+  cooldown -->|"Yes"| failNode["Reject request; retain diagnostic"]
+  cooldown -->|"No"| send["Send active request"]
+  send --> response{"Response?"}
+  response -->|"Success"| success["Return result and release queue slot"]
+  response -->|"Rate limit"| retry{"GET, retries left and delay within budget?"}
+  retry -->|"Yes"| waitNode["Wait inside active queue slot"]
+  waitNode --> send
+  retry -->|"No"| failNode
+  response -->|"Other error"| failNode
+```
+
+**Retry limits:** Only rate-limited GET requests retry, at most twice, with a
+maximum 120-second wait per retry. Server cooldown and exponential delay are
+both respected. The active queue slot remains occupied during the wait.
+Mutation requests, including GraphQL POST, do not retry automatically.
+Queued requests fail while the recorded cooldown remains active.
+
+- [ ] Configure the documented credential in the event's actual secret context.
+- [ ] Link a Dependabot PR to its existing tracking Issue; do not guess the relation.
+- [ ] Treat exhausted limits, denied access and skipped work as unresolved.
+- [ ] After a failed mutation, reread current state before any manual retry.
+
+This follows [GitHub's API rate-limit guidance](https://docs.github.com/en/rest/using-the-rest-api/best-practices-for-using-the-rest-api#handle-rate-limit-errors-appropriately).
 
 ## Token setup and rotation
 

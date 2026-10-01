@@ -1,5 +1,9 @@
 # 📝 Task Report: Profiles and Bounded Declarative Extensions
 
+> **Document purpose:** Task decision record. Records the scope, decisions and verification for Issue #22: Profiles and Bounded Declarative Extensions.
+>
+> **Key point:** Read approval, implementation status and verification separately; this report is dated task evidence, not a fresh claim of current completion.
+
 ## Goal and Background
 
 [Issue #22](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/issues/22)

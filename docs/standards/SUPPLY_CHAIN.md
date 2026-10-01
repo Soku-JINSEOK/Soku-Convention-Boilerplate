@@ -1,5 +1,40 @@
 # Supply-Chain Input Standard
 
+> **Document purpose:** Dependency input standard. Defines authoritative versions, lockfiles, pinned tools and generated validation outputs.
+>
+> **Key point:** Review inputs once, derive outputs reproducibly and verify installation plus security evidence.
+
+## Reviewed input and generated output map
+
+Each artifact has one authoritative input. Generated copies must agree with it, and ecosystem checks must run after a dependency update.
+
+**Diagram scope: Normative dependency-review model.** Generated workflow parity applies only where a generator owns the output. Matching locks and successful audits are evidence about selected inputs, not a guarantee that every dependency is risk-free.
+
+```mermaid
+flowchart TD
+  change["Dependency or tool update"] --> review["Review version, advisory and compatibility"]
+  review --> locks["Manifest and matching lockfile"]
+  review --> toolsNode["Authoritative tool pins and Action SHAs"]
+  toolsNode --> render["Render derived workflow where required"]
+  render --> parity{"Generated output matches source?"}
+  parity -->|"No"| repair["Regenerate and review diff"]
+  repair --> render
+  parity -->|"Yes"| validation["Relevant installation and behavior checks"]
+  locks --> validation
+  validation --> audit["Dependency and license audit"]
+  audit --> result{"Checks passed without suppression?"}
+  result -->|"No"| blocked["Resolve finding or record blocker"]
+  result -->|"Yes"| evidence["Retain reviewed inputs and revision evidence"]
+```
+
+**How to read:** Manifests and locks describe packages; authoritative tool pins also drive generated workflows. Parity detects drift between source and generated copies, while installation and audits test different properties.
+
+**Reader check:** Are versions, lock integrity, generated workflow and audit results consistent for the same revision?
+
+- [ ] Update the authoritative manifest and lockfile together, retaining reviewed integrity values.
+- [ ] Regenerate owned outputs and check parity rather than editing generated copies independently.
+- [ ] Patch vulnerable versions and rerun installation/tests/audits without relaxing the gate.
+
 ## Purpose
 
 Protected verification, release, and template paths must resolve reviewed
@@ -31,7 +66,7 @@ Dependabot must cover these tracked locations:
 | --- | --- |
 | GitHub Actions | `/` |
 | Go modules | `/soku`, `/templates/go` |
-| npm | `/soku/npm`, `/templates/javascript-typescript-node` |
+| npm | `/soku/npm`, `/soku/internal/manual/assets/runner`, `/templates/javascript-typescript-node` |
 | Python | `/templates/python` |
 | Maven | `/templates/java-spring` |
 | Docker | `/`, `/.devcontainer`, `/templates/gcloud` |

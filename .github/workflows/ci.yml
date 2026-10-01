@@ -40,6 +40,10 @@ jobs:
         uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
         with:
           go-version: "1.26.x"
+          cache-dependency-path: |
+            soku/go.sum
+            verification/tools.env
+            .github/workflows/ci.yml
 
       - name: Verify baseline documents exist
         shell: bash
@@ -389,6 +393,9 @@ jobs:
           .github/usage-manual.test.mjs
           .github/github-governance-audit.test.mjs
 
+      - name: Run distributed Project Sync regression tests
+        run: node --test soku/internal/projectsync/assets/github-project-sync.test.mjs
+
       - name: Run npm wrapper unit tests
         run: >-
           node --test soku/npm/lib/launcher.test.mjs
@@ -430,6 +437,11 @@ jobs:
           node scripts/verify-release-identity.mjs
           node --test scripts/verify-npm-publishing.test.mjs
           node scripts/verify-npm-publishing.mjs
+
+      - name: Check English diagram text
+        run: |
+          node --test scripts/verify-diagram-text.test.mjs
+          node scripts/verify-diagram-text.mjs
 
       - name: Check Markdown formatting
         run: >-
@@ -653,3 +665,30 @@ jobs:
 
       - name: Verify archives, checksums, and packaged binary
         run: soku/scripts/package_test.sh
+
+  manual-capture-runner:
+    name: Manual capture runner
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+          ref: ${{ inputs['head-sha'] || github.sha }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: soku/internal/manual/assets/runner/package-lock.json
+
+      - name: Install locked runner dependencies
+        working-directory: soku/internal/manual/assets/runner
+        run: npm ci
+
+      - name: Check runner types and unit behavior
+        working-directory: soku/internal/manual/assets/runner
+        run: |
+          npm run typecheck
+          npm test

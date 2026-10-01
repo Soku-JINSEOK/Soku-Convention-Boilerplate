@@ -1,5 +1,38 @@
 # 🗺️ Blueprint
 
+> **Document purpose:** Architecture authority. Defines the repository's purpose, document authority and boundaries between shared conventions and project design.
+>
+> **Key point:** Use this document to resolve policy conflicts; downstream applications own their architecture.
+
+## Engineering contract map
+
+This map summarizes document authority and the evidence connecting it to implementation. An arrow means that the source constrains or supplies the destination; project-specific architecture stays in the downstream project.
+
+**Diagram scope: Normative authority map.** The arrows show which document constrains a decision, not runtime calls. The authority order and project-owned design boundary are defined below.
+
+```mermaid
+flowchart TD
+  startNode["Reader: identify the question"] --> scope{"Shared rule or product decision?"}
+  scope -->|"Shared rule"| authority["BLUEPRINT: highest repository authority"]
+  authority -->|"Narrower requirements"| policy["Owning standard or policy"]
+  scope -->|"Product decision"| product["Project design: runtime, data and deployment"]
+  policy -->|"Constrains"| product
+  product -->|"Reasons and alternatives"| report["Task report: owner and evidence"]
+  report --> review{"Evidence supports the choice?"}
+  review -->|"No"| gap["Record gap and next validation"]
+  gap --> product
+  review -->|"Yes"| change["Review the scoped pull request"]
+```
+
+**How to read:** Read top to bottom. BLUEPRINT owns shared authority; the downstream project owns its product design. The report connects a decision to its reasons and evidence.
+
+**Reader check:** Can the reader identify both the rule owner and the evidence behind the project-specific choice?
+
+[Editable FigJam counterpart](https://www.figma.com/board/SJgcvEV1HZqYwHM5Nt5HWE)
+
+- [ ] Can a reader find the owner of each rule without opening implementation code?
+- [ ] Does the project design identify its intentional deviations and supporting evidence?
+
 ## 🎯 Purpose
 
 `Soku-Convention-Boilerplate` is a design-first repository blueprint for creating projects that stay readable, consistent, and maintainable across time, teams, and stacks.
@@ -83,6 +116,9 @@ If a document conflicts with this blueprint, the blueprint wins unless a downstr
 The repository uses a layered language strategy.
 
 - Human-facing overview content defaults to English, Korean, and Japanese.
+- Diagram titles, nodes, edge labels and legends use English across all language
+  editions and editable boards. Translate the surrounding explanation, not the
+  diagram labels, so one technical vocabulary can be checked against the code.
 - Operational rules, governance, policy, and AI instructions are written in English only.
 
 This keeps the public-facing docs approachable while making the operating rules easy for AI agents and humans to parse consistently.
@@ -100,6 +136,20 @@ A cross-link header must be included at the very top of each file to allow reade
 ### 🧱 Multi-Language Block Ordering (Inside Single Docs)
 
 If a document mixes more than one language inside a single file, group each language's content into a single contiguous block instead of interleaving languages section by section or paragraph by paragraph. Order the blocks English first, followed by each additional language in the order it was added.
+
+## Project design review inputs
+
+A downstream project records its purpose, acceptance conditions, runtime/data
+boundaries, technology tradeoffs, access policy and recovery strategy in
+project-owned documents. Shared conventions support those decisions; they do
+not choose a universal architecture or require cloud services for a local app.
+
+The [usage manual review](./docs/guides/USAGE_MANUAL.md#0-review-the-project-before-choosing-configuration)
+is the human entrypoint. It delegates structure, security, verification and
+delivery details to their existing documents. A review records an owner,
+decision, evidence and applicability; unresolved applicable conditions remain
+visible. Reuse current evidence for unchanged areas instead of creating
+duplicate policies or design records.
 
 ## 🏗️ Repository Shape
 

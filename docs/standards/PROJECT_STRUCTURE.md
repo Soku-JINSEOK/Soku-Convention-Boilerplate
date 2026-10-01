@@ -1,5 +1,52 @@
 # 🏗️ Project Structure
 
+> **Document purpose:** Ownership and layout standard. Maps directories to responsibilities, deployable units, data ownership and shared interfaces.
+>
+> **Key point:** Choose a layout that exposes real boundaries; separate folders alone do not justify separate services.
+
+## Ownership and dependency map
+
+Choose a file layout that matches the actual deployable units. This reference separates contracts and data ownership from folder names; it does not require separate services.
+
+**Diagram scope: Reference ownership and dependency model.** These are layout alternatives, not a deployed frontend/backend service supplied by this repository. Adapt the boundaries to the actual deployable units and keep schema and migration ownership explicit.
+
+```mermaid
+flowchart TD
+  deploy{"How many deployable units?"} -->|"One"| app["app or src: application"]
+  deploy -->|"Client and server"| front["frontend: presentation"]
+  front -->|"Agreed API request"| back["backend: trusted operation"]
+  app -->|"Data contract"| data["Data owner: schema and migrations"]
+  back -->|"Data contract"| data
+  back -->|"External call"| adapter["Adapter: third-party boundary"]
+  adapter -->|"Timeout or error"| handling["Defined failure and retry behavior"]
+  handling -->|"Result to caller"| back
+  tests["Tests: contracts and failure cases"] -.->|"Verify"| data
+  tests -.->|"Verify"| back
+  ops["infra: environment and identities"] -.->|"Configure"| app
+  ops -.->|"Configure"| back
+```
+
+**How to read:** Boxes are responsibilities, not mandatory services. A frontend sends a request through an agreed contract; trusted code owns the operation and the data owner controls schema changes. Dotted arrows mean configuration or verification.
+
+**Reader check:** Who owns each interface and migration, and what response does the caller receive when an external dependency fails?
+
+- [ ] Choose app/ or frontend/ + backend/ in the multi-domain layout; do not duplicate the same responsibility in both.
+- [ ] Identify the single writer or coordination policy for shared data, and test interface failures.
+
+## Why these boundaries
+
+A directory boundary makes ownership and allowed dependencies visible during
+review. Grouping only by file extension hides which module owns a rule or a
+migration. Separating every module into a service also adds deployment,
+network-failure and compatibility work before a requirement justifies it.
+
+Start with the smallest layout that expresses the actual deployable units and
+data owners. Accept explicit interface and ownership documentation as its
+maintenance cost. Revisit the boundary when independent deployment, conflicting
+data writers or measurable coupling requires it; folder count alone is not
+evidence. Record the concrete project decision using
+[Explain Why](../../CONTRIBUTING.md).
+
 ## 🎯 Purpose
 
 This document defines how repositories based on `Soku-Convention-Boilerplate` should organize directories, files, and ownership boundaries.
@@ -108,6 +155,46 @@ The layout above assumes a single service/package. Some repositories are easier 
 **When to use this instead of the single-service layout:** see [Applicability](../guides/APPLICABILITY.md) — as a rule of thumb, a solo project or a single deployable unit is well served by the default `src/` layout; a project where frontend and backend actually deploy separately, or where multiple contributors (including parallel AI agents, see [AGENTS.md § Parallel Agent Ownership](../../AGENTS.md#parallel-agent-ownership)) need to work on distinct domains at once, benefits from domain folders being visible at the root.
 
 This choice is orthogonal to the `Google Style Guide` baseline in [`CODE_STYLE.md`](./CODE_STYLE.md) — that document governs in-file code style, not directory topology, so either layout can adopt it unchanged.
+
+## Design boundary review
+
+A directory layout describes ownership of files. It does not prove that an
+application's runtime or data boundaries are correct. Before selecting a
+layout, record the following in the downstream project's design document,
+linked from its [task report](../issues/TASK_REPORT_TEMPLATE.md).
+The [usage manual review](../guides/USAGE_MANUAL.md#0-review-the-project-before-choosing-configuration)
+connects these decisions to security, verification and delivery.
+
+![Connected application and local desktop runtime boundaries](../assets/runtime-boundaries.svg)
+
+These are reference patterns, not a mandatory topology or a diagram of deployed
+Soku infrastructure. A browser or connected desktop client calls an application
+service that checks permissions before private storage access. A local desktop
+application may instead use local files or a database, with synchronization
+only when required. The server must reauthorize synchronized operations.
+
+| Boundary | Decision to record | Completion evidence |
+| --- | --- | --- |
+| Runtime | Browser, OS process, server, job or external service; supported OS/CPU/browser versions | Component inventory with execution location, responsibility and owner |
+| User flow | Input, loading, empty, success and error behavior; keyboard/accessibility needs where applicable | Screen/action flow with acceptance conditions |
+| Data | Authoritative source, identifiers, relationships, uniqueness, retention, deletion and export | Data model and examples covering lifecycle rules |
+| Consistency | Transaction boundaries, simultaneous edits, atomic local writes and duplicate operations | Conflict/transaction policy and relevant test scenarios |
+| Interfaces | Request/response schema, version compatibility, error codes, pagination and limits | API or local interface contract, including failure behavior |
+| Connections | Source/destination, protocol, port, authentication, timeout and retry policy | Connection inventory and exposure/trust boundaries |
+| Naming and TLS | Domain/DNS ownership, routing and certificate renewal where used | Name-to-service mapping and renewal/support owner |
+| Change and recovery | Existing-data migration, older-client compatibility, backup/restore and update failure | Migration/recovery procedure and planned verification |
+
+Keep network reachability and application authorization separate. Do not put
+service credentials in distributed clients, and do not expose a database merely
+to simplify client access. A deliberate specialized client-to-data architecture
+needs equivalent identity, authorization and evidence, documented as a
+project-specific decision.
+
+For each item, name an owner and link evidence. Mark an unused component N/A
+with a reason instead of adding it to satisfy the table. Follow
+[security policy](../policy/SECURITY_POLICY.md#application-access-review) for
+permission review and [verification](../../VERIFICATION_GUIDE.md#downstream-product-acceptance-review)
+for acceptance evidence.
 
 ## 📍 Documentation Placement
 

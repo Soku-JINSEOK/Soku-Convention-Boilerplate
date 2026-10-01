@@ -154,8 +154,26 @@ test('Hosted Full uses the current base/head security contract and fails closed'
   }
 });
 
-test('manual Validation invokes Hosted Full for its exact dispatched revision', () => {
-  assert.match(workflow, /hosted-full:\n\s+name: Exact-head Hosted Full\n\s+if: github.event_name == 'workflow_dispatch'\n\s+uses: \.\/\.github\/workflows\/full-validation.yml\n\s+with:\n\s+base-sha: \$\{\{ github.sha \}\}\n\s+head-sha: \$\{\{ github.sha \}\}/);
+test('manual Validation runs each full component once without a nested full tree', () => {
+  for (const name of ['ci', 'templates-ci', 'security']) {
+    const call = 'uses: ./.github/workflows/' + name + '.yml';
+    assert.equal(workflow.split(call).length - 1, 1, name);
+  }
+  assert.doesNotMatch(workflow, /uses: \.\/\.github\/workflows\/full-validation\.yml/);
+  for (const component of [repositoryWorkflow, templateWorkflow]) {
+    assert.match(component, /ref: \$\{\{ inputs\['head-sha'\] \|\| github\.sha \}\}/);
+  }
+  assert.match(hostedFullWorkflow, /^\s{2}workflow_dispatch:/m);
+  assert.match(hostedFullWorkflow, /^\s{2}schedule:/m);
+});
+
+test('runner cache only accelerates locked installation and retains verification', () => {
+  const runner = repositoryWorkflow.slice(repositoryWorkflow.indexOf('  manual-capture-runner:'));
+  assert.match(runner, /cache: npm/);
+  assert.match(runner, /cache-dependency-path: soku\/internal\/manual\/assets\/runner\/package-lock\.json/);
+  assert.match(runner, /run: npm ci/);
+  assert.match(runner, /npm run typecheck\n\s+npm test/);
+  assert.doesNotMatch(runner, /cache-hit|continue-on-error|node_modules/);
 });
 
 test('metadata-only events cannot replace required code contexts', () => {

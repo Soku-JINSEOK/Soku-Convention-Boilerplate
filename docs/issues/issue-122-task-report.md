@@ -1,5 +1,9 @@
 # Issue #122 Task Report — Align npm package license and tarball contents
 
+> **Document purpose:** Task decision record. Records the scope, decisions and verification for Issue #122: Align npm package license and tarball contents.
+>
+> **Key point:** Read approval, implementation status and verification separately; this report is dated task evidence, not a fresh claim of current completion.
+
 ## Goal and Background
 
 Issue [#122](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/issues/122)

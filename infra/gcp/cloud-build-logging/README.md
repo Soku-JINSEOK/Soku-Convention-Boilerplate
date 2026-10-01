@@ -1,5 +1,9 @@
 # Cloud Build logging
 
+> **Document purpose:** Logging infrastructure guide. Describes the isolated validation log bucket, sink and disabled rollout exclusion.
+>
+> **Key point:** Review a plan with exactly three creates; foundation, identities and triggers belong to other state.
+
 This Terraform root owns only the regional validation log bucket, its
 project-level sink, and a disabled rollout exclusion. It deliberately has no
 billing, IAM, Workload Identity Federation, trigger, or foundation resources.

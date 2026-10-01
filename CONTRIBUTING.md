@@ -1,5 +1,9 @@
 # 🤝 Contributing
 
+> **Document purpose:** Contribution standard. Explains how to propose, implement, verify and review changes with explicit decision reasons.
+>
+> **Key point:** Record constraints, alternatives, costs and evidence so another contributor can maintain the choice.
+
 ## 👋 Overview
 
 This repository is designed to keep development standards consistent across projects.  
@@ -50,6 +54,33 @@ Contributions should be easy to review. That means:
 ### 6️⃣ Explain Why
 
 Comments, pull request descriptions, and documentation should explain intent and tradeoffs, not restate obvious syntax.
+
+For every significant implementation decision, make the following reasoning
+reviewable in its owning document or linked task report:
+
+| Record | Question the reader must be able to answer |
+| --- | --- |
+| Constraint and goal | What observed problem or requirement forces a decision? |
+| Alternatives | What viable alternative, including keeping the current behavior, was considered? |
+| Choice and reason | Why does this option fit the constraint better? |
+| Accepted cost | What complexity, latency, operating cost or limitation does it introduce? |
+| Evidence | Which code, test, measurement or source supports the claim? What remains unverified? |
+| Owner and revisit trigger | Who maintains it, and what measurable change would justify revisiting it? |
+
+Keep one authoritative decision record and link to it from the issue, PR and
+relevant code. A small local fix can explain its reason in the commit body;
+a cross-cutting design belongs in the owning document or task report.
+Do not create a separate architecture record for every formatting edit.
+
+"Best practice", "performance" and "scalability" alone are not reasons.
+For example: "Remove the second manual full-validation call because it repeats
+the same repository, template and security groups. Keep the first set and its
+fail-closed gate; standalone Hosted Full remains available. Revisit if either
+entrypoint acquires a distinct verification responsibility."
+
+Reviewers check the reasoning against the changed behavior and evidence.
+A filled template or passing lint check does not establish that the decision
+is correct.
 
 ## 📝 Commit Message Standard
 
@@ -128,6 +159,15 @@ Code review should prioritize:
 - readability
 
 Avoid spending review energy on formatting issues that should be handled by tools.
+
+## Document presentation review
+
+Follow the [first-screen document contract](./docs/guides/README_GUIDE.md).
+Every editable Markdown document starts with purpose and key takeaway.
+Use a readable diagram for relationships or branching behavior, and concise
+prose for descriptive records. Review summaries and diagrams against the
+underlying behavior, and keep the [document map](./docs/guides/DOCUMENTATION_MAP.md)
+current. Historical release identities remain preserved.
 
 ## 🌐 Documentation Policy
 

@@ -1,5 +1,9 @@
 # Issue #78 Task Report — Registered Provider Public Mirror
 
+> **Document purpose:** Task decision record. Records the scope, decisions and verification for Issue #78: the registered provider public mirror.
+>
+> **Key point:** Read approval, implementation status and verification separately; this report is dated task evidence, not a fresh claim of current completion.
+
 ## Scope
 
 Mirror the four downstream Provider API v1 bundles reviewed in control-plane

@@ -1,5 +1,9 @@
 # Verification Check Classification
 
+> **Document purpose:** Verification inventory. Classifies checks as local-capable, hosted-only, release-only or deployment-only.
+>
+> **Key point:** Classification describes where evidence can be obtained; it does not change required gates.
+
 Phase 1 of [issue #112](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/issues/112):
 freeze every check currently run by CI and classify it before changing any
 required gate. No workflow, branch protection, or CD behavior changes yet —

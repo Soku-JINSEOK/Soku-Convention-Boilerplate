@@ -1,5 +1,9 @@
 # 📝 Issue #24 Task Report
 
+> **Document purpose:** Task decision record. Records the scope, decisions and verification for Issue #24: aligning issue and PR authoring contracts.
+>
+> **Key point:** Read approval, implementation status and verification separately; this report is dated task evidence, not a fresh claim of current completion.
+
 ## Goal and Background
 
 Align the repository's Issue and pull request authoring formats with the operational structure demonstrated by a private upstream control-plane repository's Issue and pull request. This report tracks [Issue #24](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/issues/24).

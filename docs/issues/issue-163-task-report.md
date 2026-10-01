@@ -1,5 +1,9 @@
 # Issue #163 Task Report — Gate-first CI/CD decision planning
 
+> **Document purpose:** Task decision record. Records the scope, decisions and verification for Issue #163: the CI/CD decision planner and its implementation amendment.
+>
+> **Key point:** Read approval, implementation status and verification separately; this report is dated task evidence, not a fresh claim of current completion.
+
 ## Goal and Background
 
 Issue [#163](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/issues/163)

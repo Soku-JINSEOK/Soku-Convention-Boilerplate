@@ -1,5 +1,67 @@
 # 🔁 `soku` Lifecycle Contract
 
+> **Document purpose:** Normative lifecycle contract. Defines Soku ownership, compatibility, planning, transactional writes and recovery.
+>
+> **Key point:** Validate before mutation, preserve project-owned files and distinguish restored failures from manual recovery.
+
+## Lifecycle transaction contract
+
+```mermaid
+flowchart TD
+  inputs["Pinned source, manifest and current files"] --> plan["Validate compatibility and ownership"]
+  plan -->|"Invalid"| refuse["Refuse before writes"]
+  plan -->|"Valid and changes needed"| dry{"Explicit dry-run?"}
+  plan -->|"Already satisfied"| noop["No-op; no transaction"]
+  dry -->|"Yes"| preview["Report dry-run; no managed-state writes"]
+  dry -->|"No"| yes{"--yes supplied?"}
+  yes -->|"Yes"| apply["Enter transaction"]
+  yes -->|"No"| confirm{"Interactive confirmation result?"}
+  confirm -->|"Unavailable or read error"| errorNode["Confirmation error: exit 2"]
+  confirm -->|"Declined"| cancel["Cancelled; no writes"]
+  confirm -->|"Approved"| apply
+```
+
+**How to read:** This is the implemented init/upgrade decision path for a valid
+plan. Read-only `status` and `diff` are separate diagnostic commands. Dry-run
+is an explicit option; declining confirmation is cancellation, not dry-run.
+An already-satisfied selection can return before confirmation.
+
+### Transaction and recovery boundary
+
+```mermaid
+flowchart TD
+  beginNode["Confirmed validated changes"] --> backup["Prepare backups and transaction journal"]
+  backup -->|"Ready"| files["Apply files and verify managed hashes"]
+  files -->|"Success"| manifest["Write manifest last"]
+  backup -->|"Preparation failure"| failure["Return failure; restore if required"]
+  files -->|"Write or hash failure"| rollback["Restore files and previous manifest"]
+  manifest -->|"Write failure"| rollback
+  manifest -->|"Success"| cleanup{"Transaction cleanup succeeds?"}
+  cleanup -->|"Yes"| done["Committed successfully"]
+  cleanup -->|"No"| committed["Committed state; preserve journal: exit 8"]
+  rollback --> restored{"Restore and cleanup succeed?"}
+  restored -->|"Yes"| seven["Restored failure: exit 7"]
+  restored -->|"No"| eight["Preserve recovery data: exit 8"]
+```
+
+**How to read:** The manifest write is inside the transaction. A failed manifest
+write can require rollback just like a failed file write. Exit 8 also covers
+cleanup failure after commit; it does not necessarily mean application failed.
+Preparation failures can return exit 7 before changing managed files, or enter
+rollback if recovery state has already been prepared.
+
+**Implementation evidence:** [init engine](../../soku/internal/initcmd/engine.go)
+and [upgrade engine](../../soku/internal/initcmd/upgrade.go) select the path;
+[transaction implementation](../../soku/internal/initcmd/transaction.go) owns
+backup, restoration, manifest replacement and cleanup. This is a source review,
+not a claim that every recovery branch was exercised in a live project.
+
+**Why show both views:** Consent controls whether mutation starts. Recovery
+controls what state remains after it starts; combining them hid materially
+different operator actions.
+
+**Reader check:** Can the operator distinguish a safe refusal, a restored failure and an incomplete rollback requiring manual recovery?
+
 ## Status and Authority
 
 - **Status:** Accepted

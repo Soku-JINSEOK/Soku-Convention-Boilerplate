@@ -1,6 +1,52 @@
 # 🧭 Language Selection
 
+> **Document purpose:** Technology decision guide. Compares language choices through platform constraints, operating capability and representative workload evidence.
+>
+> **Key point:** Record why the chosen runtime fits better and which change would justify reconsidering it.
+>
 > **Applies to:** Both — see [`docs/guides/APPLICABILITY.md`](./APPLICABILITY.md).
+
+## Constraint-first selection map
+
+Narrow the candidates using the constraints already described here, then validate the remaining tradeoff with a small representative workload.
+
+**Diagram scope: Reference decision aid.** The trial and selection criteria are project responsibilities, not an automated language selector. Record measured limits and ownership in the decision.
+
+```mermaid
+flowchart TD
+  goal["Workload and quality targets"] --> platform{"Platform fixes the runtime?"}
+  platform -->|"Yes"| supported["Supported runtime candidates"]
+  platform -->|"No"| shortlist["Team and ecosystem shortlist"]
+  supported --> constraints["Check organization and integration constraints"]
+  shortlist --> constraints
+  constraints --> trial["Representative workload and deployment trial"]
+  trial --> fit{"Meets measured limits and support capacity?"}
+  fit -->|"No"| alternatives["Change candidate or revisit requirements"]
+  alternatives --> constraints
+  fit -->|"Yes"| decision["Record choice, rejected option and accepted cost"]
+  decision --> revisit["Set owner and measurable revisit condition"]
+```
+
+**How to read:** Mandatory platform constraints narrow the set first. The workload trial checks the remaining candidates under realistic deployment conditions; it does not rank languages universally.
+
+**Reader check:** Which requirement eliminated each alternative, and which claims still need measurement?
+
+- [ ] Record platform constraints, operating experience and the cost of adding a language.
+- [ ] Tie performance claims to measurements and document when the decision should be revisited.
+
+## What makes a selection defensible
+
+Keep the supported alternatives and explain which constraint eliminates each.
+A familiar runtime may shorten incident diagnosis and onboarding, while another
+may satisfy a native integration or measured latency limit better. Accept and
+record the selected option's deployment size, ecosystem and maintenance costs;
+do not infer workload performance from language reputation.
+
+Attach the representative workload, target environment and measured result.
+If no measurement exists, label performance claims as assumptions and name the
+next check. Revisit when platform support, operating skills or quality targets
+change. The shared [decision contract](../../CONTRIBUTING.md)
+defines the record; this guide supplies language-specific criteria.
 
 ## 🎯 Purpose
 

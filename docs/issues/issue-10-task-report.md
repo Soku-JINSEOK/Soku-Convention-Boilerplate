@@ -1,5 +1,9 @@
 # 📝 Task Report: validate templates and harden sync scripts
 
+> **Document purpose:** Task decision record. Records the scope, decisions and verification for Issue #10: validate templates and harden sync scripts.
+>
+> **Key point:** Read approval, implementation status and verification separately; this report is dated task evidence, not a fresh claim of current completion.
+
 ## Goal and Background
 
 Closes #10. `ci.yml`'s `repository-hygiene` job only checks that template files exist — it never runs each stack's own build/lint/test, so a broken template could go unnoticed until copied downstream. `sync-boilerplate.sh`/`.ps1` also copied directories with a plain recursive copy, which could leak local build artifacts (`node_modules/`, `dist/`, `__pycache__/`) into a sync target and offered no dry-run preview.

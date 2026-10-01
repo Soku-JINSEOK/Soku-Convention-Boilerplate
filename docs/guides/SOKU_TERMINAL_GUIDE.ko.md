@@ -1,5 +1,9 @@
 # Soku 터미널 및 Completion 가이드
 
+> **문서 역할:** CLI 사용 안내. Soku 터미널 표시, 일상적인 명령 사용, 셸 자동완성 설정을 설명합니다.
+>
+> **핵심:** 적용 전 변경 계획을 확인하고, 변경 감지 상태와 실행 오류를 구분하세요.
+
 [English](./SOKU_TERMINAL_GUIDE.md) | [한국어](./SOKU_TERMINAL_GUIDE.ko.md) | [日本語](./SOKU_TERMINAL_GUIDE.ja.md)
 
 이 가이드는 Soku의 터미널 출력, 안전한 일상 흐름, 자동화, Bash·Zsh·Fish·

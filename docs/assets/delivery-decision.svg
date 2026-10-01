@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="1100" viewBox="0 0 1280 1100" role="img" aria-labelledby="title desc">
+<title id="title">Verification and delivery decision</title>
+<desc id="desc">Artifact identity is followed by acceptance and release-plan checks. Failed or unknown conditions hold delivery. After delivery, healthy behavior is observed; unhealthy behavior invokes compatible application and separate data recovery.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/></marker></defs>
+<rect width="1280" height="1100" fill="#ffffff"/>
+<g font-family="Arial, Helvetica, sans-serif" fill="#0f172a">
+<text x="40" y="48" font-size="29" font-weight="700">Verification and delivery decision</text>
+<rect x="430" y="100" width="420" height="110" rx="12" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+<text x="450" y="134" font-size="22" font-weight="700">Identify build artifact</text>
+<text x="450" y="166" font-size="17">Source revision, version, integrity</text>
+<text x="450" y="191" font-size="17">Record exactly what was verified</text><rect x="430" y="290" width="420" height="120" rx="12" fill="#fffbeb" stroke="#b45309" stroke-width="2"/>
+<text x="450" y="324" font-size="22" font-weight="700">Acceptance evidence complete?</text>
+<text x="450" y="356" font-size="17">Relevant checks and user acceptance</text>
+<text x="450" y="381" font-size="17">Security, compatibility, migration</text><rect x="930" y="290" width="310" height="120" rx="12" fill="#fff1f2" stroke="#be123c" stroke-width="2"/>
+<text x="950" y="324" font-size="22" font-weight="700">Hold delivery</text>
+<text x="950" y="356" font-size="17">Fail / Blocked / unknown</text>
+<text x="950" y="381" font-size="17">Resolve and reverify</text><rect x="430" y="500" width="420" height="120" rx="12" fill="#fffbeb" stroke="#b45309" stroke-width="2"/>
+<text x="450" y="534" font-size="22" font-weight="700">Release plan ready?</text>
+<text x="450" y="566" font-size="17">Target, owner, approval / trigger</text>
+<text x="450" y="591" font-size="17">Compatible app + data recovery</text><rect x="40" y="500" width="310" height="120" rx="12" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2"/>
+<text x="60" y="534" font-size="22" font-weight="700">Recovery evidence</text>
+<text x="60" y="566" font-size="17">Safe restore / repair exercise</text>
+<text x="60" y="591" font-size="17">Record downtime / data limits</text><rect x="430" y="710" width="420" height="120" rx="12" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+<text x="450" y="744" font-size="22" font-weight="700">Deliver and check result</text>
+<text x="450" y="776" font-size="17">Web: service health</text>
+<text x="450" y="801" font-size="17">Desktop: install / update smoke</text><rect x="40" y="895" width="310" height="110" rx="12" fill="#fffbeb" stroke="#b45309" stroke-width="2"/>
+<text x="60" y="929" font-size="22" font-weight="700">Recover on failure</text>
+<text x="60" y="961" font-size="17">App rollback / forward repair</text>
+<text x="60" y="986" font-size="17">Separate data restoration</text><rect x="930" y="895" width="310" height="110" rx="12" fill="#f0fdf4" stroke="#15803d" stroke-width="2"/>
+<text x="950" y="929" font-size="22" font-weight="700">Observe and maintain</text>
+<text x="950" y="961" font-size="17">Healthy result confirmed</text>
+<text x="950" y="986" font-size="17">Support and update owner</text><path d="M640 210 V290" fill="none" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
+<text x="656" y="251" font-size="16" fill="#334155">validate</text><path d="M850 350 H930" fill="none" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
+<text x="866" y="337" font-size="16" fill="#334155">No</text><path d="M640 410 V500" fill="none" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
+<text x="656" y="457" font-size="16" fill="#334155">Yes</text><path d="M350 560 H430" fill="none" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
+<text x="366" y="547" font-size="16" fill="#334155">inform</text><path d="M850 560 H900 V385 H930" fill="none" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
+<text x="869" y="546" font-size="16" fill="#334155">No</text><path d="M640 620 V710" fill="none" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
+<text x="656" y="666" font-size="16" fill="#334155">Yes</text><path d="M520 830 V865 H195 V895" fill="none" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
+<text x="283" y="852" font-size="16" fill="#334155">unhealthy</text><path d="M760 830 V865 H1085 V895" fill="none" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
+<text x="908" y="852" font-size="16" fill="#334155">healthy</text><text x="40" y="1060" font-size="17">A passing build is not product acceptance. An app rollback does not undo a data migration.</text>
+</g>
+</svg>

@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="1080" viewBox="0 0 1280 1080" role="img" aria-labelledby="title desc">
+<title id="title">Design and readiness review</title>
+<desc id="desc">Scope, technology and security inform design. Missing verification evidence returns to design. Release conditions gate delivery; failure requires application and data recovery.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/></marker></defs>
+<rect width="1280" height="1080" fill="#ffffff"/>
+<g font-family="Arial, Helvetica, sans-serif" fill="#0f172a">
+<text x="40" y="48" font-size="29" font-weight="700">Design and readiness review</text>
+<rect x="460" y="100" width="360" height="110" rx="12" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+<text x="480" y="134" font-size="22" font-weight="700">Scope and acceptance</text>
+<text x="480" y="166" font-size="17">User, outcome, limits</text>
+<text x="480" y="191" font-size="17">TASK_REPORT_TEMPLATE</text><rect x="35" y="250" width="350" height="125" rx="12" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+<text x="55" y="284" font-size="22" font-weight="700">Technology fit</text>
+<text x="55" y="316" font-size="17">Platform, team, lifespan, cost</text>
+<text x="55" y="341" font-size="17">LANGUAGE_SELECTION</text><rect x="460" y="280" width="360" height="125" rx="12" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2"/>
+<text x="480" y="314" font-size="22" font-weight="700">Design boundaries</text>
+<text x="480" y="346" font-size="17">Runtime, data, API, ownership</text>
+<text x="480" y="371" font-size="17">PROJECT_STRUCTURE</text><rect x="895" y="250" width="350" height="125" rx="12" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2"/>
+<text x="915" y="284" font-size="22" font-weight="700">Access and exposure</text>
+<text x="915" y="316" font-size="17">Identity, permissions, secrets</text>
+<text x="915" y="341" font-size="17">SECURITY_POLICY</text><rect x="460" y="470" width="360" height="110" rx="12" fill="#fffbeb" stroke="#b45309" stroke-width="2"/>
+<text x="480" y="504" font-size="22" font-weight="700">Evidence complete?</text>
+<text x="480" y="536" font-size="17">Pass / Fail / Blocked / N/A</text>
+<text x="480" y="561" font-size="17">VERIFICATION_GUIDE</text><rect x="35" y="470" width="350" height="110" rx="12" fill="#fff1f2" stroke="#be123c" stroke-width="2"/>
+<text x="55" y="504" font-size="22" font-weight="700">Resolve gaps</text>
+<text x="55" y="536" font-size="17">Owner + next verification step</text>
+<text x="55" y="561" font-size="17">Revisit affected design</text><rect x="460" y="655" width="360" height="125" rx="12" fill="#fffbeb" stroke="#b45309" stroke-width="2"/>
+<text x="480" y="689" font-size="22" font-weight="700">Release conditions met?</text>
+<text x="480" y="721" font-size="17">Target, artifact, recovery plan</text>
+<text x="480" y="746" font-size="17">CICD_STANDARDS</text><rect x="895" y="655" width="350" height="125" rx="12" fill="#fff1f2" stroke="#be123c" stroke-width="2"/>
+<text x="915" y="689" font-size="22" font-weight="700">Hold delivery</text>
+<text x="915" y="721" font-size="17">Failed or unknown condition</text>
+<text x="915" y="746" font-size="17">Retain evidence and resolve</text><rect x="460" y="860" width="360" height="125" rx="12" fill="#f0fdf4" stroke="#15803d" stroke-width="2"/>
+<text x="480" y="894" font-size="22" font-weight="700">Deliver and verify</text>
+<text x="480" y="926" font-size="17">Health or installation result</text>
+<text x="480" y="951" font-size="17">Observe and support</text><rect x="35" y="860" width="350" height="125" rx="12" fill="#fffbeb" stroke="#b45309" stroke-width="2"/>
+<text x="55" y="894" font-size="22" font-weight="700">Recover on failure</text>
+<text x="55" y="926" font-size="17">Application + data recovery</text>
+<text x="55" y="951" font-size="17">Verify restored behavior</text><path d="M640 210 V280" fill="none" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
+<path d="M385 312 H460" fill="none" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
+<text x="395" y="300" font-size="16" fill="#334155">fit</text><path d="M895 312 H820" fill="none" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
+<text x="825" y="300" font-size="16" fill="#334155">access</text><path d="M640 405 V470" fill="none" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
+<text x="655" y="448" font-size="16" fill="#334155">verify</text><path d="M460 525 H385" fill="none" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
+<text x="390" y="510" font-size="16" fill="#334155">No</text><path d="M210 470 V425 H455 V385" fill="none" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
+<text x="235" y="447" font-size="16" fill="#334155">revise</text><path d="M640 580 V655" fill="none" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
+<text x="655" y="625" font-size="16" fill="#334155">Yes</text><path d="M820 717 H895" fill="none" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
+<text x="827" y="700" font-size="16" fill="#334155">No</text><path d="M640 780 V860" fill="none" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
+<text x="655" y="827" font-size="16" fill="#334155">Yes</text><path d="M460 922 H385" fill="none" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
+<text x="392" y="907" font-size="16" fill="#334155">failure</text><path d="M35 922 H15 V525 H35" fill="none" stroke="#475569" stroke-width="2" stroke-dasharray="7 5" marker-end="url(#arrow)"/>
+<text x="40" y="1040" font-size="17">Review each applicable item with an owner, decision and evidence. Missing evidence is not a pass.</text>
+</g>
+</svg>

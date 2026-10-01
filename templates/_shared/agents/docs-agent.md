@@ -1,5 +1,9 @@
 # Docs Domain Agent
 
+> **Document purpose:** Domain agent charter. Defines responsibilities and editing boundaries for the docs/ domain.
+>
+> **Key point:** Edit only the owned domain; coordinate shared contracts and report changes needed elsewhere.
+
 ## Owned Domain
 
 The `docs/` directory: extended documentation, guides, and reference material (as distinct from the root-level entry-point documents like `README.md` or `AGENTS.md`).

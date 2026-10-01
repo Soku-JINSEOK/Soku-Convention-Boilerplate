@@ -1,8 +1,14 @@
 # 🧩 Soku-Convention-Boilerplate
 
+> **문서 역할:** 프로젝트 개요. 공통 개발 규칙과 Soku 도구의 역할, 도입 방법, 상세 문서의 위치를 안내합니다.
+>
+> **핵심:** 처음 도입할 때는 사용 매뉴얼, 규칙의 기준은 BLUEPRINT, 주제별 탐색은 전체 문서 지도를 확인하세요.
+>
 > `soku` CLI 기반의 선언적 저장소 컨벤션 베이스라인 및 수명주기 거버넌스 툴체인입니다.
 
 [English](./README.md) | [日本語](./README.ja.md)
+
+[전체 문서 지도: 문서별 목적과 읽는 순서](./docs/guides/DOCUMENTATION_MAP.md)
 
 ## 👋 개요
 
@@ -13,6 +19,33 @@
 * **🎯 선언적 컨벤션:** 멀티 스택 프로필(TypeScript, Go, Python, Java)을 지원하며 통합된 포맷팅 및 정적 분석 규칙을 제공합니다.
 * **🛡️ 관리 소유권 모델(Managed Ownership):** Soku는 관리 대상 파일의 소유권과 베이스라인을 `.soku/manifest.json`에 기록하며, 프로젝트 고유 코드는 자동 수명주기 변이 대상에서 제외합니다.
 * **🔁 재현 가능한 CLI 워크플로:** 명시적 불변 입력값, dry-run 계획 사전 검토, 트랜잭션 방식의 안전한 업그레이드를 지원합니다.
+
+## 처음 도입할 때 확인할 내용
+
+설정 파일을 선택하기 전에 목적·품질 기준·실행 위치·데이터·권한·검증·복구를
+[사용 매뉴얼 0절](./docs/guides/USAGE_MANUAL.md#0-review-the-project-before-choosing-configuration)에서
+확인합니다. 항목별 상세 기준은 기존 문서로 연결됩니다.
+해당하는 항목에는 담당자와 확인 근거를, 해당하지 않는 항목에는 이유를 기록합니다.
+프로젝트에 필요하지 않은 서버나 클라우드를 추가할 필요는 없습니다.
+
+![요구사항에서 설계·검증·배포로 이어지며 실패 시 수정·복구하는 검토 흐름](./docs/assets/review-evidence.svg)
+
+도표는 요구사항과 기술·보안 조건을 함께 검토하고, 근거가 준비된 뒤 배포와 복구를
+확인하는 흐름입니다. 문서의 표를 사용해 각 항목을 점검할 수 있습니다.
+
+## 문서로 확인하는 엔지니어링 원칙
+
+각 문서의 구성도에서 책임·접근 경계·검증 근거를 확인한 뒤, 바로 아래 체크 항목으로 구현을 점검할 수 있습니다. 구체적인 제품 설계는 해당 프로젝트에 기록합니다.
+
+* [책임과 데이터 소유자가 드러나는 코드 구성](./docs/standards/PROJECT_STRUCTURE.md#ownership-and-dependency-map)
+* [도구로 일관되게 지키는 코드 품질](./docs/standards/CODE_STYLE.md#readable-module-contract)
+* [자원별 권한 검사와 비밀정보 보호](./docs/policy/SECURITY_POLICY.md#access-enforcement-and-secret-boundary)
+* [DNS·TLS·비공개 데이터·운영 담당자](./docs/policy/CLOUD_POLICY.md#cloud-responsibilities-and-exposure)
+* [위험에 맞춘 테스트와 사용자 검수](./VERIFICATION_GUIDE.md#requirement-to-evidence-map)
+* [검사 결과와 배포 조건을 구분하는 CI/CD](./docs/standards/CICD_STANDARDS.md#implemented-validation-topology)
+* [검토한 의존성과 버전을 고정한 배포](./docs/standards/SUPPLY_CHAIN.md#reviewed-input-and-generated-output-map)
+
+[FigJam: editable document, security and CI maps](https://www.figma.com/board/SJgcvEV1HZqYwHM5Nt5HWE)
 
 ## 🗺️ 마스터 블루프린트 및 운영 계약
 
@@ -73,15 +106,27 @@ npm run format:check && npm run lint && npm run test && npm run build
 
 ## 🏗️ 아키텍처 및 수명주기 흐름
 
-```mermaid
-flowchart TB
-    BP["Boilerplate Source<br/>Release: v1.0.5 (Signed Tag)"]
-    CLI["soku CLI Engine<br/>Distribution: soku/v0.2.1"]
-    Repo["Target Downstream Repository<br/>.soku/manifest.json + Managed File Boundaries"]
+**구성도 범위: 구현된 수명주기 개요.** 점선은 소유권 제약이며 파일 쓰기를 뜻하지 않습니다. 확인·취소·복구의 상세 분기는 [수명주기 계약](./docs/standards/SOKU_LIFECYCLE.md)을 참조하세요. 근거: [init 엔진](./soku/internal/initcmd/engine.go), [upgrade 엔진](./soku/internal/initcmd/upgrade.go).
 
-    BP --> CLI
-    CLI -->|init / verify / upgrade| Repo
+```mermaid
+flowchart TD
+  source["Boilerplate source: Release: v1.0.5"] -->|"Choose immutable source"| engine["soku CLI: Distribution: soku/v0.2.1"]
+  engine --> plan["Plan managed-file changes"]
+  manifest["Manifest and current files"] -->|"Ownership and baseline inputs"| plan
+  project["Project-owned application files"] -.->|"Exclude from automatic mutation"| plan
+  plan --> conflict{"Conflict or incompatible input?"}
+  conflict -->|"Yes"| stopNode["Stop before writes"]
+  conflict -->|"No"| consent["Preview or confirm application"]
+  consent -->|"Explicit dry-run"| preview["Report plan without writes"]
+  consent -->|"Confirmed application"| apply["Apply managed-file transaction"]
+  apply -->|"Success"| owned["Managed files and updated manifest"]
+  apply -->|"Failure"| recovery["Rollback or manual recovery"]
+  owned --> inspect["Read-only status and diff"]
 ```
+
+**읽는 방법:** 원본 저장소는 규칙을 제공하고 CLI는 대상 저장소의 변경 계획을 만듭니다. manifest는 파일 소유권과 기준 상태를 기록합니다. 충돌이 있으면 기존 작업을 덮어쓰지 않고 적용을 중단합니다.
+
+**확인할 질문:** 적용할 버전, 변경 파일, 충돌 처리 방법과 결과를 확인하세요.
 
 ## 📦 현재 공개 베이스라인
 

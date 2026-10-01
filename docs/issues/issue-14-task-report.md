@@ -1,5 +1,9 @@
 # 📝 Task Report: Language Selection Guide
 
+> **Document purpose:** Task decision record. Records the scope, decisions and verification for Issue #14: Language Selection Guide.
+>
+> **Key point:** Read approval, implementation status and verification separately; this report is dated task evidence, not a fresh claim of current completion.
+
 ## Goal and Background
 
 `docs/guides/STACK_EXAMPLES.md` and `docs/guides/STACK_CONFIGS.md` explain how to configure a stack once chosen, but nothing in this boilerplate explains how to choose one — `docs/guides/INIT_GUIDE.md` tells an AI agent to "ask the user which stack(s) to bootstrap" with no criteria to reason from. Closes #14.

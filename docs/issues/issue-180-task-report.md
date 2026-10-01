@@ -1,5 +1,9 @@
 # 🔒️ Issue 180 Task Report
 
+> **Document purpose:** Task decision record. Records the scope, decisions and verification for Issue #180: isolating validation logging state and restoring authenticated checks.
+>
+> **Key point:** Read approval, implementation status and verification separately; this report is dated task evidence, not a fresh claim of current completion.
+
 ## Goal and Background
 
 Issue [#180](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/issues/180)

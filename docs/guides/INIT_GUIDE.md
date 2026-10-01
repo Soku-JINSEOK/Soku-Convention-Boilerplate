@@ -1,5 +1,32 @@
 # 🚀 Init Guide
 
+> **Document purpose:** Agent bootstrap procedure. Provides the legacy manual fallback for detecting a downstream stack and applying the appropriate baseline.
+>
+> **Key point:** Prefer the managed Soku lifecycle where adopted; inspect the target before copying configuration.
+
+## Manual bootstrap fallback
+
+**Diagram scope: Adoption procedure.** Manual template selection and managed initialization are alternatives. The managed branch delegates planning and mutation to [init engine](../../soku/internal/initcmd/engine.go); both require applicable downstream verification.
+
+```mermaid
+flowchart TD
+  target["Inspect downstream repository"] --> detect["Identify stack, existing files and local rules"]
+  detect --> mode{"Managed lifecycle adopted?"}
+  mode -->|"Yes"| lifecycle["Use reviewed Soku init workflow"]
+  mode -->|"No"| select["Select applicable baseline templates"]
+  select --> conflict{"Existing customization or ambiguous choice?"}
+  conflict -->|"Yes"| resolve["Resolve ownership and requirements"]
+  resolve --> select
+  conflict -->|"No"| adapt["Adapt placeholders and repository configuration"]
+  lifecycle --> verify["Run relevant validation"]
+  adapt --> verify
+  verify --> record["Record imported baseline and deviations"]
+```
+
+**How to read:** This is the legacy manual procedure. Existing project content and local conventions must be inspected before copying. The managed lifecycle has its own ownership-aware plan and contract.
+
+**Reader check:** Is the selected stack supported by evidence, and have existing files and local deviations been reviewed?
+
 ## Purpose
 
 This document is written for AI coding agents (not humans) that are applying

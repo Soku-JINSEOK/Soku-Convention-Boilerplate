@@ -1,5 +1,65 @@
 # 🔁 CI/CD Standards
 
+> **Document purpose:** CI/CD operating standard. Explains validation responsibilities, required gates, execution cost and controlled delivery.
+>
+> **Key point:** A passing validation run supplies evidence; it does not itself authorize deployment.
+
+## Implemented validation topology
+
+The following is the actual workflow relationship in this repository. CI Quick provides feedback in parallel; the full Validation Gate aggregates repository, runtime-template and security results. PR metadata is checked separately. Passing validation does not itself deploy a product.
+
+**Diagram scope: Implemented workflow topology.** [validation.yml](../../.github/workflows/validation.yml) calls Quick and the three full components. This depicts automatic PR/main runs; metadata policy and deployment are separate workflows.
+
+```mermaid
+flowchart TD
+  eventNode["PR opened, updated, reopened or edited; main push"] --> validation["Validation workflow"]
+  validation -->|"Changed-scope feedback"| quick["Quick checks"]
+  quick --> quickGate["CI Quick Gate"]
+  validation -->|"Complete validation"| full["Full component workflows"]
+  full --> repo["Repository: docs, CLI and runner"]
+  full --> stacks["Templates: languages and databases"]
+  full --> security["Security: history and dependencies"]
+  repo --> result{"All full components succeeded?"}
+  stacks --> result
+  security --> result
+  result -->|"No, cancelled or skipped"| failNode["Validation Gate fails"]
+  result -->|"Yes"| passNode["Validation Gate passes"]
+  passNode --> review["Branch review and remaining rules"]
+```
+
+**How to read:** Quick gives separate feedback. The required full gate combines repository, template and security evidence and fails on missing results. PR metadata has its own gate, described below; neither validation gate deploys the application.
+
+**Reader check:** Inspect the exact revision, failed child job and required gate. Do not treat a skipped component or an older successful run as current evidence.
+
+### Revision and gate boundaries
+
+| Automatic PR path | Revision checked | Result boundary |
+| --- | --- | --- |
+| Quick | Explicit PR head, compared with PR base | CI Quick Gate requires Quick success |
+| Repository and runtime templates | Default `github.sha`, the PR merge ref | Contribute to Validation Gate |
+| Security | Explicit PR head/base inputs; trusted-base orchestration | Contributes to Validation Gate |
+| Metadata policy | PR metadata through its own event workflow | PR Metadata Gate is separate |
+
+On a main push the fallback is the pushed SHA. An explicit `head-sha` supplied
+to reusable component workflows overrides their checkout fallback; the
+automatic Validation caller does not supply that input to repository/templates.
+Assess the event and checked-out revision, not just the displayed PR head.
+
+Validation Gate requires all three full components to succeed; failure,
+cancellation or unexpected skipping fails it. Quick is independent and is not
+included in that aggregate. Review all applicable gates plus signing and
+review requirements. Successful validation does not deploy or authorize merge.
+
+**Why retain this distinction:** PR-head feedback and merge compatibility answer
+different questions. Keep the existing full coverage during the Quick
+observation period; removing a gate to reduce runtime would change assurance.
+
+[Editable FigJam counterpart](https://www.figma.com/board/SJgcvEV1HZqYwHM5Nt5HWE)
+
+- [ ] Inspect the newest run for the intended source revision; a cancelled earlier run is not a test result for its successor.
+- [ ] Resolve the failing child job before rerunning the aggregate gate; keep audit thresholds and required checks intact.
+- [ ] Batch PR body/title/label edits before starting final verification: edited events currently trigger Validation as well as metadata checks.
+
 ## 🎯 Purpose
 
 This document defines the baseline expectations for continuous integration and continuous delivery in repositories built on `Soku-Convention-Boilerplate`.
@@ -61,26 +121,23 @@ Pipelines should be:
 
 Avoid building opaque pipelines that only one person can maintain.
 
-For this boilerplate, Pull Request Policy, Security, and the explicitly scoped
-Project synchronization workflow subscribe directly to repository events.
-Pull Request Policy authenticates the
-current API metadata against the trusted event identity and enforces the PR and
-commit-title contract. Security runs its complete history, dependency, Go
-vulnerability, and OSV checks for pull request code events, when a Draft becomes
-ready for review, and on pushes to `main`. Closed pull requests do not start
-Pull Request Policy or Security; Project synchronization intentionally handles
-closed and merged events for completion metadata.
+For this boilerplate, Validation subscribes to PR opened, synchronize, reopened
+and edited events, and pushes to main. It calls repository CI, runtime-template
+validation and Security once each, alongside changed-scope Quick validation.
+The same graph handles manual and reusable Validation calls. Pull Request
+Policy and Project synchronization have separate event subscriptions.
 
-Project synchronization is a metadata-only exception: it checks out the
-trusted base revision, never executes pull request head code, uses the narrow
-`PROJECT_SYNC_TOKEN` secret for GitHub Issue/Project writes, and grants no
-Contents write permission. Its audit/apply and conflict behavior is documented
-in [`GITHUB_PROJECT_SYNC.md`](../guides/GITHUB_PROJECT_SYNC.md).
+Pull Request Policy authenticates current API metadata against the trusted
+event identity. Project synchronization checks out the trusted base revision,
+never executes PR head code, uses the scoped PROJECT_SYNC_TOKEN for Issue and
+Project writes, and grants no Contents write permission. Its behavior is
+documented in [GITHUB_PROJECT_SYNC.md](../guides/GITHUB_PROJECT_SYNC.md).
 
-Repository CI, runtime-template validation, and their Validation aggregate are
-manual or reusable workflows. They do not independently subscribe to pull
-request or `main` events. This keeps the event-driven validation surface limited
-to the two policy and security responsibilities above.
+Repository CI and runtime-template workflows are manual or reusable, without
+independent PR or main triggers. Security is reusable, manual and scheduled;
+automatic PR security coverage comes through Validation. Draft/Ready changes
+run metadata policy, not another code-validation tree. Closed PR events are
+handled by Project synchronization for completion metadata.
 
 Two operating-contract exceptions are intentional. Release may subscribe to
 signed `v*` and `soku/v*` tag pushes, and Deploy remains manual through
@@ -136,6 +193,41 @@ current five-shared-file shape with three workflow outputs. This additive
 compatibility does not change the catalog, profile-index, or manifest major
 versions.
 
+## Why these CI choices
+
+The [shared decision contract](../../CONTRIBUTING.md) also applies to CI changes.
+Reduce duplicate execution before reducing evidence. The implemented choices
+and remaining tradeoffs are explicit:
+
+| Choice | Why this option | Alternative and accepted cost | Evidence and revisit condition |
+| --- | --- | --- | --- |
+| One full tree per manual Validation | Its direct repository, template and security calls already provide full coverage | Removed the additional Hosted Full call; standalone Hosted Full still has its own gate and entrypoints | Regression counts each component once; revisit if Hosted Full gains a distinct responsibility |
+| Preserve required full checks and Quick comparison | A cheaper Quick result has not yet satisfied the full-gate transition criteria | Keep overlap during the Issue #116 observation window rather than silently weakening coverage | Review measured comparison evidence before any ruleset transition |
+| Retain PR edited events | Editing the base can change what must be validated | Body/title edits still incur a full run; batch edits before final verification | Revisit only with tested base-retarget handling and protection against metadata results replacing code results |
+| Cache runner npm downloads by lockfile | Repeated installs can reuse downloaded packages | Cache storage and misses remain; npm ci, integrity checks, typecheck and unit tests always run | Compare cold/warm install steps; remove cache if sustained overhead exceeds the benefit |
+| Use explicit hygiene Go cache inputs | There is no root go.mod, so default discovery cannot restore the cache | Key by the module sum, tool pins and owning workflow; cold misses still install tools | The initial hosted log reported a missing dependency file; verify the warning disappears and review warm-cache benefit |
+| Keep independent scheduled/manual Hosted Full | Rechecks unchanged code against evolving dependencies and tools | Scheduled execution has a separate ongoing cost | Review frequency using failure yield and measured runner work |
+
+### Measure work and coverage together
+
+Baseline [run 36807006720](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/actions/runs/36807006720)
+had 24 full component jobs totaling 760 job-seconds, excluding Quick, gates and
+queue time. This is the sum of job start/end intervals, not elapsed pipeline
+time or a billing amount. It is one observation, not a stable benchmark.
+
+Manual Validation previously invoked those three full components twice.
+Removing the nested call changes two full trees to one: 50% fewer full-component
+invocations on that entrypoint, plus removal of its nested aggregate job.
+The 760 seconds illustrate the size of one tree; they are not a measured
+before/after saving. PR runs did not invoke that manual-only tree, so this
+change does not claim a 50% reduction for PRs. Cache savings remain unmeasured.
+
+For future optimization, compare the same revision and event, distinguish cold
+and warm caches, and record job count, summed runner work, elapsed time, retry
+rate and coverage. Preserve failures and cancellations in the history. The owner
+reviews the [Issue #245 report](../issues/issue-245-task-report.md) and the
+existing Quick observation criteria before narrowing additional checks.
+
 ## 🌍 Environment Strategy
 
 Projects should define environment expectations clearly, such as:
@@ -181,6 +273,47 @@ direct post-merge `main` push or a release preflight.
 3. deployment execution
 4. health verification
 5. rollback or remediation path
+
+## Delivery readiness review
+
+Use this table when a downstream project deploys a service or distributes an
+application. These are review inputs, not claims that this boilerplate already
+implements every delivery mechanism. Product acceptance evidence is defined in
+the [verification guide](../../VERIFICATION_GUIDE.md#downstream-product-acceptance-review);
+the implemented optional GCP path remains in
+[Cloud Run CI/CD](../guides/CLOUD_RUN_CICD.md).
+
+![Delivery decision from identified artifact through acceptance, recovery and health checks](../assets/delivery-decision.svg)
+
+The decision is: identify the artifact, complete applicable verification, confirm
+release conditions, deliver and check the result. Failed or unknown conditions
+hold delivery. A failed outcome invokes the documented recovery path.
+Continuous delivery keeps a verified change releasable; continuous deployment
+also automates its production delivery. Choose and document which applies.
+
+| Review | Service/web delivery | Desktop/local delivery |
+| --- | --- | --- |
+| Artifact identity | Source revision and immutable package/image identity | Version, OS/CPU package and integrity identity |
+| Configuration | Environment-specific settings and scoped identities | Installation paths, OS permissions and user settings |
+| Acceptance | Relevant tests and target-environment smoke checks | Relevant tests plus clean install and supported-device smoke |
+| Data change | Migration compatibility, transaction/backfill and backup plan | Existing local data, settings and version migration |
+| Rollout | Target, approval/trigger, traffic/change strategy and health | Distribution channel, update policy and old-client support |
+| Recovery | Compatible application rollback and separate data recovery | Reinstall/update recovery and compatible local-data restoration |
+| Operation | Error/latency signals, alerts, support owner and cost | Crash diagnostics with consent/privacy, support and update owner |
+
+- [ ] Record artifact identity and exactly which artifact was verified.
+- [ ] Name the release owner, target and applicable approval/trigger.
+- [ ] Confirm acceptance evidence and unresolved conditions before delivery.
+- [ ] Review application/data compatibility across both upgrade and recovery.
+- [ ] Verify the chosen health or installation smoke check after delivery.
+- [ ] Verify recovery in a safe environment and record its limits.
+- [ ] Define observation, support and retirement/data export responsibilities.
+
+A previous application version does not automatically undo a database or file
+migration. If rollback is unsafe, document a compatible forward repair or
+restore procedure and its downtime/data-loss limits before release. Mark unused
+mechanisms N/A with a reason; do not introduce servers or cloud delivery into an
+offline app merely to complete this checklist.
 
 ## 📝 Documentation Rule
 

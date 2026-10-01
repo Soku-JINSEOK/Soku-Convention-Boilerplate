@@ -1,5 +1,9 @@
 # CI Quick Comparison
 
+> **Document purpose:** Comparison evidence. Records the Quick-versus-Full observation criteria and measurements for Issue #116.
+>
+> **Key point:** Required full checks remain until the documented transition criteria and ruleset decision are satisfied.
+
 ## Purpose
 
 This audit is the authoritative comparison record for Issue #116. It measures

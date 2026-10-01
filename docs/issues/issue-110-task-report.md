@@ -1,5 +1,9 @@
 # Issue #110 Task Report — Silence CD plan and summary logs in node tests
 
+> **Document purpose:** Task decision record. Records the scope, decisions and verification for Issue #110: Silence CD plan and summary logs in node tests.
+>
+> **Key point:** Read approval, implementation status and verification separately; this report is dated task evidence, not a fresh claim of current completion.
+
 ## Goal and Background
 
 Issue [#110](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/issues/110) requires suppressing verbose `CD plan` and `Cloud Run deployment evidence` test output logs from dumping into the terminal console during `node --test .github/*.test.mjs`.

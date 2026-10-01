@@ -1,5 +1,9 @@
 # Issue #188 Task Report
 
+> **Document purpose:** Task decision record. Records the scope, decisions and verification for Issue #188: remediating npm lockfile findings.
+>
+> **Key point:** Read approval, implementation status and verification separately; this report is dated task evidence, not a fresh claim of current completion.
+
 ## Goal and Background
 
 Remediate three existing npm lockfile findings exposed by the Security workflow

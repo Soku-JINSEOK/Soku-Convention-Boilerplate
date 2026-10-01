@@ -34,6 +34,7 @@ run_or_fail "regression::contribution-title" 72 node --test \
   scripts/detect-verification-scope.test.mjs \
   scripts/plan-ci-quick.test.mjs \
   scripts/scan-diff-secrets.test.mjs \
+  scripts/verify-diagram-text.test.mjs \
   scripts/verify.test.mjs
 run_or_fail "regression::pr-governance" 72 node --test \
   .github/dependabot.test.mjs \
@@ -59,6 +60,7 @@ require_command npm "regression::npm-wrapper-package" 72
 print_step_end
 
 print_step "Markdown, YAML, and GitHub Actions linting"
+run_or_fail "lint::diagram-text" 73 node scripts/verify-diagram-text.mjs
 require_command npx "lint::npx" 73
 run_or_fail "lint::markdownlint" 73 npx --yes "markdownlint-cli2@${MARKDOWNLINT_CLI2_VERSION}" \
   --config .markdownlint.jsonc "**/*.md" "#**/node_modules/**"

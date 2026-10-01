@@ -1,5 +1,9 @@
 # 💬 Comment Templates
 
+> **Document purpose:** Collaboration template. Copyable review and progress comments with findings, blockers and next actions.
+>
+> **Key point:** Choose the relevant block and replace every placeholder; a status comment is not approval.
+
 GitHub has no built-in way to prefill a comment body the way it does for issues and pull requests. Copy the relevant block below when leaving a review or status-update comment, and delete anything that does not apply.
 
 ## 🔍 Review Comment

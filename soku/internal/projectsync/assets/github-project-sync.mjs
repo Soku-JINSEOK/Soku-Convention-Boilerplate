@@ -262,7 +262,13 @@ function nextLink(headers) {
 }
 
 export class GitHubApiClient {
-  constructor({token = normalizeToken(), fetchImpl = globalThis.fetch, apiBase = GITHUB_API} = {}) {
+  constructor({
+    token = normalizeToken(),
+    fetchImpl = globalThis.fetch,
+    apiBase = GITHUB_API,
+    wait = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds)),
+    now = () => Date.now(),
+  } = {}) {
     if (typeof fetchImpl !== 'function') {
       throw new Error('A fetch implementation is required.');
     }
@@ -270,38 +276,87 @@ export class GitHubApiClient {
     this.token = token;
     this.fetchImpl = fetchImpl;
     this.apiBase = apiBase.replace(/\/$/, '');
+    this.wait = wait;
+    this.now = now;
+    this.pending = Promise.resolve();
+    this.blockedUntil = 0;
   }
 
   async request(method, pathOrUrl, body) {
+    // Serialize reads and writes, including pagination from concurrent audits.
+    const result = this.pending.then(() => this.requestWithRetry(method, pathOrUrl, body));
+    this.pending = result.then(() => undefined, () => undefined);
+    return result;
+  }
+
+  async requestWithRetry(method, pathOrUrl, body) {
+    if (this.now() < this.blockedUntil) {
+      throw new Error('GitHub API rate-limit cooldown is still active; retry later.');
+    }
     const url = pathOrUrl.startsWith('http')
       ? pathOrUrl
       : `${this.apiBase}${pathOrUrl.startsWith('/') ? pathOrUrl : `/${pathOrUrl}`}`;
-    const response = await this.fetchImpl(url, {
-      method,
-      headers: {
-        Accept: 'application/vnd.github+json',
-        Authorization: `Bearer ${this.token}`,
-        'X-GitHub-Api-Version': '2022-11-28',
-        ...(body === undefined ? {} : {'Content-Type': 'application/json'}),
-      },
-      ...(body === undefined ? {} : {body: JSON.stringify(body)}),
-    });
-    const raw = typeof response.text === 'function'
-      ? await response.text()
-      : JSON.stringify(await response.json());
-    let data = null;
-    if (raw) {
-      try {
-        data = JSON.parse(raw);
-      } catch {
-        data = raw;
+    for (let attempt = 0; ; attempt += 1) {
+      const response = await this.fetchImpl(url, {
+        method,
+        headers: {
+          Accept: 'application/vnd.github+json',
+          Authorization: `Bearer ${this.token}`,
+          'X-GitHub-Api-Version': '2022-11-28',
+          ...(body === undefined ? {} : {'Content-Type': 'application/json'}),
+        },
+        ...(body === undefined ? {} : {body: JSON.stringify(body)}),
+      });
+      const raw = typeof response.text === 'function'
+        ? await response.text()
+        : JSON.stringify(await response.json());
+      let data = null;
+      if (raw) {
+        try {
+          data = JSON.parse(raw);
+        } catch {
+          data = raw;
+        }
       }
+      if (!response.ok) {
+        const message = typeof data === 'object' ? data?.message : data;
+        const retryAfter = headerValue(response.headers, 'retry-after');
+        const remaining = headerValue(response.headers, 'x-ratelimit-remaining');
+        const rateLimited = response.status === 429 || (
+          response.status === 403 && (
+            remaining === '0' || retryAfter !== '' ||
+            /secondary rate limit|API rate limit exceeded/i.test(String(message))
+          )
+        );
+        if (rateLimited) {
+          const currentTime = this.now();
+          const seconds = Number(retryAfter);
+          const retryDelay = retryAfter === '' ? 0 : (
+            Number.isFinite(seconds)
+              ? seconds * 1000
+              : Date.parse(retryAfter) - currentTime
+          );
+          const reset = headerValue(response.headers, 'x-ratelimit-reset');
+          const resetDelay = remaining === '0' && reset !== ''
+            ? Number(reset) * 1000 - currentTime
+            : 0;
+          const delay = Math.max(
+            60_000 * (2 ** attempt),
+            Number.isFinite(retryDelay) ? retryDelay : 0,
+            Number.isFinite(resetDelay) ? resetDelay : 0,
+          );
+          // Queued requests must not bypass the server's cooldown on failure.
+          this.blockedUntil = currentTime + delay;
+          if (method === 'GET' && attempt < 2 && delay <= 120_000) {
+            await this.wait(delay);
+            continue;
+          }
+        }
+        throw new Error(`GitHub ${method} ${pathOrUrl} failed (${response.status}): ${message ?? 'unknown error'}`);
+      }
+      this.blockedUntil = 0;
+      return {data, headers: response.headers, status: response.status};
     }
-    if (!response.ok) {
-      const message = typeof data === 'object' ? data?.message : data;
-      throw new Error(`GitHub ${method} ${pathOrUrl} failed (${response.status}): ${message ?? 'unknown error'}`);
-    }
-    return {data, headers: response.headers, status: response.status};
   }
 
   async rest(method, path, body) {

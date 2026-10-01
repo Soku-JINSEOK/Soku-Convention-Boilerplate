@@ -1,5 +1,9 @@
 # Product user manual
 
+> **Document purpose:** User manual starter. Provides the structure for project-owned instructions backed by stable capture identifiers.
+>
+> **Key point:** Replace example prose and disclose adapters; preserve generated image and provenance files.
+
 This file is a core-managed structural example. Create project-owned
 `docs/manual/USAGE.md`, `USAGE.ko.md`, and `USAGE.ja.md` for actual prose.
 
