@@ -1,5 +1,9 @@
 # 🤖 AGENTS
 
+> **Document purpose:** Agent operating contract. Defines how AI agents read authority, respect ownership and make reviewable repository changes.
+>
+> **Key point:** Read BLUEPRINT first, preserve scoped ownership, and explain changes with evidence.
+
 ## 🎯 Purpose
 
 This document provides stable operating guidance for AI agents working in repositories based on `Soku-Convention-Boilerplate`.
@@ -53,6 +57,10 @@ When editing code or documentation:
 ## 🌐 Documentation Policy
 
 Agents should treat documentation as part of the codebase, not as optional polish.
+
+Apply the [first-screen presentation contract](./docs/guides/README_GUIDE.md):
+state purpose and key takeaway at the top, explain structural diagrams in prose,
+and update the [document map](./docs/guides/DOCUMENTATION_MAP.md) with new files.
 
 Which language to write in (multilingual overview content vs. English-only operational content) is defined once in the [Language Policy in BLUEPRINT.md](./BLUEPRINT.md#language-policy) — do not restate or fork that rule in other documents.
 

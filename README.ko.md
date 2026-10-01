@@ -1,8 +1,14 @@
 # 🧩 Soku-Convention-Boilerplate
 
+> **문서 역할:** 프로젝트 개요. 공통 개발 규칙과 Soku 도구의 역할, 도입 방법, 상세 문서의 위치를 안내합니다.
+>
+> **핵심:** 처음 도입할 때는 사용 매뉴얼, 규칙의 기준은 BLUEPRINT, 주제별 탐색은 전체 문서 지도를 확인하세요.
+
 > `soku` CLI 기반의 선언적 저장소 컨벤션 베이스라인 및 수명주기 거버넌스 툴체인입니다.
 
 [English](./README.md) | [日本語](./README.ja.md)
+
+[전체 문서 지도: 문서별 목적과 읽는 순서](./docs/guides/DOCUMENTATION_MAP.md)
 
 ## 👋 개요
 
@@ -101,14 +107,22 @@ npm run format:check && npm run lint && npm run test && npm run build
 ## 🏗️ 아키텍처 및 수명주기 흐름
 
 ```mermaid
-flowchart TB
-    BP["Boilerplate Source<br/>Release: v1.0.5 (Signed Tag)"]
-    CLI["soku CLI Engine<br/>Distribution: soku/v0.2.1"]
-    Repo["Target Downstream Repository<br/>.soku/manifest.json + Managed File Boundaries"]
-
-    BP --> CLI
-    CLI -->|init / verify / upgrade| Repo
+flowchart TD
+  source["Boilerplate source: Release: v1.0.5"] -->|"고정된 컨벤션 버전 선택"| engine["soku CLI: Distribution: soku/v0.2.1"]
+  engine --> plan["설치된 CLI가 관리 파일 변경 계획 작성"]
+  manifest[".soku/manifest.json"] -->|"manifest와 로컬 수정 상태 확인"| plan
+  plan --> conflict{"충돌 또는 호환성 문제?"}
+  conflict -->|"예"| stopNode["쓰기를 중단하고 원인 해결"]
+  conflict -->|"아니요"| apply["확인된 계획을 트랜잭션으로 적용"]
+  apply --> owned["관리 대상 컨벤션 파일"]
+  apply --> state["앱 코드는 프로젝트 소유로 유지"]
+  owned --> inspect["status와 diff로 읽기 전용 진단"]
+  inspect --> plan
 ```
+
+**읽는 방법:** 원본 저장소는 규칙을 제공하고 CLI는 대상 저장소의 변경 계획을 만듭니다. manifest는 파일 소유권과 기준 상태를 기록합니다. 충돌이 있으면 기존 작업을 덮어쓰지 않고 적용을 중단합니다.
+
+**확인할 질문:** 적용할 버전, 변경 파일, 충돌 처리 방법과 결과를 확인하세요.
 
 ## 📦 현재 공개 베이스라인
 

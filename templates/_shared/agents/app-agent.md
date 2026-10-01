@@ -1,5 +1,9 @@
 # App Domain Agent
 
+> **Document purpose:** Domain agent charter. Defines responsibilities and editing boundaries for the app/ domain.
+>
+> **Key point:** Edit only the owned domain; coordinate shared contracts and report changes needed elsewhere.
+
 ## Owned Domain
 
 The `app/` directory: the entire single monolithic application (UI, server logic, CLI, batch jobs — whatever the project consists of, undivided). Use this charter only in repositories that keep the app as one deployable unit — if the repository splits into separate frontend/backend deployables, use `frontend-agent.md` and `backend-agent.md` instead, never both `app-agent.md` and the split pair.

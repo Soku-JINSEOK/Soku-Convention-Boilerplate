@@ -1,5 +1,28 @@
 # Cloud Build Shadow Validation
 
+> **Document purpose:** Shadow validation contract. Defines an isolated Cloud Build comparison candidate and the evidence required before operational use.
+>
+> **Key point:** Local candidates are unattested; no live rollout or required-check replacement is established here.
+
+## Proposed shadow evidence boundary
+
+```mermaid
+flowchart TD
+  future["Future approved trigger: source and PR identity"] --> guard["Validate substitution identity"]
+  guard --> valid{"Identity and contract valid?"}
+  valid -->|"No"| refuse["Reject before validation"]
+  valid -->|"Yes"| quick["Reuse scope planner and Quick checks"]
+  quick --> candidate["Local result: UNATTESTED_CANDIDATE"]
+  candidate --> pending["Cannot count as natural operational sample"]
+  server["Server-issued build and source evidence"] -.->|"Future independent verification"| attestor["Trusted attestor: not delivered here"]
+  candidate -.->|"Compare with server evidence"| attestor
+```
+
+**How to read:** Solid arrows describe the candidate validation contract. Dotted arrows are a future attestation requirement, not an implemented rollout. A source-generated result cannot attest to its own provenance.
+
+**Reader check:** Keep operational evidence marked missing until a trusted attestor verifies server evidence and duplicate-attempt state.
+
+
 Status: strict local contract only; live execution is not run and operational evidence is missing.
 
 ## Purpose and non-goals

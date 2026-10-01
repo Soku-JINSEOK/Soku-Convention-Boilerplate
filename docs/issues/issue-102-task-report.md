@@ -1,5 +1,9 @@
 # Issue #102 Task Report — Simplify issue templates for operator efficiency
 
+> **Document purpose:** Task decision record. Records the scope, decisions and verification for Issue #102: Simplify issue templates for operator efficiency.
+>
+> **Key point:** Read approval, implementation status and verification separately; this report is dated task evidence, not a fresh claim of current completion.
+
 ## Goal and Background
 
 Issue [#102](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/issues/102) requires issue forms to stop forcing users to fill full multilingual and metadata fields for every task.

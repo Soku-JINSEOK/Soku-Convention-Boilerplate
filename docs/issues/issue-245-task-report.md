@@ -1,5 +1,9 @@
 # Task report: explainable decisions and CI workload
 
+> **Document purpose:** Task decision record. Records the scope, decisions and verification for Issue #245: explainable decisions and CI workload.
+>
+> **Key point:** Read approval, implementation status and verification separately; this report is dated task evidence, not a fresh claim of current completion.
+
 ## Goal and Background
 
 Issue #245 extends PR #244. The owner requested explicit answers to why an
@@ -89,3 +93,25 @@ personal contact details, local paths or billing information are included.
 ## AI Assistance
 
 - **Planning/implementation/drafting:** OpenAI Codex
+
+## Approved first-screen documentation follow-up
+
+The owner explicitly requested detailed, easier diagrams throughout the
+documentation and top summaries for descriptive documents on 2026-10-01.
+Approval: Soku-JINSEOK's direct request to implement this documentation change.
+
+The review inventory contains 134 existing Markdown files. Add purpose and key
+takeaway blocks to 117 editable files, improve 25 document diagrams, and add a
+complete document map plus a release-record index. Preserve the 17 versioned
+release and append-only records byte for byte; their adjacent index supplies
+the reader summaries. Historical task-report status and evidence remain intact.
+
+The shared presentation contract lives in README_GUIDE and is referenced by
+CONTRIBUTING and AGENTS. Every diagram explains how to read it and what to check.
+Reference patterns, implemented behavior and proposed shadow behavior are
+distinguished. The Korean lifecycle overview is also available in the existing
+[FigJam board](https://www.figma.com/board/SJgcvEV1HZqYwHM5Nt5HWE).
+
+Verification: inspect summary coverage, links and diagram structure; use hosted
+repository validation because local process provisioning is unavailable.
+Final source and hosted results are recorded in Issue #245.

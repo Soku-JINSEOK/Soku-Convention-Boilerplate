@@ -1,5 +1,9 @@
 # Third-Party Notices
 
+> **Document purpose:** Third-party attribution. Lists bundled Go modules, pinned versions and license references for the Soku binary.
+>
+> **Key point:** Keep notices consistent with the modules included in the release build.
+
 The `soku` binary includes the following Go modules. The list is derived from
 the module metadata embedded in a release build; versions are pinned in
 `go.mod` and verified by `go.sum`.

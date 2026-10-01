@@ -1,5 +1,9 @@
 # Issue #235 task report — Archify repository flow maps
 
+> **Document purpose:** Task decision record. Records the scope, decisions and verification for Issue #235: Archify repository flow maps.
+>
+> **Key point:** Read approval, implementation status and verification separately; this report is dated task evidence, not a fresh claim of current completion.
+
 ## Authority and scope
 
 Issue #235 tracks the documentation-only Archify map publication for

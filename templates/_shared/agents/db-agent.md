@@ -1,5 +1,9 @@
 # DB Domain Agent
 
+> **Document purpose:** Domain agent charter. Defines responsibilities and editing boundaries for the db/ domain.
+>
+> **Key point:** Edit only the owned domain; coordinate shared contracts and report changes needed elsewhere.
+
 ## Owned Domain
 
 The `db/` directory: schema definitions, migrations, and seed data.

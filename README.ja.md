@@ -1,8 +1,14 @@
 # 🧩 Soku-Convention-Boilerplate
 
+> **文書の役割:** プロジェクト概要。共通規約とSokuツールの役割、導入方法、詳細文書への入口を案内します。
+>
+> **要点:** 導入は利用マニュアル、規則の優先順位はBLUEPRINT、目的別の検索は文書マップを確認してください。
+
 > `soku` CLI を活用した宣言的なリポジトリ規約ベースラインおよびライフサイクルツールチェーンです。
 
 [English](./README.md) | [한국어](./README.ko.md)
+
+[全文書マップ: 文書ごとの目的と読み方](./docs/guides/DOCUMENTATION_MAP.md)
 
 ## 👋 概要
 
@@ -101,14 +107,22 @@ npm run format:check && npm run lint && npm run test && npm run build
 ## 🏗️ アーキテクチャおよびライフサイクルフロー
 
 ```mermaid
-flowchart TB
-    BP["Boilerplate Source<br/>Release: v1.0.5 (Signed Tag)"]
-    CLI["soku CLI Engine<br/>Distribution: soku/v0.2.1"]
-    Repo["Target Downstream Repository<br/>.soku/manifest.json + Managed File Boundaries"]
-
-    BP --> CLI
-    CLI -->|init / verify / upgrade| Repo
+flowchart TD
+  source["Boilerplate source: Release: v1.0.5"] -->|"固定された規約バージョンを選択"| engine["soku CLI: Distribution: soku/v0.2.1"]
+  engine --> plan["CLIが管理対象ファイルの変更を計画"]
+  manifest[".soku/manifest.json"] -->|"manifestとローカル変更を確認"| plan
+  plan --> conflict{"競合または互換性の問題?"}
+  conflict -->|"はい"| stopNode["書き込み前に停止して原因を解消"]
+  conflict -->|"いいえ"| apply["確認した計画をトランザクションで適用"]
+  apply --> owned["管理対象の規約ファイル"]
+  apply --> state["アプリコードはプロジェクトが所有"]
+  owned --> inspect["statusとdiffによる読み取り専用診断"]
+  inspect --> plan
 ```
+
+**読み方:** 原本は規約を提供し、CLIは対象リポジトリへの変更を計画します。manifestは所有権と基準状態を記録します。競合時は既存の変更を上書きせず適用を停止します。
+
+**確認する点:** 適用する版、変更ファイル、競合時の対応と結果を確認してください。
 
 ## 📦 現在公開中のベースライン
 

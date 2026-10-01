@@ -1,5 +1,9 @@
 # Issue #117 — code-validation preservation and current-main Hosted Full forward-port
 
+> **Document purpose:** Task decision record. Records the scope, decisions and verification for Issue #117: preserving required code validation and adding current-source Hosted Full.
+>
+> **Key point:** Read approval, implementation status and verification separately; this report is dated task evidence, not a fresh claim of current completion.
+
 ## Purpose
 
 This integration combines the narrow code-validation correction with the

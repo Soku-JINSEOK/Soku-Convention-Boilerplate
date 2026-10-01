@@ -1,5 +1,9 @@
 # Issue #208 Task Report — Strict Fail-Closed Shadow Correction
 
+> **Document purpose:** Task decision record. Records the scope, decisions and verification for Issue #208: Strict Fail-Closed Shadow Correction.
+>
+> **Key point:** Read approval, implementation status and verification separately; this report is dated task evidence, not a fresh claim of current completion.
+
 ## State and authority
 
 ~~~text

@@ -1,5 +1,9 @@
 # Task report: design and readiness documentation
 
+> **Document purpose:** Task decision record. Records the scope, decisions and verification for Issue #243: design and readiness documentation.
+>
+> **Key point:** Read approval, implementation status and verification separately; this report is dated task evidence, not a fresh claim of current completion.
+
 ## Goal and Background
 
 Related to #243. First-time adopters need to connect requirements, runtime/data

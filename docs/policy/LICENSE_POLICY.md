@@ -1,5 +1,9 @@
 # 📜 License Policy
 
+> **Document purpose:** License policy. Explains how projects select, declare and maintain licensing and dependency obligations.
+>
+> **Key point:** Keep repository declarations and distributed notices consistent with the intended reuse.
+
 ## 🎯 Purpose
 
 This document defines how repositories based on `Soku-Convention-Boilerplate` should approach licensing decisions.

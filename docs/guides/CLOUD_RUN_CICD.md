@@ -1,5 +1,32 @@
 # Cloud Run CI/CD and bootstrap guide
 
+> **Document purpose:** Deployment runbook. Explains GCP bootstrap, manual dev deployment, authenticated health checks and rollback.
+>
+> **Key point:** Validation is separate from delivery; follow the explicit operation and environment boundaries.
+
+## Manual dev delivery
+
+```mermaid
+flowchart TD
+  operator["Operator: manual workflow"] --> operation{"Selected operation?"}
+  operation -->|"check"| checks["Validate plan without cloud mutation"]
+  operation -->|"deploy"| auth["Authenticate scoped deployer"]
+  auth --> imageNode["Build image and resolve immutable digest"]
+  imageNode --> deploy["Deploy dev revision and route traffic"]
+  deploy --> health{"Traffic and authenticated health valid?"}
+  health -->|"Yes"| success["Record verified deployment"]
+  health -->|"No"| restore["Restore exact pre-deploy revision"]
+  operation -->|"rollback"| rollback["Select rollback revision and restore"]
+  restore --> evidence["Sanitized attempt evidence"]
+  rollback --> evidence
+  success --> evidence
+```
+
+**How to read:** This is the documented manual dev path. Authentication belongs only to mutation operations. A failed health or traffic check triggers recovery to the recorded pre-deploy revision; inspect recovery evidence before declaring the service healthy.
+
+**Reader check:** Confirm environment, immutable image, runtime identity, health result and before/after revisions.
+
+
 This deployment path is manual by design. Local defaults and ordinary CI perform
 only syntax, formatting, validation, and mock regression checks. They never apply
 Terraform, push images, call GCP APIs, or deploy Cloud Run.

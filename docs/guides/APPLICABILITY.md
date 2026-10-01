@@ -1,22 +1,30 @@
 # 🧑‍💻 Applicability
 
+> **Document purpose:** Applicability guide. Helps personal, connected and team projects select proportionate conventions and evidence.
+>
+> **Key point:** Reduce process overhead according to risk; explain every N/A instead of silently omitting a responsibility.
+
 ## Scale the process to the risk
 
 Project size adjusts the amount of evidence and coordination. It does not remove baseline secret hygiene, recoverability or responsibility for the change.
 
 ```mermaid
 flowchart TD
-  scope["Project and affected boundaries"] --> local["Local or personal"]
-  scope --> connected["Connected product"]
-  scope --> team["Team or higher impact"]
-  local --> small["Purpose, local data, tests and recovery"]
-  connected --> medium["Add access, network and acceptance"]
-  team --> large["Add explicit owners and operating targets"]
-  small --> decision["Applicable evidence or reasoned N/A"]
-  medium --> decision
-  large --> decision
-  decision --> revisit["Revisit when risk or scope changes"]
+  project["Project and change scope"] --> local["Baseline: purpose, data, tests and recovery"]
+  local --> connected{"Network or shared resource involved?"}
+  connected -->|"Yes"| access["Add identity, permissions and network evidence"]
+  connected -->|"No"| localReason["Record hosted components N/A with reason"]
+  access --> impact{"Multiple owners or higher impact?"}
+  localReason --> impact
+  impact -->|"Yes"| ownership["Add owners, review and operating targets"]
+  impact -->|"No"| simple["Keep lightweight accountable records"]
+  ownership --> record["Evidence, owner and unresolved items"]
+  simple --> record
 ```
+
+**How to read:** Connectedness and impact are separate questions: a solo project can still expose shared data. Add controls for actual boundaries and risk instead of treating team size as the only trigger.
+
+**Reader check:** Are all applicable responsibilities covered, and does every omission have an explicit reason?
 
 - [ ] Choose evidence proportional to the affected behavior and reuse valid existing evidence.
 - [ ] Do not treat a personal project as exempt from secrets, dependency and data-recovery checks.

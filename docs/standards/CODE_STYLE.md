@@ -1,20 +1,31 @@
 # 🎨 Code Style
 
+> **Document purpose:** Code quality standard. Defines readable modules, explicit inputs and effects, naming, formatting and behavior checks.
+>
+> **Key point:** Make responsibilities and errors understandable without requiring readers to infer hidden behavior.
+
 ## Readable module contract
 
 This example makes the existing rules about coherent functions, explicit inputs and predictable effects visible. It describes responsibilities, not mandatory classes or a framework.
 
 ```mermaid
-flowchart LR
-  caller["Caller"] --> input["Validate explicit inputs"]
-  input --> logic["One coherent responsibility"]
-  logic --> output["Result or defined error"]
-  logic --> effect["Named I/O boundary"]
-  effect --> logic
-  formatter["Formatter and linter"] -.-> input
-  formatter -.-> logic
-  behavior["Behavior tests"] -.-> output
+flowchart TD
+  caller["Caller: explicit input"] --> valid{"Input valid?"}
+  valid -->|"No"| rejected["Defined validation error"]
+  valid -->|"Yes"| rule["One coherent responsibility"]
+  rule --> io{"External effect required?"}
+  io -->|"No"| result["Return explicit result"]
+  io -->|"Yes"| boundary["Named I/O adapter"]
+  boundary -->|"Success"| result
+  boundary -->|"Failure"| errorNode["Defined error or bounded recovery"]
+  result --> caller
+  errorNode --> caller
+  checks["Formatter, linter and behavior tests"] -.->|"Verify different properties"| rule
 ```
+
+**How to read:** Solid arrows show runtime control and results; the dotted arrow is verification. Keep I/O visible so callers and tests can distinguish a business result from a dependency failure.
+
+**Reader check:** Can a reader name the inputs, result, failure behavior and side effects without opening every dependency?
 
 - [ ] Can the function's inputs, outputs, errors and side effects be identified from its interface?
 - [ ] Can a reviewer focus on behavior while the configured formatter and linter enforce style?

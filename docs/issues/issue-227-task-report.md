@@ -1,5 +1,9 @@
 # 🔧 Issue 227 Task Report
 
+> **Document purpose:** Task decision record. Records the scope, decisions and verification for Issue #227: combining manual-runner dependency coverage and a fast-uri update.
+>
+> **Key point:** Read approval, implementation status and verification separately; this report is dated task evidence, not a fresh claim of current completion.
+
 ## Goal and Background
 
 Issue [#227](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/issues/227)

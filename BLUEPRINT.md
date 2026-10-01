@@ -1,21 +1,30 @@
 # 🗺️ Blueprint
 
+> **Document purpose:** Architecture authority. Defines the repository's purpose, document authority and boundaries between shared conventions and project design.
+>
+> **Key point:** Use this document to resolve policy conflicts; downstream applications own their architecture.
+
 ## Engineering contract map
 
 This map summarizes document authority and the evidence connecting it to implementation. An arrow means that the source constrains or supplies the destination; project-specific architecture stays in the downstream project.
 
 ```mermaid
 flowchart TD
-  blueprint["BLUEPRINT: authority"] --> structure["Structure and style"]
-  blueprint --> security["Security and cloud"]
-  blueprint --> validation["Verification and delivery"]
-  structure --> project["Project-owned design"]
-  security --> project
-  project --> evidence["Task report: decisions and evidence"]
-  validation --> evidence
-  evidence --> pr["Issue and PR review"]
-  pr --> releaseNode["Versioned release and sync"]
+  startNode["Reader: identify the question"] --> scope{"Shared rule or product decision?"}
+  scope -->|"Shared rule"| authority["BLUEPRINT: highest repository authority"]
+  authority -->|"Narrower requirements"| policy["Owning standard or policy"]
+  scope -->|"Product decision"| product["Project design: runtime, data and deployment"]
+  policy -->|"Constrains"| product
+  product -->|"Reasons and alternatives"| report["Task report: owner and evidence"]
+  report --> review{"Evidence supports the choice?"}
+  review -->|"No"| gap["Record gap and next validation"]
+  gap --> product
+  review -->|"Yes"| change["Review the scoped pull request"]
 ```
+
+**How to read:** Read top to bottom. BLUEPRINT owns shared authority; the downstream project owns its product design. The report connects a decision to its reasons and evidence.
+
+**Reader check:** Can the reader identify both the rule owner and the evidence behind the project-specific choice?
 
 [Editable FigJam counterpart](https://www.figma.com/board/SJgcvEV1HZqYwHM5Nt5HWE)
 

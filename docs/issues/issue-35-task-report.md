@@ -1,5 +1,9 @@
 # Issue #35 Task Report
 
+> **Document purpose:** Task decision record. Records the scope, decisions and verification for Issue #35: release-gate repair and first release preparation.
+>
+> **Key point:** Read approval, implementation status and verification separately; this report is dated task evidence, not a fresh claim of current completion.
+
 ## Goal and Background
 
 Repair the release gate and publish the first boilerplate and CLI releases from

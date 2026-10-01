@@ -1,9 +1,39 @@
 # End-to-end boilerplate usage manual
 
+> **Document purpose:** Human adoption guide. Connects project review, installation, safe initialization, validation, governance and optional delivery.
+>
+> **Key point:** Follow the linked owning contract for edge cases and verify a plan before applying changes.
+
+## Adoption and operating decisions
+
+```mermaid
+flowchart TD
+  goal["Project goal, users and constraints"] --> fit["Select applicable conventions and stack"]
+  fit --> source["Select and verify immutable source"]
+  source --> plan["Preview initialization and owned files"]
+  plan --> conflict{"Collision or unsupported input?"}
+  conflict -->|"Yes"| resolve["Resolve configuration or ownership"]
+  resolve --> plan
+  conflict -->|"No"| apply["Apply the reviewed plan"]
+  apply --> verify{"Relevant verification passes?"}
+  verify -->|"No"| repair["Diagnose and recover"]
+  repair --> plan
+  verify -->|"Yes"| operate["Operate status, diff and reviewed upgrades"]
+  operate --> delivery["Optional delivery: separate readiness and authorization"]
+```
+
+**How to read:** Follow the document's numbered sections for commands. Configuration choices precede installation; preview precedes writes; verification precedes routine operation. Delivery is optional and has separate conditions.
+
+**Reader check:** Can the adopter identify the source version, intended file changes, test evidence and next recovery step?
+
+
 This is the human starting point for adopting Soku conventions. It connects the
 supported decisions and commands without replacing their authoritative
 contracts. Follow linked normative documents when an edge case needs more
 detail.
+
+For each document's purpose and presentation type, use the
+[complete document map](./DOCUMENTATION_MAP.md).
 
 ## 0. Review the project before choosing configuration
 

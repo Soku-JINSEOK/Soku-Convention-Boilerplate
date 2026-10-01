@@ -1,5 +1,9 @@
 # npm Trusted Publishing
 
+> **Document purpose:** Publishing configuration guide. Defines the GitHub-to-npm trusted publisher identity and the tokenless release verification contract.
+>
+> **Key point:** Only the reviewed release path publishes; configuring trust is not evidence that a release succeeded.
+
 ## Purpose
 
 The `soku` npm package is published from GitHub Actions through npm Trusted

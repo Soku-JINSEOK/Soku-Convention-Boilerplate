@@ -1,5 +1,9 @@
 # Pull Request
 
+> **Document purpose:** Pull request template. Collect the linked issue, decision rationale, verification and remaining risks for a reviewable change.
+>
+> **Key point:** Fill the required metadata and language sections; mark only checks actually run.
+
 ## 🔗 Common Metadata
 
 - **Issue:** `<Closes #N for final work | Related to #N for partial work>`

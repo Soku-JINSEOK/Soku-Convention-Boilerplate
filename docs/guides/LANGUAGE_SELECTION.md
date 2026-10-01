@@ -1,5 +1,9 @@
 # 🧭 Language Selection
 
+> **Document purpose:** Technology decision guide. Compares language choices through platform constraints, operating capability and representative workload evidence.
+>
+> **Key point:** Record why the chosen runtime fits better and which change would justify reconsidering it.
+
 > **Applies to:** Both — see [`docs/guides/APPLICABILITY.md`](./APPLICABILITY.md).
 
 ## Constraint-first selection map
@@ -8,16 +12,22 @@ Narrow the candidates using the constraints already described here, then validat
 
 ```mermaid
 flowchart TD
-  platform{"Platform constrains runtime?"} -->|"Yes"| supported["Supported candidates"]
-  platform -->|"No"| existing["Existing systems and team"]
-  supported --> policy["Organization constraints"]
-  existing --> policy
-  policy --> shortlist["Maintainable shortlist"]
-  shortlist --> trial["Measure representative workload"]
-  trial --> fit{"Meets quality and operating limits?"}
-  fit -->|"No"| shortlist
-  fit -->|"Yes"| decision["Record choice, alternatives and revisit trigger"]
+  goal["Workload and quality targets"] --> platform{"Platform fixes the runtime?"}
+  platform -->|"Yes"| supported["Supported runtime candidates"]
+  platform -->|"No"| shortlist["Team and ecosystem shortlist"]
+  supported --> constraints["Check organization and integration constraints"]
+  shortlist --> constraints
+  constraints --> trial["Representative workload and deployment trial"]
+  trial --> fit{"Meets measured limits and support capacity?"}
+  fit -->|"No"| alternatives["Change candidate or revisit requirements"]
+  alternatives --> constraints
+  fit -->|"Yes"| decision["Record choice, rejected option and accepted cost"]
+  decision --> revisit["Set owner and measurable revisit condition"]
 ```
+
+**How to read:** Mandatory platform constraints narrow the set first. The workload trial checks the remaining candidates under realistic deployment conditions; it does not rank languages universally.
+
+**Reader check:** Which requirement eliminated each alternative, and which claims still need measurement?
 
 - [ ] Record platform constraints, operating experience and the cost of adding a language.
 - [ ] Tie performance claims to measurements and document when the decision should be revisited.

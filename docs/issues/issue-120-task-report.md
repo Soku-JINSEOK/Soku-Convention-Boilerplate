@@ -1,5 +1,9 @@
 # Issue #120 Task Report — Reduce public metadata exposure
 
+> **Document purpose:** Task decision record. Records the scope, decisions and verification for Issue #120: Reduce public metadata exposure.
+>
+> **Key point:** Read approval, implementation status and verification separately; this report is dated task evidence, not a fresh claim of current completion.
+
 ## Goal and Background
 
 Issue [#120](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/issues/120)

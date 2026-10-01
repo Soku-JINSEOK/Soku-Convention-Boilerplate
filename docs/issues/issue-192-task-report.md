@@ -1,5 +1,9 @@
 # Issue #192 Task Report
 
+> **Document purpose:** Task decision record. Records the scope, decisions and verification for Issue #192: the optional downstream Project Sync component.
+>
+> **Key point:** Read approval, implementation status and verification separately; this report is dated task evidence, not a fresh claim of current completion.
+
 ## Goal and Background
 
 [Issue #192](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/issues/192)

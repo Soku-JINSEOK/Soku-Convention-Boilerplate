@@ -1,5 +1,9 @@
 # July 2026 Dependency Updates (Issue #69)
 
+> **Document purpose:** Task decision record. Records the scope, decisions and verification for Issue #69: the July 2026 dependency update batch.
+>
+> **Key point:** Read approval, implementation status and verification separately; this report is dated task evidence, not a fresh claim of current completion.
+
 ## Outcome
 
 This report records the three dependency updates reviewed under

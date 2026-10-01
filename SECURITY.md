@@ -1,5 +1,9 @@
 # 🔐 Security
 
+> **Document purpose:** Reporting entrypoint. Explains how to report a suspected security issue privately and find the operating security policy.
+>
+> **Key point:** Avoid public disclosure of sensitive details while maintainers assess the report.
+
 ## 📣 Reporting
 
 If you believe you have found a security issue in a repository built from this boilerplate, report it through the repository's private security reporting channel when available.

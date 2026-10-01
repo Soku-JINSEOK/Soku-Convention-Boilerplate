@@ -1,5 +1,9 @@
 # Issue 56 Task Report
 
+> **Document purpose:** Task decision record. Records the scope, decisions and verification for Issue #56: dependency, secret, license and signed-tag gates.
+>
+> **Key point:** Read approval, implementation status and verification separately; this report is dated task evidence, not a fresh claim of current completion.
+
 ## Goal and Background
 
 [Issue #56](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/issues/56)

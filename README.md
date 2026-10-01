@@ -1,8 +1,14 @@
 # 🧩 Soku-Convention-Boilerplate
 
+> **Document purpose:** Project overview. Start here to understand the convention baseline, Soku lifecycle tooling and where to find setup and operating rules.
+>
+> **Key point:** Choose the usage manual for adoption, BLUEPRINT for authority and the document map for a specific question.
+
 > Declarative repository convention baseline and lifecycle tooling powered by the `soku` CLI.
 
 [한국어](./README.ko.md) | [日本語](./README.ja.md)
+
+[Complete document map: purpose and reading route for every document](./docs/guides/DOCUMENTATION_MAP.md)
 
 ## 👋 Overview
 
@@ -99,14 +105,22 @@ To run the complete verification suite for this boilerplate repository itself:
 ## 🏗️ Architecture & Lifecycle Flow
 
 ```mermaid
-flowchart TB
-    BP["Boilerplate Source<br/>Release: v1.0.5 (Signed Tag)"]
-    CLI["soku CLI Engine<br/>Distribution: soku/v0.2.1"]
-    Repo["Target Downstream Repository<br/>.soku/manifest.json + Managed File Boundaries"]
-
-    BP --> CLI
-    CLI -->|init / verify / upgrade| Repo
+flowchart TD
+  source["Boilerplate source: Release: v1.0.5"] -->|"Choose immutable convention source"| engine["soku CLI: Distribution: soku/v0.2.1"]
+  engine --> plan["Installed CLI plans owned-file changes"]
+  manifest[".soku/manifest.json"] -->|"Inspect manifest and local modifications"| plan
+  plan --> conflict{"Conflict or incompatible input?"}
+  conflict -->|"Yes"| stopNode["Stop and resolve before writing"]
+  conflict -->|"No"| apply["Apply confirmed transaction"]
+  apply --> owned["Managed convention files"]
+  apply --> state["Project application files stay project-owned"]
+  owned --> inspect["Read-only status and diff"]
+  inspect --> plan
 ```
+
+**How to read:** The source supplies conventions; the CLI plans changes in the downstream repository. The manifest records ownership and baselines. A conflict stops application rather than overwriting a local decision.
+
+**Reader check:** Identify the input release, proposed files, conflict handling and result before applying.
 
 ## 📦 Current Published Baseline
 

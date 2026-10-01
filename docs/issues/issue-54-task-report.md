@@ -1,5 +1,9 @@
 # Issue #54 Task Report — Public Provider API Mirror
 
+> **Document purpose:** Task decision record. Records the scope, decisions and verification for Issue #54: the public Provider API mirror.
+>
+> **Key point:** Read approval, implementation status and verification separately; this report is dated task evidence, not a fresh claim of current completion.
+
 ## Scope
 
 Publish the reviewed `ci-cd-control-plane-v1` declarative bundle and composite

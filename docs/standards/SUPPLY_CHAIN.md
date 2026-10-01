@@ -1,23 +1,33 @@
 # Supply-Chain Input Standard
 
+> **Document purpose:** Dependency input standard. Defines authoritative versions, lockfiles, pinned tools and generated validation outputs.
+>
+> **Key point:** Review inputs once, derive outputs reproducibly and verify installation plus security evidence.
+
 ## Reviewed input and generated output map
 
 Each artifact has one authoritative input. Generated copies must agree with it, and ecosystem checks must run after a dependency update.
 
 ```mermaid
 flowchart TD
-  review["Review release and advisory"] --> deps["Manifest and lockfile"]
-  review --> toolsNode["verification/tools.env"]
-  review --> actions["Pinned Action SHA or image digest"]
-  toolsNode --> render["Render template CI"]
-  render --> generated["Generated workflow"]
-  toolsNode --> parity["Supply-chain parity checks"]
-  generated --> parity
-  actions --> parity
-  deps --> ecosystem["Install, test and dependency audit"]
-  parity --> gate["Hosted validation"]
-  ecosystem --> gate
+  change["Dependency or tool update"] --> review["Review version, advisory and compatibility"]
+  review --> locks["Manifest and matching lockfile"]
+  review --> toolsNode["Authoritative tool pins and Action SHAs"]
+  toolsNode --> render["Render derived workflow where required"]
+  render --> parity{"Generated output matches source?"}
+  parity -->|"No"| repair["Regenerate and review diff"]
+  repair --> render
+  parity -->|"Yes"| validation["Relevant installation and behavior checks"]
+  locks --> validation
+  validation --> audit["Dependency and license audit"]
+  audit --> result{"Checks passed without suppression?"}
+  result -->|"No"| blocked["Resolve finding or record blocker"]
+  result -->|"Yes"| evidence["Retain reviewed inputs and revision evidence"]
 ```
+
+**How to read:** Manifests and locks describe packages; authoritative tool pins also drive generated workflows. Parity detects drift between source and generated copies, while installation and audits test different properties.
+
+**Reader check:** Are versions, lock integrity, generated workflow and audit results consistent for the same revision?
 
 - [ ] Update the authoritative manifest and lockfile together, retaining reviewed integrity values.
 - [ ] Regenerate owned outputs and check parity rather than editing generated copies independently.

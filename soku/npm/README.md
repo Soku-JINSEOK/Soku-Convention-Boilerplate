@@ -1,5 +1,28 @@
 # `@soku-jinseok/soku`
 
+> **Document purpose:** Package installation guide. Explains the npm launcher that downloads, verifies and runs the matching native Soku executable.
+>
+> **Key point:** Match package and release identity; checksum verification precedes execution.
+
+## Launcher execution
+
+```mermaid
+flowchart TD
+  command["User runs installed npm command"] --> platform["Select supported OS and architecture"]
+  platform --> cached{"Verified cached executable available?"}
+  cached -->|"Yes"| execute["Run native Soku with user arguments"]
+  cached -->|"No"| fetchNode["Fetch matching release asset and checksums"]
+  fetchNode --> checksum{"Checksum matches?"}
+  checksum -->|"No"| refuse["Fail without executing download"]
+  checksum -->|"Yes"| cache["Cache native executable"]
+  cache --> execute
+```
+
+**How to read:** The npm package is a launcher for a version-matched native binary. Downloading is distinct from verification, and verification must precede execution.
+
+**Reader check:** Does the launcher select the expected platform asset and reject a mismatched download?
+
+
 Cross-platform launcher for the native `soku` CLI distributed from
 [`Soku-Convention-Boilerplate`](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate).
 

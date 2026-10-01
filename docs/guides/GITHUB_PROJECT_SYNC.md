@@ -1,5 +1,31 @@
 # GitHub Project and Metadata Synchronization
 
+> **Document purpose:** Metadata synchronization guide. Explains installation, audit, guarded apply and recovery for Issue and Project metadata synchronization.
+>
+> **Key point:** Use the scoped identity and fresh target state; source-code mutation and duplicate Project items are outside its scope.
+
+## Metadata audit and apply
+
+```mermaid
+flowchart TD
+  eventNode["Issue, PR, schedule or manual event"] --> trusted["Trusted source and scoped credential"]
+  trusted --> read["Read current metadata and existing Project items"]
+  read --> mode{"Audit or apply?"}
+  mode -->|"Audit"| report["Redacted proposed changes and target hashes"]
+  mode -->|"Apply"| fresh["Reread each target before mutation"]
+  fresh --> same{"Target still matches audited state?"}
+  same -->|"No"| stale["Skip stale target; report conflict"]
+  same -->|"Yes"| write["Apply allowed metadata change"]
+  write --> result["Record per-target result"]
+  write -->|"Permission or mutation failure"| failNode["Stop failed operation; inspect current state"]
+  report --> review["Operator reviews findings"]
+```
+
+**How to read:** Audit describes intended metadata changes. Apply rereads each target so concurrent edits are not overwritten. Requests use the serialized queue and rate-limit rules in the dedicated section below.
+
+**Reader check:** Check the event's credential context, repository scope, target freshness and unresolved per-target findings.
+
+
 This repository synchronizes GitHub Issue and pull request metadata with the
 user-owned Project #2. The synchronization scope is deliberately narrow:
 

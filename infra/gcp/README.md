@@ -1,5 +1,31 @@
 # GCP infrastructure
 
+> **Document purpose:** Infrastructure configuration guide. Explains Terraform foundation, runtime, optional validation resources and isolated state responsibilities.
+>
+> **Key point:** Preview the intended resource scope and require explicit application before creating or changing cloud resources.
+
+## Terraform ownership and state
+
+```mermaid
+flowchart TD
+  operator["Operator: preview bootstrap"] --> mode{"Requested resource scope?"}
+  mode -->|"Foundation"| foundation["APIs, identities, registry and WIF"]
+  mode -->|"Runtime"| runtime["Cloud Run with immutable image digest"]
+  mode -->|"Validation only"| validation["Dedicated validation identity and triggers"]
+  foundation --> appState["State prefix: cloud-run"]
+  runtime --> appState
+  validation --> validationState["State prefix: cloud-build-validation"]
+  logging["Separate logging root: bucket, sink and exclusion"] --> logState["State prefix: cloud-build-logging"]
+  appState --> review["Review plan and explicit apply conditions"]
+  validationState --> review
+  logState --> review
+```
+
+**How to read:** The boxes describe declared resource ownership, not live deployment status. Workload Identity Federation (WIF) connects the reviewed GitHub identity to the deployer; the validation identity is separate. State prefixes prevent one resource scope from silently managing another.
+
+**Reader check:** Check the intended state prefix, identity and exact planned resources before any apply.
+
+
 This Terraform stack deliberately separates bootstrap from runtime creation while
 keeping both stages in one remote GCS state.
 

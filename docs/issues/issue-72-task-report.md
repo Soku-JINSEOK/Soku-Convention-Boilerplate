@@ -1,5 +1,9 @@
 # Issue 72 Task Report
 
+> **Document purpose:** Task decision record. Records the scope, decisions and verification for Issue #72: central governance template alignment.
+>
+> **Key point:** Read approval, implementation status and verification separately; this report is dated task evidence, not a fresh claim of current completion.
+
 ## Goal and Background
 
 Resolve central governance template drift in `Soku-Convention-Boilerplate` under

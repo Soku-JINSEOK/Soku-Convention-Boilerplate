@@ -1,5 +1,9 @@
 # Issue #87 Task Report — Confirmed GCP Bootstrap
 
+> **Document purpose:** Task decision record. Records the scope, decisions and verification for Issue #87: confirmed GCP bootstrap.
+>
+> **Key point:** Read approval, implementation status and verification separately; this report is dated task evidence, not a fresh claim of current completion.
+
 ## Goal and Background
 
 Issue [#87](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/issues/87)

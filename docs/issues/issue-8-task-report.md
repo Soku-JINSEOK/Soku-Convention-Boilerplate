@@ -1,5 +1,9 @@
 # 📝 Task Report: add task-report and title-check templates
 
+> **Document purpose:** Task decision record. Records the scope, decisions and verification for Issue #8: add task-report and title-check templates.
+>
+> **Key point:** Read approval, implementation status and verification separately; this report is dated task evidence, not a fresh claim of current completion.
+
 ## Goal and Background
 
 Closes #8. `PULL_REQUEST_TEMPLATE.md` requires a `docs/issues/issue-<n>-task-report.md` file that had no template, `contribution-title.mjs` had no CI enforcement or regression tests, and there was no bilingual template for GitHub comments — see issue #8 for the full comparison.

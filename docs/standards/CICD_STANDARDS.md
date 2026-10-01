@@ -1,25 +1,33 @@
 # 🔁 CI/CD Standards
 
+> **Document purpose:** CI/CD operating standard. Explains validation responsibilities, required gates, execution cost and controlled delivery.
+>
+> **Key point:** A passing validation run supplies evidence; it does not itself authorize deployment.
+
 ## Implemented validation topology
 
 The following is the actual workflow relationship in this repository. CI Quick provides feedback in parallel; the full Validation Gate aggregates repository, runtime-template and security results. PR metadata is checked separately. Passing validation does not itself deploy a product.
 
 ```mermaid
 flowchart TD
-  eventNode["PR code event or main push"] --> validation["validation.yml"]
-  validation --> quick["ci-quick.yml: changed scope"]
+  eventNode["PR opened, updated, reopened or edited; main push"] --> validation["Validation workflow"]
+  validation -->|"Changed-scope feedback"| quick["Quick checks"]
   quick --> quickGate["CI Quick Gate"]
-  validation --> repoChecks["ci.yml: repository checks"]
-  validation --> templateChecks["templates-ci.yml: runtime templates"]
-  validation --> securityChecks["security.yml: history and dependencies"]
-  repoChecks --> fullGate["Validation Gate: all three succeed"]
-  templateChecks --> fullGate
-  securityChecks --> fullGate
-  prEvent["PR metadata event"] --> policy["pull-request-policy.yml"]
-  policy --> metadata["PR Metadata Gate"]
-  fullGate -.-> review["Protected branch review"]
-  metadata -.-> review
+  validation -->|"Complete validation"| full["Full component workflows"]
+  full --> repo["Repository: docs, CLI and runner"]
+  full --> stacks["Templates: languages and databases"]
+  full --> security["Security: history and dependencies"]
+  repo --> result{"All full components succeeded?"}
+  stacks --> result
+  security --> result
+  result -->|"No, cancelled or skipped"| failNode["Validation Gate fails"]
+  result -->|"Yes"| passNode["Validation Gate passes"]
+  passNode --> review["Branch review and remaining rules"]
 ```
+
+**How to read:** Quick gives separate feedback. The required full gate combines repository, template and security evidence and fails on missing results. PR metadata has its own gate, described below; neither validation gate deploys the application.
+
+**Reader check:** Inspect the exact revision, failed child job and required gate. Do not treat a skipped component or an older successful run as current evidence.
 
 [Editable FigJam counterpart](https://www.figma.com/board/SJgcvEV1HZqYwHM5Nt5HWE)
 

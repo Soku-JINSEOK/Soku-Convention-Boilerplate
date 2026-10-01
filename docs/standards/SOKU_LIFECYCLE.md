@@ -1,5 +1,33 @@
 # 🔁 `soku` Lifecycle Contract
 
+> **Document purpose:** Normative lifecycle contract. Defines Soku ownership, compatibility, planning, transactional writes and recovery.
+>
+> **Key point:** Validate before mutation, preserve project-owned files and distinguish restored failures from manual recovery.
+
+## Lifecycle transaction contract
+
+```mermaid
+flowchart TD
+  inputs["Pinned source, manifest and current files"] --> read["status or diff: read-only diagnostics"]
+  inputs --> plan["init or upgrade: validated change plan"]
+  plan --> safe{"Compatibility and ownership valid?"}
+  safe -->|"No"| refuse["Refuse before writes"]
+  safe -->|"Yes"| approved{"Apply confirmed?"}
+  approved -->|"No"| preview["Dry-run plan; no state mutation"]
+  approved -->|"Yes"| transaction["Apply managed-file transaction"]
+  transaction --> ok{"Application succeeded?"}
+  ok -->|"Yes"| manifest["Replace manifest last"]
+  ok -->|"No"| rollback["Attempt rollback"]
+  rollback --> restored{"Previous state restored?"}
+  restored -->|"Yes"| exitSeven["Report failure with restored state: exit 7"]
+  restored -->|"No"| exitEight["Stop for manual recovery: exit 8"]
+```
+
+**How to read:** Read-only diagnostics and dry-run do not write managed state. Real changes require a validated, confirmed plan. The manifest records a successful transaction only after managed files are applied.
+
+**Reader check:** Can the operator distinguish a safe refusal, a restored failure and an incomplete rollback requiring manual recovery?
+
+
 ## Status and Authority
 
 - **Status:** Accepted

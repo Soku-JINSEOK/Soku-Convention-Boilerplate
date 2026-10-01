@@ -1,5 +1,9 @@
 # ☁️ Cloud Policy
 
+> **Document purpose:** Cloud decision policy. Defines provider and service selection through workload, identity, recovery and operating cost.
+>
+> **Key point:** Document who operates each resource and why its obligations are justified by the workload.
+
 > **Applies to:** Team/Scaled — see [`docs/guides/APPLICABILITY.md`](../guides/APPLICABILITY.md). A personal project on a single cloud account only needs the workload-fit reasoning below, not the multi-account governance framing.
 
 ## Cloud responsibilities and exposure
@@ -8,17 +12,21 @@ This reference shows responsibilities to document when a connected service uses 
 
 ```mermaid
 flowchart TD
-  client["Client"] --> naming["DNS name and certificate owner"]
-  naming --> entry["TLS endpoint and allowed ingress"]
-  entry --> app["Application: scoped runtime identity"]
-  app --> storage["Private data service"]
-  app --> external["Approved outbound integration"]
-  secrets["Environment-scoped secrets"] -.-> app
-  app --> signals["Redacted logs and health signals"]
-  signals --> owner["Operations owner"]
-  budget["Usage and budget signals"] --> owner
-  owner --> recovery["Recovery procedure and limits"]
+  client["User or client"] --> dns["DNS owner: name and renewal"]
+  dns --> entry["TLS endpoint: allowed ingress"]
+  entry --> auth["Application: identity and resource permission"]
+  auth -->|"Scoped data access"| data["Private storage: data and backup owner"]
+  auth -->|"Approved outbound request"| external["External service"]
+  external -->|"Timeout or failure"| recover["Defined retry or degraded response"]
+  data -->|"Backup and restore evidence"| recovery["Recovery owner and objectives"]
+  auth -->|"Redacted health signals"| monitor["Operations: alerts and incident response"]
+  budget["Usage and budget signals"] --> monitor
+  monitor -->|"Incident action"| recovery
 ```
+
+**How to read:** This is a provider-neutral reference, not a claim of deployed resources. DNS maps the name, TLS protects transport, and application authorization controls resource access. Each layer has a different owner and failure mode.
+
+**Reader check:** Who owns certificates, access, data restoration, external failures and budget alerts? Mark hosted components N/A for an offline app.
 
 - [ ] Document ingress, egress, DNS/certificate renewal and environment-specific identities.
 - [ ] Estimate storage, requests and network costs, and name the alert and recovery owner.

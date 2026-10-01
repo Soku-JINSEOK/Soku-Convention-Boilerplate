@@ -1,5 +1,9 @@
 # GitHub Governance Hardening for Boilerplate (Issue #55)
 
+> **Document purpose:** Task decision record. Records the scope, decisions and verification for Issue #55: GitHub governance hardening.
+>
+> **Key point:** Read approval, implementation status and verification separately; this report is dated task evidence, not a fresh claim of current completion.
+
 ## Outcome
 
 This report captures the metadata normalization and governance hardening work tracked by

@@ -1,5 +1,9 @@
 # Issue #100 Task Report — Audit complete Issue and pull-request history
 
+> **Document purpose:** Task decision record. Records the scope, decisions and verification for Issue #100: Audit complete Issue and pull-request history.
+>
+> **Key point:** Read approval, implementation status and verification separately; this report is dated task evidence, not a fresh claim of current completion.
+
 ## Goal and Background
 
 Issue [#100](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/issues/100)

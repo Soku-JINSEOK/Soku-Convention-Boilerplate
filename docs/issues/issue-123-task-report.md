@@ -1,5 +1,9 @@
 # Issue #123 Task Report — Unify version metadata and publication identity
 
+> **Document purpose:** Task decision record. Records the scope, decisions and verification for Issue #123: Unify version metadata and publication identity.
+>
+> **Key point:** Read approval, implementation status and verification separately; this report is dated task evidence, not a fresh claim of current completion.
+
 ## Goal and Background
 
 Issue [#123](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/issues/123)

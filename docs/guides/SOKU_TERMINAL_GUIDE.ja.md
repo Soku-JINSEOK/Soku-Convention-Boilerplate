@@ -1,5 +1,9 @@
 # Soku ターミナルおよび Completion ガイド
 
+> **文書の役割:** CLI利用ガイド。Sokuのターミナル表示、日常のコマンド、シェル補完設定を説明します。
+>
+> **要点:** 適用前に変更計画を確認し、差分検出と実行エラーを区別してください。
+
 [English](./SOKU_TERMINAL_GUIDE.md) | [한국어](./SOKU_TERMINAL_GUIDE.ko.md) | [日本語](./SOKU_TERMINAL_GUIDE.ja.md)
 
 このガイドでは、Soku のターミナル出力、安全な日常フロー、自動化、Bash・Zsh・

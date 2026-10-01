@@ -1,5 +1,9 @@
 # Backend Domain Agent
 
+> **Document purpose:** Domain agent charter. Defines responsibilities and editing boundaries for the backend/ domain.
+>
+> **Key point:** Edit only the owned domain; coordinate shared contracts and report changes needed elsewhere.
+
 ## Owned Domain
 
 The `backend/` directory: the API/server, its business logic, its tests, and any backend-only configuration. Use this charter only in repositories that split `frontend/` and `backend/` — if the repository uses a single `app/` folder instead, use `app-agent.md`.

@@ -1,5 +1,9 @@
 # Issue #195 Task Report: Downstream Project Sync Audit
 
+> **Document purpose:** Task decision record. Records the scope, decisions and verification for Issue #195: Downstream Project Sync Audit.
+>
+> **Key point:** Read approval, implementation status and verification separately; this report is dated task evidence, not a fresh claim of current completion.
+
 ## Goal and Background
 
 Validate the optional `github-project-sync` Soku component as a downstream

@@ -1,24 +1,31 @@
 # ✅ Verification Guide
 
+> **Document purpose:** Verification checklist. Maps repository, runtime, governance and delivery claims to executable checks and retained evidence.
+>
+> **Key point:** Missing or unavailable evidence is not a pass; record the tested revision and limits.
+
 ## Requirement-to-evidence map
 
 Select verification from the product risk, then keep the actual result tied to its requirement and tested revision. The branches below supply complementary evidence; a green lint result alone cannot satisfy user acceptance.
 
 ```mermaid
 flowchart TD
-  requirement["Requirement and risk"] --> unit["Unit: rule and edge cases"]
-  requirement --> boundary["Integration: API, DB and failures"]
-  requirement --> journey["E2E and human task acceptance"]
-  requirement --> resilience["Security, compatibility and recovery"]
-  unit --> evidence["Result, environment and source revision"]
-  boundary --> evidence
-  journey --> evidence
-  resilience --> evidence
-  evidence --> decision{"Applicable criteria satisfied?"}
-  decision -->|"No or missing"| followup["Fail or Blocked: owner and next check"]
-  decision -->|"Yes"| accepted["Acceptance evidence"]
-  followup -.-> requirement
+  requirement["User outcome and failure risk"] --> type{"Which boundary could fail?"}
+  type -->|"Rule or calculation"| unit["Unit test: normal and edge cases"]
+  type -->|"API or data exchange"| integration["Integration test: contract and failure"]
+  type -->|"User task or recovery"| acceptance["Journey, acceptance or recovery exercise"]
+  unit --> evidence["Result with revision and environment"]
+  integration --> evidence
+  acceptance --> evidence
+  evidence --> complete{"Every applicable criterion evidenced?"}
+  complete -->|"No"| missing["Fail or Blocked: owner and next check"]
+  missing --> requirement
+  complete -->|"Yes"| accepted["Record acceptance and limitations"]
 ```
+
+**How to read:** Choose checks by the failure they can detect. Unit tests cannot prove a complete user journey; a passing journey does not replace focused failure tests. Each result includes its environment and tested revision.
+
+**Reader check:** Can a reviewer trace each acceptance condition to an actual result and see every untested assumption?
 
 - [ ] Link a concrete result to every applicable acceptance condition, including negative and recovery cases.
 - [ ] Use N/A only with a reason; distinguish planned checks, actual passes, failures and unavailable checks.

@@ -1,5 +1,9 @@
 # GitHub Governance History Audit — 2026-07-23
 
+> **Document purpose:** Dated audit record. Records the read-only governance inventory of 33 issues and 59 pull requests at the stated cutoff.
+>
+> **Key point:** This is historical evidence for that cutoff, not a statement of today's repository state.
+
 ## Scope and safety boundary
 
 - Repository: `Soku-JINSEOK/Soku-Convention-Boilerplate`

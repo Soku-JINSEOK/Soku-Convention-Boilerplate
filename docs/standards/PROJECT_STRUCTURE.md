@@ -1,23 +1,32 @@
 # 🏗️ Project Structure
 
+> **Document purpose:** Ownership and layout standard. Maps directories to responsibilities, deployable units, data ownership and shared interfaces.
+>
+> **Key point:** Choose a layout that exposes real boundaries; separate folders alone do not justify separate services.
+
 ## Ownership and dependency map
 
 Choose a file layout that matches the actual deployable units. This reference separates contracts and data ownership from folder names; it does not require separate services.
 
 ```mermaid
 flowchart TD
-  choice{"Deployable units?"} -->|"One"| single["src/ or app/"]
-  choice -->|"Separate client and server"| split["frontend/ + backend/"]
-  single --> interfaces["Explicit module contracts"]
-  split --> interfaces
-  interfaces --> data["Data owner: schema and migrations"]
-  interfaces --> integration["External API adapters"]
-  tests["tests/: boundary and behavior checks"] -.-> interfaces
-  infra["infra/: runtime configuration"] -.-> single
-  infra -.-> split
-  docsNode["docs/: decisions and owners"] -.-> data
-  docsNode -.-> integration
+  deploy{"How many deployable units?"} -->|"One"| app["app or src: application"]
+  deploy -->|"Client and server"| front["frontend: presentation"]
+  front -->|"Agreed API request"| back["backend: trusted operation"]
+  app -->|"Data contract"| data["Data owner: schema and migrations"]
+  back -->|"Data contract"| data
+  back -->|"External call"| adapter["Adapter: third-party boundary"]
+  adapter -->|"Timeout or error"| handling["Defined failure and retry behavior"]
+  handling -->|"Result to caller"| back
+  tests["Tests: contracts and failure cases"] -.->|"Verify"| data
+  tests -.->|"Verify"| back
+  ops["infra: environment and identities"] -.->|"Configure"| app
+  ops -.->|"Configure"| back
 ```
+
+**How to read:** Boxes are responsibilities, not mandatory services. A frontend sends a request through an agreed contract; trusted code owns the operation and the data owner controls schema changes. Dotted arrows mean configuration or verification.
+
+**Reader check:** Who owns each interface and migration, and what response does the caller receive when an external dependency fails?
 
 - [ ] Choose app/ or frontend/ + backend/ in the multi-domain layout; do not duplicate the same responsibility in both.
 - [ ] Identify the single writer or coordination policy for shared data, and test interface failures.

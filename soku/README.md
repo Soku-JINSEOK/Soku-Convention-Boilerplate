@@ -1,5 +1,9 @@
 # `soku` CLI
 
+> **Document purpose:** CLI reference. Explains Soku installation, command behavior, supported lifecycle features and distribution.
+>
+> **Key point:** Use exact source identity and preview managed changes before applying a transaction.
+
 [Terminal guide: English](../docs/guides/SOKU_TERMINAL_GUIDE.md) |
 [한국어](../docs/guides/SOKU_TERMINAL_GUIDE.ko.md) |
 [日本語](../docs/guides/SOKU_TERMINAL_GUIDE.ja.md)

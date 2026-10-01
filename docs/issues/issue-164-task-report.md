@@ -1,5 +1,9 @@
 # Issue #164 Task Report — Real-runtime user-manual capture
 
+> **Document purpose:** Task decision record. Records the scope, decisions and verification for Issue #164: Real-runtime user-manual capture.
+>
+> **Key point:** Read approval, implementation status and verification separately; this report is dated task evidence, not a fresh claim of current completion.
+
 ## Goal and Background
 
 Issue [#164](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/issues/164)

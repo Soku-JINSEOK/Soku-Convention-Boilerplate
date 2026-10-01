@@ -1,5 +1,9 @@
 # Project Sync Credential Setup and Rotation Runbook
 
+> **Document purpose:** Credential runbook. Defines scoped credential setup, replacement audits, secret rotation and revocation for Project Sync.
+>
+> **Key point:** Separate each mutation from its audit evidence and never use a broader fallback credential.
+
 ## Purpose
 
 This runbook defines the least-privilege setup, verification, replacement, and

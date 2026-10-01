@@ -1,5 +1,32 @@
 # Real-Runtime User-Manual Capture
 
+> **Document purpose:** Capture contract. Defines local real-runtime screenshots, ownership, adapters, provenance and redacted reports.
+>
+> **Key point:** Only actual runtime evidence may claim runtime authenticity, with every adapter disclosed.
+
+## Local capture contract
+
+```mermaid
+flowchart TD
+  config["Project-owned capture configuration and fixtures"] --> plan["Plan and doctor: inspect prerequisites"]
+  plan --> ready{"Local inputs and runner ready?"}
+  ready -->|"No"| repair["Resolve configuration or prerequisites"]
+  repair --> plan
+  ready -->|"Yes: explicit capture"| runner["Run original frontend in local Chromium"]
+  adapters["Declared backend or screen adapters"] -.->|"Disclose substitutions"| runner
+  runner --> capture["Capture scenario with stable identifier"]
+  capture --> images["PNG and generated index"]
+  capture --> report["Redacted provenance and hashes"]
+  images --> author["Author project-owned manual and captions"]
+  report --> author
+  author --> review["Review accuracy, disclosures and intended use"]
+```
+
+**How to read:** The installed runner is managed tooling; scenarios, fixtures, images and prose belong to the project. An adapter changes the authenticity classification and must be disclosed in captions and the report.
+
+**Reader check:** Does each image trace to its scenario, source and adapter disclosures without exposing credentials?
+
+
 ## Status and Scope
 
 - **Status:** Accepted for the opt-in `docs-manual` component

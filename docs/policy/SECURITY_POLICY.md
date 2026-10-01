@@ -1,5 +1,9 @@
 # 🔐 Security Policy
 
+> **Document purpose:** Security operating policy. Defines secret hygiene, identity, resource authorization, dependency review and response responsibilities.
+>
+> **Key point:** Enforce permission at the trusted operation boundary and verify denial paths as well as allowed use.
+
 > **Applies to:** Both (lighter for Personal) — see [`docs/guides/APPLICABILITY.md`](../guides/APPLICABILITY.md). Secret hygiene and dependency review matter solo too; only the "external reporter" framing in `SECURITY.md` assumes other users.
 
 ## Access enforcement and secret boundary
@@ -8,16 +12,24 @@ This is a connected-application reference. Authentication establishes identity; 
 
 ```mermaid
 flowchart TD
-  client["Browser or installed client"] --> identity["Verify identity and session"]
-  identity --> permission{"Action allowed on this resource?"}
-  permission -->|"No or unknown"| denied["Reject request"]
-  permission -->|"Yes"| validation["Validate input and resource scope"]
-  validation --> service["Trusted application operation"]
-  service --> data["Private data: scoped identity"]
-  secrets["Server-side secret store"] -.-> service
-  service --> audit["Redacted audit event"]
-  denied --> audit
+  client["Client: request and resource identifier"] --> identity{"Session valid?"}
+  identity -->|"No"| deny["Reject and record redacted reason"]
+  identity -->|"Yes"| access{"Action allowed on this resource?"}
+  access -->|"No or unknown"| deny
+  access -->|"Yes"| input{"Input and resource scope valid?"}
+  input -->|"No"| invalid["Return defined validation error"]
+  input -->|"Yes"| operation["Trusted application operation"]
+  secret["Scoped server identity"] -.->|"Authorizes data access"| operation
+  operation -->|"Read or write"| data["Private data"]
+  data -->|"Allowed result"| output["Return only permitted fields"]
+  output --> client
+  deny --> audit["Redacted audit evidence"]
+  invalid --> audit
 ```
+
+**How to read:** Identity answers who is asking; resource permission answers whether that user may perform this action on this particular record. A client cannot grant itself permission. Private credentials remain inside the trusted boundary.
+
+**Reader check:** Test another user's record identifier, missing roles, invalid input and the fields returned to the client.
 
 [Editable FigJam counterpart](https://www.figma.com/board/SJgcvEV1HZqYwHM5Nt5HWE)
 

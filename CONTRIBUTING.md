@@ -1,5 +1,9 @@
 # 🤝 Contributing
 
+> **Document purpose:** Contribution standard. Explains how to propose, implement, verify and review changes with explicit decision reasons.
+>
+> **Key point:** Record constraints, alternatives, costs and evidence so another contributor can maintain the choice.
+
 ## 👋 Overview
 
 This repository is designed to keep development standards consistent across projects.  
@@ -155,6 +159,15 @@ Code review should prioritize:
 - readability
 
 Avoid spending review energy on formatting issues that should be handled by tools.
+
+## Document presentation review
+
+Follow the [first-screen document contract](./docs/guides/README_GUIDE.md).
+Every editable Markdown document starts with purpose and key takeaway.
+Use a readable diagram for relationships or branching behavior, and concise
+prose for descriptive records. Review summaries and diagrams against the
+underlying behavior, and keep the [document map](./docs/guides/DOCUMENTATION_MAP.md)
+current. Historical release identities remain preserved.
 
 ## 🌐 Documentation Policy
 

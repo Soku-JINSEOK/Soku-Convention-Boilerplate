@@ -1,22 +1,31 @@
 # 🐙 GitHub Standards
 
+> **Document purpose:** Collaboration standard. Defines issue, task-report, pull-request, label, signature and review requirements.
+>
+> **Key point:** Keep the reason for a change traceable to its tested revision and unresolved conditions.
+
 ## Change and evidence relationships
 
 This relationship map shows what a reviewer must be able to trace. It does not add an approval role or replace the detailed metadata and signing rules below.
 
 ```mermaid
 flowchart TD
-  issue["Issue: goal and completion criteria"] --> report["Task report: design and approval"]
-  report --> branch["Scoped branch and signed commits"]
-  branch --> pr["PR: change, rationale and evidence"]
-  issue -.-> pr
-  report -.-> pr
-  pr --> codeChecks["Code and security checks"]
-  pr --> metadata["Labels, assignee and linked records"]
-  codeChecks --> review["Review and resolved conversations"]
-  metadata --> review
-  review --> mergeNode["Merge under active branch rules"]
+  issue["Issue: problem and completion criteria"] --> report["Task report: design, alternatives and approval"]
+  report --> branch["Scoped implementation and signed commits"]
+  branch --> pr["PR: linked report and tested revision"]
+  pr --> code["Code and security checks"]
+  pr --> meta["Metadata: relation, labels and assignee"]
+  code --> ready{"Checks and review conditions satisfied?"}
+  meta --> ready
+  ready -->|"No"| fix["Record blocker and update the change"]
+  fix --> branch
+  ready -->|"Yes"| mergeNode["Merge under active branch rules"]
+  mergeNode --> closeNode["Record completion and accurate status"]
 ```
+
+**How to read:** Issue and report explain intent; commits carry the implementation; the PR gathers both technical and collaboration evidence. A green job alone cannot resolve a missing signature or review condition.
+
+**Reader check:** Can the reviewer trace the same change from problem through decision and commit to the current results?
 
 - [ ] Trace the PR to its issue and approved task report, then trace each result to the tested revision.
 - [ ] Check both commit signatures and validation results; neither substitutes for the other.

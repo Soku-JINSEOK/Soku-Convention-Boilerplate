@@ -1,5 +1,9 @@
 # 📝 Task Report Template
 
+> **Document purpose:** Decision and evidence template. Captures a task's problem, alternatives, approval, implementation and actual verification.
+>
+> **Key point:** Keep planned work separate from completed evidence and give unresolved risks an owner.
+
 <!-- Copy this file to `docs/issues/issue-<n>-task-report.md`, where `<n>` matches the linked issue number. -->
 
 ## Evidence map
@@ -8,16 +12,22 @@ Use the diagram as a completeness check when filling this report. Link existing 
 
 ```mermaid
 flowchart TD
-  goal["Goal and acceptance criteria"] --> design["Design, alternatives and risks"]
-  design --> approval["Recorded approval"]
-  approval --> implementation["Scoped implementation"]
-  goal --> planned["Planned verification"]
-  implementation --> actual["Actual results and revision"]
+  problem["Problem and measurable outcome"] --> options["Constraints and viable alternatives"]
+  options --> decision["Choice, accepted cost and revisit trigger"]
+  decision --> approval["Record approval and scope"]
+  approval --> implementation["Implement scoped change"]
+  problem --> planned["Plan checks for acceptance and risks"]
+  implementation --> actual["Actual results with revision and environment"]
   planned --> actual
-  actual --> decision{"Criteria satisfied?"}
-  decision -->|"No"| openItems["Open items: owner and next action"]
-  decision -->|"Yes"| review["Reviewable completion evidence"]
+  actual --> done{"All applicable criteria satisfied?"}
+  done -->|"No"| gaps["Record owner, gap and next check"]
+  gaps --> decision
+  done -->|"Yes"| review["Reviewable completion evidence"]
 ```
+
+**How to read:** A task report separates intended checks from executed results. Approval records the permitted scope; it does not turn an assumption into verified evidence.
+
+**Reader check:** Can the reviewer explain the selected alternative and identify any remaining unknown without reconstructing the conversation?
 
 ## Goal and Background
 

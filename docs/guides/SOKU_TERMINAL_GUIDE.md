@@ -1,5 +1,9 @@
 # Soku Terminal and Completion Guide
 
+> **Document purpose:** CLI user guide. Explains readable terminal output, safe everyday commands and shell completion.
+>
+> **Key point:** Preview changes before applying them and distinguish diagnostic exit codes from internal failures.
+
 [English](./SOKU_TERMINAL_GUIDE.md) | [한국어](./SOKU_TERMINAL_GUIDE.ko.md) | [日本語](./SOKU_TERMINAL_GUIDE.ja.md)
 
 This guide explains Soku's terminal output, a safe daily workflow, automation,

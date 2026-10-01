@@ -1,5 +1,9 @@
 # 📝 Task Report: Transactional `soku diff` and `soku upgrade`
 
+> **Document purpose:** Task decision record. Records the scope, decisions and verification for Issue #20: Transactional `soku diff` and `soku upgrade`.
+>
+> **Key point:** Read approval, implementation status and verification separately; this report is dated task evidence, not a fresh claim of current completion.
+
 ## Goal and Background
 
 [Issue #20](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/issues/20)
