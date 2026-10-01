@@ -24,6 +24,21 @@ flowchart TD
 - [ ] Estimate storage, requests and network costs, and name the alert and recovery owner.
 - [ ] Choose a single provider unless a concrete requirement justifies the additional operating burden.
 
+## Why workload fit precedes provider choice
+
+A provider or service adds account, identity, recovery and support obligations.
+Start with the workload and the team's ability to operate it. Managed services
+can reduce patching work but introduce service constraints, recurring cost and
+exit effort. Self-managed infrastructure trades those constraints for maintenance
+and incident responsibility. An offline application may need neither.
+
+Record the rejected option, expected load, storage/egress assumptions, recovery
+objectives, operator and budget review threshold. Validate with a representative
+cost estimate and recovery exercise; a provider comparison table is not operating
+evidence. Revisit when measured demand, residency requirements or operating
+capability changes. Use the shared
+[decision contract](../../CONTRIBUTING.md).
+
 ## 🎯 Purpose
 
 This document defines how repositories based on `Soku-Convention-Boilerplate` should document and reason about cloud usage.

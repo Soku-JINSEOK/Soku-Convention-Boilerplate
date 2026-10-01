@@ -27,6 +27,15 @@ flowchart TD
 
 <!-- Describe the intended design or fix at a level a reviewer can approve before implementation starts. -->
 
+### Decision rationale
+
+<!-- Apply CONTRIBUTING.md's Explain Why contract. Link an existing decision
+when unchanged; distinguish measured results from assumptions. -->
+
+| Decision | Constraint and alternatives | Selection reason and accepted cost | Evidence or validation needed | Owner and revisit trigger |
+| --- | --- | --- | --- | --- |
+| | | | | |
+
 ## Planned Implementation
 
 <!-- List the concrete steps or files expected to change. -->
@@ -104,6 +113,15 @@ This plan does not authorize deployment or release. -->
 ## 제안하는 접근
 
 <!-- 구현 착수 전 검토자가 승인할 수 있는 수준으로 설계 또는 수정 방향을 설명합니다. -->
+
+### 결정 근거
+
+<!-- CONTRIBUTING.md의 Explain Why 기준을 적용합니다. 변경이 없는 결정은
+기존 근거를 연결하고, 측정 결과와 가정을 구분합니다. -->
+
+| 결정 | 제약과 대안 | 선택 이유와 감수하는 비용 | 근거 또는 필요한 검증 | 담당자와 재검토 조건 |
+| --- | --- | --- | --- | --- |
+| | | | | |
 
 ## 계획된 구현
 

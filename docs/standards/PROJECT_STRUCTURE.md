@@ -22,6 +22,20 @@ flowchart TD
 - [ ] Choose app/ or frontend/ + backend/ in the multi-domain layout; do not duplicate the same responsibility in both.
 - [ ] Identify the single writer or coordination policy for shared data, and test interface failures.
 
+## Why these boundaries
+
+A directory boundary makes ownership and allowed dependencies visible during
+review. Grouping only by file extension hides which module owns a rule or a
+migration. Separating every module into a service also adds deployment,
+network-failure and compatibility work before a requirement justifies it.
+
+Start with the smallest layout that expresses the actual deployable units and
+data owners. Accept explicit interface and ownership documentation as its
+maintenance cost. Revisit the boundary when independent deployment, conflicting
+data writers or measurable coupling requires it; folder count alone is not
+evidence. Record the concrete project decision using
+[Explain Why](../../CONTRIBUTING.md).
+
 ## 🎯 Purpose
 
 This document defines how repositories based on `Soku-Convention-Boilerplate` should organize directories, files, and ownership boundaries.

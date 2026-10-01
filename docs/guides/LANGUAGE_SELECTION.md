@@ -22,6 +22,20 @@ flowchart TD
 - [ ] Record platform constraints, operating experience and the cost of adding a language.
 - [ ] Tie performance claims to measurements and document when the decision should be revisited.
 
+## What makes a selection defensible
+
+Keep the supported alternatives and explain which constraint eliminates each.
+A familiar runtime may shorten incident diagnosis and onboarding, while another
+may satisfy a native integration or measured latency limit better. Accept and
+record the selected option's deployment size, ecosystem and maintenance costs;
+do not infer workload performance from language reputation.
+
+Attach the representative workload, target environment and measured result.
+If no measurement exists, label performance claims as assumptions and name the
+next check. Revisit when platform support, operating skills or quality targets
+change. The shared [decision contract](../../CONTRIBUTING.md)
+defines the record; this guide supplies language-specific criteria.
+
 ## 🎯 Purpose
 
 `docs/guides/STACK_EXAMPLES.md` and `docs/guides/STACK_CONFIGS.md` explain how to configure a stack once it is chosen, but nothing in this boilerplate explains how to choose one. [`INIT_GUIDE.md`](./INIT_GUIDE.md) even tells an AI agent to "ask the user which stack(s) to bootstrap" with no criteria to reason from. This document is that missing criteria: the goal is not to pick the fastest or most popular language, but the one with the lowest total cost across development, deployment, operation, incident response, security, and future hand-off.

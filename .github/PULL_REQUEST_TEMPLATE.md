@@ -10,7 +10,9 @@
 
 ### 🎯 Goal
 
-<!-- State the outcome and rationale. -->
+<!-- State the observed problem and outcome. Explain why this implementation
+fits the constraint, the viable alternative rejected, and the cost accepted.
+Link the authoritative decision in the task report or owning document. -->
 
 ### 📦 Scope
 
@@ -34,7 +36,8 @@
 
 ### ⚠️ Risks and Follow-up
 
-<!-- Record compatibility, migration, cost, delivery, and remaining risks. -->
+<!-- Record compatibility, migration, cost, delivery, and remaining risks.
+Name the decision owner and the condition that would require revisiting it. -->
 
 ## 🇰🇷 한국어 요약
 

@@ -24,6 +24,20 @@ flowchart TD
 - [ ] Test denied access as well as allowed access, including changing another user's resource identifier.
 - [ ] Keep service credentials out of distributed clients and verify that logs omit sensitive payloads.
 
+## Why identity and resource permission are separate
+
+A valid session proves who is asking, but not whether that identity owns or may
+modify the requested resource. A client-only visibility check can be bypassed
+by a direct request. Enforce authorization at the trusted operation boundary,
+including resource scope, and reject unknown permission states.
+
+The accepted cost is explicit permission logic and denial-path tests. Keep
+policy reuse consistent without assuming every resource has the same rule.
+Evidence includes attempts with another user's identifier, expired sessions
+and insufficient roles. Revisit the model when tenancy, sharing or privileged
+operations change. Record project-specific choices under the shared
+[decision contract](../../CONTRIBUTING.md).
+
 ## 🎯 Purpose
 
 This document defines the baseline security posture for repositories based on `Soku-Convention-Boilerplate`.

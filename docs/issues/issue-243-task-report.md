@@ -162,3 +162,10 @@ Limitations:
 ## AI Assistance
 
 - **Planning/implementation/drafting:** OpenAI Codex
+
+## Follow-up: explainable decisions and CI workload
+
+The owner requested additional implementation rationale and CI optimization in
+Issue #245. Its [supplemental report](./issue-245-task-report.md) records approval,
+alternatives, expected savings and validation limits. PR #244 retains this
+original report as its Common Metadata record.

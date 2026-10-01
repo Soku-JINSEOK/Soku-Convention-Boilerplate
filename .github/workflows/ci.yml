@@ -671,6 +671,8 @@ jobs:
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
           node-version: "24"
+          cache: npm
+          cache-dependency-path: soku/internal/manual/assets/runner/package-lock.json
 
       - name: Install locked runner dependencies
         working-directory: soku/internal/manual/assets/runner

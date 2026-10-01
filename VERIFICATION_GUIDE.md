@@ -23,6 +23,20 @@ flowchart TD
 - [ ] Link a concrete result to every applicable acceptance condition, including negative and recovery cases.
 - [ ] Use N/A only with a reason; distinguish planned checks, actual passes, failures and unavailable checks.
 
+## Why verification follows risk
+
+Unit checks give precise feedback for rules; integration checks expose contract,
+database and failure-boundary mismatches; user-task checks establish whether the
+intended outcome works. Making every check end-to-end increases setup cost and
+makes failures harder to isolate. Using only unit checks leaves integration and
+acceptance assumptions untested.
+
+Select the cheapest check that can detect each relevant failure, then add
+boundary and acceptance evidence where a smaller check cannot establish the
+claim. Record the chosen check, alternative, limitation and revisit condition
+under [Explain Why](./CONTRIBUTING.md). A production escape, flaky
+dependency or sustained runtime increase should trigger review of that mapping.
+
 ## Purpose
 
 This guide is the operational checklist for validating this repository, its

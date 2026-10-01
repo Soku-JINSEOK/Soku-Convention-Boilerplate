@@ -88,26 +88,23 @@ Pipelines should be:
 
 Avoid building opaque pipelines that only one person can maintain.
 
-For this boilerplate, Pull Request Policy, Security, and the explicitly scoped
-Project synchronization workflow subscribe directly to repository events.
-Pull Request Policy authenticates the
-current API metadata against the trusted event identity and enforces the PR and
-commit-title contract. Security runs its complete history, dependency, Go
-vulnerability, and OSV checks for pull request code events, when a Draft becomes
-ready for review, and on pushes to `main`. Closed pull requests do not start
-Pull Request Policy or Security; Project synchronization intentionally handles
-closed and merged events for completion metadata.
+For this boilerplate, Validation subscribes to PR opened, synchronize, reopened
+and edited events, and pushes to main. It calls repository CI, runtime-template
+validation and Security once each, alongside changed-scope Quick validation.
+The same graph handles manual and reusable Validation calls. Pull Request
+Policy and Project synchronization have separate event subscriptions.
 
-Project synchronization is a metadata-only exception: it checks out the
-trusted base revision, never executes pull request head code, uses the narrow
-`PROJECT_SYNC_TOKEN` secret for GitHub Issue/Project writes, and grants no
-Contents write permission. Its audit/apply and conflict behavior is documented
-in [`GITHUB_PROJECT_SYNC.md`](../guides/GITHUB_PROJECT_SYNC.md).
+Pull Request Policy authenticates current API metadata against the trusted
+event identity. Project synchronization checks out the trusted base revision,
+never executes PR head code, uses the scoped PROJECT_SYNC_TOKEN for Issue and
+Project writes, and grants no Contents write permission. Its behavior is
+documented in [GITHUB_PROJECT_SYNC.md](../guides/GITHUB_PROJECT_SYNC.md).
 
-Repository CI, runtime-template validation, and their Validation aggregate are
-manual or reusable workflows. They do not independently subscribe to pull
-request or `main` events. This keeps the event-driven validation surface limited
-to the two policy and security responsibilities above.
+Repository CI and runtime-template workflows are manual or reusable, without
+independent PR or main triggers. Security is reusable, manual and scheduled;
+automatic PR security coverage comes through Validation. Draft/Ready changes
+run metadata policy, not another code-validation tree. Closed PR events are
+handled by Project synchronization for completion metadata.
 
 Two operating-contract exceptions are intentional. Release may subscribe to
 signed `v*` and `soku/v*` tag pushes, and Deploy remains manual through
@@ -162,6 +159,40 @@ released `v1.0.5` three-shared-file shape with its single CI workflow and the
 current five-shared-file shape with three workflow outputs. This additive
 compatibility does not change the catalog, profile-index, or manifest major
 versions.
+
+## Why these CI choices
+
+The [shared decision contract](../../CONTRIBUTING.md) also applies to CI changes.
+Reduce duplicate execution before reducing evidence. The implemented choices
+and remaining tradeoffs are explicit:
+
+| Choice | Why this option | Alternative and accepted cost | Evidence and revisit condition |
+| --- | --- | --- | --- |
+| One full tree per manual Validation | Its direct repository, template and security calls already provide full coverage | Removed the additional Hosted Full call; standalone Hosted Full still has its own gate and entrypoints | Regression counts each component once; revisit if Hosted Full gains a distinct responsibility |
+| Preserve required full checks and Quick comparison | A cheaper Quick result has not yet satisfied the full-gate transition criteria | Keep overlap during the Issue #116 observation window rather than silently weakening coverage | Review measured comparison evidence before any ruleset transition |
+| Retain PR edited events | Editing the base can change what must be validated | Body/title edits still incur a full run; batch edits before final verification | Revisit only with tested base-retarget handling and protection against metadata results replacing code results |
+| Cache runner npm downloads by lockfile | Repeated installs can reuse downloaded packages | Cache storage and misses remain; npm ci, integrity checks, typecheck and unit tests always run | Compare cold/warm install steps; remove cache if sustained overhead exceeds the benefit |
+| Keep independent scheduled/manual Hosted Full | Rechecks unchanged code against evolving dependencies and tools | Scheduled execution has a separate ongoing cost | Review frequency using failure yield and measured runner work |
+
+### Measure work and coverage together
+
+Baseline [run 36807006720](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/actions/runs/36807006720)
+had 24 full component jobs totaling 760 job-seconds, excluding Quick, gates and
+queue time. This is the sum of job start/end intervals, not elapsed pipeline
+time or a billing amount. It is one observation, not a stable benchmark.
+
+Manual Validation previously invoked those three full components twice.
+Removing the nested call changes two full trees to one: 50% fewer full-component
+invocations on that entrypoint, plus removal of its nested aggregate job.
+The 760 seconds illustrate the size of one tree; they are not a measured
+before/after saving. PR runs did not invoke that manual-only tree, so this
+change does not claim a 50% reduction for PRs. Cache savings remain unmeasured.
+
+For future optimization, compare the same revision and event, distinguish cold
+and warm caches, and record job count, summed runner work, elapsed time, retry
+rate and coverage. Preserve failures and cancellations in the history. The owner
+reviews the [Issue #245 report](../issues/issue-245-task-report.md) and the
+existing Quick observation criteria before narrowing additional checks.
 
 ## 🌍 Environment Strategy
 
