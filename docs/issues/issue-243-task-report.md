@@ -73,6 +73,26 @@ associated with commits, issues and pull requests.
 **Status:** Approved by the owner's explicit request. This extends the earlier
 documentation-only scope to the dependency and validation fixes above.
 
+## Current extension status
+
+Added thirteen document-specific Mermaid diagrams, three README indexes,
+an editable FigJam board with authority/security/CI diagrams, and the two
+patch dependency updates. A read-only hosted job installs the capture runner
+lockfile and runs its existing type and unit checks; browser E2E remains
+explicitly opt-in. Full security and repository gates remain unchanged.
+
+Local shell provisioning failed before command execution. Lockfile edits use
+matching integrity metadata cross-checked against public upstream consumer
+lockfiles and the libraries' tagged package manifests. Hosted npm installation
+and audits must confirm these inputs; local execution is not claimed.
+
+Static validation checked 296 relative links and 51 changed-target anchors
+without missing targets. The FigJam board was read back and visually inspected.
+Manifest and lock-root pins agree. CI evidence and remaining blockers are
+tracked in PR #244 and issue #243.
+Results in the earlier Verification section below describe the previous
+implementation, not the newly extended patch.
+
 ## Implementation Status
 
 Implemented eleven existing-document updates, three SVG figures and one
@@ -104,8 +124,9 @@ Limitations:
 - The implementation commits are unsigned; signing must be addressed before
   merge under the repository's contribution rules.
 - tldraw editing was blocked by the execution environment's approval policy.
-- Figma generation requires selecting a team/organization in its widget;
-  no FigJam output was generated and none is claimed.
+- The earlier Figma selection limitation was resolved for this extension.
+  The editable board is https://www.figma.com/board/SJgcvEV1HZqYwHM5Nt5HWE.
+  The original SVGs remain repository-authored illustrations.
 - Results above identify the checked implementation commit. Any later report
   edits require their own hosted checks before merge; no checks or branch rules
   are relaxed.

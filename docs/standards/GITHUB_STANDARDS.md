@@ -1,5 +1,26 @@
 # 🐙 GitHub Standards
 
+## Change and evidence relationships
+
+This relationship map shows what a reviewer must be able to trace. It does not add an approval role or replace the detailed metadata and signing rules below.
+
+```mermaid
+flowchart TD
+  issue["Issue: goal and completion criteria"] --> report["Task report: design and approval"]
+  report --> branch["Scoped branch and signed commits"]
+  branch --> pr["PR: change, rationale and evidence"]
+  issue -.-> pr
+  report -.-> pr
+  pr --> codeChecks["Code and security checks"]
+  pr --> metadata["Labels, assignee and linked records"]
+  codeChecks --> review["Review and resolved conversations"]
+  metadata --> review
+  review --> mergeNode["Merge under active branch rules"]
+```
+
+- [ ] Trace the PR to its issue and approved task report, then trace each result to the tested revision.
+- [ ] Check both commit signatures and validation results; neither substitutes for the other.
+
 ## 🎯 Purpose
 
 This document defines repository collaboration standards for GitHub-based workflows.

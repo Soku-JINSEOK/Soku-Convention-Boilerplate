@@ -2,6 +2,30 @@
 
 > **Applies to:** Team (multi-repository) — see [`docs/guides/APPLICABILITY.md`](../guides/APPLICABILITY.md). If you maintain a single personal project off this boilerplate, you can skip tag-pinning discipline; this matters once you sync updates across more than one downstream repository.
 
+## Independent artifacts and ownership
+
+Convention releases and CLI releases have separate identities and compatibility evidence. Manual convention synchronization imports convention-owned files; it does not distribute the CLI source tree or overwrite arbitrary application code.
+
+```mermaid
+flowchart TD
+  source["Reviewed repository source"] --> convention["Convention tag: vMAJOR.MINOR.PATCH"]
+  source --> cli["CLI tag: soku/vMAJOR.MINOR.PATCH"]
+  convention --> pin["Downstream pins immutable source"]
+  pin --> planNode["Review owned files and local overrides"]
+  planNode --> syncNode["Apply supported convention update"]
+  cli --> archives["Native archives and checksums"]
+  cli --> launcher["npm wrapper where applicable"]
+  archives --> install["Install compatible CLI"]
+  launcher --> install
+  install -.-> planNode
+  syncNode --> verify["Verify downstream behavior"]
+  verify --> record["Record version and recovery evidence"]
+```
+
+- [ ] Resolve the exact source commit and supported compatibility before updating.
+- [ ] Preserve project-owned files and recorded overrides; review removals and migrations.
+- [ ] Never infer a convention version from a CLI version or move a published tag.
+
 ## 🎯 Purpose
 
 This document defines how `Soku-Convention-Boilerplate` is versioned, released, and synchronized across downstream repositories.

@@ -2,6 +2,28 @@
 
 > **Applies to:** Both (lighter for Personal) — see [`docs/guides/APPLICABILITY.md`](../guides/APPLICABILITY.md). Secret hygiene and dependency review matter solo too; only the "external reporter" framing in `SECURITY.md` assumes other users.
 
+## Access enforcement and secret boundary
+
+This is a connected-application reference. Authentication establishes identity; authorization checks the requested action against the specific resource. For an offline app, apply the relevant checks at the OS/file boundary and record hosted components as N/A.
+
+```mermaid
+flowchart TD
+  client["Browser or installed client"] --> identity["Verify identity and session"]
+  identity --> permission{"Action allowed on this resource?"}
+  permission -->|"No or unknown"| denied["Reject request"]
+  permission -->|"Yes"| validation["Validate input and resource scope"]
+  validation --> service["Trusted application operation"]
+  service --> data["Private data: scoped identity"]
+  secrets["Server-side secret store"] -.-> service
+  service --> audit["Redacted audit event"]
+  denied --> audit
+```
+
+[Editable FigJam counterpart](https://www.figma.com/board/SJgcvEV1HZqYwHM5Nt5HWE)
+
+- [ ] Test denied access as well as allowed access, including changing another user's resource identifier.
+- [ ] Keep service credentials out of distributed clients and verify that logs omit sensitive payloads.
+
 ## 🎯 Purpose
 
 This document defines the baseline security posture for repositories based on `Soku-Convention-Boilerplate`.

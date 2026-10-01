@@ -1,5 +1,32 @@
 # 🔁 CI/CD Standards
 
+## Implemented validation topology
+
+The following is the actual workflow relationship in this repository. CI Quick provides feedback in parallel; the full Validation Gate aggregates repository, runtime-template and security results. PR metadata is checked separately. Passing validation does not itself deploy a product.
+
+```mermaid
+flowchart TD
+  eventNode["PR code event or main push"] --> validation["validation.yml"]
+  validation --> quick["ci-quick.yml: changed scope"]
+  quick --> quickGate["CI Quick Gate"]
+  validation --> repoChecks["ci.yml: repository checks"]
+  validation --> templateChecks["templates-ci.yml: runtime templates"]
+  validation --> securityChecks["security.yml: history and dependencies"]
+  repoChecks --> fullGate["Validation Gate: all three succeed"]
+  templateChecks --> fullGate
+  securityChecks --> fullGate
+  prEvent["PR metadata event"] --> policy["pull-request-policy.yml"]
+  policy --> metadata["PR Metadata Gate"]
+  fullGate -.-> review["Protected branch review"]
+  metadata -.-> review
+```
+
+[Editable FigJam counterpart](https://www.figma.com/board/SJgcvEV1HZqYwHM5Nt5HWE)
+
+- [ ] Inspect the newest run for the intended source revision; a cancelled earlier run is not a test result for its successor.
+- [ ] Resolve the failing child job before rerunning the aggregate gate; keep audit thresholds and required checks intact.
+- [ ] Batch PR body/title/label edits before starting final verification: edited events currently trigger Validation as well as metadata checks.
+
 ## 🎯 Purpose
 
 This document defines the baseline expectations for continuous integration and continuous delivery in repositories built on `Soku-Convention-Boilerplate`.

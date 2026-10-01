@@ -1,5 +1,27 @@
 # 🏗️ Project Structure
 
+## Ownership and dependency map
+
+Choose a file layout that matches the actual deployable units. This reference separates contracts and data ownership from folder names; it does not require separate services.
+
+```mermaid
+flowchart TD
+  choice{"Deployable units?"} -->|"One"| single["src/ or app/"]
+  choice -->|"Separate client and server"| split["frontend/ + backend/"]
+  single --> interfaces["Explicit module contracts"]
+  split --> interfaces
+  interfaces --> data["Data owner: schema and migrations"]
+  interfaces --> integration["External API adapters"]
+  tests["tests/: boundary and behavior checks"] -.-> interfaces
+  infra["infra/: runtime configuration"] -.-> single
+  infra -.-> split
+  docsNode["docs/: decisions and owners"] -.-> data
+  docsNode -.-> integration
+```
+
+- [ ] Choose app/ or frontend/ + backend/ in the multi-domain layout; do not duplicate the same responsibility in both.
+- [ ] Identify the single writer or coordination policy for shared data, and test interface failures.
+
 ## 🎯 Purpose
 
 This document defines how repositories based on `Soku-Convention-Boilerplate` should organize directories, files, and ownership boundaries.

@@ -1,5 +1,27 @@
 # 🗺️ Blueprint
 
+## Engineering contract map
+
+This map summarizes document authority and the evidence connecting it to implementation. An arrow means that the source constrains or supplies the destination; project-specific architecture stays in the downstream project.
+
+```mermaid
+flowchart TD
+  blueprint["BLUEPRINT: authority"] --> structure["Structure and style"]
+  blueprint --> security["Security and cloud"]
+  blueprint --> validation["Verification and delivery"]
+  structure --> project["Project-owned design"]
+  security --> project
+  project --> evidence["Task report: decisions and evidence"]
+  validation --> evidence
+  evidence --> pr["Issue and PR review"]
+  pr --> releaseNode["Versioned release and sync"]
+```
+
+[Editable FigJam counterpart](https://www.figma.com/board/SJgcvEV1HZqYwHM5Nt5HWE)
+
+- [ ] Can a reader find the owner of each rule without opening implementation code?
+- [ ] Does the project design identify its intentional deviations and supporting evidence?
+
 ## 🎯 Purpose
 
 `Soku-Convention-Boilerplate` is a design-first repository blueprint for creating projects that stay readable, consistent, and maintainable across time, teams, and stacks.

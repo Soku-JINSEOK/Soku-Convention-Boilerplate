@@ -1,5 +1,28 @@
 # ✅ Verification Guide
 
+## Requirement-to-evidence map
+
+Select verification from the product risk, then keep the actual result tied to its requirement and tested revision. The branches below supply complementary evidence; a green lint result alone cannot satisfy user acceptance.
+
+```mermaid
+flowchart TD
+  requirement["Requirement and risk"] --> unit["Unit: rule and edge cases"]
+  requirement --> boundary["Integration: API, DB and failures"]
+  requirement --> journey["E2E and human task acceptance"]
+  requirement --> resilience["Security, compatibility and recovery"]
+  unit --> evidence["Result, environment and source revision"]
+  boundary --> evidence
+  journey --> evidence
+  resilience --> evidence
+  evidence --> decision{"Applicable criteria satisfied?"}
+  decision -->|"No or missing"| followup["Fail or Blocked: owner and next check"]
+  decision -->|"Yes"| accepted["Acceptance evidence"]
+  followup -.-> requirement
+```
+
+- [ ] Link a concrete result to every applicable acceptance condition, including negative and recovery cases.
+- [ ] Use N/A only with a reason; distinguish planned checks, actual passes, failures and unavailable checks.
+
 ## Purpose
 
 This guide is the operational checklist for validating this repository, its

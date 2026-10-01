@@ -1,5 +1,28 @@
 # Supply-Chain Input Standard
 
+## Reviewed input and generated output map
+
+Each artifact has one authoritative input. Generated copies must agree with it, and ecosystem checks must run after a dependency update.
+
+```mermaid
+flowchart TD
+  review["Review release and advisory"] --> deps["Manifest and lockfile"]
+  review --> toolsNode["verification/tools.env"]
+  review --> actions["Pinned Action SHA or image digest"]
+  toolsNode --> render["Render template CI"]
+  render --> generated["Generated workflow"]
+  toolsNode --> parity["Supply-chain parity checks"]
+  generated --> parity
+  actions --> parity
+  deps --> ecosystem["Install, test and dependency audit"]
+  parity --> gate["Hosted validation"]
+  ecosystem --> gate
+```
+
+- [ ] Update the authoritative manifest and lockfile together, retaining reviewed integrity values.
+- [ ] Regenerate owned outputs and check parity rather than editing generated copies independently.
+- [ ] Patch vulnerable versions and rerun installation/tests/audits without relaxing the gate.
+
 ## Purpose
 
 Protected verification, release, and template paths must resolve reviewed
@@ -31,7 +54,7 @@ Dependabot must cover these tracked locations:
 | --- | --- |
 | GitHub Actions | `/` |
 | Go modules | `/soku`, `/templates/go` |
-| npm | `/soku/npm`, `/templates/javascript-typescript-node` |
+| npm | `/soku/npm`, `/soku/internal/manual/assets/runner`, `/templates/javascript-typescript-node` |
 | Python | `/templates/python` |
 | Maven | `/templates/java-spring` |
 | Docker | `/`, `/.devcontainer`, `/templates/gcloud` |

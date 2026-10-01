@@ -1,5 +1,24 @@
 # 🎨 Code Style
 
+## Readable module contract
+
+This example makes the existing rules about coherent functions, explicit inputs and predictable effects visible. It describes responsibilities, not mandatory classes or a framework.
+
+```mermaid
+flowchart LR
+  caller["Caller"] --> input["Validate explicit inputs"]
+  input --> logic["One coherent responsibility"]
+  logic --> output["Result or defined error"]
+  logic --> effect["Named I/O boundary"]
+  effect --> logic
+  formatter["Formatter and linter"] -.-> input
+  formatter -.-> logic
+  behavior["Behavior tests"] -.-> output
+```
+
+- [ ] Can the function's inputs, outputs, errors and side effects be identified from its interface?
+- [ ] Can a reviewer focus on behavior while the configured formatter and linter enforce style?
+
 ## 🎯 Purpose
 
 This document defines the operational style expectations for repositories built on `Soku-Convention-Boilerplate`.

@@ -2,6 +2,28 @@
 
 > **Applies to:** Team/Scaled — see [`docs/guides/APPLICABILITY.md`](../guides/APPLICABILITY.md). A personal project on a single cloud account only needs the workload-fit reasoning below, not the multi-account governance framing.
 
+## Cloud responsibilities and exposure
+
+This reference shows responsibilities to document when a connected service uses cloud resources. It is provider-neutral and does not assert that these resources are deployed by this repository. A local application can omit the cloud entirely.
+
+```mermaid
+flowchart TD
+  client["Client"] --> naming["DNS name and certificate owner"]
+  naming --> entry["TLS endpoint and allowed ingress"]
+  entry --> app["Application: scoped runtime identity"]
+  app --> storage["Private data service"]
+  app --> external["Approved outbound integration"]
+  secrets["Environment-scoped secrets"] -.-> app
+  app --> signals["Redacted logs and health signals"]
+  signals --> owner["Operations owner"]
+  budget["Usage and budget signals"] --> owner
+  owner --> recovery["Recovery procedure and limits"]
+```
+
+- [ ] Document ingress, egress, DNS/certificate renewal and environment-specific identities.
+- [ ] Estimate storage, requests and network costs, and name the alert and recovery owner.
+- [ ] Choose a single provider unless a concrete requirement justifies the additional operating burden.
+
 ## 🎯 Purpose
 
 This document defines how repositories based on `Soku-Convention-Boilerplate` should document and reason about cloud usage.

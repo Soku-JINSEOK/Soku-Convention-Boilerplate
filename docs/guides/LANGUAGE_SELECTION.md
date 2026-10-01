@@ -2,6 +2,26 @@
 
 > **Applies to:** Both — see [`docs/guides/APPLICABILITY.md`](./APPLICABILITY.md).
 
+## Constraint-first selection map
+
+Narrow the candidates using the constraints already described here, then validate the remaining tradeoff with a small representative workload.
+
+```mermaid
+flowchart TD
+  platform{"Platform constrains runtime?"} -->|"Yes"| supported["Supported candidates"]
+  platform -->|"No"| existing["Existing systems and team"]
+  supported --> policy["Organization constraints"]
+  existing --> policy
+  policy --> shortlist["Maintainable shortlist"]
+  shortlist --> trial["Measure representative workload"]
+  trial --> fit{"Meets quality and operating limits?"}
+  fit -->|"No"| shortlist
+  fit -->|"Yes"| decision["Record choice, alternatives and revisit trigger"]
+```
+
+- [ ] Record platform constraints, operating experience and the cost of adding a language.
+- [ ] Tie performance claims to measurements and document when the decision should be revisited.
+
 ## 🎯 Purpose
 
 `docs/guides/STACK_EXAMPLES.md` and `docs/guides/STACK_CONFIGS.md` explain how to configure a stack once it is chosen, but nothing in this boilerplate explains how to choose one. [`INIT_GUIDE.md`](./INIT_GUIDE.md) even tells an AI agent to "ask the user which stack(s) to bootstrap" with no criteria to reason from. This document is that missing criteria: the goal is not to pick the fastest or most popular language, but the one with the lowest total cost across development, deployment, operation, incident response, security, and future hand-off.

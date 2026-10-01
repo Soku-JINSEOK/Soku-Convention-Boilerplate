@@ -1,5 +1,26 @@
 # 🧑‍💻 Applicability
 
+## Scale the process to the risk
+
+Project size adjusts the amount of evidence and coordination. It does not remove baseline secret hygiene, recoverability or responsibility for the change.
+
+```mermaid
+flowchart TD
+  scope["Project and affected boundaries"] --> local["Local or personal"]
+  scope --> connected["Connected product"]
+  scope --> team["Team or higher impact"]
+  local --> small["Purpose, local data, tests and recovery"]
+  connected --> medium["Add access, network and acceptance"]
+  team --> large["Add explicit owners and operating targets"]
+  small --> decision["Applicable evidence or reasoned N/A"]
+  medium --> decision
+  large --> decision
+  decision --> revisit["Revisit when risk or scope changes"]
+```
+
+- [ ] Choose evidence proportional to the affected behavior and reuse valid existing evidence.
+- [ ] Do not treat a personal project as exempt from secrets, dependency and data-recovery checks.
+
 ## 🎯 Purpose
 
 This boilerplate was originally written with team-scale collaboration in mind, so some of its documents assume things that do not hold for a solo/personal project: a second reviewer, a shared release cadence, multi-account cloud governance. This document audits which parts of the boilerplate apply to a **Personal** project, which assume a **Team**, and which apply to **Both** — so an individual adopting this boilerplate can tell what to keep, what to skip, and what to defer.

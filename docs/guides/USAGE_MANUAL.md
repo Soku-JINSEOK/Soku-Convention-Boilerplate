@@ -7,6 +7,12 @@ detail.
 
 ## 0. Review the project before choosing configuration
 
+For document-specific component and boundary diagrams, use the
+[engineering convention index](../../README.md#engineering-conventions-at-a-glance).
+The [editable FigJam board](https://www.figma.com/board/SJgcvEV1HZqYwHM5Nt5HWE)
+contains the document authority, authorization and implemented CI maps.
+GitHub's diagrams and text remain readable without a Figma account.
+
 Start with the problem, execution environment and acceptance conditions. The
 boilerplate supplies conventions and starter configuration; the downstream
 project owns its application architecture, data model and deployment topology.

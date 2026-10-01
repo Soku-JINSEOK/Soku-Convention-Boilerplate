@@ -2,6 +2,23 @@
 
 <!-- Copy this file to `docs/issues/issue-<n>-task-report.md`, where `<n>` matches the linked issue number. -->
 
+## Evidence map
+
+Use the diagram as a completeness check when filling this report. Link existing evidence instead of copying policy text.
+
+```mermaid
+flowchart TD
+  goal["Goal and acceptance criteria"] --> design["Design, alternatives and risks"]
+  design --> approval["Recorded approval"]
+  approval --> implementation["Scoped implementation"]
+  goal --> planned["Planned verification"]
+  implementation --> actual["Actual results and revision"]
+  planned --> actual
+  actual --> decision{"Criteria satisfied?"}
+  decision -->|"No"| openItems["Open items: owner and next action"]
+  decision -->|"Yes"| review["Reviewable completion evidence"]
+```
+
 ## Goal and Background
 
 <!-- What problem or request does this address? Link the issue. -->
