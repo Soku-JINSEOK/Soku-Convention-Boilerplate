@@ -8,6 +8,8 @@
 
 Each artifact has one authoritative input. Generated copies must agree with it, and ecosystem checks must run after a dependency update.
 
+**Diagram scope: Normative dependency-review model.** Generated workflow parity applies only where a generator owns the output. Matching locks and successful audits are evidence about selected inputs, not a guarantee that every dependency is risk-free.
+
 ```mermaid
 flowchart TD
   change["Dependency or tool update"] --> review["Review version, advisory and compatibility"]

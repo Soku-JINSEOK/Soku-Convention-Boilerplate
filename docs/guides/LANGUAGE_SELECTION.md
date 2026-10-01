@@ -10,6 +10,8 @@
 
 Narrow the candidates using the constraints already described here, then validate the remaining tradeoff with a small representative workload.
 
+**Diagram scope: Reference decision aid.** The trial and selection criteria are project responsibilities, not an automated language selector. Record measured limits and ownership in the decision.
+
 ```mermaid
 flowchart TD
   goal["Workload and quality targets"] --> platform{"Platform fixes the runtime?"}

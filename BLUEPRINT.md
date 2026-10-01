@@ -8,6 +8,8 @@
 
 This map summarizes document authority and the evidence connecting it to implementation. An arrow means that the source constrains or supplies the destination; project-specific architecture stays in the downstream project.
 
+**Diagram scope: Normative authority map.** The arrows show which document constrains a decision, not runtime calls. The authority order and project-owned design boundary are defined below.
+
 ```mermaid
 flowchart TD
   startNode["Reader: identify the question"] --> scope{"Shared rule or product decision?"}
@@ -114,6 +116,9 @@ If a document conflicts with this blueprint, the blueprint wins unless a downstr
 The repository uses a layered language strategy.
 
 - Human-facing overview content defaults to English, Korean, and Japanese.
+- Diagram titles, nodes, edge labels and legends use English across all language
+  editions and editable boards. Translate the surrounding explanation, not the
+  diagram labels, so one technical vocabulary can be checked against the code.
 - Operational rules, governance, policy, and AI instructions are written in English only.
 
 This keeps the public-facing docs approachable while making the operating rules easy for AI agents and humans to parse consistently.

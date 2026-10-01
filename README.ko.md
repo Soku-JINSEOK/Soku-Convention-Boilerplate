@@ -106,18 +106,22 @@ npm run format:check && npm run lint && npm run test && npm run build
 
 ## 🏗️ 아키텍처 및 수명주기 흐름
 
+**구성도 범위: 구현된 수명주기 개요.** 점선은 소유권 제약이며 파일 쓰기를 뜻하지 않습니다. 확인·취소·복구의 상세 분기는 [수명주기 계약](./docs/standards/SOKU_LIFECYCLE.md)을 참조하세요. 근거: [init 엔진](./soku/internal/initcmd/engine.go), [upgrade 엔진](./soku/internal/initcmd/upgrade.go).
+
 ```mermaid
 flowchart TD
-  source["Boilerplate source: Release: v1.0.5"] -->|"고정된 컨벤션 버전 선택"| engine["soku CLI: Distribution: soku/v0.2.1"]
-  engine --> plan["설치된 CLI가 관리 파일 변경 계획 작성"]
-  manifest[".soku/manifest.json"] -->|"manifest와 로컬 수정 상태 확인"| plan
-  plan --> conflict{"충돌 또는 호환성 문제?"}
-  conflict -->|"예"| stopNode["쓰기를 중단하고 원인 해결"]
-  conflict -->|"아니요"| apply["확인된 계획을 트랜잭션으로 적용"]
-  apply --> owned["관리 대상 컨벤션 파일"]
-  apply --> state["앱 코드는 프로젝트 소유로 유지"]
-  owned --> inspect["status와 diff로 읽기 전용 진단"]
-  inspect --> plan
+  source["Boilerplate source: Release: v1.0.5"] -->|"Choose immutable source"| engine["soku CLI: Distribution: soku/v0.2.1"]
+  engine --> plan["Plan managed-file changes"]
+  manifest["Manifest and current files"] -->|"Ownership and baseline inputs"| plan
+  project["Project-owned application files"] -.->|"Exclude from automatic mutation"| plan
+  plan --> conflict{"Conflict or incompatible input?"}
+  conflict -->|"Yes"| stopNode["Stop before writes"]
+  conflict -->|"No"| consent["Preview or confirm application"]
+  consent -->|"Explicit dry-run"| preview["Report plan without writes"]
+  consent -->|"Confirmed application"| apply["Apply managed-file transaction"]
+  apply -->|"Success"| owned["Managed files and updated manifest"]
+  apply -->|"Failure"| recovery["Rollback or manual recovery"]
+  owned --> inspect["Read-only status and diff"]
 ```
 
 **읽는 방법:** 원본 저장소는 규칙을 제공하고 CLI는 대상 저장소의 변경 계획을 만듭니다. manifest는 파일 소유권과 기준 상태를 기록합니다. 충돌이 있으면 기존 작업을 덮어쓰지 않고 적용을 중단합니다.

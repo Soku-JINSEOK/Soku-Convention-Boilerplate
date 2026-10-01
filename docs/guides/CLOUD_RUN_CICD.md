@@ -8,23 +8,36 @@
 
 ```mermaid
 flowchart TD
-  operator["Operator: manual workflow"] --> operation{"Selected operation?"}
-  operation -->|"check"| checks["Validate plan without cloud mutation"]
-  operation -->|"deploy"| auth["Authenticate scoped deployer"]
-  auth --> imageNode["Build image and resolve immutable digest"]
-  imageNode --> deploy["Deploy dev revision and route traffic"]
-  deploy --> health{"Traffic and authenticated health valid?"}
-  health -->|"Yes"| success["Record verified deployment"]
-  health -->|"No"| restore["Restore exact pre-deploy revision"]
-  operation -->|"rollback"| rollback["Select rollback revision and restore"]
-  restore --> evidence["Sanitized attempt evidence"]
-  rollback --> evidence
-  success --> evidence
+  operator["Manual workflow: dev"] --> operation{"Selected operation?"}
+  operation -->|"check"| checks["Validate plan; no cloud mutation"]
+  operation -->|"deploy or rollback"| auth["Authenticate scoped deployer through WIF"]
+  auth --> mode{"Mutation operation?"}
+  mode -->|"deploy"| imageNode["Build image and resolve immutable digest"]
+  imageNode --> deploy["Record previous revision; deploy new image"]
+  deploy -->|"Command or revision discovery fails"| failed["Failed attempt; operator recovery"]
+  deploy -->|"Ready revision and URL found"| health{"Traffic update, 100 percent and health pass?"}
+  health -->|"Yes"| success["Deployment success"]
+  health -->|"No"| previous{"Previous revision available?"}
+  previous -->|"No"| failed
+  previous -->|"Yes"| restore["Attempt traffic restoration and health check"]
+  restore -->|"Success"| rolledBack["Rolled back; deployment still fails"]
+  restore -->|"Failure"| failed
+  mode -->|"rollback"| manual["Select explicit or previous ready revision"]
+  manual -->|"Missing target"| failed
+  manual -->|"Target found"| rollback["Update traffic and check health"]
+  rollback -->|"Failure"| failed
+  rollback -->|"Success"| recovered["Manual rollback success"]
 ```
 
-**How to read:** This is the documented manual dev path. Authentication belongs only to mutation operations. A failed health or traffic check triggers recovery to the recorded pre-deploy revision; inspect recovery evidence before declaring the service healthy.
+**How to read:** This is the implemented manual dev path in
+[deploy-gcp.yml](../../.github/workflows/deploy-gcp.yml) and
+[cd-deploy.sh](../../scripts/cd-deploy.sh). Both mutation operations authenticate.
+Automatic rollback is conditional, and successful rollback still reports the
+deployment as failed. Image/build/authentication failures can stop the workflow
+before the deploy helper starts; its attempt artifact is not proof those stages
+completed. This diagram does not assert any current live cloud state.
 
-**Reader check:** Confirm environment, immutable image, runtime identity, health result and before/after revisions.
+**Reader check:** Confirm the environment, digest, scoped identity, observed traffic and health, available recovery target, and the sanitized attempt result.
 
 This deployment path is manual by design. Local defaults and ordinary CI perform
 only syntax, formatting, validation, and mock regression checks. They never apply
@@ -193,22 +206,42 @@ Local callers may omit `--identity-service-account`; the helper then keeps the
 active-account token path for backward compatibility. Never enable shell tracing
 around this command or persist identity tokens or generated credential paths.
 
-Every deployment and rollback attempt writes a sanitized JSON record under the
-non-hidden `deploy-evidence/` directory. The workflow uploads that directory even
+The deploy helper records handled deployment and rollback outcomes under the
+non-hidden `deploy-evidence/` directory. Earlier authentication, build or plan
+failures can leave no helper record. The workflow uploads that directory even
 when the operation fails and treats a missing evidence file as an operation
-failure. Inspect `final_status`, the before/after revisions, rollback target, and
-run URL in the downloaded artifact; no token or credential path is recorded.
+failure. Inspect `final_status`, `environment`, `commit`, `error`,
+`verified_traffic_percent`, `run_id`, `run_attempt` and `timestamp` in the JSON.
+The public record deliberately excludes revision names, rollback targets,
+service URLs, tokens and credential paths. Correlate the run ID with Actions;
+inspect revision state through the authorized operator's cloud access.
 The deploy helper also assigns 100% traffic to the resolved ready revision and
 verifies Cloud Run's reported percentage before calling `/health`. A missing or
-non-100% value fails the deployment and restores the exact pre-deploy revision.
+non-100% value fails the deployment and attempts restoration only when a
+pre-deploy revision exists. Restoration can itself fail.
 Successful evidence records `verified_traffic_percent: 100`.
 
 ## Recovery
 
 Run the same workflow with `operation=rollback`. Optionally supply an exact
 `rollback_revision`; otherwise the deployment helper selects the previous ready
-revision. A failed post-deploy health check automatically sends all traffic back
-to the revision recorded immediately before deployment and retains evidence.
+revision. Traffic-update, traffic-percentage or post-deploy health failures
+attempt restoration to the recorded pre-deploy revision when one exists.
+A failed deploy command or missing revision/URL exits without that automatic
+rollback. Recovery changes application traffic; it does not undo data changes.
+
+| Helper outcome | Exit | Operator interpretation |
+| --- | --- | --- |
+| Deployment succeeds | 0 | New revision passed traffic and health checks |
+| Automatic restoration and health succeed | 1 | Deployment failed; recovery succeeded |
+| Deploy/discovery failure or unsuccessful automatic recovery | 9 | Inspect cloud state and recover explicitly |
+| Manual rollback target missing | 4 | Supply or establish a valid target |
+| Manual rollback traffic/health fails | 9 | Recovery is incomplete |
+| Manual rollback succeeds | 0 | Requested restoration passed health |
+
+**Why preserve failure after recovery:** Restoring availability does not make
+the attempted change acceptable. Keeping a failing result prevents a recovered
+incident from being mistaken for a successful delivery.
 
 Local emergency rollback is also available after generating a rollback plan:
 

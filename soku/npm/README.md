@@ -2,23 +2,35 @@
 
 > **Document purpose:** Package installation guide. Explains the npm launcher that downloads, verifies and runs the matching native Soku executable.
 >
-> **Key point:** Match package and release identity; checksum verification precedes execution.
+> **Key point:** Match package and release identity; downloaded archives are checked, but existing cached executables are reused without revalidation.
 
 ## Launcher execution
 
 ```mermaid
 flowchart TD
-  command["User runs installed npm command"] --> platform["Select supported OS and architecture"]
-  platform --> cached{"Verified cached executable available?"}
-  cached -->|"Yes"| execute["Run native Soku with user arguments"]
-  cached -->|"No"| fetchNode["Fetch matching release asset and checksums"]
-  fetchNode --> checksum{"Checksum matches?"}
-  checksum -->|"No"| refuse["Fail without executing download"]
-  checksum -->|"Yes"| cache["Cache native executable"]
+  command["Installed npm command"] --> platform{"Supported OS and architecture?"}
+  platform -->|"No"| refuse["Fail without executing a download"]
+  platform -->|"Yes"| cached{"Cached executable exists?"}
+  cached -->|"Yes: no new checksum check"| execute["Run native Soku with user arguments"]
+  cached -->|"No"| fetchNode["Fetch checksums and matching release archive"]
+  fetchNode -->|"Fetch or checksum entry failure"| refuse
+  fetchNode --> checksum{"Archive SHA256 matches expected entry?"}
+  checksum -->|"No"| refuse
+  checksum -->|"Yes"| extract["Extract and require expected executable"]
+  extract -->|"Missing or extraction failure"| refuse
+  extract -->|"Success"| cache["Copy executable into versioned cache"]
   cache --> execute
 ```
 
-**How to read:** The npm package is a launcher for a version-matched native binary. Downloading is distinct from verification, and verification must precede execution.
+**How to read:** This is the implemented behavior in
+[launcher.mjs](./lib/launcher.mjs), especially `resolveBinary`. The checksum
+covers a newly downloaded archive. A cache hit checks file existence and
+returns that path without hashing it again. The check does not independently
+authenticate the checksum publisher.
+
+**Why this distinction:** Download integrity and trust in an existing local
+cache are different boundaries. Protect the user cache; do not describe this
+launcher as detecting later cache tampering.
 
 **Reader check:** Does the launcher select the expected platform asset and reject a mismatched download?
 

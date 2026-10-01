@@ -8,6 +8,8 @@
 
 Choose a file layout that matches the actual deployable units. This reference separates contracts and data ownership from folder names; it does not require separate services.
 
+**Diagram scope: Reference ownership and dependency model.** These are layout alternatives, not a deployed frontend/backend service supplied by this repository. Adapt the boundaries to the actual deployable units and keep schema and migration ownership explicit.
+
 ```mermaid
 flowchart TD
   deploy{"How many deployable units?"} -->|"One"| app["app or src: application"]

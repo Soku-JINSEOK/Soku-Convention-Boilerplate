@@ -6,6 +6,8 @@
 
 ## Local capture contract
 
+**Diagram scope: Implemented capture path with human review.** [capture.ts](../../soku/internal/manual/assets/runner/src/capture.ts) launches Chromium, stages outputs, records hashes and replaces generated files. The author writes manual prose separately; captured pixels and provenance do not establish product acceptance.
+
 ```mermaid
 flowchart TD
   config["Project-owned capture configuration and fixtures"] --> plan["Plan and doctor: inspect prerequisites"]

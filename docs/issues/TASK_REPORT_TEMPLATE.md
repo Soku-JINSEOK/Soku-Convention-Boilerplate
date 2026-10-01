@@ -10,6 +10,8 @@
 
 Use the diagram as a completeness check when filling this report. Link existing evidence instead of copying policy text.
 
+**Diagram scope: Normative evidence lifecycle.** These arrows relate planned acceptance to actual evidence. They do not automate approval, mark incomplete work done, or grant permission to merge.
+
 ```mermaid
 flowchart TD
   problem["Problem and measurable outcome"] --> options["Constraints and viable alternatives"]

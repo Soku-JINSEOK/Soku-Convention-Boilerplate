@@ -8,6 +8,8 @@
 
 Select verification from the product risk, then keep the actual result tied to its requirement and tested revision. The branches below supply complementary evidence; a green lint result alone cannot satisfy user acceptance.
 
+**Diagram scope: Reference verification model.** This maps risks to evidence; it does not assert that every downstream acceptance or recovery test exists. Use the implemented verification commands below to determine actual coverage.
+
 ```mermaid
 flowchart TD
   requirement["User outcome and failure risk"] --> type{"Which boundary could fail?"}

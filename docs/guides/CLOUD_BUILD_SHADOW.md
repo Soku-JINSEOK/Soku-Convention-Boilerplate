@@ -6,6 +6,8 @@
 
 ## Proposed shadow evidence boundary
 
+**Diagram scope: Proposed operational path with an implemented local contract check.** The trusted attestor is not delivered. [verify-cloud-build-shadow.mjs](../../scripts/verify-cloud-build-shadow.mjs) validates candidate evidence; it cannot establish a natural server-attested run.
+
 ~~~mermaid
 flowchart TD
   future["Future approved trigger: source and PR identity"] --> guard["Validate substitution identity"]

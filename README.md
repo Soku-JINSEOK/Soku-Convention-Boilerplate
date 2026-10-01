@@ -104,18 +104,22 @@ To run the complete verification suite for this boilerplate repository itself:
 
 ## 🏗️ Architecture & Lifecycle Flow
 
+**Diagram scope: Implemented lifecycle overview.** The dashed edge is an ownership constraint, not a write. Confirmation and recovery details are in [the lifecycle contract](./docs/standards/SOKU_LIFECYCLE.md). Source: [init engine](./soku/internal/initcmd/engine.go) and [upgrade engine](./soku/internal/initcmd/upgrade.go).
+
 ```mermaid
 flowchart TD
-  source["Boilerplate source: Release: v1.0.5"] -->|"Choose immutable convention source"| engine["soku CLI: Distribution: soku/v0.2.1"]
-  engine --> plan["Installed CLI plans owned-file changes"]
-  manifest[".soku/manifest.json"] -->|"Inspect manifest and local modifications"| plan
+  source["Boilerplate source: Release: v1.0.5"] -->|"Choose immutable source"| engine["soku CLI: Distribution: soku/v0.2.1"]
+  engine --> plan["Plan managed-file changes"]
+  manifest["Manifest and current files"] -->|"Ownership and baseline inputs"| plan
+  project["Project-owned application files"] -.->|"Exclude from automatic mutation"| plan
   plan --> conflict{"Conflict or incompatible input?"}
-  conflict -->|"Yes"| stopNode["Stop and resolve before writing"]
-  conflict -->|"No"| apply["Apply confirmed transaction"]
-  apply --> owned["Managed convention files"]
-  apply --> state["Project application files stay project-owned"]
+  conflict -->|"Yes"| stopNode["Stop before writes"]
+  conflict -->|"No"| consent["Preview or confirm application"]
+  consent -->|"Explicit dry-run"| preview["Report plan without writes"]
+  consent -->|"Confirmed application"| apply["Apply managed-file transaction"]
+  apply -->|"Success"| owned["Managed files and updated manifest"]
+  apply -->|"Failure"| recovery["Rollback or manual recovery"]
   owned --> inspect["Read-only status and diff"]
-  inspect --> plan
 ```
 
 **How to read:** The source supplies conventions; the CLI plans changes in the downstream repository. The manifest records ownership and baselines. A conflict stops application rather than overwriting a local decision.

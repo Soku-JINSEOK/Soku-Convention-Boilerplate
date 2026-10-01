@@ -10,10 +10,14 @@
 
 This reference shows responsibilities to document when a connected service uses cloud resources. It is provider-neutral and does not assert that these resources are deployed by this repository. A local application can omit the cloud entirely.
 
+**Diagram scope: Reference cloud responsibility model.** DNS resolves the name; HTTPS traffic goes to the resolved endpoint, not through a DNS owner. Dotted edges indicate ownership. This is not a snapshot of deployed infrastructure; the optional implemented GCP path is in [Cloud Run CI/CD](../guides/CLOUD_RUN_CICD.md).
+
 ```mermaid
 flowchart TD
-  client["User or client"] --> dns["DNS owner: name and renewal"]
-  dns --> entry["TLS endpoint: allowed ingress"]
+  client["User or client"] -->|"Name lookup"| dns["DNS resolver and authoritative records"]
+  dns -->|"Resolved endpoint"| client
+  owner["DNS owner: records and renewal"] -.->|"Maintains"| dns
+  client -->|"HTTPS request"| entry["TLS endpoint: allowed ingress"]
   entry --> auth["Application: identity and resource permission"]
   auth -->|"Scoped data access"| data["Private storage: data and backup owner"]
   auth -->|"Approved outbound request"| external["External service"]

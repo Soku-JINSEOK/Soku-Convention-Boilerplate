@@ -6,6 +6,8 @@
 
 ## Adoption and operating decisions
 
+**Diagram scope: Adoption procedure.** This combines human review with implemented CLI operations. See [init engine](../../soku/internal/initcmd/engine.go) and [upgrade engine](../../soku/internal/initcmd/upgrade.go) for the mutation boundary; optional delivery requires its own authorization.
+
 ```mermaid
 flowchart TD
   goal["Project goal, users and constraints"] --> fit["Select applicable conventions and stack"]

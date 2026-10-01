@@ -10,6 +10,8 @@
 
 This is a connected-application reference. Authentication establishes identity; authorization checks the requested action against the specific resource. For an offline app, apply the relevant checks at the OS/file boundary and record hosted components as N/A.
 
+**Diagram scope: Reference request-security model.** These are required design questions, not a supplied authentication service. Session, resource permission and input validation are separate checks. A downstream implementation must define denial, permitted response fields and audit redaction.
+
 ```mermaid
 flowchart TD
   client["Client: request and resource identifier"] --> identity{"Session valid?"}

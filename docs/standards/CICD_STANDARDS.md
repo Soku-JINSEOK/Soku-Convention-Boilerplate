@@ -8,6 +8,8 @@
 
 The following is the actual workflow relationship in this repository. CI Quick provides feedback in parallel; the full Validation Gate aggregates repository, runtime-template and security results. PR metadata is checked separately. Passing validation does not itself deploy a product.
 
+**Diagram scope: Implemented workflow topology.** [validation.yml](../../.github/workflows/validation.yml) calls Quick and the three full components. This depicts automatic PR/main runs; metadata policy and deployment are separate workflows.
+
 ```mermaid
 flowchart TD
   eventNode["PR opened, updated, reopened or edited; main push"] --> validation["Validation workflow"]
@@ -28,6 +30,29 @@ flowchart TD
 **How to read:** Quick gives separate feedback. The required full gate combines repository, template and security evidence and fails on missing results. PR metadata has its own gate, described below; neither validation gate deploys the application.
 
 **Reader check:** Inspect the exact revision, failed child job and required gate. Do not treat a skipped component or an older successful run as current evidence.
+
+### Revision and gate boundaries
+
+| Automatic PR path | Revision checked | Result boundary |
+| --- | --- | --- |
+| Quick | Explicit PR head, compared with PR base | CI Quick Gate requires Quick success |
+| Repository and runtime templates | Default `github.sha`, the PR merge ref | Contribute to Validation Gate |
+| Security | Explicit PR head/base inputs; trusted-base orchestration | Contributes to Validation Gate |
+| Metadata policy | PR metadata through its own event workflow | PR Metadata Gate is separate |
+
+On a main push the fallback is the pushed SHA. An explicit `head-sha` supplied
+to reusable component workflows overrides their checkout fallback; the
+automatic Validation caller does not supply that input to repository/templates.
+Assess the event and checked-out revision, not just the displayed PR head.
+
+Validation Gate requires all three full components to succeed; failure,
+cancellation or unexpected skipping fails it. Quick is independent and is not
+included in that aggregate. Review all applicable gates plus signing and
+review requirements. Successful validation does not deploy or authorize merge.
+
+**Why retain this distinction:** PR-head feedback and merge compatibility answer
+different questions. Keep the existing full coverage during the Quick
+observation period; removing a gate to reduce runtime would change assurance.
 
 [Editable FigJam counterpart](https://www.figma.com/board/SJgcvEV1HZqYwHM5Nt5HWE)
 

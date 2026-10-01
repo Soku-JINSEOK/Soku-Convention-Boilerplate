@@ -8,6 +8,8 @@
 
 This example makes the existing rules about coherent functions, explicit inputs and predictable effects visible. It describes responsibilities, not mandatory classes or a framework.
 
+**Diagram scope: Reference module contract.** The named I/O adapter illustrates a testable boundary; it is not a required class hierarchy or a claim that all modules already use it. Formatters cannot prove business correctness.
+
 ```mermaid
 flowchart TD
   caller["Caller: explicit input"] --> valid{"Input valid?"}

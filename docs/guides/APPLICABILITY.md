@@ -8,6 +8,8 @@
 
 Project size adjusts the amount of evidence and coordination. It does not remove baseline secret hygiene, recoverability or responsibility for the change.
 
+**Diagram scope: Reference decision aid.** Select controls from the stated project constraints. A local app still needs data and recovery review; network controls become applicable when it uses shared resources.
+
 ```mermaid
 flowchart TD
   project["Project and change scope"] --> local["Baseline: purpose, data, tests and recovery"]

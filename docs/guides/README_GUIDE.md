@@ -29,6 +29,30 @@ infrastructure instructions and task reports. Keep the existing language policy.
 7. Maintain the [complete document map](./DOCUMENTATION_MAP.md) when adding,
    moving or retiring a document.
 
+### Diagram accuracy and evidence
+
+Follow the [canonical language policy](../../BLUEPRINT.md#language-policy):
+all diagram content is English, including titles, connectors and legends in
+localized READMEs, SVG assets and editable boards.
+
+For each figure, state whether it describes implemented behavior, a normative
+contract, a reference pattern or proposed work. For implementation diagrams,
+link the owning code or workflow and identify inputs, boundaries, outputs,
+failure paths and recovery limits. Distinguish request flow, ownership and
+verification evidence; an arrow must not imply an operation the code never
+performs. Split detailed recovery from the overview when needed.
+
+Check the diagram and its adjacent prose in the same review. Record the source
+revision and coverage in the task report. A rendered diagram proves legibility,
+not semantic correctness; a source review is not evidence of live deployment.
+Descriptive documents retain their purpose/key-summary block without a forced
+diagram. Preserve immutable historical records through the release index.
+
+The existing repository hygiene job runs a dependency-free diagram text check.
+It rejects non-ASCII letters in Mermaid and SVG text while allowing Unicode
+punctuation. It does not detect misspelled English or prove code/diagram parity;
+those remain explicit review responsibilities.
+
 ### Why this format
 
 Readers need to establish relevance before learning implementation detail.

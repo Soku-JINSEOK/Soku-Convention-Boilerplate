@@ -8,6 +8,8 @@
 
 This relationship map shows what a reviewer must be able to trace. It does not add an approval role or replace the detailed metadata and signing rules below.
 
+**Diagram scope: Normative contribution lifecycle.** Active repository rules and reviewer decisions control integration. Passing code checks alone does not establish signed commits, accepted review or merge permission.
+
 ```mermaid
 flowchart TD
   issue["Issue: problem and completion criteria"] --> report["Task report: design, alternatives and approval"]

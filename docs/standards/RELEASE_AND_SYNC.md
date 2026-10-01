@@ -10,6 +10,8 @@
 
 Convention releases and CLI releases have separate identities and compatibility evidence. Manual convention synchronization imports convention-owned files; it does not distribute the CLI source tree or overwrite arbitrary application code.
 
+**Diagram scope: Normative release and adoption lifecycle.** This states the required process, not proof that a particular tag, package or downstream update passed. Check the immutable release record and actual verification evidence before consuming it.
+
 ```mermaid
 flowchart TD
   source["Reviewed source revision"] --> axis{"Which artifact is being released?"}

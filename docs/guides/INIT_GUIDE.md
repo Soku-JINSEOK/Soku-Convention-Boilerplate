@@ -6,6 +6,8 @@
 
 ## Manual bootstrap fallback
 
+**Diagram scope: Adoption procedure.** Manual template selection and managed initialization are alternatives. The managed branch delegates planning and mutation to [init engine](../../soku/internal/initcmd/engine.go); both require applicable downstream verification.
+
 ```mermaid
 flowchart TD
   target["Inspect downstream repository"] --> detect["Identify stack, existing files and local rules"]
@@ -16,7 +18,8 @@ flowchart TD
   conflict -->|"Yes"| resolve["Resolve ownership and requirements"]
   resolve --> select
   conflict -->|"No"| adapt["Adapt placeholders and repository configuration"]
-  adapt --> verify["Run relevant validation"]
+  lifecycle --> verify["Run relevant validation"]
+  adapt --> verify
   verify --> record["Record imported baseline and deviations"]
 ```
 

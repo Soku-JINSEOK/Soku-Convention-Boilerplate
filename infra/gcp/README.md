@@ -6,19 +6,22 @@
 
 ## Terraform ownership and state
 
+**Diagram scope: Implemented bootstrap and declared state boundaries.** [gcp-bootstrap.sh](../../scripts/gcp-bootstrap.sh) selects the apply path; [main.tf](./main.tf) declares resources. Dotted edges identify state ownership, not execution order. The separate logging root follows its own reviewed plan. No live resource inventory is asserted.
+
 ```mermaid
 flowchart TD
-  operator["Operator: preview bootstrap"] --> mode{"Requested resource scope?"}
-  mode -->|"Foundation"| foundation["APIs, identities, registry and WIF"]
-  mode -->|"Runtime"| runtime["Cloud Run with immutable image digest"]
-  mode -->|"Validation only"| validation["Dedicated validation identity and triggers"]
-  foundation --> appState["State prefix: cloud-run"]
-  runtime --> appState
-  validation --> validationState["State prefix: cloud-build-validation"]
-  logging["Separate logging root: bucket, sink and exclusion"] --> logState["State prefix: cloud-build-logging"]
-  appState --> review["Review plan and explicit apply conditions"]
-  validationState --> review
-  logState --> review
+  operator["Operator selects bootstrap mode"] --> preview["Preview resources and commands"]
+  preview --> approved{"Explicit apply and matching project confirmation?"}
+  approved -->|"No"| stopNode["No apply"]
+  approved -->|"Yes"| mode{"Validation-only mode?"}
+  mode -->|"Yes"| validation["Target APIs, validation identity and triggers"]
+  validation -->|"Uses isolated state"| validationState["Prefix: cloud-build-validation"]
+  mode -->|"No"| foundation["Target foundation; deploy_runtime=false"]
+  foundation --> imageNode["Build image and resolve digest"]
+  imageNode --> runtime["Apply runtime with immutable digest"]
+  foundation -.->|"Shared state"| appState["Prefix: cloud-run"]
+  runtime -.->|"Shared state"| appState
+  logging["Separate logging root and reviewed plan"] -.->|"Separate state"| logState["Prefix: cloud-build-logging"]
 ```
 
 **How to read:** The boxes describe declared resource ownership, not live deployment status. Workload Identity Federation (WIF) connects the reviewed GitHub identity to the deployer; the validation identity is separate. State prefixes prevent one resource scope from silently managing another.

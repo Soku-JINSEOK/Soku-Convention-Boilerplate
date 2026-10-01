@@ -106,18 +106,22 @@ npm run format:check && npm run lint && npm run test && npm run build
 
 ## 🏗️ アーキテクチャおよびライフサイクルフロー
 
+**図の範囲: 実装済みライフサイクルの概要。** 破線は所有権の制約であり、書き込みではありません。確認・取消・復旧の詳細は[ライフサイクル契約](./docs/standards/SOKU_LIFECYCLE.md)を参照してください。根拠: [init実装](./soku/internal/initcmd/engine.go)、[upgrade実装](./soku/internal/initcmd/upgrade.go)。
+
 ```mermaid
 flowchart TD
-  source["Boilerplate source: Release: v1.0.5"] -->|"固定された規約バージョンを選択"| engine["soku CLI: Distribution: soku/v0.2.1"]
-  engine --> plan["CLIが管理対象ファイルの変更を計画"]
-  manifest[".soku/manifest.json"] -->|"manifestとローカル変更を確認"| plan
-  plan --> conflict{"競合または互換性の問題?"}
-  conflict -->|"はい"| stopNode["書き込み前に停止して原因を解消"]
-  conflict -->|"いいえ"| apply["確認した計画をトランザクションで適用"]
-  apply --> owned["管理対象の規約ファイル"]
-  apply --> state["アプリコードはプロジェクトが所有"]
-  owned --> inspect["statusとdiffによる読み取り専用診断"]
-  inspect --> plan
+  source["Boilerplate source: Release: v1.0.5"] -->|"Choose immutable source"| engine["soku CLI: Distribution: soku/v0.2.1"]
+  engine --> plan["Plan managed-file changes"]
+  manifest["Manifest and current files"] -->|"Ownership and baseline inputs"| plan
+  project["Project-owned application files"] -.->|"Exclude from automatic mutation"| plan
+  plan --> conflict{"Conflict or incompatible input?"}
+  conflict -->|"Yes"| stopNode["Stop before writes"]
+  conflict -->|"No"| consent["Preview or confirm application"]
+  consent -->|"Explicit dry-run"| preview["Report plan without writes"]
+  consent -->|"Confirmed application"| apply["Apply managed-file transaction"]
+  apply -->|"Success"| owned["Managed files and updated manifest"]
+  apply -->|"Failure"| recovery["Rollback or manual recovery"]
+  owned --> inspect["Read-only status and diff"]
 ```
 
 **読み方:** 原本は規約を提供し、CLIは対象リポジトリへの変更を計画します。manifestは所有権と基準状態を記録します。競合時は既存の変更を上書きせず適用を停止します。
