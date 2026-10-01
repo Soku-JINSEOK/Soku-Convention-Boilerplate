@@ -389,6 +389,9 @@ jobs:
           .github/usage-manual.test.mjs
           .github/github-governance-audit.test.mjs
 
+      - name: Run distributed Project Sync regression tests
+        run: node --test soku/internal/projectsync/assets/github-project-sync.test.mjs
+
       - name: Run npm wrapper unit tests
         run: >-
           node --test soku/npm/lib/launcher.test.mjs
