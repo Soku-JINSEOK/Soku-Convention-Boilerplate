@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="800" viewBox="0 0 1280 800" role="img" aria-labelledby="title desc">
+<title id="title">Runtime and trust boundaries</title>
+<desc id="desc">Connected clients call a trusted application that checks authorization before private storage access. A local desktop application uses local persistence and may optionally synchronize with a service that reauthorizes each operation.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/></marker></defs>
+<rect width="1280" height="800" fill="#ffffff"/>
+<g font-family="Arial, Helvetica, sans-serif" fill="#0f172a">
+<text x="40" y="48" font-size="29" font-weight="700">Runtime and trust boundaries</text>
+<text x="40" y="97" font-size="17">Reference patterns — choose by project needs; these are not deployed Soku infrastructure.</text><text x="40" y="155" font-size="20" font-weight="700">CONNECTED WEB OR DESKTOP</text><rect x="40" y="190" width="335" height="145" rx="12" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+<text x="60" y="224" font-size="22" font-weight="700">Client</text>
+<text x="60" y="256" font-size="17">Browser or installed app</text>
+<text x="60" y="281" font-size="17">Untrusted inputs</text>
+<text x="60" y="306" font-size="17">No shared service secrets</text><rect x="470" y="190" width="335" height="145" rx="12" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2"/>
+<text x="490" y="224" font-size="22" font-weight="700">Application / API</text>
+<text x="490" y="256" font-size="17">Authenticate + authorize</text>
+<text x="490" y="281" font-size="17">Validate every operation</text>
+<text x="490" y="306" font-size="17">Define error / retry behavior</text><rect x="900" y="190" width="335" height="145" rx="12" fill="#f0fdf4" stroke="#15803d" stroke-width="2"/>
+<text x="920" y="224" font-size="22" font-weight="700">Private storage</text>
+<text x="920" y="256" font-size="17">Scoped service identity</text>
+<text x="920" y="281" font-size="17">Transactions + retention</text>
+<text x="920" y="306" font-size="17">Backup + restore</text><path d="M375 260 H470" fill="none" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
+<text x="376" y="244" font-size="16" fill="#334155">HTTPS</text><path d="M805 260 H900" fill="none" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
+<text x="806" y="244" font-size="16" fill="#334155">private</text><text x="40" y="385" font-size="17">For named network services: DNS owner, TLS renewal, routing and allowed connections.</text><text x="40" y="415" font-size="17">Network reachability does not grant permission to read or change a resource.</text><text x="40" y="490" font-size="20" font-weight="700">LOCAL / OFFLINE DESKTOP</text><rect x="40" y="530" width="335" height="145" rx="12" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+<text x="60" y="564" font-size="22" font-weight="700">Installed application</text>
+<text x="60" y="596" font-size="17">Supported OS / CPU</text>
+<text x="60" y="621" font-size="17">OS permissions + input checks</text>
+<text x="60" y="646" font-size="17">Versioned install / update</text><rect x="470" y="530" width="335" height="145" rx="12" fill="#f0fdf4" stroke="#15803d" stroke-width="2"/>
+<text x="490" y="564" font-size="22" font-weight="700">Local file or database</text>
+<text x="490" y="596" font-size="17">Atomic writes + concurrency</text>
+<text x="490" y="621" font-size="17">Existing-data migration</text>
+<text x="490" y="646" font-size="17">Backup / export / restore</text><rect x="900" y="530" width="335" height="145" rx="12" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2"/>
+<text x="920" y="564" font-size="22" font-weight="700">Optional sync service</text>
+<text x="920" y="596" font-size="17">Server reauthorization</text>
+<text x="920" y="621" font-size="17">Conflict / duplicate policy</text>
+<text x="920" y="646" font-size="17">Only when required</text><path d="M375 600 H470" fill="none" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
+<text x="379" y="583" font-size="16" fill="#334155">local</text><path d="M805 600 H900" fill="none" stroke="#475569" stroke-width="2.5" stroke-dasharray="7 5" marker-end="url(#arrow)"/>
+<text x="811" y="583" font-size="16" fill="#334155">sync</text><text x="40" y="733" font-size="17">Review execution location, data ownership, trust, connections, failure and recovery.</text><text x="40" y="762" font-size="17">Mark servers, domains, cloud and synchronization N/A with a reason when unused.</text>
+</g>
+</svg>

@@ -54,6 +54,28 @@ This maps onto the existing [Maturity Levels in BLUEPRINT.md](../../BLUEPRINT.md
 - `templates/_shared/ci/downstream-ci*.yml` — CI catches regressions with zero
   reviewers and separates quick feedback from scheduled full/security checks.
 
+## Design and readiness reviews by scope
+
+The [usage review](./USAGE_MANUAL.md#0-review-the-project-before-choosing-configuration),
+[structure review](../standards/PROJECT_STRUCTURE.md#design-boundary-review),
+[access review](../policy/SECURITY_POLICY.md#application-access-review),
+[product acceptance review](../../VERIFICATION_GUIDE.md#downstream-product-acceptance-review)
+and [delivery review](../standards/CICD_STANDARDS.md#delivery-readiness-review)
+apply to Both, at different depth. They supplement the existing documents;
+they are not an additional governance profile.
+
+| Project/change | Proportionate evidence |
+| --- | --- |
+| Small local script or app | Short purpose/scope, local input/data handling, relevant tests, execution/update and recovery notes |
+| Web or connected desktop app | Runtime/data and access boundaries, interface/network failures, target-environment acceptance and delivery plan |
+| Existing feature change | Reuse the current design; update affected decisions and regression/recovery evidence |
+| Team or higher-impact service | Named acceptance/release owners, agreed quality/recovery targets, traceable results and support handoff |
+
+Do not create a cloud account, DNS record, server, authentication subsystem or
+formal test category solely to check a box. Mark unused areas N/A with a reason
+and owner. Team coordination can be lighter for a personal project; sensitive
+data handling, relevant verification and recoverability still require decisions.
+
 ## 🔁 Maintenance Rule
 
 When a new document or policy is added to this boilerplate, add a row here classifying it as Personal, Team, or Both, so this audit does not go stale.

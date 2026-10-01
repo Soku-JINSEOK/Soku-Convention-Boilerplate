@@ -82,6 +82,38 @@ Pipelines should:
 - separate validation from production deployment where appropriate
 - keep deployment approval paths explicit
 
+## Application access review
+
+Secret hygiene does not establish a product's access policy. Record the
+application's trust boundaries and actor/action permissions in its project-owned
+design document. Use the [structure review](../standards/PROJECT_STRUCTURE.md#design-boundary-review)
+to locate components and connections; use the
+[product acceptance review](../../VERIFICATION_GUIDE.md#downstream-product-acceptance-review)
+to verify enforcement.
+
+- [ ] Identify human users, administrators, automation identities and external
+  integrations; define login/session expiry and account removal where used.
+- [ ] Specify which actor can read, create, change, delete and export each
+  resource, including ownership, team or tenant boundaries.
+- [ ] Enforce authorization at the service or trusted data boundary for every
+  operation; hiding a UI control is not an authorization check.
+- [ ] Validate untrusted inputs, identifiers and files, including supported
+  formats, size limits and safe file/path handling.
+- [ ] Record public/private entrypoints, required connection protection and
+  the minimum privileges of each application identity.
+- [ ] Keep shared service secrets out of browser bundles and installed
+  clients; identify where credentials are stored, rotated and revoked.
+- [ ] Protect sensitive local files and exports, define retention/deletion,
+  and avoid sensitive payloads in diagnostic logs.
+- [ ] Define rejected-access behavior, useful audit events and who receives
+  and investigates a suspected incident.
+
+Check applicable items only after linking the decision and verification result.
+For an offline app with no accounts, hosted login can be N/A with a reason;
+OS permissions, local data, input handling and package integrity still need
+review. Distributed clients and local files can be modified by their users;
+a server must not trust a client assertion of identity or permission.
+
 ## 📣 Reporting and Remediation
 
 Repositories should define how security issues are handled, including:

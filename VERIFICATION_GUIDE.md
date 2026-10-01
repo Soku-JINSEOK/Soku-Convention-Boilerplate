@@ -41,6 +41,57 @@ Issue #201 prepares the source-only `soku/v0.3.0` candidate. It is not a
 published baseline until a separately approved signed tag, Release,
 five-archive matrix, checksums, and coordinated npm publication complete.
 
+## Downstream product acceptance review
+
+The repository commands below verify Soku and its starter templates. They do
+not certify that a downstream product meets user requirements. Record that
+product's acceptance strategy in its own design/test documents, linked from the
+[task report](./docs/issues/TASK_REPORT_TEMPLATE.md). Start with the
+[usage review](./docs/guides/USAGE_MANUAL.md#0-review-the-project-before-choosing-configuration)
+and the [design boundaries](./docs/standards/PROJECT_STRUCTURE.md#design-boundary-review).
+
+QA includes requirement/design review, test planning, user validation and
+release decisions. Automated tests supply part of the evidence. Select checks
+from the product's risk and behavior; do not require every test category for a
+trivial change or treat code coverage as proof of product acceptance.
+
+| Requirement or risk | Suitable verification | Evidence to retain |
+| --- | --- | --- |
+| Calculation, validation or state rule | Focused unit tests | Input/expected-result cases and actual result |
+| API, database, file or external integration | Integration tests | Contract, realistic configuration and failure result |
+| Critical user task | End-to-end check and user acceptance | Complete user scenario and acceptance owner |
+| Resource/team/tenant access | Positive and denied-access checks | Actor/resource cases, including direct identifier manipulation |
+| Load, large data or responsiveness | Performance measurement where material | Dataset, concurrency, environment, latency/resource results |
+| Browser, OS, CPU or install/update support | Compatibility and clean-install/update checks | Supported matrix and verified versions |
+| Timeout, retry, duplicate request or concurrent write | Failure/concurrency checks | Resulting state, duplicate/conflict policy and recovery result |
+| Existing-data change, backup or deployment failure | Migration and restoration/recovery exercise | Compatible versions, restored behavior and recovery limits |
+| Ease of use and accessibility | User/task review and applicable accessibility checks | Observations, unresolved issues and acceptance decision |
+
+For each applicable requirement, record:
+
+| Requirement ID | Scenario and expected result | Method/environment | Owner | Status | Evidence |
+| --- | --- | --- | --- | --- | --- |
+| Example: ACCESS-01 | Another team's record remains inaccessible after changing its ID | Service integration; agreed test environment | Named reviewer | Blocked until executed | Link to actual result |
+
+Use `Pass`, `Fail`, `Blocked` or `N/A`. A pass requires the actual
+result, version and environment. N/A requires a reason and owner.
+A skipped, unavailable or flaky check is not a pass. An illustrative row is
+not completed evidence, and a passing build does not establish user acceptance.
+
+Before release:
+
+- [ ] Map each applicable acceptance condition to a verification result.
+- [ ] Check changed behavior and affected existing behavior.
+- [ ] Record user acceptance for changed critical workflows.
+- [ ] Resolve or explicitly defer defects with an owner and impact; a deferred
+  defect must still satisfy the agreed release conditions.
+- [ ] Record applicable security, compatibility, data migration and recovery
+  results, and separate app rollback from data restoration.
+- [ ] Confirm the release/support owner and a post-delivery verification plan.
+
+The [delivery review](./docs/standards/CICD_STANDARDS.md#delivery-readiness-review)
+uses this evidence. This review does not authorize production deployment.
+
 ## Local Repository Checks
 
 `scripts/verify.sh` is the shared local entry point:

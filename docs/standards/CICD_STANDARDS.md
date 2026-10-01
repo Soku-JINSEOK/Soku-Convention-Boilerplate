@@ -182,6 +182,47 @@ direct post-merge `main` push or a release preflight.
 4. health verification
 5. rollback or remediation path
 
+## Delivery readiness review
+
+Use this table when a downstream project deploys a service or distributes an
+application. These are review inputs, not claims that this boilerplate already
+implements every delivery mechanism. Product acceptance evidence is defined in
+the [verification guide](../../VERIFICATION_GUIDE.md#downstream-product-acceptance-review);
+the implemented optional GCP path remains in
+[Cloud Run CI/CD](../guides/CLOUD_RUN_CICD.md).
+
+![Delivery decision from identified artifact through acceptance, recovery and health checks](../assets/delivery-decision.svg)
+
+The decision is: identify the artifact, complete applicable verification, confirm
+release conditions, deliver and check the result. Failed or unknown conditions
+hold delivery. A failed outcome invokes the documented recovery path.
+Continuous delivery keeps a verified change releasable; continuous deployment
+also automates its production delivery. Choose and document which applies.
+
+| Review | Service/web delivery | Desktop/local delivery |
+| --- | --- | --- |
+| Artifact identity | Source revision and immutable package/image identity | Version, OS/CPU package and integrity identity |
+| Configuration | Environment-specific settings and scoped identities | Installation paths, OS permissions and user settings |
+| Acceptance | Relevant tests and target-environment smoke checks | Relevant tests plus clean install and supported-device smoke |
+| Data change | Migration compatibility, transaction/backfill and backup plan | Existing local data, settings and version migration |
+| Rollout | Target, approval/trigger, traffic/change strategy and health | Distribution channel, update policy and old-client support |
+| Recovery | Compatible application rollback and separate data recovery | Reinstall/update recovery and compatible local-data restoration |
+| Operation | Error/latency signals, alerts, support owner and cost | Crash diagnostics with consent/privacy, support and update owner |
+
+- [ ] Record artifact identity and exactly which artifact was verified.
+- [ ] Name the release owner, target and applicable approval/trigger.
+- [ ] Confirm acceptance evidence and unresolved conditions before delivery.
+- [ ] Review application/data compatibility across both upgrade and recovery.
+- [ ] Verify the chosen health or installation smoke check after delivery.
+- [ ] Verify recovery in a safe environment and record its limits.
+- [ ] Define observation, support and retirement/data export responsibilities.
+
+A previous application version does not automatically undo a database or file
+migration. If rollback is unsafe, document a compatible forward repair or
+restore procedure and its downtime/data-loss limits before release. Mark unused
+mechanisms N/A with a reason; do not introduce servers or cloud delivery into an
+offline app merely to complete this checklist.
+
 ## 📝 Documentation Rule
 
 If a repository uses CI/CD, its README or `docs/` folder should explain:

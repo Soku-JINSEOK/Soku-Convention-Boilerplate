@@ -1,0 +1,12 @@
+flowchart TD
+    scope["Scope and acceptance"] --> design["Design boundaries"]
+    fit["Technology fit"] --> design
+    security["Access and exposure"] --> design
+    design --> checks{"Evidence complete?"}
+    checks -->|"No or unknown"| revise["Resolve gaps"]
+    revise --> design
+    checks -->|"Yes"| release{"Release conditions met?"}
+    release -->|"No or unknown"| hold["Hold delivery"]
+    release -->|"Yes"| deliver["Deliver and verify"]
+    deliver -->|"Failure"| recover["Recover app and data"]
+    recover --> revise

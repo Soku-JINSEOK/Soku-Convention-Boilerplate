@@ -109,6 +109,46 @@ The layout above assumes a single service/package. Some repositories are easier 
 
 This choice is orthogonal to the `Google Style Guide` baseline in [`CODE_STYLE.md`](./CODE_STYLE.md) — that document governs in-file code style, not directory topology, so either layout can adopt it unchanged.
 
+## Design boundary review
+
+A directory layout describes ownership of files. It does not prove that an
+application's runtime or data boundaries are correct. Before selecting a
+layout, record the following in the downstream project's design document,
+linked from its [task report](../issues/TASK_REPORT_TEMPLATE.md).
+The [usage manual review](../guides/USAGE_MANUAL.md#0-review-the-project-before-choosing-configuration)
+connects these decisions to security, verification and delivery.
+
+![Connected application and local desktop runtime boundaries](../assets/runtime-boundaries.svg)
+
+These are reference patterns, not a mandatory topology or a diagram of deployed
+Soku infrastructure. A browser or connected desktop client calls an application
+service that checks permissions before private storage access. A local desktop
+application may instead use local files or a database, with synchronization
+only when required. The server must reauthorize synchronized operations.
+
+| Boundary | Decision to record | Completion evidence |
+| --- | --- | --- |
+| Runtime | Browser, OS process, server, job or external service; supported OS/CPU/browser versions | Component inventory with execution location, responsibility and owner |
+| User flow | Input, loading, empty, success and error behavior; keyboard/accessibility needs where applicable | Screen/action flow with acceptance conditions |
+| Data | Authoritative source, identifiers, relationships, uniqueness, retention, deletion and export | Data model and examples covering lifecycle rules |
+| Consistency | Transaction boundaries, simultaneous edits, atomic local writes and duplicate operations | Conflict/transaction policy and relevant test scenarios |
+| Interfaces | Request/response schema, version compatibility, error codes, pagination and limits | API or local interface contract, including failure behavior |
+| Connections | Source/destination, protocol, port, authentication, timeout and retry policy | Connection inventory and exposure/trust boundaries |
+| Naming and TLS | Domain/DNS ownership, routing and certificate renewal where used | Name-to-service mapping and renewal/support owner |
+| Change and recovery | Existing-data migration, older-client compatibility, backup/restore and update failure | Migration/recovery procedure and planned verification |
+
+Keep network reachability and application authorization separate. Do not put
+service credentials in distributed clients, and do not expose a database merely
+to simplify client access. A deliberate specialized client-to-data architecture
+needs equivalent identity, authorization and evidence, documented as a
+project-specific decision.
+
+For each item, name an owner and link evidence. Mark an unused component N/A
+with a reason instead of adding it to satisfy the table. Follow
+[security policy](../policy/SECURITY_POLICY.md#application-access-review) for
+permission review and [verification](../../VERIFICATION_GUIDE.md#downstream-product-acceptance-review)
+for acceptance evidence.
+
 ## 📍 Documentation Placement
 
 Place documents according to their scope:

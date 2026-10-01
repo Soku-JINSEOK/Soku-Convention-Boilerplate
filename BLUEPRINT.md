@@ -101,6 +101,20 @@ A cross-link header must be included at the very top of each file to allow reade
 
 If a document mixes more than one language inside a single file, group each language's content into a single contiguous block instead of interleaving languages section by section or paragraph by paragraph. Order the blocks English first, followed by each additional language in the order it was added.
 
+## Project design review inputs
+
+A downstream project records its purpose, acceptance conditions, runtime/data
+boundaries, technology tradeoffs, access policy and recovery strategy in
+project-owned documents. Shared conventions support those decisions; they do
+not choose a universal architecture or require cloud services for a local app.
+
+The [usage manual review](./docs/guides/USAGE_MANUAL.md#0-review-the-project-before-choosing-configuration)
+is the human entrypoint. It delegates structure, security, verification and
+delivery details to their existing documents. A review records an owner,
+decision, evidence and applicability; unresolved applicable conditions remain
+visible. Reuse current evidence for unchanged areas instead of creating
+duplicate policies or design records.
+
 ## 🏗️ Repository Shape
 
 The boilerplate assumes a structure that is easy to navigate without hidden conventions.

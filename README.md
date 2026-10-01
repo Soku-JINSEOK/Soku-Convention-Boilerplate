@@ -14,6 +14,17 @@ Traditional project boilerplates suffer from **template drift**: once copied, co
 * **🛡️ Managed Ownership Model:** Soku records managed-file ownership and baselines in `.soku/manifest.json`, while project-owned files remain outside automatic lifecycle mutation.
 * **🔁 Reproducible CLI Workflow:** Explicit immutable inputs, dry-run plan inspection, and transactional upgrades.
 
+## First-time project review
+
+Before choosing starter files, review purpose, quality targets, runtime/data
+boundaries, access, acceptance and recovery in the
+[usage manual, section 0](./docs/guides/USAGE_MANUAL.md#0-review-the-project-before-choosing-configuration).
+It links each decision to its existing authoritative document. Record evidence
+for applicable items and a reason for N/A; do not add cloud or server components
+that the project does not need.
+
+![Requirements, design, verification and delivery review](./docs/assets/review-evidence.svg)
+
 ## 🗺️ Master Blueprint & Operating Contract
 
 * **Canonical Operating Design:** [BLUEPRINT.md](./BLUEPRINT.md) (Architecture Authority)
