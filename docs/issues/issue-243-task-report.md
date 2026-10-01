@@ -70,17 +70,24 @@ Actually completed against the prepared change set:
   separation; no errors.
 - Three SVG figures: XML element nesting, accessible title/description and
   prohibited script/external-resource checks passed.
+- All three SVGs rendered and visually reviewed; overlapping branch labels
+  were shortened, and the recovery-to-review path was made explicit.
+- Hosted checks on `6df44c49b5a118cc1f382c8afc2af02b56580890`:
+  Repository Hygiene (including Markdown lint and documentation regressions),
+  PR Metadata Gate and CI Quick Gate passed.
 
 Limitations:
 
-- Local command/file execution became unresponsive. Repository Markdown lint,
-  existing documentation tests and full verification are not claimed as passed.
-- SVG source/layout checks were performed; rendered-image visual QA is pending.
+- Full Validation reports existing `brace-expansion` and `fast-uri` security
+  findings in unchanged lockfiles. Full repository verification is not a pass.
+- The implementation commits are unsigned; signing must be addressed before
+  merge under the repository's contribution rules.
 - tldraw editing was blocked by the execution environment's approval policy.
 - Figma generation requires selecting a team/organization in its widget;
   no FigJam output was generated and none is claimed.
-- The diagram/report follow-up commit requires current-head hosted results
-  before merge. No checks or branch rules are relaxed.
+- Results above identify the checked implementation commit. Any later report
+  edits require their own hosted checks before merge; no checks or branch rules
+  are relaxed.
 
 ## Public Disclosure Review
 
