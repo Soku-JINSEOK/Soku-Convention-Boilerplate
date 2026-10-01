@@ -172,6 +172,7 @@ and remaining tradeoffs are explicit:
 | Preserve required full checks and Quick comparison | A cheaper Quick result has not yet satisfied the full-gate transition criteria | Keep overlap during the Issue #116 observation window rather than silently weakening coverage | Review measured comparison evidence before any ruleset transition |
 | Retain PR edited events | Editing the base can change what must be validated | Body/title edits still incur a full run; batch edits before final verification | Revisit only with tested base-retarget handling and protection against metadata results replacing code results |
 | Cache runner npm downloads by lockfile | Repeated installs can reuse downloaded packages | Cache storage and misses remain; npm ci, integrity checks, typecheck and unit tests always run | Compare cold/warm install steps; remove cache if sustained overhead exceeds the benefit |
+| Use explicit hygiene Go cache inputs | There is no root go.mod, so default discovery cannot restore the cache | Key by the module sum, tool pins and owning workflow; cold misses still install tools | The initial hosted log reported a missing dependency file; verify the warning disappears and review warm-cache benefit |
 | Keep independent scheduled/manual Hosted Full | Rechecks unchanged code against evolving dependencies and tools | Scheduled execution has a separate ongoing cost | Review frequency using failure yield and measured runner work |
 
 ### Measure work and coverage together

@@ -71,6 +71,15 @@ Integration remains pending review and commit signing.
 - Cache speedup and live manual dispatch behavior are not measured in this report;
   workflow regressions establish the graph and retain fail-closed behavior.
 
+## Evidence-driven cache correction
+
+The first follow-up hosted Repository Hygiene job passed but reported that Go
+cache restoration could not find a dependency file at the repository root.
+The module lives under soku. Configure its cache inputs explicitly using
+soku/go.sum, verification/tools.env and the owning CI workflow, so module and
+tool-pin changes invalidate the cache. Tool installation and validation steps
+remain unconditional; no warm-cache speedup is claimed.
+
 ## Public Disclosure Review
 
 Only public repository paths, source revisions, issue/run links and summarized
