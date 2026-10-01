@@ -23,5 +23,6 @@ test('standalone sources and nested SVG text include encoded labels', () => {
   assert.equal(hasNonEnglishLetters(diagramTexts('map.mmd', 'a["日本語"]')[0]), true);
   const svg = '<svg aria-label="English"><title>English</title><text><tspan>&#xD55C;</tspan></text></svg>';
   assert.equal(diagramTexts('map.svg', svg).some(hasNonEnglishLetters), true);
+  assert.deepEqual(diagramTexts('map.svg', '<text><tspan>English</tspan></text>'), ['<tspan>English</tspan>']);
   assert.deepEqual(diagramTexts('code.js', '한국어'), []);
 });

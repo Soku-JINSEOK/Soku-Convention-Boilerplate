@@ -9,7 +9,8 @@ export function diagramTexts(path, source) {
   if (path.endsWith('.mmd')) return [source];
   if (path.endsWith('.svg')) {
     return [...source.matchAll(/<(text|title|desc)\b[^>]*>([\s\S]*?)<\/\1>/g)]
-      .map((match) => match[2].replace(/<[^>]*>/g, ''))
+      // Inspect nested markup verbatim; this is not an HTML sanitizer.
+      .map((match) => match[2])
       .concat([...source.matchAll(/\baria-label=["']([^"']*)["']/g)]
         .map((match) => match[1]));
   }

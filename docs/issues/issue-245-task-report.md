@@ -211,3 +211,18 @@ execution. Static prepared-content checks and final hosted tests provide the
 available evidence. This review does not claim live Cloud Run deployment,
 rollback drills, manual workflow dispatch or browser rendering of every GitHub
 Mermaid figure. Final commit, run and check results belong in Issue #245.
+
+### Hosted feedback correction
+
+The first follow-up made the focused fixture execution explicit in the same
+hygiene step as the repository text check. Hosted Node execution confirmed all
+three fixtures and the 145 extracted text blocks passed.
+
+CodeQL subsequently reported one new high-severity alert on the branch despite
+successful analysis jobs. Review of the new checker identified unnecessary
+regex-based removal of nested SVG markup. Remove that transformation: inspect
+the selected SVG text subtree verbatim, including nested tags and attributes,
+and add an assertion that markup is preserved. The checker is not an HTML
+sanitizer and does not render input. This makes the check more conservative
+without an additional XML/HTML dependency or suppressed security rule.
+Final CodeQL and aggregate status must be verified on the corrected revision.
