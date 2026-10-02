@@ -363,6 +363,15 @@ func indexedSnapshot(t *testing.T) SourceSnapshot {
 	snapshot.Files[ProfileIndexPath] = mustRead(t, "../../catalog/index-v2.json")
 	snapshot.Files["AGENTS.md"] = mustRead(t, "../../../AGENTS.md")
 	snapshot.Files[".github/CODEOWNERS"] = mustRead(t, "../../../.github/CODEOWNERS")
+	index, err := DecodeProfileIndex(snapshot.Files[ProfileIndexPath])
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, layer := range index.Layers {
+		for _, file := range layer.Files {
+			snapshot.Files[file.Source] = mustRead(t, "../../../"+file.Source)
+		}
+	}
 	return snapshot
 }
 
@@ -434,4 +443,70 @@ func mapsEqual(left, right map[string]string) bool {
 		}
 	}
 	return true
+}
+
+func TestProfilesProduceCompleteStacksWithProgressiveGovernance(t *testing.T) {
+	snapshot := indexedSnapshot(t)
+	catalog := mustCatalog(t)
+	for _, stack := range catalog.Stacks {
+		for _, profile := range []string{ProfileBootstrap, ProfileStandard, ProfileScaled} {
+			t.Run(stack.ID+"/"+profile, func(t *testing.T) {
+				config := Config{Profile: profile, Stacks: []string{stack.ID}, ProjectName: "starter", ModulePath: "example.com/starter", JavaGroup: "com.example", ServiceName: "starter"}
+				changes, err := renderProfileCatalog(snapshot, catalog, config)
+				if err != nil {
+					t.Fatal(err)
+				}
+				paths := map[string]bool{}
+				for _, change := range changes {
+					paths[change.Path] = true
+				}
+				// The baseline stack is a runnable unit, not a prefix of its file list.
+				stackOnly := catalog
+				stackOnly.Files = nil
+				expected, err := renderCatalog(snapshot, stackOnly, config)
+				if err != nil {
+					t.Fatal(err)
+				}
+				for _, file := range expected {
+					if !paths[file.Path] {
+						t.Fatalf("missing stack file %s", file.Path)
+					}
+				}
+				for _, path := range []string{".github/workflows/ci.yml", ".github/workflows/security.yml"} {
+					if !paths[path] {
+						t.Fatalf("missing baseline workflow %s", path)
+					}
+				}
+				for _, path := range []string{".github/workflows/full-validation.yml", ".github/ISSUE_TEMPLATE/task.yml", ".github/PULL_REQUEST_TEMPLATE.md"} {
+					if paths[path] != (profile != ProfileBootstrap) {
+						t.Fatalf("unexpected standard capability %s", path)
+					}
+				}
+				for _, path := range []string{"AGENTS.md", ".github/CODEOWNERS"} {
+					if paths[path] != (profile == ProfileScaled) {
+						t.Fatalf("unexpected scaled capability %s", path)
+					}
+				}
+			})
+		}
+	}
+}
+
+func TestLegacyProfileLimitDoesNotMutateCatalog(t *testing.T) {
+	snapshot := indexedSnapshot(t)
+	var index ProfileIndex
+	if err := json.Unmarshal(snapshot.Files[ProfileIndexPath], &index); err != nil {
+		t.Fatal(err)
+	}
+	index.Layers[0].StackFileLimit = 1
+	snapshot.Files[ProfileIndexPath], _ = json.Marshal(index)
+	catalog := mustCatalog(t)
+	before, _ := json.Marshal(catalog)
+	if _, err := renderProfileCatalog(snapshot, catalog, Config{Profile: ProfileBootstrap, Stacks: []string{"go"}, ModulePath: "example.com/starter"}); err != nil {
+		t.Fatal(err)
+	}
+	after, _ := json.Marshal(catalog)
+	if !bytes.Equal(before, after) {
+		t.Fatal("rendering one profile mutated the shared catalog")
+	}
 }

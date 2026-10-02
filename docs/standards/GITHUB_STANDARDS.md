@@ -127,6 +127,27 @@ For work that benefits from a documented plan before implementation starts, use 
 
 This is not only a team review mechanism. It also works as an implementation gate for AI coding agents: the agent drafts the report, a human (even the sole owner of a solo project) approves it, and only then does implementation start. Skip it for trivial changes where a full plan would be pure overhead.
 
+### Open work and closure
+
+Use the existing Issue/PR body or project status to distinguish work; no new
+label family or duplicate integration tracker is required.
+
+| State | Meaning and exit condition |
+| --- | --- |
+| planned | Scope is agreed; implementation has not begun. |
+| in-progress | An owner is actively implementing. |
+| blocked | Name the dependency, owner, and next unblock action. |
+| ready-for-integration | Implementation and verification are complete; link the integration target. |
+| needs-owner-action | Name the concrete owner action, such as signing the final commits. |
+| done | Acceptance criteria are met; close the item with the result link. |
+| superseded | Link the replacement and close the obsolete item. |
+
+An implemented issue may close while integration continues elsewhere if its
+acceptance criteria exclude integration and the remaining action is explicitly
+owned by a linked open item. Otherwise keep it ready-for-integration, not
+in-progress. Historical records need not remain open. Reuse the PR's evidence
+and link it from an adopted task report instead of maintaining parallel copies.
+
 ## 🔍 Review Standards
 
 > **Applies to:** Team — see [`docs/guides/APPLICABILITY.md`](../guides/APPLICABILITY.md). This section assumes a second person reviewing the PR; a solo project has no reviewer to apply it to.
@@ -207,6 +228,65 @@ git config --global tag.gpgsign true
 Export and paste your GPG public key (`gpg --armor --export <KEY_ID>`) into GitHub under **Settings -> SSH and GPG keys -> New GPG Key**.
 
 For interactive configuration assistance, you can run the [scripts/setup-git-signing.sh](../../scripts/setup-git-signing.sh) script.
+
+#### Automation to owner signing handoff
+
+When the automation environment lacks a signing identity, keep its unsigned
+working commits on the review branch and record `needs-owner-action` after
+verification. Do not claim integration readiness or weaken branch protection.
+The owner reviews the final tree, creates signed replacement commits using their
+own configured identity, and verifies GitHub recognizes those signatures.
+
+For a private linear review branch, an owner may use
+`git rebase --force-rebase --gpg-sign <reviewed-base>` after checking the worktree
+is clean and saving a recovery branch. Coordinate any history rewrite with
+collaborators; inspect the resulting tree and commits before a lease-protected
+push. Nonlinear or shared history requires a deliberately chosen signing path.
+Never give signing secrets to automation merely to avoid this handoff.
+
+Rewriting commits changes SHAs. Run final required CI and review against the
+new signed head, then merge under the existing rules. Prior results remain
+historical evidence and cannot substitute for checks on the replacement head.
+Release-tag signing continues to follow the release contract.
+
+#### Cloud signing options
+
+A cloud shell can create signed Git commits when it has an authorized signing
+identity. A disposable SSH-key probe in this Codex cloud environment created
+and verified a signed commit with `git commit -S` and `git verify-commit`.
+The probe key was deleted and never registered or uploaded; this proves local
+signing capability, not GitHub verification for an account.
+
+Two paths are available:
+
+- **SSH/GPG identity:** provision an approved dedicated signing identity through
+  the environment's secure configuration, register its public key with GitHub,
+  and configure repository-local `gpg.format`, `user.signingkey`, and
+  `commit.gpgsign`. Do not put private material in chat, issues, scripts, or the
+  repository. Scope key access to the intended trusted signing phase.
+- **GitHub server signing:** the official
+  [GraphQL schema](https://github.com/octokit/graphql-schema/blob/main/schema.graphql)
+  documents that `createCommitOnBranch` automatically signs commits **if
+  supported**. It uses the authenticated credential owner's authorship and
+  GitHub's web committer, and requires `expectedHeadOid`. Create a reviewed
+  replacement on a separate branch based on the intended target; adding one
+  signed commit atop unsigned history does not sign its parents. Preserve file
+  modes and compare the resulting tree before using this as a signing handoff.
+
+The current connector's Git Database `create_commit` operation exposes no
+signature field; its availability is not evidence of signing support. This
+session has no configured signing identity, and `gh auth status` rejects the
+injected CLI token. The GraphQL path therefore remains documented, not exercised
+with the user's account. Do not assume it can be called through the current
+connector or reuse an inaccessible credential.
+
+After either path, require the returned commit verification to be
+`verified: true`, inspect every introduced commit under the repository ruleset,
+and rerun CI on the replacement head. The
+[GitHub signature documentation](https://github.com/github/docs/blob/main/content/authentication/managing-commit-signature-verification/about-commit-signature-verification.md)
+also describes built-in Codespaces signing; that separate product's integration
+must not be attributed to Codex cloud. Release tags still require the release
+contract's reviewed GPG fingerprint.
 
 ## 🏷️ Labels and Metadata
 

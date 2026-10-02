@@ -112,6 +112,12 @@ func render() (string, error) {
 		return "", errors.New("template missing stack job token")
 	}
 	templateContent := strings.Replace(string(templateText), stackJobsToken, strings.Join(stackJobs, "\n\n"), 1)
+	// The repository workflow validates an explicit revision; downstream jobs
+	// continue to use their normal event checkout when copied or rendered.
+	checkout := regexp.MustCompile(`(?m)^(      - uses: actions/checkout@[^\n]+)$`)
+	templateContent = checkout.ReplaceAllStringFunc(templateContent, func(line string) string {
+		return line + "\n        with:\n          ref: ${{ inputs['head-sha'] || github.sha }}"
+	})
 	if err := validateRenderedWorkflow(templateContent); err != nil {
 		return "", err
 	}

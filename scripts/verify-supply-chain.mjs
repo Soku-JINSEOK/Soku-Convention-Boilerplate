@@ -4,6 +4,7 @@ import {
   readFileSync,
   readdirSync,
   statSync,
+  writeFileSync,
 } from 'node:fs';
 import {dirname, join, relative, resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -229,6 +230,76 @@ export function verifyDependabotCoverage(content) {
   );
 }
 
+export function renderToolsPolicy(tools) {
+  return [
+    '<!-- tools-env:start -->',
+    '| Policy key | Reviewed value |',
+    '| --- | --- |',
+    ...[...tools].map(([key, value]) => `| \`${key}\` | \`${value}\` |`),
+    '<!-- tools-env:end -->',
+  ].join('\n');
+}
+
+export function verifyPolicyDocumentation(content, tools) {
+  return content.replaceAll('\r\n', '\n').includes(renderToolsPolicy(tools)) ? [] : [finding(
+    'verification/CLASSIFICATION.md', 1, 'policy-documentation',
+    'Regenerate shared policy values with node scripts/verify-supply-chain.mjs --write-docs.',
+  )];
+}
+
+export function verifyPythonSupport(project, workflow) {
+  const range = /^requires-python = ">=3\.(\d+),<3\.(\d+)"$/m.exec(project.replaceAll('\r\n', '\n'));
+  const matrix = /python-version: \[([^\]]+)\]/.exec(workflow);
+  const versions = matrix ? [...matrix[1].matchAll(/['"](3\.\d+)['"]/g)].map(m => m[1]) : [];
+  const minimum = Number(range?.[1]);
+  const upper = Number(range?.[2]);
+  const expected = range && upper > minimum && upper - minimum < 20
+    ? Array.from({length: upper - minimum}, (_, i) => `3.${minimum + i}`) : [];
+  return expected.length > 0 && JSON.stringify(versions) === JSON.stringify(expected) &&
+    workflow.includes('python-version: ${{ matrix.python-version }}') &&
+    workflow.includes('fail-fast: false') ? [] : [finding(
+      'templates/python/pyproject.toml', 1, 'python-support',
+      'Every declared Python minor must run in the Full matrix, with fail-fast disabled.',
+    )];
+}
+
+export function verifyRuntimeSupport(root) {
+  const read = path => readFileSync(resolve(root, path), 'utf8');
+  const findings = [];
+  const nodeRange = JSON.parse(read('templates/javascript-typescript-node/package.json')).engines.node;
+  const lockRange = JSON.parse(read('templates/javascript-typescript-node/package-lock.json')).packages[''].engines.node;
+  const clauses = [...nodeRange.matchAll(/>=([0-9]+(?:\.[0-9]+){0,2}) <([0-9]+)/g)];
+  const expectedNode = clauses.map(match => match[1]);
+  if (clauses.map(match => match[0]).join(' || ') !== nodeRange || clauses.length === 0 ||
+      clauses.some(match => Number(match[2]) !== Number(match[1].split('.')[0]) + 1) || nodeRange !== lockRange) {
+    findings.push(finding('templates/javascript-typescript-node/package.json', 1, 'runtime-support', 'Declare tested Node release lines and keep the lockfile root in sync.'));
+  }
+  const goVersion = /^go (\d+\.\d+)$/m.exec(read('templates/go/go.mod').replaceAll('\r\n', '\n'))?.[1];
+  const javaVersion = /<java.version>(\d+)<\/java.version>/.exec(read('templates/java-spring/pom.xml'))?.[1];
+  for (const path of ['.github/workflows/templates-ci.yml', 'templates/_shared/ci/downstream-ci.yml']) {
+    const workflow = read(path);
+    const matrix = /node-version: \[([^\]]+)\]/.exec(workflow);
+    const actualNode = matrix ? [...matrix[1].matchAll(/['"]([0-9.]+)['"]/g)].map(match => match[1]) : [];
+    if (JSON.stringify(actualNode) !== JSON.stringify(expectedNode) || !workflow.includes('node-version: ${{ matrix.node-version }}')) {
+      findings.push(finding(path, 1, 'runtime-support', 'Full Node matrix must test the minimum of each declared release line.'));
+    }
+    for (const [key, version] of [['go-version', goVersion], ['java-version', javaVersion]]) {
+      if (!version || !workflow.includes(`${key}: '${version}'`)) {
+        findings.push(finding(path, 1, 'runtime-support', `${key} must match the template build declaration.`));
+      }
+    }
+  }
+  const terraformVersion = /hashicorp\/terraform:(\d+\.\d+\.\d+)@sha256:/.exec(read('scripts/verify.sh'))?.[1];
+  const [major, minor] = (terraformVersion ?? '').split('.').map(Number);
+  for (const path of ['infra/gcp/versions.tf', 'infra/gcp/cloud-build-logging/versions.tf']) {
+    const range = /required_version = "([^"]+)"/.exec(read(path))?.[1];
+    if (!terraformVersion || range !== `>= ${terraformVersion}, < ${major}.${minor + 1}.0`) {
+      findings.push(finding(path, 1, 'runtime-support', 'Terraform support must start at the verification image version and remain in its tested minor line.'));
+    }
+  }
+  return findings;
+}
+
 function parityChecks(root, tools) {
   const checks = [
     ['GOIMPORTS_VERSION', '.github/workflows/ci.yml', 'goimports@'],
@@ -298,6 +369,16 @@ export function verifyRepository(root) {
     readFileSync(resolve(root, 'verification/tools.env'), 'utf8'),
   );
   findings.push(...parityChecks(root, tools));
+  findings.push(...verifyRuntimeSupport(root));
+  for (const path of ['.github/workflows/templates-ci.yml', 'templates/_shared/ci/downstream-ci.yml']) {
+    findings.push(...verifyPythonSupport(
+      readFileSync(resolve(root, 'templates/python/pyproject.toml'), 'utf8'),
+      readFileSync(resolve(root, path), 'utf8'),
+    ));
+  }
+  findings.push(...verifyPolicyDocumentation(
+    readFileSync(resolve(root, 'verification/CLASSIFICATION.md'), 'utf8'), tools,
+  ));
 
   const dependabot = readFileSync(
     resolve(root, '.github/dependabot.yml'),
@@ -314,6 +395,16 @@ export function verifyRepository(root) {
 
 function main() {
   const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+  if (process.argv.includes('--write-docs')) {
+    const path = resolve(root, 'verification/CLASSIFICATION.md');
+    const content = readFileSync(path, 'utf8');
+    const tools = parseToolsEnv(readFileSync(resolve(root, 'verification/tools.env'), 'utf8'));
+    const marker = /<!-- tools-env:start -->[\s\S]*?<!-- tools-env:end -->/g;
+    if ([...content.matchAll(marker)].length !== 1) {
+      throw new Error('Expected exactly one tools-env documentation block.');
+    }
+    writeFileSync(path, content.replace(marker, () => renderToolsPolicy(tools)));
+  }
   const result = verifyRepository(root);
 
   if (result.findings.length > 0) {

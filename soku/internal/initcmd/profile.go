@@ -74,13 +74,15 @@ func renderProfileCatalog(snapshot SourceSnapshot, catalog Catalog, config Confi
 			for _, output := range layer.SharedOutputs {
 				shared[output] = true
 			}
-			if layer.StackFileLimit == -1 || layer.StackFileLimit > stackLimit {
+			if stackLimit != -1 && (layer.StackFileLimit == -1 || layer.StackFileLimit > stackLimit) {
 				stackLimit = layer.StackFileLimit
 			}
 			extra = append(extra, layer.Files...)
 		}
 	}
 	composed := catalog
+	// Keep legacy file-limit selection from mutating the caller's catalog.
+	composed.Stacks = append([]Stack(nil), catalog.Stacks...)
 	composed.Files = nil
 	seen := map[string]bool{}
 	for _, declaration := range catalog.Files {

@@ -2,26 +2,66 @@
   "schema_version": 2,
   "default_profile": "standard",
   "profiles": [
-    {"id": "bootstrap", "layers": ["bootstrap"]},
-    {"id": "standard", "layers": ["bootstrap", "standard"]},
-    {"id": "scaled", "layers": ["bootstrap", "standard", "scaled"]}
+    {
+      "id": "bootstrap",
+      "layers": [
+        "bootstrap"
+      ]
+    },
+    {
+      "id": "standard",
+      "layers": [
+        "bootstrap",
+        "standard"
+      ]
+    },
+    {
+      "id": "scaled",
+      "layers": [
+        "bootstrap",
+        "standard",
+        "scaled"
+      ]
+    }
   ],
   "layers": [
     {
       "id": "bootstrap",
-      "shared_outputs": [".editorconfig", ".gitignore"],
-      "stack_file_limit": 1,
+      "shared_outputs": [
+        ".editorconfig",
+        ".gitignore",
+        ".github/workflows/ci.yml",
+        ".github/workflows/security.yml"
+      ],
+      "stack_file_limit": -1,
       "files": []
     },
     {
       "id": "standard",
       "shared_outputs": [
-        ".github/workflows/ci.yml",
-        ".github/workflows/full-validation.yml",
-        ".github/workflows/security.yml"
+        ".github/workflows/full-validation.yml"
       ],
       "stack_file_limit": -1,
-      "files": []
+      "files": [
+        {
+          "source": "templates/_shared/governance/task.yml",
+          "output": ".github/ISSUE_TEMPLATE/task.yml",
+          "owner": "core",
+          "class": "core-managed",
+          "content_mode": "text",
+          "strategy": "render",
+          "placeholders": []
+        },
+        {
+          "source": "templates/_shared/governance/pull-request.md",
+          "output": ".github/PULL_REQUEST_TEMPLATE.md",
+          "owner": "core",
+          "class": "core-managed",
+          "content_mode": "text",
+          "strategy": "render",
+          "placeholders": []
+        }
+      ]
     },
     {
       "id": "scaled",

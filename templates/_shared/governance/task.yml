@@ -1,0 +1,22 @@
+name: Task
+description: Describe a change and how to verify it.
+body:
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: What developer work or failure does this change address?
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance and verification
+      description: State observable completion criteria and relevant checks.
+    validations:
+      required: true
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies and owner action
+      description: Link blockers or note signing, release, or environment prerequisites.

@@ -37,6 +37,35 @@ This boilerplate was originally written with team-scale collaboration in mind, s
 
 This maps onto the existing [Maturity Levels in BLUEPRINT.md](../../BLUEPRINT.md#maturity-levels): a Personal project typically stays at **Bootstrap**, a small team moves into **Standard**, and multi-team or regulated environments reach **Scaled**.
 
+## Generated profile scope
+
+The executable source is [`soku/catalog/index-v2.json`](../../soku/catalog/index-v2.json),
+with rendering in `soku/internal/initcmd/profile.go`.
+
+| Profile | Generated operating surface |
+| --- | --- |
+| bootstrap | Complete selected stack files, editor/ignore settings, Quick formatting/lint/tests/build, and scheduled/manual Security. No issue/PR forms, Full workflow, AGENTS, or CODEOWNERS. |
+| standard | Bootstrap plus scheduled/manual Full matrix validation and concise Issue/PR forms including verification and release handoff. |
+| scaled | Standard plus AGENTS and CODEOWNERS. |
+
+All profiles retain lifecycle conflict detection, dry-run, transactional writes,
+and rollback. The published catalog selects complete stacks; positional
+`stack_file_limit` remains readable only for compatibility with older catalogs.
+Regression tests cover every stack/profile combination and prevent one render
+from mutating another profile's catalog.
+
+Quick runtime checks apply to the language stacks. Configuration-only stacks
+retain syntax/whitespace feedback; they do not acquire an application test suite
+merely by selecting a profile. Security's trigger is explicit in its workflow;
+it is not a claim of a required per-PR dependency gate.
+
+Profiles produce repository files. They do not configure branch protection,
+signing identities, release publication, or deployment environments. Review
+CODEOWNERS for the adopting project's actual owner before enabling owner-based
+review requirements. Existing projects receive these changes only through a
+reviewed source release/profile transition; preview newly added files and
+resolve collisions before applying.
+
 ## 📋 How to Read This Table
 
 - **Personal** — applies and is worth keeping even solo; skipping it has a real cost.

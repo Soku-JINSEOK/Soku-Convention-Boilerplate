@@ -132,17 +132,31 @@ check, packaging + `gh release create`, `npm publish --provenance`) are
 | WIF auth, image build+push+digest resolve, Cloud Run deploy, health check | `deploy` | **deployment-only** |
 | Rollback to previous revision | `rollback` | **deployment-only** |
 
-## Known drift resolved by `verification/tools.env` (this phase)
+## Shared policy values
 
-- `npm audit --audit-level`: `ci-local.sh` used `high`, `security.yml` uses
-  `low`. Unified to `low` (the stricter of the two) in `tools.env`.
-- `goimports` version: local verification, `ci.yml`, and the generated
-  `templates-ci.yml` workflow now agree on reviewed version `v0.48.0`.
-- MySQL `8.4.10`, PostgreSQL `16.14`, and Alpine `3.21.7` image inputs use
-  reviewed multi-architecture manifest digests. `verification/tools.env`
-  remains authoritative for local database verification; the supply-chain
-  verifier enforces parity where GitHub Actions must repeat service-image
-  values before workflow steps can source that file.
+`verification/tools.env` is authoritative for shared tool versions, audit
+thresholds, and database images. Local checks source it; the supply-chain
+verifier checks repeated workflow and downstream values against it. Update
+that source first, then regenerate the table below with
+`node scripts/verify-supply-chain.mjs --write-docs`. CI rejects stale tables.
+Explanatory prose should link to this source instead of copying current values.
+
+<!-- tools-env:start -->
+| Policy key | Reviewed value |
+| --- | --- |
+| `MARKDOWNLINT_CLI2_VERSION` | `0.22.1` |
+| `YAML_LINT_VERSION` | `1.7.0` |
+| `ACTIONLINT_VERSION` | `v1.7.10` |
+| `GOIMPORTS_VERSION` | `v0.48.0` |
+| `GOLANGCI_LINT_VERSION` | `v2.12.2` |
+| `GITLEAKS_VERSION` | `v8.24.2` |
+| `PIP_AUDIT_VERSION` | `2.10.0` |
+| `GOVULNCHECK_VERSION` | `v1.6.0` |
+| `OSV_SCANNER_VERSION` | `v2.4.0` |
+| `NPM_AUDIT_LEVEL` | `high` |
+| `MYSQL_IMAGE` | `mysql:8.4.10@sha256:8dbcf531a03aade657e181b9cf2f1d1803ce621a1d55610cb44cb531ab7d7db6` |
+| `POSTGRES_IMAGE` | `postgres:16.14@sha256:33f923b05f64ca54ac4401c01126a6b92afe839a0aa0a52bc5aeb5cc958e5f20` |
+<!-- tools-env:end -->
 
 ## Explicitly out of scope for this phase
 

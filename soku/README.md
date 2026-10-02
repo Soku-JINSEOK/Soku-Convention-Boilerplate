@@ -139,8 +139,8 @@ Catalog v2 composes three built-in profiles in one fixed order:
 
 | Profile | Composition | Typical use |
 | --- | --- | --- |
-| `bootstrap` | `bootstrap` | Personal-minimal projects and early experiments. |
-| `standard` | `bootstrap → standard` | Team-standard projects; this is the default and legacy-compatible ID. |
+| `bootstrap` | `bootstrap` | Complete stack starters, Quick quality checks, and scheduled/manual Security. |
+| `standard` | `bootstrap → standard` | Adds Full validation and concise Issue/PR forms; default and legacy-compatible ID. |
 | `scaled` | `bootstrap → standard → scaled` | Scaled collaboration with core agent and ownership policy files. |
 
 CLI flags override explicit YAML, and explicit YAML overrides manifest state.

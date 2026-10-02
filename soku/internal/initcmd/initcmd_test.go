@@ -190,8 +190,8 @@ func TestCatalogRenderingUsesExactTokensAndJavaPaths(t *testing.T) {
 		!strings.Contains(securityWorkflow, "pip-audit==2.10.0") {
 		t.Fatal("generated security workflow is missing reviewed audits")
 	}
-	if strings.Contains(workflow, "npm run format:check") {
-		t.Fatal("generated quick workflow contains a full-only formatting gate")
+	if !strings.Contains(workflow, "npm run format:check") {
+		t.Fatal("generated quick workflow is missing the bootstrap formatting gate")
 	}
 	if !strings.Contains(fullWorkflow, "npm run format:check") {
 		t.Fatal("generated full workflow is missing its formatting gate")
@@ -290,11 +290,14 @@ func TestDownstreamCIRenderingRejectsMalformedMarkersAndUsesFallback(t *testing.
 		"missing block":     strings.Replace(string(source), "# soku:job-end python\n", "", 1),
 		"duplicate begin":   strings.Replace(string(source), "# soku:job-begin python\n", "# soku:job-begin python\n# soku:job-begin python\n", 1),
 		"nested block":      strings.Replace(string(source), "# soku:job-begin python\n", "# soku:job-begin python\n# soku:job-begin go\n", 1),
-		"un-commented line": strings.Replace(string(source), "  #   name: Python\n", "    name: Python\n", 1),
+		"un-commented line": strings.Replace(string(source), "  #   name: Python", "    name: Python", 1),
 		"unknown job":       string(source) + "\n# soku:job-begin ruby\n",
 	}
 	for name, malformed := range cases {
 		t.Run(name, func(t *testing.T) {
+			if malformed == string(source) {
+				t.Fatal("malformed fixture did not change the source")
+			}
 			if _, err := renderDownstreamCI([]byte(malformed), []string{"python"}); failureCode(err) != 5 {
 				t.Fatalf("error=%v", err)
 			}

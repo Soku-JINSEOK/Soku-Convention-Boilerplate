@@ -10,7 +10,7 @@ This audit is the authoritative comparison record for Issue #116. It measures
 the sharded `CI Quick Gate` against the hosted full validation path without
 weakening the existing required checks during observation.
 
-## Activation
+## Previous Activation
 
 - **Implementation:** automatic Quick, Full, and trusted Security validation
   restored by
@@ -26,7 +26,7 @@ The sharded window that began at `2026-07-26T14:13:58Z` and the restarted
 window after PR #176 are historical only. PR #181 removed automatic Quick and
 Full validation from pull request and `main` events, invalidating those
 observation windows. PR #199 restored the automatic caller and its merge commit
-starts the current observation window at the timestamp above. PR #199 and this
+started the previous observation window at the timestamp above. PR #199 and this
 activation-record pull request are excluded from the sample. Any later change
 to Quick or Full behavior or coverage resets both counters again.
 
@@ -50,20 +50,60 @@ All of the following must hold for the complete sample:
 
 ## Measurement Method
 
-Use the GitHub Actions Jobs API for the final successful Validation run on each
-merged head commit.
+The `Validation metrics` completion workflow collects each Validation run
+attempt, including failures and cancellations, using read-only Actions access.
+It executes the default branch collector, never measured PR code. JSON
+artifacts are named by run ID and attempt. Their retention is declared in
+`.github/workflows/validation-metrics.yml`; export qualifying evidence before
+expiry. Collection becomes automatic after that workflow reaches the default
+branch. For an existing attempt:
 
-- Quick jobs are successful jobs named `Quick validation / ...` plus
-  `CI Quick Gate`.
-- Full jobs are successful jobs named `Full repository validation / ...`,
+```bash
+node scripts/collect-validation-metrics.mjs OWNER/REPO RUN_ID ATTEMPT > metrics.json
+```
+
+- Quick jobs are named `Quick validation / ...` plus `CI Quick Gate`.
+- Full jobs are named `Full repository validation / ...`,
   `Full runtime-template validation / ...`, or `Security validation / ...`,
   plus `Validation Gate`.
-- Critical duration is the interval from the earliest selected job start to
-  the latest selected job completion.
-- Runner-seconds are the sum of selected job durations.
-- Critical ratio is Quick critical duration divided by Full critical duration.
-- Runner reduction is one minus Quick runner-seconds divided by Full
-  runner-seconds.
+- Critical duration spans the earliest selected job start through the latest
+  completion, including intervening waits. Runner-seconds sum job elapsed times;
+  they are an execution-cost proxy, not a billing measurement.
+- Reports retain job counts, conclusions, timestamps, run SHA, and attempt.
+  Missing gates or cancellations are incomplete observations, not passes.
+- Compare outcomes across all attempts before selecting timing samples. A
+  Quick-pass / Full-fail result is a possible miss requiring investigation,
+  including whether the failure is flaky, environmental, or revision-related.
+- Critical ratio divides Quick critical duration by Full critical duration;
+  runner reduction is one minus Quick runner-seconds divided by Full's.
+- Cache hit rate and changed-scope relevance are `null` until instrumented.
+  Unclassified jobs are counted so new job naming cannot silently hide cost.
+
+Reports do not certify sample eligibility. Apply the inclusion rules, verify
+which checkout revisions each workflow validated (PR head versus merge ref),
+and exclude incompatible coverage epochs. Metrics collection is advisory and
+cannot alter a required gate.
+
+### Coverage changes in this revision
+
+The expanded Python Full matrix changes coverage and starts a new observation
+epoch when merged. Previous activation dates and samples below remain historical;
+record the new merge SHA and activation time before counting natural samples.
+The independent Hosted Full path and required check names remain unchanged.
+
+## Observed adverse evidence
+
+Read back from the GitHub run/attempt Jobs API during this operational follow-up:
+
+| Run / attempt | Source head | Quick | Full | Classification |
+| --- | --- | --- | --- | --- |
+| [36806174238 / 1](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/actions/runs/36806174238) | `a6303bd17614a69212f80f16c505f5cbc62ba8ca` | Pass; 4 jobs; 49 job-seconds; 38 s critical interval | Fail; 24 jobs; 691 job-seconds; 125 s critical interval | Possible miss; known dependency coverage discrepancy in Issue #116 |
+
+The API returned all 29 jobs; one unclassified job is excluded from both group
+costs and remains visible in the report. This is an open dependency PR from a
+previous coverage epoch, not a qualifying merged sample. Neither the favorable
+cost ratio nor a later passing run erases this adverse result. Keep Issue #117
+blocked until the coverage decision and new observation criteria are satisfied.
 
 ## Previous Window Samples (Historical)
 
@@ -102,6 +142,7 @@ Current aggregate runner reduction: **Not available**.
 
 ## Decision
 
-**Observation active from the PR #199 recovery merge.** Issue #117 must not
+**A new observation epoch must be recorded after the coverage change merges.**
+Issue #117 must not
 change required contexts until every criterion is supported by linked Actions
 evidence from this epoch.
