@@ -423,6 +423,7 @@ jobs:
           node --test
           scripts/detect-verification-scope.test.mjs
           scripts/plan-ci-quick.test.mjs
+          scripts/collect-validation-metrics.test.mjs
           scripts/scan-diff-secrets.test.mjs
           scripts/verify.test.mjs
 
@@ -430,6 +431,7 @@ jobs:
         run: |
           node --test scripts/verify-supply-chain.test.mjs
           node scripts/verify-supply-chain.mjs
+          go run ./scripts/render-templates-ci.go --check
 
       - name: Enforce reviewed release identity and npm publishing
         run: |

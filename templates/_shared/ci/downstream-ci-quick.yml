@@ -23,6 +23,7 @@ jobs:
   #       with:
   #         node-version: '22'
   #     - run: npm ci
+  #     - run: npm run format:check
   #     - run: npm run lint
   #     - run: npm test
   #     - run: npm run build
@@ -38,6 +39,7 @@ jobs:
   #       with:
   #         python-version: '3.12'
   #     - run: pip install -r requirements-lock.txt -e ".[dev]"
+  #     - run: black --check .
   #     - run: ruff check .
   #     - run: pytest
 # soku:job-end python
@@ -51,6 +53,8 @@ jobs:
   #     - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
   #       with:
   #         go-version: '1.26'
+  #     - name: Check Go formatting
+  #       run: test -z "$(gofmt -l .)"
   #     - run: go test ./...
   #     - run: go vet ./...
   #     - run: go build ./...

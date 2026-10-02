@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "your-project-name"
 version = "0.1.0"
 description = "Starter project"
-requires-python = ">=3.11"
+requires-python = ">=3.11,<3.15"
 readme = "README.md"
 dependencies = []
 

@@ -181,7 +181,7 @@ existing per-PR Full gate. It runs repository, runtime-template, and security
 workflows against one exact head SHA; Security receives a separately selected
 trusted base SHA for policy inputs. Results aggregate into `Hosted Full Gate`,
 which fails closed on failure, cancellation, or an unexpected result. It
-supports reusable calls, manual runs, and a daily `02:41 UTC` schedule. Required
+supports reusable calls, manual runs, and the schedule declared in that workflow. Required
 contexts remain unchanged until Issue #116 passes every observation criterion
 and the ruleset transition is recorded.
 
@@ -227,6 +227,26 @@ and warm caches, and record job count, summed runner work, elapsed time, retry
 rate and coverage. Preserve failures and cancellations in the history. The owner
 reviews the [Issue #245 report](../issues/issue-245-task-report.md) and the
 existing Quick observation criteria before narrowing additional checks.
+
+## Validation efficiency and support contracts
+
+Optimize feedback latency and unnecessary execution while preserving defect
+coverage. Use the existing scope detector for fast/Quick work; keep unknown
+paths conservative. Full, hosted-only, release-only, and deployment-only checks
+retain their own responsibilities. Removing a duplicate invocation does not
+authorize changing required check contexts or dropping Full coverage.
+
+The [Quick/Full comparison record](../audits/ci-quick-comparison.md) defines
+measurement and gate-transition criteria. Completion metrics include failed and
+cancelled attempts; a successful rerun must not erase a previous miss. Treat
+missing cache or scope-relevance telemetry as unknown, not zero.
+
+Runtime support is a tested contract. The Python template's `requires-python`
+range is checked against every minor in its Full matrix; Quick uses one
+representative version. Extend the declared range only with corresponding
+matrix and dependency-lock validation. Node, Go, Java, database, Terraform, and
+Actions compatibility claims likewise need automated evidence; a pinned tool
+version alone does not prove compatibility with a wider range.
 
 ## 🌍 Environment Strategy
 

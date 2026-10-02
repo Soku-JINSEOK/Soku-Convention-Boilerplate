@@ -390,3 +390,12 @@ test('actual aggregate shell rejects failed cancelled and unexpectedly skipped c
     }
   }
 });
+
+test('metrics observe completed attempts with read-only trusted default-branch code', () => {
+  const metrics = readFileSync(new URL('./workflows/validation-metrics.yml', import.meta.url), 'utf8');
+  assert.match(metrics, /workflow_run:[\s\S]*workflows: \[Validation\][\s\S]*types: \[completed\]/);
+  assert.match(metrics, /actions: read/);
+  assert.match(metrics, /contents: read/);
+  assert.match(metrics, /github\.event\.workflow_run\.run_attempt/);
+  assert.doesNotMatch(metrics, /ref:|repository:|: write|pull_request_target/);
+});

@@ -33,6 +33,8 @@ run_or_fail "regression::contribution-title" 72 node --test \
   scripts/github-project-sync.test.mjs \
   scripts/detect-verification-scope.test.mjs \
   scripts/plan-ci-quick.test.mjs \
+  scripts/collect-validation-metrics.test.mjs \
+  scripts/verify-supply-chain.test.mjs \
   scripts/scan-diff-secrets.test.mjs \
   scripts/verify-diagram-text.test.mjs \
   scripts/verify.test.mjs
@@ -53,6 +55,9 @@ if command -v python3 >/dev/null 2>&1; then
     soku/actions/ci-cd-control-plane-v1/test_validate_config.py
 fi
 print_step_end
+
+run_or_fail "policy::supply-chain" 72 node scripts/verify-supply-chain.mjs
+run_or_fail "policy::generated-templates" 72 go run ./scripts/render-templates-ci.go --check
 
 print_step "npm wrapper package tests"
 require_command npm "regression::npm-wrapper-package" 72

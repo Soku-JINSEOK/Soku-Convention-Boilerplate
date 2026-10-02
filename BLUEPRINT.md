@@ -402,6 +402,18 @@ Can this rule still make sense when copied into a different repository?
 
 If the answer is no, the rule belongs in a downstream project document instead of the shared boilerplate.
 
+Also identify the concrete failure the convention prevents and the repeated
+work it removes for downstream developers. Prefer extending an existing
+normative contract to creating another policy or report. Keep mutable facts
+(versions, thresholds, supported ranges) in executable configuration; generate
+reference values or verify their parity in CI instead of copying them into prose.
+
+Review existing rules for removal when replacing them. Checks that have produced
+identical results for six months are candidates for consolidation, not automatic
+deletion: confirm equivalent failure coverage and retain an independent check
+when it detects a distinct risk. Record the decision in the existing PR or
+contract rather than adding a separate recurring report.
+
 ## 🎬 Summary
 
 This repository exists to make future projects easier to read, easier to review, and easier to operate.  

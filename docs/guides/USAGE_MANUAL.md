@@ -103,7 +103,7 @@ which convention files `soku` manages; it is not a team-size entitlement.
 
 | Adoption level | Recommended profile | Start here when |
 | --- | --- | --- |
-| Personal | `bootstrap` | One maintainer needs safe editor and ignore defaults with minimal governance. |
+| Personal | `bootstrap` | Complete selected stacks with Quick and Security; no collaboration forms or Full workflow. |
 | Team | `standard` | Contributors share CI, templates, and review conventions. This is the default profile. |
 | Scaled | `scaled` | Multiple teams or agents need the standard layer plus explicit ownership and agent policy. |
 

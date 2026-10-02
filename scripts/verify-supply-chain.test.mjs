@@ -1,10 +1,16 @@
 import assert from 'node:assert/strict';
 import {dirname, resolve} from 'node:path';
+import {mkdtempSync, mkdirSync, readFileSync, writeFileSync, rmSync} from 'node:fs';
+import {tmpdir} from 'node:os';
 import test from 'node:test';
 import {fileURLToPath} from 'node:url';
 
 import {
   inspectContent,
+  renderToolsPolicy,
+  verifyPolicyDocumentation,
+  verifyPythonSupport,
+  verifyRuntimeSupport,
   verifyDependabotCoverage,
   verifyRepository,
 } from './verify-supply-chain.mjs';
@@ -89,4 +95,57 @@ test('current repository satisfies the immutable supply-chain contract', () => {
   const result = verifyRepository(root);
 
   assert.deepEqual(result.findings, []);
+});
+
+test('policy documentation rejects a stale threshold after a source change', () => {
+  const tools = new Map([['NPM_AUDIT_LEVEL', 'high']]);
+  const rendered = renderToolsPolicy(tools);
+  assert.deepEqual(verifyPolicyDocumentation(rendered, tools), []);
+  assert.deepEqual(verifyPolicyDocumentation(rendered.replaceAll('\n', '\r\n'), tools), []);
+  tools.set('NPM_AUDIT_LEVEL', 'critical');
+  assert.equal(verifyPolicyDocumentation(rendered, tools)[0].rule, 'policy-documentation');
+  assert.deepEqual(verifyPolicyDocumentation(renderToolsPolicy(tools), tools), []);
+});
+
+test('Python support rejects untested minimum, new upper bound, and floating ranges', () => {
+  const workflow = "python-version: ['3.11', '3.12', '3.13', '3.14']\n" +
+    'python-version: ${{ matrix.python-version }}\nfail-fast: false';
+  assert.deepEqual(verifyPythonSupport('requires-python = ">=3.11,<3.15"', workflow), []);
+  for (const range of ['>=3.10,<3.15', '>=3.11,<3.16', '>=3.11']) {
+    assert.equal(verifyPythonSupport(`requires-python = "${range}"`, workflow)[0].rule, 'python-support');
+  }
+  assert.equal(verifyPythonSupport('requires-python = ">=3.11,<3.15"', workflow.replace('fail-fast: false', 'fail-fast: true')).length, 1);
+});
+
+test('runtime parity catches declaration and matrix drift', () => {
+  const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+  const fixture = mkdtempSync(resolve(tmpdir(), 'soku-runtime-contract-'));
+  const paths = [
+    'templates/javascript-typescript-node/package.json',
+    'templates/javascript-typescript-node/package-lock.json',
+    'templates/go/go.mod', 'templates/java-spring/pom.xml',
+    '.github/workflows/templates-ci.yml', 'templates/_shared/ci/downstream-ci.yml',
+    'scripts/verify.sh', 'infra/gcp/versions.tf', 'infra/gcp/cloud-build-logging/versions.tf',
+  ];
+  try {
+    for (const path of paths) {
+      mkdirSync(dirname(resolve(fixture, path)), {recursive: true});
+      writeFileSync(resolve(fixture, path), readFileSync(resolve(root, path)));
+    }
+    assert.deepEqual(verifyRuntimeSupport(fixture), []);
+    for (const [path, before, after] of [
+      ['templates/javascript-typescript-node/package.json', '>=22.12.0', '>=22.0.0'],
+      ['templates/go/go.mod', 'go 1.26', 'go 1.27'],
+      ['templates/java-spring/pom.xml', '<java.version>21', '<java.version>25'],
+      ['infra/gcp/versions.tf', '>= 1.15.3', '>= 1.8.0'],
+    ]) {
+      const original = readFileSync(resolve(fixture, path), 'utf8');
+      assert.ok(original.includes(before), path);
+      writeFileSync(resolve(fixture, path), original.replace(before, after));
+      assert.ok(verifyRuntimeSupport(fixture).length > 0, path);
+      writeFileSync(resolve(fixture, path), original);
+    }
+  } finally {
+    rmSync(fixture, {recursive: true, force: true});
+  }
 });
