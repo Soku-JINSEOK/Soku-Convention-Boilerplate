@@ -10,12 +10,15 @@ parsing and output, transactional `init`, portable manifest-v1/v2/v3 records, an
 read-only `status` diagnostics, immutable release comparison, and transactional
 core upgrades.
 
-The recommended full-verification baseline is the published boilerplate
-`v1.0.5` with CLI `soku/v0.1.4`. Existing boilerplate and CLI tags, including
-`v1.0.4` and `soku/v0.1.3`, remain immutable historical compatibility
-baselines. The current distribution release is `soku/v0.2.1`, which preserves
-that lifecycle compatibility contract. Human adopters should start with the
-[end-to-end usage manual](../docs/guides/USAGE_MANUAL.md).
+After all required gates and approved publication, the recommended full-verification baseline
+will be Boilerplate `v1.1.0` with CLI `soku/v0.3.0`. Both are unpublished
+source candidates. Installation, source-selection and packaging examples below
+apply only after approved publication. Current published distributions remain
+`soku/v0.2.1` / `v1.0.5`; the earlier full-verification baseline used
+`soku/v0.1.4`. Existing immutable tags and historical compatibility records
+remain unchanged. Candidate local fixture evidence does not establish official
+release resolution or the complete release matrix. Human adopters should read
+the [end-to-end usage manual](../docs/guides/USAGE_MANUAL.md).
 
 CLI distribution is available in two equivalent paths:
 
@@ -24,7 +27,7 @@ CLI distribution is available in two equivalent paths:
 - npm (`@soku-jinseok/soku`) from `soku/v0.2.0` onward:
 
   ```bash
-  npm install -g @soku-jinseok/soku@0.2.1
+  npm install -g @soku-jinseok/soku@0.3.0
   soku --version
   ```
 
@@ -94,7 +97,7 @@ nothing.
 ```bash
 soku init \
   --boilerplate-source https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate \
-  --boilerplate-release v1.0.5 \
+  --boilerplate-release v1.1.0 \
   --stack javascript-typescript-node \
   --project-name example-service \
   --dry-run
@@ -197,7 +200,7 @@ The equivalent strict YAML file is a flat mapping. Unknown fields are rejected:
 ```yaml
 schema_version: 1
 boilerplate_source: https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate
-boilerplate_release: v1.0.5
+boilerplate_release: v1.1.0
 stacks:
   - go
   - postgresql
@@ -249,7 +252,7 @@ component in the same complete plan:
 ```bash
 soku init \
   --boilerplate-source https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate \
-  --boilerplate-release v1.0.5 \
+  --boilerplate-release v1.1.0 \
   --stack javascript-typescript-node \
   --project-name example-service \
   --project-sync \
@@ -431,7 +434,7 @@ For a published immutable release, Go understands the repository's submodule
 tag and installs it by module version:
 
 ```bash
-go install github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/soku@v0.1.4
+go install github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/soku@v0.3.0
 ```
 
 ## Verify a Release Download
@@ -441,7 +444,7 @@ then verify it before extraction. For example:
 
 ```bash
 sha256sum --check --ignore-missing checksums.txt
-tar -xzf soku_v0.1.4_linux_amd64.tar.gz
+tar -xzf soku_v0.3.0_linux_amd64.tar.gz
 ./soku --version
 ```
 
@@ -457,7 +460,7 @@ Linux arm64, macOS amd64, macOS arm64, and Windows amd64 archives:
 ```bash
 cd soku
 ./scripts/package.sh \
-  --version v0.1.4 \
+  --version v0.3.0 \
   --commit 0123456789abcdef0123456789abcdef01234567 \
   --built-at 2026-07-18T00:00:00Z \
   --output-dir ./dist

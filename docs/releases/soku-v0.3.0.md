@@ -2,6 +2,8 @@
 
 Release axis: soku
 
+Proposed signed tag: soku/v0.3.0 (not created)
+
 Publication status: source candidate only; tag, GitHub Release, archives,
 checksums, npm publication, and downstream adoption are not authorized by
 Issue #201
@@ -9,8 +11,9 @@ Issue #201
 Manifest schemas: manifest-v1 and manifest-v2 remain byte-compatible and
 readable; manifest-v3 adds explicit project-owned core-rendering overrides
 
-Boilerplate compatibility: v1.0.1 through v1.0.5 ownership-handoff reproducer,
-with the existing declared lifecycle compatibility retained for other paths
+Boilerplate compatibility: v1.1.0 candidate; v1.0.1 through v1.0.5
+ownership-handoff reproducer, with the existing declared lifecycle
+compatibility retained for other paths
 
 Profiles: bootstrap, standard (default and legacy), and scaled
 
@@ -37,7 +40,7 @@ Any breaking behavior, read-only compatibility state, or manual recovery
 requirement: older CLIs treat manifest v3 as unsupported/read-only; repositories
 remaining on v1/v2 retain their existing bytes and behavior
 
-Companion tag: none
+Companion tag: v1.1.0 (proposed; neither tag is created)
 
 This candidate adds
 `soku ownership handoff --path <path> --expected-sha256 <sha256>` for one
@@ -56,3 +59,17 @@ requires a separately reviewed explicit operation.
 No tag, Release, package, checksum artifact, Provider apply, downstream merge,
 cloud mutation, ruleset change, credential change, or delivery activation is
 created by this candidate record.
+
+The v1.1.0 companion separates generated Quick, scheduled/manual Full
+Validation, and Security workflows. JavaScript Quick and Full checks run at
+the generated project root; Boilerplate's own template CI retains its template
+directory. The Control Center rehearsal uses the existing lifecycle engine
+with a synthetic source identity and is fixture evidence only. Official source
+resolution, exact candidate hosted CI, and downstream adoption remain
+NOT_VERIFIED until the corresponding gates are executed.
+
+The isolated source candidate aligns release-identity.json, npm version,
+workflow defaults, installation examples and usage guidance on these proposed
+versions. This does not change the currently published immutable identities.
+Record the actual source commit and obtain human signing/release approval after
+all required gates; neither version numbers nor local fixtures authorize delivery.

@@ -43,6 +43,13 @@ the machine-readable authority for the current published boilerplate tag,
 native CLI tag, npm launcher version, release-note records, and tested lifecycle
 compatibility baseline.
 
+An isolated release-preparation candidate may stage the proposed next identity
+before publication. Its documentation must explicitly identify those versions
+as unpublished targets. Candidate metadata is not proof of publication or
+complete compatibility verification: immutable tags, GitHub Releases, dated
+validation evidence, all required gates and human publication approval still
+apply. Previously published records remain immutable.
+
 The current distribution version and compatibility baseline are separate
 fields. A newer CLI distribution may preserve behavior verified against an
 older lifecycle baseline; documentation must not describe that compatibility
