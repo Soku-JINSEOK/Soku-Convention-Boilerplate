@@ -40,7 +40,9 @@ Any breaking behavior, read-only compatibility state, or manual recovery
 requirement: older CLIs treat manifest v3 as unsupported/read-only; repositories
 remaining on v1/v2 retain their existing bytes and behavior
 
-Companion tag: v1.1.0 (proposed; neither tag is created)
+Companion tag: v1.1.0
+
+The companion tag is proposed; neither tag has been created.
 
 This candidate adds
 `soku ownership handoff --path <path> --expected-sha256 <sha256>` for one
