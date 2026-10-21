@@ -1,6 +1,6 @@
 # 🧩 Soku-Convention-Boilerplate
 
-> **Source candidate:** proposed Boilerplate v1.1.0 / CLI soku/v0.3.0 are unpublished. Quick-start examples apply only after approved publication. Current published versions remain v1.0.5 / soku/v0.2.1. No tag or release is created by this source change.
+> **Source candidate:** proposed Boilerplate v1.1.1 / CLI soku/v0.3.1 are unpublished. Quick-start examples apply only after approved publication. Current published versions remain v1.0.5 / soku/v0.2.1. No tag or release is created by this source change.
 > Declarative repository convention baseline and lifecycle tooling powered by the `soku` CLI.
 
 [한국어](./README.ko.md) | [日本語](./README.ja.md)
@@ -27,17 +27,17 @@ Traditional project boilerplates suffer from **template drift**: once copied, co
 ### 1) Install the `soku` CLI
 
 ```bash
-npm install -g @soku-jinseok/soku@0.3.0
+npm install -g @soku-jinseok/soku@0.3.1
 ```
 
-*(Or download the standalone binary from the `soku/v0.3.0` release page and verify with `checksums.txt`)*
+*(Or download the standalone binary from the `soku/v0.3.1` release page and verify with `checksums.txt`)*
 
 ### 2) Preview the initialization plan (`--dry-run`)
 
 ```bash
 soku init \
   --boilerplate-source https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate \
-  --boilerplate-release v1.1.0 \
+  --boilerplate-release v1.1.1 \
   --profile standard \
   --stack javascript-typescript-node \
   --project-name my-service \
@@ -50,7 +50,7 @@ soku init \
 ```bash
 soku init \
   --boilerplate-source https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate \
-  --boilerplate-release v1.1.0 \
+  --boilerplate-release v1.1.1 \
   --profile standard \
   --stack javascript-typescript-node \
   --project-name my-service \
@@ -76,8 +76,8 @@ To run the complete verification suite for this boilerplate repository itself:
 
 ```mermaid
 flowchart TB
-    BP["Boilerplate Source<br/>Release: v1.1.0 (unpublished candidate)"]
-    CLI["soku CLI Engine<br/>Distribution: soku/v0.3.0"]
+    BP["Boilerplate Source<br/>Release: v1.1.1 (unpublished candidate)"]
+    CLI["soku CLI Engine<br/>Distribution: soku/v0.3.1"]
     Repo["Target Downstream Repository<br/>.soku/manifest.json + Managed File Boundaries"]
 
     BP --> CLI

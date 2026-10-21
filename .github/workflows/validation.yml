@@ -33,7 +33,7 @@ jobs:
       cancel-in-progress: true
     uses: ./.github/workflows/ci-quick.yml
     with:
-      base-sha: ${{ github.event.pull_request.base.sha || github.event.before || github.sha }}
+      base-sha: ${{ github.event.pull_request.base.sha || (github.event.before != '0000000000000000000000000000000000000000' && github.event.before) || github.sha }}
       head-sha: ${{ github.event.pull_request.head.sha || github.sha }}
 
   ci-quick-gate:
@@ -71,7 +71,7 @@ jobs:
       cancel-in-progress: true
     uses: ./.github/workflows/security.yml
     with:
-      base-sha: ${{ github.event.pull_request.base.sha || github.event.before || github.sha }}
+      base-sha: ${{ github.event.pull_request.base.sha || (github.event.before != '0000000000000000000000000000000000000000' && github.event.before) || github.sha }}
       head-sha: ${{ github.event.pull_request.head.sha || github.sha }}
 
   validation-gate:
