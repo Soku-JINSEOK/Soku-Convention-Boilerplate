@@ -97,7 +97,7 @@ function selectedRevision(job, input, github) {
   // This fixture evaluates the actual YAML expression's SHA string lookups,
   // boolean operators and equality, with absent Actions properties as ''.
   // It is deliberately not a general GitHub Actions expression interpreter.
-  assert.match(expression, /^(?:\s+|github(?:\.[a-z_][a-z0-9_]*)+|'[a-zA-Z0-9/_-]*'|\|\||&&|!=|==|\(|\))+$/);
+  assert.match(expression, /^(?:\s|github(?:\.[a-z_][a-z0-9_]*)+|'[a-zA-Z0-9/_-]*'|\|\||&&|!=|==|\(|\))+$/);
   const literals = expression.replace(/github(?:\.[a-z_][a-z0-9_]*)+/g, path => {
     const value = path.split('.').slice(1).reduce((current, key) => current?.[key], github);
     assert.ok(value == null || typeof value === 'string');
