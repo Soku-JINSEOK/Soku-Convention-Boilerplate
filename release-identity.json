@@ -1,22 +1,22 @@
 {
   "schemaVersion": 1,
   "boilerplate": {
-    "version": "1.1.0",
-    "tag": "v1.1.0",
-    "releaseNotes": "docs/releases/v1.1.0.md"
+    "version": "1.1.1",
+    "tag": "v1.1.1",
+    "releaseNotes": "docs/releases/v1.1.1.md"
   },
   "cli": {
-    "version": "0.3.0",
-    "tag": "soku/v0.3.0",
-    "releaseNotes": "docs/releases/soku-v0.3.0.md"
+    "version": "0.3.1",
+    "tag": "soku/v0.3.1",
+    "releaseNotes": "docs/releases/soku-v0.3.1.md"
   },
   "npm": {
     "package": "@soku-jinseok/soku",
-    "version": "0.3.0"
+    "version": "0.3.1"
   },
   "compatibility": {
-    "boilerplateTag": "v1.1.0",
-    "cliTag": "soku/v0.3.0",
+    "boilerplateTag": "v1.1.1",
+    "cliTag": "soku/v0.3.1",
     "npmSupportedFromCliTag": "soku/v0.2.0"
   },
   "signing": {

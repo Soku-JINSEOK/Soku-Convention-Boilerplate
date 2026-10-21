@@ -1,7 +1,11 @@
 import assert from 'node:assert/strict';
-import {readFileSync} from 'node:fs';
+import {mkdtempSync, readFileSync, rmSync, writeFileSync} from 'node:fs';
 import test from 'node:test';
 import {spawnSync} from 'node:child_process';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
+import {fileURLToPath} from 'node:url';
+import {runInNewContext} from 'node:vm';
 
 const workflow = readFileSync(
   new URL('./workflows/validation.yml', import.meta.url),
@@ -85,11 +89,77 @@ test('runs CI Quick in parallel without replacing the full gate', () => {
   assert.match(workflow, /head-sha: \$\{\{ github\.event\.pull_request\.head\.sha \|\| github\.sha \}\}/);
 });
 
-test('provides a valid Quick base for manual reusable validation', () => {
-  assert.match(
-    workflow,
-    /base-sha: \$\{\{ github\.event\.pull_request\.base\.sha \|\| github\.event\.before \|\| github\.sha \}\}/,
-  );
+function selectedRevision(job, input, github) {
+  const block = new RegExp(`^  ${job}:([\\s\\S]*?)(?=\\n  [a-z][a-z0-9-]*:)`, 'm').exec(workflow)?.[1];
+  assert.ok(block, `missing job ${job}`);
+  const expression = new RegExp(`${input}: \\$\\{\\{ (.*?) \\}\\}`).exec(block)?.[1];
+  assert.ok(expression, `missing ${job}/${input}`);
+  // This fixture evaluates the actual YAML expression's SHA string lookups,
+  // boolean operators and equality, with absent Actions properties as ''.
+  // It is deliberately not a general GitHub Actions expression interpreter.
+  assert.match(expression, /^(?:\s+|github(?:\.[a-z_][a-z0-9_]*)+|'[a-zA-Z0-9/_-]*'|\|\||&&|!=|==|\(|\))+$/);
+  const literals = expression.replace(/github(?:\.[a-z_][a-z0-9_]*)+/g, path => {
+    const value = path.split('.').slice(1).reduce((current, key) => current?.[key], github);
+    assert.ok(value == null || typeof value === 'string');
+    return JSON.stringify(value ?? '');
+  });
+  return runInNewContext(literals, {}, {timeout: 1000});
+}
+
+test('actual Quick and Security revision expressions preserve PR trust and reject zero-before bases', () => {
+  const zero = '0'.repeat(40);
+  const base = '1'.repeat(40);
+  const head = '2'.repeat(40);
+  const merge = '3'.repeat(40);
+  const pr = {base: {sha: base}, head: {sha: head}};
+  const cases = [
+    {name: 'new annotated tag', github: {event_name: 'push', ref: 'refs/tags/v1.1.1', sha: head, event: {before: zero, created: true}}, base: head, head},
+    {name: 'existing main push', github: {event_name: 'push', ref: 'refs/heads/main', sha: head, event: {before: base, created: false}}, base, head},
+    {name: 'new branch', github: {event_name: 'push', ref: 'refs/heads/new', sha: head, event: {before: zero, created: true}}, base: head, head},
+    ...[undefined, '', null, zero, merge].map(before => ({name: `PR with before=${before}`, github: {event_name: 'pull_request', sha: merge, event: {before, pull_request: pr}}, base, head})),
+    ...[undefined, '', null].map(before => ({name: `manual with before=${before}`, github: {event_name: 'workflow_dispatch', sha: head, event: {before}}, base: head, head})),
+  ];
+  for (const context of cases) {
+    for (const job of ['quick', 'security']) {
+      assert.equal(selectedRevision(job, 'base-sha', context.github), context.base, `${job}/${context.name}/base`);
+      assert.equal(selectedRevision(job, 'head-sha', context.github), context.head, `${job}/${context.name}/head`);
+      assert.notEqual(selectedRevision(job, 'base-sha', context.github), zero);
+    }
+  }
+});
+
+test('new annotated-tag event runs real scope detection and planner with a resolvable trusted checkout', t => {
+  const root = mkdtempSync(join(tmpdir(), 'soku-tag-event-'));
+  t.after(() => rmSync(root, {recursive: true, force: true}));
+  const repository = fileURLToPath(new URL('../', import.meta.url));
+  const run = (command, args) => {
+    const result = spawnSync(command, args, {cwd: root, encoding: 'utf8'});
+    assert.ifError(result.error);
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    return result.stdout.trim();
+  };
+  const git = (...args) => run('git', ['-c', 'commit.gpgsign=false', '-c', 'tag.gpgsign=false', '-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid', ...args]);
+  git('init', '--quiet');
+  writeFileSync(join(root, '.gitleaks.toml'), '# trusted fixture policy\n');
+  git('add', '.gitleaks.toml');
+  git('commit', '--quiet', '-m', 'fixture');
+  git('tag', '-a', 'v9.9.9', '-m', 'local event fixture only');
+  assert.equal(git('cat-file', '-t', 'v9.9.9'), 'tag');
+  const sha = git('rev-parse', 'v9.9.9^{commit}');
+  const github = {event_name: 'push', ref: 'refs/tags/v9.9.9', sha, event: {before: '0'.repeat(40), created: true}};
+  const base = selectedRevision('quick', 'base-sha', github);
+  const head = selectedRevision('quick', 'head-sha', github);
+  const scope = run(process.execPath, [join(repository, 'scripts/detect-verification-scope.mjs'), '--workspace', root, '--base', base, '--head', head, '--json']);
+  const scopePath = join(root, 'scopes.json');
+  writeFileSync(scopePath, scope);
+  const plan = JSON.parse(run(process.execPath, [join(repository, 'scripts/plan-ci-quick.mjs'), '--scope-json', scopePath, '--profiles', join(repository, 'verification/profiles.yml')]));
+  assert.ok(plan.include.length > 0, 'always-on checks remain selected for an empty diff');
+  const trustedBase = selectedRevision('security', 'base-sha', github);
+  const securityHead = selectedRevision('security', 'head-sha', github);
+  assert.equal(git('rev-parse', `${trustedBase}^{commit}`), sha);
+  assert.equal(git('rev-parse', `${securityHead}^{commit}`), sha);
+  git('checkout', '--quiet', '--detach', trustedBase);
+  assert.equal(readFileSync(join(root, '.gitleaks.toml'), 'utf8'), '# trusted fixture policy\n');
 });
 
 test('requires repository, templates, and trusted Security in the full gate', () => {
@@ -102,10 +172,6 @@ test('requires repository, templates, and trusted Security in the full gate', ()
   assert.match(workflow, /SECURITY_RESULT:/);
   assert.match(workflow, /group: validation-full-security-/);
   assert.match(workflow, /uses: \.\/\.github\/workflows\/security\.yml/);
-  assert.match(
-    workflow,
-    /base-sha: \$\{\{ github\.event\.pull_request\.base\.sha \|\| github\.event\.before \|\| github\.sha \}\}/,
-  );
   assert.match(
     workflow,
     /head-sha: \$\{\{ github\.event\.pull_request\.head\.sha \|\| github\.sha \}\}/,

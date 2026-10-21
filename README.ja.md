@@ -1,6 +1,6 @@
 # 🧩 Soku-Convention-Boilerplate
 
-> **ソース候補:** Boilerplate v1.1.0 / CLI soku/v0.3.0は未公開です。クイックスタート例は承認済み公開後にのみ使用します。現在の公開版はv1.0.5 / soku/v0.2.1で、このソース変更はタグやリリースを作成しません。
+> **ソース候補:** Boilerplate v1.1.1 / CLI soku/v0.3.1は未公開です。クイックスタート例は承認済み公開後にのみ使用します。現在の公開版はv1.0.5 / soku/v0.2.1で、このソース変更はタグやリリースを作成しません。
 > `soku` CLI を活用した宣言的なリポジトリ規約ベースラインおよびライフサイクルツールチェーンです。
 
 [English](./README.md) | [한국어](./README.ko.md)
@@ -27,17 +27,17 @@
 ### 1) `soku` CLI のインストール
 
 ```bash
-npm install -g @soku-jinseok/soku@0.3.0
+npm install -g @soku-jinseok/soku@0.3.1
 ```
 
-*（または `soku/v0.3.0` リリースページからスタンドアロンバイナリを取得し、`checksums.txt` で検証してインストール）*
+*（または `soku/v0.3.1` リリースページからスタンドアロンバイナリを取得し、`checksums.txt` で検証してインストール）*
 
 ### 2) 初期化計画の事前プレビュー（`--dry-run`）
 
 ```bash
 soku init \
   --boilerplate-source https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate \
-  --boilerplate-release v1.1.0 \
+  --boilerplate-release v1.1.1 \
   --profile standard \
   --stack javascript-typescript-node \
   --project-name my-service \
@@ -50,7 +50,7 @@ soku init \
 ```bash
 soku init \
   --boilerplate-source https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate \
-  --boilerplate-release v1.1.0 \
+  --boilerplate-release v1.1.1 \
   --profile standard \
   --stack javascript-typescript-node \
   --project-name my-service \
@@ -76,8 +76,8 @@ npm run format:check && npm run lint && npm run test && npm run build
 
 ```mermaid
 flowchart TB
-    BP["Boilerplate Source<br/>Release: v1.1.0 (unpublished candidate)"]
-    CLI["soku CLI Engine<br/>Distribution: soku/v0.3.0"]
+    BP["Boilerplate Source<br/>Release: v1.1.1 (unpublished candidate)"]
+    CLI["soku CLI Engine<br/>Distribution: soku/v0.3.1"]
     Repo["Target Downstream Repository<br/>.soku/manifest.json + Managed File Boundaries"]
 
     BP --> CLI
