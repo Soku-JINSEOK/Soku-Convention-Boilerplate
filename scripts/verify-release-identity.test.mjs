@@ -1,7 +1,39 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import { spawnSync } from 'node:child_process';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import {verifyReleaseIdentity} from './verify-release-identity.mjs';
+
+const repositoryRoot = fileURLToPath(new URL("../", import.meta.url));
+const selectedIdentity = JSON.parse(
+  readFileSync(join(repositoryRoot, "release-identity.json"), "utf8"),
+);
+
+for (const axis of ["boilerplate", "cli"]) {
+  test(`selected ${axis} release notes pass the real notes-only gate`, () => {
+    const record = selectedIdentity[axis];
+    const result = spawnSync(
+      "bash",
+      [
+        join(repositoryRoot, "scripts/verify-release-tag.sh"),
+        "--tag",
+        record.tag,
+        "--notes-file",
+        join(repositoryRoot, record.releaseNotes),
+        "--expected-fingerprint",
+        selectedIdentity.signing.activeFingerprint,
+        "--check-notes-only",
+      ],
+      { cwd: repositoryRoot, encoding: "utf8", shell: false },
+    );
+    assert.ifError(result.error);
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    assert.match(result.stdout, /Release notes contract passed/);
+  });
+}
 
 const identity = {
   schemaVersion: 1,

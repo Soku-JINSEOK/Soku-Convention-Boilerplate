@@ -8,10 +8,14 @@ downloads the matching GitHub release asset at first run, verifies it with
 `checksums.txt`, caches the native executable, and executes it with your provided
 arguments.
 
+This source package targets unpublished CLI 0.3.0. The installation example
+requires approved publication of both the native and npm distributions; it is
+not an available-release claim. Currently published npm/native CLI is 0.2.1.
+
 ## Install
 
 ```bash
-npm install -g @soku-jinseok/soku@0.2.1
+npm install -g @soku-jinseok/soku@0.3.0
 ```
 
 ## Usage

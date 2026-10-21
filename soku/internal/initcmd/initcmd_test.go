@@ -19,6 +19,7 @@ import (
 
 	"github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/soku/internal/manifest"
 	"github.com/santhosh-tekuri/jsonschema/v6"
+	"gopkg.in/yaml.v3"
 )
 
 const testSource = "https://github.com/example/boilerplate"
@@ -209,6 +210,64 @@ func TestCatalogRenderingUsesExactTokensAndJavaPaths(t *testing.T) {
 	}
 	if regexp.MustCompile(`uses:\s+[^\s]+@v\d+`).MatchString(workflow) {
 		t.Fatal("generated CI contains a mutable major-version action reference")
+	}
+}
+
+func TestGeneratedJavaScriptWorkflowsRunChecksAtProjectRoot(t *testing.T) {
+	changes, err := renderCatalog(repositorySnapshot(t), mustCatalog(t), Config{
+		SchemaVersion: 1, Profile: "standard",
+		Stacks: []string{"javascript-typescript-node"}, ProjectName: "root-project",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, workflowPath := range []string{".github/workflows/ci.yml", ".github/workflows/full-validation.yml"} {
+		t.Run(workflowPath, func(t *testing.T) {
+			var content []byte
+			for _, change := range changes {
+				if change.Path == workflowPath {
+					content = change.Content
+				}
+			}
+			if len(content) == 0 {
+				t.Fatal("generated workflow is missing")
+			}
+			var workflow struct {
+				Jobs map[string]struct {
+					Defaults struct {
+						Run struct {
+							WorkingDirectory string `yaml:"working-directory"`
+						} `yaml:"run"`
+					} `yaml:"defaults"`
+					Steps []struct {
+						Run              string `yaml:"run"`
+						WorkingDirectory string `yaml:"working-directory"`
+					} `yaml:"steps"`
+				} `yaml:"jobs"`
+			}
+			if err := yaml.Unmarshal(content, &workflow); err != nil {
+				t.Fatal(err)
+			}
+			job, exists := workflow.Jobs["javascript-typescript-node"]
+			if !exists || job.Defaults.Run.WorkingDirectory != "" {
+				t.Fatal("JS job must use the checkout root")
+			}
+			runs := make(map[string]bool)
+			for _, step := range job.Steps {
+				if step.WorkingDirectory != "" {
+					t.Fatalf("step %q leaves the checkout root", step.Run)
+				}
+				runs[step.Run] = true
+			}
+			for _, command := range []string{"npm ci", "npm run lint", "npm test", "npm run build"} {
+				if !runs[command] {
+					t.Errorf("missing required check %q", command)
+				}
+			}
+			if workflowPath == ".github/workflows/full-validation.yml" && (!runs["npm run typecheck"] || !runs["npm run format:check"]) {
+				t.Fatal("Full Validation must retain its type and formatting checks")
+			}
+		})
 	}
 }
 

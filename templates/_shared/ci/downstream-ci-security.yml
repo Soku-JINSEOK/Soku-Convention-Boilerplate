@@ -21,7 +21,7 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
         with:
-          go-version: '1.26'
+          go-version: '1.26.10'
       - run: >-
           go run github.com/zricethezav/gitleaks/v8@v8.24.2
           detect --source . --no-banner
@@ -59,7 +59,7 @@ jobs:
   #     - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
   #     - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
   #       with:
-  #         go-version: '1.26'
+  #         go-version: '1.26.10'
   #     - run: go run golang.org/x/vuln/cmd/govulncheck@v1.6.0 ./...
 # soku:job-end go
 

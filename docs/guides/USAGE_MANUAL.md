@@ -30,17 +30,20 @@ Record these decisions before initialization:
 - whether task reports and cloud delivery are enabled;
 - every intentional downstream override and its owner.
 
-## 2. Obtain and verify the published baseline
+## 2. Obtain and verify the approved release
 
-The current pair is boilerplate `v1.0.5` and CLI `soku/v0.2.1`. These are
-independent release axes. The verified lifecycle compatibility baseline remains
-`soku/v0.1.4`; never infer compatibility from matching version numbers or
-select `latest`.
+This source manual targets candidate boilerplate `v1.1.0` and CLI
+`soku/v0.3.0`. Commands and download URLs in this section and the later examples
+apply only after human-approved publication. Currently published versions are
+`v1.0.5` / `soku/v0.2.1`; the prior verified lifecycle baseline was
+`soku/v0.1.4`. These are independent release axes; local candidate fixtures do
+not establish publication or the complete release matrix. Never select latest
+or infer compatibility from matching version numbers.
 
 ### Verify the boilerplate source
 
 The boilerplate release is a signed source tag, not a binary asset. `soku init`
-accepts the exact `v1.0.5` tag, resolves it through GitHub to a full commit, and
+accepts the exact `v1.1.0` tag, resolves it through GitHub to a full commit, and
 validates the bounded source archive and catalog before planning writes. For a
 manual source checkout, verify the tag before using it:
 
@@ -48,8 +51,8 @@ manual source checkout, verify the tag before using it:
 git clone https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate.git
 cd Soku-Convention-Boilerplate
 git fetch --tags
-git verify-tag v1.0.5
-git switch --detach v1.0.5
+git verify-tag v1.1.0
+git switch --detach v1.1.0
 ```
 
 Do not move, recreate, or accept a locally substituted public tag. See
@@ -58,29 +61,29 @@ compatibility records.
 
 ### Download and verify the CLI
 
-Download the `soku/v0.2.1` archive matching the platform and
+Download the `soku/v0.3.0` archive matching the platform and
 `checksums.txt` from the
-[CLI release](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/releases/tag/soku/v0.2.1).
+[CLI release](https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/releases/tag/soku/v0.3.0).
 For Linux amd64:
 
 ```bash
-curl -LO https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/releases/download/soku/v0.2.1/checksums.txt
-curl -LO https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/releases/download/soku/v0.2.1/soku_v0.2.1_linux_amd64.tar.gz
-grep ' soku_v0.2.1_linux_amd64.tar.gz$' checksums.txt | sha256sum --check -
-tar -xzf soku_v0.2.1_linux_amd64.tar.gz
+curl -LO https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/releases/download/soku/v0.3.0/checksums.txt
+curl -LO https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate/releases/download/soku/v0.3.0/soku_v0.3.0_linux_amd64.tar.gz
+grep ' soku_v0.3.0_linux_amd64.tar.gz$' checksums.txt | sha256sum --check -
+tar -xzf soku_v0.3.0_linux_amd64.tar.gz
 ./soku --version
 ```
 
 On macOS, select the `darwin_amd64` or `darwin_arm64` archive and replace the
 checksum command with `shasum -a 256 --check`. On Windows, select
-`soku_v0.1.4_windows_amd64.zip`, calculate
+`soku_v0.3.0_windows_amd64.zip`, calculate
 `Get-FileHash -Algorithm SHA256`, and compare it with that asset's exact line in
 `checksums.txt` before extraction. Stop if the checksum or version differs.
 
 For `soku/v0.2.0` and later, you can also install via npm:
 
 ```bash
-npm install -g @soku-jinseok/soku@0.2.1
+npm install -g @soku-jinseok/soku@0.3.0
 soku --version
 ```
 
@@ -110,7 +113,7 @@ complete plan without writing files:
 ```bash
 soku init \
   --boilerplate-source https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate \
-  --boilerplate-release v1.0.5 \
+  --boilerplate-release v1.1.0 \
   --profile standard \
   --stack javascript-typescript-node \
   --project-name example-service \
@@ -148,7 +151,7 @@ dry-run path list and verification result, then apply the same immutable inputs:
 ```bash
 soku init \
   --boilerplate-source https://github.com/Soku-JINSEOK/Soku-Convention-Boilerplate \
-  --boilerplate-release v1.0.5 \
+  --boilerplate-release v1.1.0 \
   --profile standard \
   --stack javascript-typescript-node \
   --project-name example-service \
@@ -178,7 +181,7 @@ entries by hand.
 
 ```bash
 soku status
-soku diff --boilerplate-release v1.0.5
+soku diff --boilerplate-release v1.1.0
 ```
 
 `status` is local and read-only. It returns `0` for clean state, `3` for pending
@@ -331,7 +334,7 @@ Never:
 ## 12. First-adoption completion checklist
 
 - [ ] Adoption level and `bootstrap`, `standard`, or `scaled` profile recorded.
-- [ ] Boilerplate `v1.0.5` and CLI `soku/v0.2.1` selected independently.
+- [ ] Boilerplate `v1.1.0` and CLI `soku/v0.3.0` selected independently.
 - [ ] For `soku/v0.2.0` and later, npm wrapper option is verified if used.
 - [ ] CLI archive checksum and reported version verified.
 - [ ] Stack IDs and required names confirmed with no placeholders.
