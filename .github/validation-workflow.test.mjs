@@ -89,6 +89,19 @@ test('runs CI Quick in parallel without replacing the full gate', () => {
   assert.match(workflow, /head-sha: \$\{\{ github\.event\.pull_request\.head\.sha \|\| github\.sha \}\}/);
 });
 
+function validateShaExpression(expression) {
+  // Sticky matching consumes one token at a time. An invalid suffix cannot
+  // repartition preceding whitespace or adjacent lookup tokens.
+  const token = /\s+|github(?:\.[a-z_][a-z0-9_]*)+|'[a-zA-Z0-9/_-]*'|\|\||&&|!=|==|\(|\)/y;
+  let offset = 0;
+  while (offset < expression.length) {
+    token.lastIndex = offset;
+    assert.ok(token.exec(expression), 'Unsupported SHA expression token');
+    assert.ok(token.lastIndex > offset, 'SHA expression token must advance');
+    offset = token.lastIndex;
+  }
+}
+
 function selectedRevision(job, input, github) {
   const block = new RegExp(`^  ${job}:([\\s\\S]*?)(?=\\n  [a-z][a-z0-9-]*:)`, 'm').exec(workflow)?.[1];
   assert.ok(block, `missing job ${job}`);
@@ -97,7 +110,7 @@ function selectedRevision(job, input, github) {
   // This fixture evaluates the actual YAML expression's SHA string lookups,
   // boolean operators and equality, with absent Actions properties as ''.
   // It is deliberately not a general GitHub Actions expression interpreter.
-  assert.match(expression, /^(?:\s|github(?:\.[a-z_][a-z0-9_]*)+|'[a-zA-Z0-9/_-]*'|\|\||&&|!=|==|\(|\))+$/);
+  validateShaExpression(expression);
   const literals = expression.replace(/github(?:\.[a-z_][a-z0-9_]*)+/g, path => {
     const value = path.split('.').slice(1).reduce((current, key) => current?.[key], github);
     assert.ok(value == null || typeof value === 'string');
@@ -105,6 +118,24 @@ function selectedRevision(job, input, github) {
   });
   return runInNewContext(literals, {}, {timeout: 1000});
 }
+
+test('SHA expression tokenizer rejects long invalid token runs without repartitioning', () => {
+  const script = `
+    import assert from 'node:assert/strict';
+    import {readFileSync} from 'node:fs';
+    const validate = ${validateShaExpression.toString()};
+    assert.throws(() => validate(readFileSync(0, 'utf8')), /Unsupported SHA expression token/);
+  `;
+  for (const prefix of ['\t'.repeat(100000), 'github._'.repeat(10000)]) {
+    const result = spawnSync(process.execPath, ['--input-type=module', '-e', script], {
+      input: `${prefix}!`,
+      encoding: 'utf8',
+      timeout: 2000,
+    });
+    assert.ifError(result.error);
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+  }
+});
 
 test('actual Quick and Security revision expressions preserve PR trust and reject zero-before bases', () => {
   const zero = '0'.repeat(40);
