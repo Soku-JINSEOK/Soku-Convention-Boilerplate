@@ -5,16 +5,17 @@
   "type": "module",
   "devDependencies": {
     "@types/node": "26.6.2",
-    "@vitest/coverage-v8": "4.1.11",
+    "@vitest/coverage-v8": "4.1.12",
     "eslint": "9.39.5",
     "gts": "7.0.0",
     "prettier": "3.9.9",
     "typescript": "6.0.3",
-    "vitest": "4.1.11"
+    "vitest": "4.1.12"
   },
   "overrides": {
     "brace-expansion": "5.0.12",
     "js-yaml": "4.3.2",
+    "minimatch": "11.0.1",
     "tmp": "0.2.7"
   },
   "scripts": {

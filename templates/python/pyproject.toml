@@ -11,7 +11,7 @@ readme = "README.md"
 dependencies = []
 
 [project.optional-dependencies]
-dev = ["black>=26.5.1,<27", "ruff", "mypy", "pytest"]
+dev = ["black>=26.10.1,<27", "ruff", "mypy", "pytest"]
 
 # Black enforces the 80-column Python template format. Ruff is used for linting
 # only, so [tool.ruff.format] is intentionally absent.
